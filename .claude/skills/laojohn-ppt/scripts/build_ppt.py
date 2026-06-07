@@ -1,0 +1,156 @@
+# -*- coding: utf-8 -*-
+"""build_ppt.py - 把中间稿 .md 编译为 .pptx
+
+用法：
+    python build_ppt.py --input 中间稿.md --output 课件.pptx [--course 导读课] [--book 俗世奇人]
+    python build_ppt.py --input 中间稿.md --output 课件.pptx --logo path/to/logo.png --banner path/to/banner.jpg
+
+如果 --logo / --banner 未指定，会自动从 ../assets/logo/ 和 ../assets/decorations/ 取默认资源。
+"""
+import argparse
+import os
+import sys
+
+from pptx import Presentation
+from pptx.util import Emu
+
+import theme
+from parser import parse_md, Page
+from layouts import RENDERERS
+
+
+def find_default_asset(filename_candidates, asset_subdir):
+    here = os.path.dirname(os.path.abspath(__file__))
+    base = os.path.normpath(os.path.join(here, "..", "assets", asset_subdir))
+    if not os.path.isdir(base):
+        return None
+    for name in filename_candidates:
+        p = os.path.join(base, name)
+        if os.path.isfile(p):
+            return p
+    # 兜底：返回该目录第一个 png/jpg
+    for fn in sorted(os.listdir(base)):
+        if fn.lower().endswith((".png", ".jpg", ".jpeg")):
+            return os.path.join(base, fn)
+    return None
+
+
+def build(input_md: str, output_pptx: str, *,
+          course_name: str = "", book_title: str = "",
+          logo_path: str = None, banner_path: str = None) -> dict:
+    with open(input_md, encoding="utf-8") as f:
+        md = f.read()
+
+    deck = parse_md(md)
+    # 命令行参数覆盖元信息
+    if course_name:
+        deck.course = course_name
+    if book_title:
+        deck.title = book_title
+
+    # 默认资源
+    if logo_path is None:
+        logo_path = find_default_asset(["logo-red.png", "logo.png"], "logo")
+    if banner_path is None:
+        banner_path = find_default_asset(["cover-banner.jpg", "banner.jpg", "banner.png"], "decorations")
+    # END 页用白色 LOGO（找不到时回退红色）
+    logo_white_path = find_default_asset(["logo-white.png"], "logo") or logo_path
+
+    prs = Presentation()
+    prs.slide_width = theme.SLIDE_W
+    prs.slide_height = theme.SLIDE_H
+    blank_layout = prs.slide_layouts[6]
+
+    # ===== 自动注入封面 + END =====
+    # 中间稿里 P 编号沿用详案，仅用于回溯；PPT 内显示顺序与页码计数独立于此。
+    pages = list(deck.pages)
+
+    # 1) 若首页不是封面，按"和导读课起始页一样"的规则注入一页封面
+    if not pages or pages[0].page_type != "封面":
+        synthetic_cover = Page(num=0, page_type="封面")
+        # 标题留空：render_cover 会回退到 ctx["book_title"]
+        # 副标题留空：会回退到 ctx["course_name"]
+        # body 留空：会回退到 ctx["meta"]（作者 · 年级）
+        pages.insert(0, synthetic_cover)
+
+    # 2) 始终追加一页 END
+    pages.append(Page(num=999, page_type="_END"))
+
+    # 页码：仅对中间内容页计数（封面、END 不纳入）
+    inner_total = sum(1 for p in pages if p.page_type not in {"封面", "_END"})
+    placeholder_report = []
+    inner_idx = 0
+
+    for page in pages:
+        slide = prs.slides.add_slide(blank_layout)
+        is_inner = page.page_type not in {"封面", "_END"}
+        if is_inner:
+            inner_idx += 1
+
+        ctx = {
+            "course_name": deck.course or course_name,
+            "book_title": deck.title or book_title,
+            "page_index": inner_idx,
+            "page_total": inner_total,
+            "logo_path": logo_path,
+            "logo_white_path": logo_white_path,
+            "banner_path": banner_path,
+            "meta": f"{deck.author}　·　{deck.grade}" if (deck.author or deck.grade) else "",
+        }
+        renderer = RENDERERS.get(page.page_type)
+        if renderer is None:
+            raise ValueError(f"P{page.num} 无渲染器：{page.page_type}")
+        renderer(slide, page, ctx)
+
+        # 占位清单（仅对中间稿原生页报告，跳过 synthetic）
+        if page.page_type in {"_END", "封面"} and page.num in {0, 999}:
+            continue
+        sug = (page.image_suggestion or "").strip()
+        if sug and sug not in {"无", "无（页面已满）", "—", "无配图"} and page.page_type in {"引导问题", "要点小结", "环节标题"}:
+            placeholder_report.append((page.num, page.page_type, sug))
+        else:
+            placeholder_report.append((page.num, page.page_type, "—"))
+
+    total = len(pages)
+
+    os.makedirs(os.path.dirname(os.path.abspath(output_pptx)) or ".", exist_ok=True)
+    prs.save(output_pptx)
+
+    return {
+        "pages": total,
+        "output": os.path.abspath(output_pptx),
+        "placeholders": placeholder_report,
+        "logo": logo_path,
+        "banner": banner_path,
+    }
+
+
+def main():
+    ap = argparse.ArgumentParser(description="老约翰投屏 PPT 编译器")
+    ap.add_argument("--input", "-i", required=True, help="中间稿 .md 路径")
+    ap.add_argument("--output", "-o", required=True, help="输出 .pptx 路径")
+    ap.add_argument("--course", default="", help="课时名（覆盖中间稿元信息）")
+    ap.add_argument("--book", default="", help="书名（覆盖中间稿元信息）")
+    ap.add_argument("--logo", default=None, help="LOGO 图片路径")
+    ap.add_argument("--banner", default=None, help="封面横幅图片路径")
+    args = ap.parse_args()
+
+    info = build(
+        args.input, args.output,
+        course_name=args.course,
+        book_title=args.book,
+        logo_path=args.logo,
+        banner_path=args.banner,
+    )
+
+    print(f"[OK] 已生成 {info['pages']} 页 -> {info['output']}")
+    print(f"     LOGO: {info['logo']}")
+    print(f"     横幅: {info['banner']}")
+    print()
+    print("配图占位清单：")
+    for num, ptype, sug in info["placeholders"]:
+        print(f"  P{num:02d}  [{ptype}]  {sug}")
+
+
+if __name__ == "__main__":
+    main()

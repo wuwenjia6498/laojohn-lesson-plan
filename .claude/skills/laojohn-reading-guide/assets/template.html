@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  :root {
+    --ink:        #444444;   /* 正文主色(深灰) */
+    --title-ink:  #333333;   /* 大标题(深灰) */
+    --header-ink: #888888;   /* 页眉灰 */
+    --rule:       #b8b8b8;   /* 页眉下分隔线 */
+    --tab-bg:     #f0c9b8;   /* 左侧标签色块/信息表标题格(橙粉) */
+    --tab-ink:    #444444;   /* 标签文字(深灰) */
+    --body-bg:    #f7eee8;   /* 栏目正文淡底(暖米,与橙粉色系一致) */
+    --table-line: #ecc4b0;   /* 信息表边框(淡橙) */
+    --table-head: #f0c9b8;   /* 信息表标题格底(同标签橙粉) */
+    --cover-bg:   #efeae6;   /* 书封占位底 */
+    --cover-ink:  #b3aaa3;   /* 书封占位字 */
+    --page:       #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    font-family: "Noto Sans CJK SC", "Source Han Sans SC", "Microsoft YaHei", sans-serif;
+    color: var(--ink);
+    background: var(--page);
+  }
+  .page {
+    position: relative;
+    width: 794px;
+    min-height: 1123px;
+    padding: 44px 56px 48px;
+    background: var(--page);
+  }
+
+  /* 页眉 */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 13px;
+    color: var(--header-ink);
+    letter-spacing: 1px;
+    padding-bottom: 9px;
+    border-bottom: 1.5px solid var(--rule);
+  }
+
+  /* 居中大标题 */
+  .doc-title {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--title-ink);
+    letter-spacing: 2px;
+    margin: 40px 0 30px;
+  }
+
+  /* 顶部区:左书封 + 右信息表,等高拉伸 */
+  .top {
+    display: grid;
+    grid-template-columns: 188px 1fr;
+    column-gap: 30px;
+    align-items: stretch;
+    margin-bottom: 34px;
+  }
+  .cover {
+    width: 188px;
+    border-radius: 3px;
+    overflow: hidden;
+    background: var(--cover-bg);
+  }
+  .cover img { width: 100%; display: block; }
+  .cover.placeholder {
+    height: 232px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: none;
+    border: 1.5px dashed var(--cover-ink);
+    color: var(--cover-ink);
+    font-size: 14px;
+    letter-spacing: 2px;
+  }
+
+  /* 信息表:2 组键值并排,3 行;height:100% 使表格与书封等高 */
+  .info-table {
+    width: 100%;
+    height: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .info-table td {
+    border: 1.5px solid var(--table-line);
+    padding: 13px 15px;
+    line-height: 1.5;
+  }
+  .info-table .k {
+    background: var(--table-head);
+    color: var(--tab-ink);
+    font-weight: 700;
+    text-align: center;
+    width: 96px;
+    white-space: nowrap;
+  }
+  .info-table .v {
+    color: var(--ink);
+    min-width: 90px;
+    text-align: center;
+  }
+  .info-table .k.stack { line-height: 1.25; }
+
+  /* 栏目:左标签块 + 右正文 */
+  .section {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    column-gap: 0;
+    margin-bottom: 5px;
+    align-items: stretch;
+  }
+  .tab {
+    background: var(--tab-bg);
+    color: var(--tab-ink);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0;
+    border-radius: 4px 0 0 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 1.5;
+    padding: 14px 12px;
+    word-break: break-all;
+  }
+  .body {
+    border-radius: 0 4px 4px 0;
+    padding: 14px 20px;
+    font-size: 13.5px;
+    line-height: 1.8;
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  /* 奇数栏(1、3):白底;偶数栏(2、4):浅灰底 */
+  #sections .section:nth-child(odd)  .body { background: #ffffff; }
+  #sections .section:nth-child(even) .body { background: #f0f0f0; }
+  .body p { margin: 0; }
+  .body .item { margin: 0; }
+  .body .item + .item { margin-top: 5px; }
+
+  /* 打印/PDF:禁止任何自动分页,保证单页输出 */
+  @page { margin: 0; size: auto; }
+  @media print {
+    html, body { height: auto; }
+    .page {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    .section {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="page" id="page">
+  <div class="header">
+    <span id="hL"></span>
+    <span id="hR"></span>
+  </div>
+  <div class="doc-title" id="docTitle"></div>
+
+  <div class="top">
+    <div id="coverBox"></div>
+    <table class="info-table">
+      <tbody id="infoBody"></tbody>
+    </table>
+  </div>
+
+  <div id="sections"></div>
+</div>
+
+<script>
+  const DATA = /*__DATA__*/ null;
+
+  function el(tag, cls, html) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (html != null) e.innerHTML = html;
+    return e;
+  }
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function render(data) {
+    document.getElementById('hL').textContent = data.header_left || '';
+    document.getElementById('hR').textContent = data.header_right || '';
+    document.getElementById('docTitle').textContent = data.title || '';
+
+    // 书封:有图放图,无图放占位框
+    const coverBox = document.getElementById('coverBox');
+    if (data.cover_image) {
+      const c = el('div', 'cover');
+      const img = document.createElement('img');
+      img.src = data.cover_image;
+      c.appendChild(img);
+      coverBox.appendChild(c);
+    } else {
+      coverBox.appendChild(el('div', 'cover placeholder', '书封待放'));
+    }
+
+    // 信息表:固定 3 行 × (键|值|键|值)
+    const info = data.info || {};
+    const rows = [
+      ['书名', info['书名'], '字数', info['字数']],
+      ['作者', info['作者'], '页数', info['页数']],
+      ['出版社', info['出版社'], ['累计', '阅读'], info['累计阅读']],
+    ];
+    const tb = document.getElementById('infoBody');
+    rows.forEach(([k1, v1, k2, v2]) => {
+      const tr = el('tr');
+      const isStack = Array.isArray(k2);
+      tr.appendChild(el('td', 'k', esc(k1)));
+      tr.appendChild(el('td', 'v', esc(v1)));
+      tr.appendChild(el('td', 'k' + (isStack ? ' stack' : ''),
+        isStack ? k2.map(esc).join('<br>') : esc(k2)));
+      tr.appendChild(el('td', 'v', esc(v2)));
+      tb.appendChild(tr);
+    });
+
+    // 栏目
+    const host = document.getElementById('sections');
+    (data.sections || []).forEach(sec => {
+      const row = el('div', 'section');
+      row.appendChild(el('div', 'tab', esc(sec.label).replace(/\n/g, '<br>')));
+      const body = el('div', 'body');
+      if (sec.type === 'list') {
+        (sec.items || []).forEach(it => {
+          body.appendChild(el('div', 'item', esc(it)));
+        });
+      } else {
+        body.appendChild(el('p', null, esc(sec.content)));
+      }
+      row.appendChild(body);
+      host.appendChild(row);
+    });
+
+    document.body.setAttribute('data-rendered', '1');
+  }
+
+  if (DATA) render(DATA);
+</script>
+</body>
+</html>
