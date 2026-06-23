@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #FFFFFF; }
+  body {
+    font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+    color: #2B2B2B;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  #page {
+    width: 794px;
+    min-height: 1123px;
+    background: #FFFFFF;
+    padding: 84px 56px 56px 56px;
+    position: relative;
+  }
+  /* 右上角 logo */
+  .brand-logo {
+    position: absolute;
+    top: 40px;
+    right: 48px;
+    height: 56px;
+    width: auto;
+  }
+  /* 标题区 */
+  .sheet-head { margin: 40px 8px 30px 8px; }
+  .sheet-title {
+    font-size: 21px;
+    font-weight: 700;
+    color: #2B2B2B;
+    line-height: 1.5;
+  }
+  .sheet-sub {
+    font-size: 14px;
+    color: #8A8175;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+  /* 表格 */
+  table.ws {
+    width: 100%;
+    border-collapse: collapse;
+    border-top: 2px solid #B6AC9A;
+    border-bottom: 2px solid #B6AC9A;
+  }
+  table.ws thead th {
+    background: #A89B8A;
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1.4;
+    text-align: center;
+    vertical-align: middle;
+    padding: 13px 12px;
+    border-right: 1px solid #C9C0B0;
+  }
+  table.ws thead th:last-child { border-right: none; }
+  /* 行标题列（首列）更深一档表头 */
+  table.ws thead th.col-label { background: #7D7468; }
+
+  table.ws tbody td {
+    border-right: 1px dashed #D6CEC0;
+    border-bottom: 1px dashed #D6CEC0;
+    padding: 16px 16px;
+    font-size: 14px;
+    line-height: 1.8;
+    vertical-align: top;
+    color: #333;
+  }
+  table.ws tbody td:last-child { border-right: none; }
+  table.ws tbody tr:last-child td { border-bottom: none; }
+  /* 斑马纹 */
+  table.ws tbody tr:nth-child(even) td { background: #F6F4EF; }
+  /* 首列作为行标签 */
+  table.ws tbody td.cell-label {
+    font-weight: 600;
+    color: #5A5048;
+    background: #EFEBE3 !important;
+  }
+  /* 示范填充文字 */
+  table.ws tbody td.filled { color: #3A4A45; }
+
+  /* 底部说明 */
+  .sheet-note {
+    margin: 22px 8px 0 8px;
+    font-size: 13px;
+    color: #8A8175;
+    line-height: 1.7;
+    text-align: center;
+  }
+  /* 版本角标 */
+  .variant-tag {
+    position: absolute;
+    top: 64px;
+    left: 56px;
+    font-size: 12px;
+    color: #A89B8A;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+<div id="page">
+  <img class="brand-logo" id="logo" alt="老约翰深度阅读">
+  <div class="variant-tag" id="variantTag"></div>
+  <div class="sheet-head">
+    <div class="sheet-title" id="title"></div>
+    <div class="sheet-sub" id="subtitle"></div>
+  </div>
+  <table class="ws">
+    <thead><tr id="thead"></tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div class="sheet-note" id="note"></div>
+</div>
+
+<script>
+const DATA = /*__DATA__*/ null;
+
+function render() {
+  const d = DATA;
+  document.getElementById('logo').src = d.logo;
+  document.getElementById('title').textContent = d.title || '';
+
+  const sub = document.getElementById('subtitle');
+  if (d.subtitle) { sub.textContent = d.subtitle; } else { sub.style.display = 'none'; }
+
+  const tag = document.getElementById('variantTag');
+  if (d.variant) { tag.textContent = d.variant; } else { tag.style.display = 'none'; }
+
+  // 表头
+  const thead = document.getElementById('thead');
+  d.columns.forEach((c, i) => {
+    const th = document.createElement('th');
+    th.textContent = c.name;
+    if (c.width) th.style.width = (typeof c.width === 'number' ? c.width + '%' : c.width);
+    if (d.label_first_col && i === 0) th.className = 'col-label';
+    thead.appendChild(th);
+  });
+
+  // 表体
+  const tbody = document.getElementById('tbody');
+  const minH = d.row_min_h || 64;
+  (d.rows || []).forEach(row => {
+    const tr = document.createElement('tr');
+    row.forEach((cell, i) => {
+      const td = document.createElement('td');
+      td.style.minHeight = minH + 'px';
+      td.style.height = minH + 'px';
+      const txt = (cell == null) ? '' : String(cell);
+      td.textContent = txt;
+      if (d.label_first_col && i === 0) td.className = 'cell-label';
+      else if (txt.trim() !== '') td.className = 'filled';
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+
+  const note = document.getElementById('note');
+  if (d.note) { note.textContent = d.note; } else { note.style.display = 'none'; }
+
+  document.body.dataset.rendered = '1';
+}
+render();
+</script>
+</body>
+</html>

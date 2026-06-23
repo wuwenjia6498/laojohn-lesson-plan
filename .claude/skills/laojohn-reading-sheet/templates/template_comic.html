@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<!-- 图文并排·小漫画：左描述书写线 + 右画框，重复多格。学生左写情节、右画图。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #FFFFFF; }
+  body { font-family: "Microsoft YaHei", "微软雅黑", sans-serif; color: #2B2B2B;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #page { width: 794px; min-height: 1123px; background: #FFFFFF; position: relative;
+    padding: 84px 56px 48px 56px; }
+  .brand-logo { position: absolute; top: 40px; right: 48px; height: 56px; width: auto; }
+  .variant-tag { position: absolute; top: 64px; left: 56px; font-size: 12px; color: #A89B8A; letter-spacing: 1px; }
+  .sheet-title { font-size: 21px; font-weight: 700; color: #2B2B2B; margin: 40px 8px 12px; line-height: 1.5; }
+  .sheet-sub { font-size: 14px; color: #8A8175; margin: 0 8px 22px; line-height: 1.6; }
+  .banner { width: 300px; margin: 6px auto 24px; text-align: center; font-size: 18px; font-weight: 700;
+    color: #6B5644; border-top: 2px solid #C9B89A; border-bottom: 2px solid #C9B89A; padding: 8px 0; }
+  .cell { display: flex; gap: 22px; margin-bottom: 22px; align-items: stretch; }
+  .cell .desc { width: 300px; flex: none; padding-top: 6px; }
+  .cell .desc .dline { border-bottom: 1.4px dotted #B9B2A2; height: 46px; position: relative; }
+  .cell .desc .dline .pre { position: absolute; left: 2px; bottom: 6px; font-size: 14px; color: #3A4A45; }
+  .cell .draw { flex: 1; border: 2px dashed #B9C9A6; border-radius: 12px; position: relative; }
+  .cell .draw .palette { position: absolute; top: 12px; left: 14px; font-size: 22px; }
+</style>
+</head>
+<body>
+<div id="page">
+  <img class="brand-logo" id="logo">
+  <div class="variant-tag" id="variantTag"></div>
+  <div class="sheet-title" id="title"></div>
+  <div class="sheet-sub" id="subtitle"></div>
+  <div class="banner" id="banner"></div>
+  <div id="cells"></div>
+</div>
+<script>
+const DATA = /*__DATA__*/ null;
+function render(){
+  const d = DATA;
+  document.getElementById('logo').src = d.logo;
+  document.getElementById('title').textContent = d.title || '';
+  const sub = document.getElementById('subtitle');
+  if (d.subtitle) sub.textContent = d.subtitle; else sub.style.display = 'none';
+  const tag = document.getElementById('variantTag');
+  if (d.variant) tag.textContent = d.variant; else tag.style.display = 'none';
+  const banner = document.getElementById('banner');
+  if (d.banner) banner.textContent = d.banner; else banner.style.display = 'none';
+
+  let cells = d.cells;
+  if (typeof cells === 'number') cells = Array.from({length: cells}, () => ({}));
+  if (!cells) cells = [{}, {}, {}];
+
+  const wrap = document.getElementById('cells');
+  cells.forEach(c => {
+    const cell = document.createElement('div'); cell.className = 'cell';
+    const desc = document.createElement('div'); desc.className = 'desc';
+    const lines = c.lines || 4;
+    const pre = Array.isArray(c.value) ? c.value : (c.value ? [c.value] : []);
+    for (let i = 0; i < lines; i++) {
+      const dl = document.createElement('div'); dl.className = 'dline';
+      if (pre[i] && pre[i].trim() !== '') { const t = document.createElement('div'); t.className = 'pre'; t.textContent = pre[i]; dl.appendChild(t); }
+      desc.appendChild(dl);
+    }
+    const draw = document.createElement('div'); draw.className = 'draw';
+    draw.style.minHeight = (c.h || (lines * 46 + 10)) + 'px';
+    const pal = document.createElement('span'); pal.className = 'palette'; pal.textContent = '🎨'; draw.appendChild(pal);
+    cell.appendChild(desc); cell.appendChild(draw);
+    wrap.appendChild(cell);
+  });
+  document.body.dataset.rendered = '1';
+}
+render();
+</script>
+</body>
+</html>

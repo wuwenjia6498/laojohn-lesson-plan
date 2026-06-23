@@ -30,6 +30,26 @@ COLOR_TABLE_HEAD_FG = "FFFFFF"
 COLOR_END_BG_FROM = "6FB4AF"
 COLOR_END_BG_TO   = "3A7F7A"
 
+# === 方案 A：三类页型差异化 ===
+# 环节标题：整面深灰蓝底 + 大序号 + 白字
+COLOR_SECTION_BG  = "44546A"
+COLOR_SECTION_FG  = "FFFFFF"
+COLOR_SECTION_SUB = "DDDDDD"
+COLOR_SECTION_NUM = "8FA5C5"   # 巨大章节序号（浅蓝灰，略淡）
+COLOR_SECTION_PG  = "B8C4D6"   # 深底页码
+
+# 引导问题：问号水印 + 红色引导竖线
+COLOR_QMARK_WATER = "F0EFEC"   # 极淡灰，问号水印
+COLOR_RED_ACCENT  = "C0392B"   # 红色强调（沿用 LOGO 红）
+
+# 要点小结：红方块编号 + 细分隔线
+COLOR_NUMBOX_BG   = "C0392B"
+COLOR_NUMBOX_FG   = "FFFFFF"
+COLOR_BULLET_SEP  = "E5E5E5"
+# 方案 B：要点小结结论卡
+COLOR_CARD_BG     = "FBF6EE"
+COLOR_CARD_BORDER = "E8DDC8"
+
 # ============ 字号（pt）============
 SZ_COVER_TITLE     = 66
 SZ_COVER_SUB       = 32
@@ -77,18 +97,24 @@ LOGO_INNER_X = pct_x(0.860)
 LOGO_INNER_Y = pct_y(0.040)
 LOGO_INNER_W = pct_x(0.110)
 
-# 右下页码
+# 右下页码常量（页码角标已取消、draw_page_num 现为空操作；常量保留备用，便于将来恢复）
 PAGE_NUM_X = pct_x(0.900)
 PAGE_NUM_Y = pct_y(0.940)
 PAGE_NUM_W = pct_x(0.080)
 PAGE_NUM_H = pct_y(0.040)
 
 # 配图占位框（按页型分区）
+# 注：环节标题为满屏深灰蓝实心卡片，render_section 不调用 maybe_placeholder，
+# 故此处不为其留区域（与 image-suggestion.md「环节标题不配图」一致）。
 PLACEHOLDER_REGIONS = {
     "引导问题": (pct_x(0.60), pct_y(0.35), pct_x(0.35), pct_y(0.50)),
     "要点小结": (pct_x(0.65), pct_y(0.45), pct_x(0.30), pct_y(0.45)),
-    "环节标题": (pct_x(0.60), pct_y(0.30), pct_x(0.35), pct_y(0.55)),
 }
+
+# 四图网格区域（引导问题页带 ≥2 条配图建议时启用）：标题下整幅主体区
+# 2×2 排布，每幅一个占位框；详见 helpers.add_image_grid / layouts.render_guide。
+IMAGE_GRID_REGION = (pct_x(0.07), pct_y(0.42), pct_x(0.86), pct_y(0.50))
+IMAGE_GRID_GAP = pct_x(0.018)
 
 # 主内容区（避开左上铭牌、右上 LOGO、右下页码）
 CONTENT_LEFT_X   = pct_x(0.07)
@@ -157,9 +183,9 @@ TABLE_SUBTITLE_W = pct_x(0.86)
 TABLE_SUBTITLE_H = pct_y(0.06)
 
 TABLE_AREA_X = pct_x(0.07)
-TABLE_AREA_Y = pct_y(0.40)
+TABLE_AREA_Y = pct_y(0.385)
 TABLE_AREA_W = pct_x(0.86)
-TABLE_AREA_H = pct_y(0.50)
+TABLE_AREA_H = pct_y(0.555)   # 上移加高，给多行表更多纵向空间（底边 ~0.94H）
 
 # 封面
 # 横幅：四周留白边，覆盖上半页

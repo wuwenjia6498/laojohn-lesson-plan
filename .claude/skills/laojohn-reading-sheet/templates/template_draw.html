@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<!-- 绘画页：整页大虚线画框，"画出……"。可选框内左上提示标签 + 框下描述书写线。多为单版。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #FFFFFF; }
+  body { font-family: "Microsoft YaHei", "微软雅黑", sans-serif; color: #2B2B2B;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #page { width: 794px; min-height: 1123px; background: #FFFFFF; position: relative;
+    padding: 84px 56px 48px 56px; }
+  .brand-logo { position: absolute; top: 40px; right: 48px; height: 56px; width: auto; }
+  .variant-tag { position: absolute; top: 64px; left: 56px; font-size: 12px; color: #A89B8A; letter-spacing: 1px; }
+  .sheet-title { font-size: 21px; font-weight: 700; color: #2B2B2B; margin: 40px 8px 12px; line-height: 1.5; }
+  .sheet-sub { font-size: 14px; color: #8A8175; margin: 0 8px 22px; line-height: 1.6; }
+  .drawbox { border: 2px dashed #C7A86A; border-radius: 16px; position: relative; }
+  .drawbox .plabel { position: absolute; top: 16px; left: 20px; font-size: 15px; font-weight: 700; color: #9A7B45; }
+  .drawbox .palette { position: absolute; top: 14px; left: 18px; font-size: 26px; }
+  .cap { margin: 22px 4px 0; }
+  .cap .cline { border-bottom: 1.4px dotted #B9B2A2; height: 44px; }
+</style>
+</head>
+<body>
+<div id="page">
+  <img class="brand-logo" id="logo">
+  <div class="variant-tag" id="variantTag"></div>
+  <div class="sheet-title" id="title"></div>
+  <div class="sheet-sub" id="subtitle"></div>
+  <div class="drawbox" id="box">
+    <span class="palette" id="palette">🎨</span>
+    <div class="plabel" id="plabel"></div>
+  </div>
+  <div class="cap" id="cap"></div>
+</div>
+<script>
+const DATA = /*__DATA__*/ null;
+function render(){
+  const d = DATA;
+  document.getElementById('logo').src = d.logo;
+  document.getElementById('title').textContent = d.title || '';
+  const sub = document.getElementById('subtitle');
+  if (d.subtitle) sub.textContent = d.subtitle; else sub.style.display = 'none';
+  const tag = document.getElementById('variantTag');
+  if (d.variant) tag.textContent = d.variant; else tag.style.display = 'none';
+
+  const box = document.getElementById('box');
+  const capN = d.caption_lines || 0;
+  box.style.minHeight = (d.box_min_h || (capN ? 640 : 820)) + 'px';
+
+  const plabel = document.getElementById('plabel');
+  if (d.prompt) { plabel.textContent = d.prompt; document.getElementById('palette').style.display = 'none'; }
+  else { plabel.style.display = 'none'; if (d.icon === false) document.getElementById('palette').style.display = 'none'; }
+
+  const cap = document.getElementById('cap');
+  if (capN) { for (let i = 0; i < capN; i++) { const l = document.createElement('div'); l.className = 'cline'; cap.appendChild(l); } }
+  else cap.style.display = 'none';
+
+  document.body.dataset.rendered = '1';
+}
+render();
+</script>
+</body>
+</html>

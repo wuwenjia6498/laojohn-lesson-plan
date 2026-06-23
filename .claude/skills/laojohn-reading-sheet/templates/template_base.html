@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<!--
+  模板骨架 · 新增阅读单样式时照抄这个文件，只实现中间「主体区」。
+  这样新模板天然满足「模板契约」、品牌头统一，render.py 无需改动即可接入。
+
+  契约（四条，缺一不可）：
+  1. 含注入点  /*__DATA__*/ null   （render.py 用它替换为本张的 data JSON）
+  2. 根元素 id="page"，宽 794px（A4 竖版），高随内容增长（min-height:1123px）
+  3. 渲染结束置  document.body.dataset.rendered = '1'
+  4. 白底、右上 logo（用 d.logo）、标题下移避让 logo、左上版本角标（d.variant）
+
+  data 里固定可用字段：logo / variant / title（标题）/ 其余按模板自定，见 data-schema.md
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #page { width: 794px; min-height: 1123px; background: #FFFFFF;
+    position: relative; padding: 84px 56px 56px 56px; }
+  .brand-logo { position: absolute; top: 40px; right: 48px; height: 56px; width: auto; }
+  .variant-tag { position: absolute; top: 64px; left: 56px; font-size: 12px;
+    color: #A89B8A; letter-spacing: 1px; }
+  .sheet-title { font-size: 21px; font-weight: 700; color: #2B2B2B;
+    margin: 40px 8px 30px; line-height: 1.5; }
+  /* ↓↓↓ 主体区样式写这里 ↓↓↓ */
+</style>
+</head>
+<body>
+<div id="page">
+  <img class="brand-logo" id="logo">
+  <div class="variant-tag" id="variantTag"></div>
+  <div class="sheet-title" id="title"></div>
+  <!-- ↓↓↓ 主体区 DOM 写这里 ↓↓↓ -->
+</div>
+<script>
+const DATA = /*__DATA__*/ null;
+function render(){
+  const d = DATA;
+  document.getElementById('logo').src = d.logo;
+  document.getElementById('title').textContent = d.title || '';
+  const tag = document.getElementById('variantTag');
+  if (d.variant) tag.textContent = d.variant; else tag.style.display = 'none';
+
+  // ↓↓↓ 主体渲染逻辑写这里（读 d 的其余字段，建表/画图/排版） ↓↓↓
+
+  document.body.dataset.rendered = '1';
+}
+render();
+</script>
+</body>
+</html>

@@ -16,9 +16,11 @@
     正文：...
 
 字段集合：眉标 / 标题 / 副标题 / 正文 / 要点 / 表格 / 配图建议
-- 单值字段：眉标、标题、副标题、正文（可多行）、配图建议
+- 单值字段：眉标、标题、副标题、正文（可多行）
 - 列表字段：要点（以 `- ` 或 `• ` 开头）
 - 表格字段：`表格：` 之后跟标准 GFM 表格
+- 配图建议：可重复多行；单条走单图占位，引导问题页 ≥2 条触发 2×2 四图网格
+  （image_suggestion 留首条兼容旧路径，image_suggestions 收全部）
 
 页型集合（6 种）：
     封面 / 环节标题 / 引导问题 / 原文齐读 / 要点小结 / 填空表格
@@ -46,7 +48,8 @@ class Page:
     bullets: List[str] = field(default_factory=list)
     table_headers: List[str] = field(default_factory=list)
     table_rows: List[List[str]] = field(default_factory=list)
-    image_suggestion: str = ""
+    image_suggestion: str = ""                                  # 单条（兼容旧逻辑/单图页）
+    image_suggestions: List[str] = field(default_factory=list)  # 多条（≥2 触发四图网格）
     course: str = ""           # 课时（如有）
 
 
@@ -167,7 +170,12 @@ def parse_md(md_text: str) -> Deck:
                 elif key == "副标题":
                     current.subtitle = tail.strip()
                 elif key == "配图建议":
-                    current.image_suggestion = tail.strip()
+                    val = tail.strip()
+                    if val:
+                        current.image_suggestions.append(val)
+                        # image_suggestion 保留首条非空，单图页/旧渲染路径继续可用
+                        if not current.image_suggestion:
+                            current.image_suggestion = val
             elif key == "正文":
                 pending_field = "正文"
                 if tail.strip():

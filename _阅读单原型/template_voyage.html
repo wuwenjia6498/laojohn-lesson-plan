@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #page { width: 794px; min-height: 1123px; background: #FFFFFF; position: relative;
+    padding: 72px 56px 44px 56px; }
+  .brand-logo { position: absolute; top: 34px; right: 42px; height: 48px; }
+  .variant-tag { position: absolute; top: 38px; left: 46px; font-size: 13px; color: #B3A98F; letter-spacing: 1px; }
+  .topbox { width: 320px; margin: 44px auto 0; background: #6B5644; border-radius: 12px;
+    text-align: center; padding: 16px 10px; color: #FFF; }
+  .topbox .t1 { font-size: 23px; font-weight: 700; }
+  .topbox .t2 { font-size: 15px; margin-top: 4px; opacity: .92; }
+  .connector { width: 2px; height: 28px; background: #B89A6E; margin: 0 auto; }
+  .card { border: 1.5px solid #C9B89A; border-radius: 10px; padding: 14px 22px 16px;
+    margin-bottom: 16px; }
+  .card .ch { font-size: 17px; font-weight: 700; color: #6B5644; padding-bottom: 8px;
+    border-bottom: 1px solid #E3D8C2; margin-bottom: 10px; }
+  .frow { display: flex; align-items: flex-start; margin-bottom: 10px; }
+  .frow .flab { width: 76px; flex: none; font-size: 14px; font-weight: 700; color: #8A6F4E;
+    padding-top: 6px; }
+  .frow .fval { flex: 1; }
+  .fval .vline { border-bottom: 1.3px solid #D8CBB0; height: 36px; }
+  .fval .vtext { font-size: 14px; line-height: 1.85; color: #3A3A33; padding: 4px 0;
+    border-bottom: 1px dashed #E0D6C2; }
+  .v-foot { text-align: center; font-size: 13.5px; color: #9A937F; margin-top: 18px; }
+</style>
+</head>
+<body>
+<div id="page">
+  <img class="brand-logo" id="logo">
+  <div class="variant-tag" id="variantTag"></div>
+  <div class="topbox"><div class="t1" id="t1"></div><div class="t2" id="t2"></div></div>
+  <div class="connector"></div>
+  <div id="cards"></div>
+  <div class="v-foot" id="foot"></div>
+</div>
+<script>
+const DATA = /*__DATA__*/ null;
+function render(){
+  const d=DATA;
+  document.getElementById('logo').src=d.logo;
+  document.getElementById('t1').textContent=d.title_main||'';
+  const t2=document.getElementById('t2'); if(d.title_sub) t2.textContent=d.title_sub; else t2.style.display='none';
+  const tag=document.getElementById('variantTag'); if(d.variant) tag.textContent=d.variant; else tag.style.display='none';
+  const foot=document.getElementById('foot'); if(d.footer) foot.textContent=d.footer; else foot.style.display='none';
+
+  const wrap=document.getElementById('cards');
+  (d.branches||[]).forEach(br=>{
+    const card=document.createElement('div'); card.className='card';
+    const ch=document.createElement('div'); ch.className='ch'; ch.textContent=br.header||''; card.appendChild(ch);
+    (br.fields||[]).forEach(f=>{
+      const row=document.createElement('div'); row.className='frow';
+      const lab=document.createElement('div'); lab.className='flab'; lab.textContent=f.label||''; row.appendChild(lab);
+      const val=document.createElement('div'); val.className='fval';
+      const hasVal = Array.isArray(f.value) ? f.value.length>0 : (f.value && f.value.trim()!=='');
+      if(hasVal){
+        const arr = Array.isArray(f.value) ? f.value : [f.value];
+        arr.forEach(item=>{ const v=document.createElement('div'); v.className='vtext'; v.textContent=item; val.appendChild(v); });
+      } else {
+        const n=f.lines||1;
+        for(let i=0;i<n;i++){ const ln=document.createElement('div'); ln.className='vline'; val.appendChild(ln); }
+      }
+      row.appendChild(val); card.appendChild(row);
+    });
+    wrap.appendChild(card);
+  });
+  document.body.dataset.rendered='1';
+}
+render();
+</script>
+</body>
+</html>

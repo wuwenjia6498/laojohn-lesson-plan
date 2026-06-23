@@ -1,9 +1,12 @@
-"""中间稿合规校验脚本（laojohn-ppt-draft v1.1 契约）
+"""中间稿合规校验脚本（laojohn-ppt-draft 契约）
+
+P 编号已由工具自排（详案不再有换页点），本脚本只校验"页内连续不跳号、不重复"，
+不再要求 P 编号与详案锚点一一对应。
 
 用法：
   python _smoke_check.py                       # 默认扫 examples/ 下所有 .md
   python _smoke_check.py <file>                # 扫指定文件
-  python _smoke_check.py <file> <start> <end>  # 同时校验 P 编号区间
+  python _smoke_check.py <file> <start> <end>  # 额外断言 P 编号落在指定区间（可选）
 
 退出码：0=PASS, 1=FAIL
 """
@@ -36,8 +39,16 @@ def check_file(target: str, expect_range=None) -> tuple[list[str], list[str], li
 
     # 页编号
     ids = [int(m.group(1)) for m in re.finditer(r'^## P(\d+) \|', text, re.MULTILINE)]
+    # 常驻校验：P 编号连续不跳号、不重复（工具自排，每节课从 P01 起；本脚本按单文件校验，天然适配）
+    dups = {x for x in ids if ids.count(x) > 1}
+    if dups:
+        errs.append(f'[P] 编号重复: {sorted(dups)}')
+    for a, b in zip(ids, ids[1:]):
+        if b != a + 1:
+            errs.append(f'[P] 编号不连续: P{a} 之后是 P{b}（应为 P{a+1}）')
+    # 可选：额外断言 P 落在指定区间
     if expect_range and ids != list(range(expect_range[0], expect_range[1]+1)):
-        errs.append(f'[P] 期望 {expect_range}, 实际 {ids}')
+        errs.append(f'[P] 期望区间 {expect_range}, 实际 {ids}')
 
     # 页型
     for m in re.finditer(r'^## P(\d+) \| 页型:(\S+)', text, re.MULTILINE):
@@ -49,6 +60,37 @@ def check_file(target: str, expect_range=None) -> tuple[list[str], list[str], li
         for word in FORBID_KEYWORDS_IN_EYEBROW:
             if word in m.group(1):
                 errs.append(f'[眉标] 含课型: {m.group(1).strip()}')
+
+    # v1.2 环节标题相关校验：序号一致性 + 相邻禁连
+    section_pages = []  # [(pid_int, title)]
+    pid_to_type = []    # [(pid_int, page_type)] 按出现顺序
+    for m in re.finditer(r'^## P(\d+) \| 页型:(\S+)', text, re.MULTILINE):
+        pid_to_type.append((int(m.group(1)), m.group(2)))
+    pages_split = re.split(r'\n## P', text)
+    for p in pages_split[1:]:
+        h = re.search(r'^(\d+) \| 页型:环节标题', p)
+        if not h: continue
+        ti = re.search(r'标题：(.+)', p)
+        section_pages.append((int(h.group(1)), ti.group(1).strip() if ti else ''))
+
+    # C1：单环节课时不应带"一、"前缀；多环节课时序号 1→N 不跳号
+    SECTION_NUMERALS = ['一、','二、','三、','四、','五、','六、']
+    if len(section_pages) == 1:
+        _, title = section_pages[0]
+        if any(title.startswith(n) for n in SECTION_NUMERALS):
+            errs.append(f'[环节序号] 单环节课时标题不应带"一、"前缀: "{title}"')
+    elif len(section_pages) >= 2:
+        for i, (pid, title) in enumerate(section_pages):
+            expected = SECTION_NUMERALS[i]
+            if not title.startswith(expected):
+                errs.append(f'[环节序号] P{pid} 第 {i+1} 个环节应以"{expected}"开头，实际: "{title}"')
+        if len(section_pages) > 4:
+            warns.append(f'[环节序号] 单课时环节数={len(section_pages)} 超过推荐上限 4')
+
+    # C2：禁止两个相邻的环节标题页
+    for i in range(len(pid_to_type) - 1):
+        if pid_to_type[i][1] == '环节标题' and pid_to_type[i+1][1] == '环节标题':
+            errs.append(f'[环节连续] P{pid_to_type[i][0]} 与 P{pid_to_type[i+1][0]} 均为环节标题，禁止相邻')
 
     # 逐页检查
     pages = re.split(r'\n## P', text)
@@ -70,9 +112,15 @@ def check_file(target: str, expect_range=None) -> tuple[list[str], list[str], li
             if pt == '填空表格' and sub and ebt in sub.group(1):
                 errs.append(f'[P{pid} {pt}] 眉标 in 副标题: "{ebt}" 包含于 "{sub.group(1).strip()}"')
 
+        # 四图网格变体：引导问题页带 ≥2 条配图建议时，要点改由各格题面承载、不再必填
+        img_sug_count = len(re.findall(r'^配图建议[:：]', p, re.MULTILINE))
+        is_image_grid = (pt == '引导问题' and img_sug_count >= 2)
+
         # 字段冲突矩阵
         rules = FIELD_MATRIX.get(pt, {})
         for must in rules.get('必填', []):
+            if is_image_grid and must == '要点':
+                continue  # 网格页豁免要点必填
             if f'{must}：' not in p:
                 errs.append(f'[P{pid} {pt}] 缺必填字段: {must}')
         for ban in rules.get('禁用', []):

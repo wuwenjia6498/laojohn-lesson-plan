@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<!-- 故事山形图：平滑弧线山形 + 沿坡节点框（起始→上升→高潮→下降→结局）。节点数自适应(3–7)。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #page { width: 794px; height: 1123px; background: #FFFFFF; position: relative; overflow: hidden; }
+  .brand-logo { position: absolute; top: 32px; right: 42px; height: 48px; }
+  .variant-tag { position: absolute; top: 36px; left: 46px; font-size: 13px; color: #B3A98F; letter-spacing: 1px; }
+  .l-title { position: absolute; top: 74px; left: 0; width: 100%; text-align: center;
+    font-size: 23px; font-weight: 700; color: #333; padding: 0 56px; line-height: 1.4; }
+  .l-sub { position: absolute; top: 116px; left: 0; width: 100%; text-align: center; font-size: 15px; color: #8A8268; }
+  .l-foot { position: absolute; bottom: 28px; left: 0; width: 100%; text-align: center; font-size: 14px; color: #9A937F; padding: 0 40px; }
+  .hd { font-size: 14px; font-weight: 700; }
+  .ftxt { font-size: 13px; fill: #3A3A33; }
+</style>
+</head>
+<body>
+<div id="page">
+  <img class="brand-logo" id="logo">
+  <div class="variant-tag" id="variantTag"></div>
+  <div class="l-title" id="title"></div>
+  <div class="l-sub" id="subtitle"></div>
+  <svg id="svg" width="794" height="950" style="position:absolute; top:128px; left:0;"></svg>
+  <div class="l-foot" id="foot"></div>
+</div>
+<script>
+const DATA = /*__DATA__*/ null;
+const SVGNS = "http://www.w3.org/2000/svg";
+function el(t,a){const e=document.createElementNS(SVGNS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+function wrap(s,max){const o=[];for(let i=0;i<s.length;i+=max)o.push(s.slice(i,i+max));return o;}
+const PALETTE = ["#A8504F","#D9883A","#C49B3E","#4E8C7D","#5B7FA6","#8268A0","#7A8C3A"];
+
+const X_L = 84, X_R = 710, Y_BASE = 786, AMP = 384;
+function render(){
+  const d = DATA;
+  document.getElementById('logo').src = d.logo;
+  document.getElementById('title').textContent = d.title || '';
+  const sub = document.getElementById('subtitle'); if(d.subtitle) sub.textContent = d.subtitle; else sub.style.display='none';
+  const tag = document.getElementById('variantTag'); if(d.variant) tag.textContent = d.variant; else tag.style.display='none';
+  const foot = document.getElementById('foot'); if(d.footer) foot.textContent = d.footer; else foot.style.display='none';
+
+  const svg = document.getElementById('svg');
+  const steps = d.steps || [];
+  const n = steps.length;
+  // 框宽随阶数自适应：阶多则收窄，杜绝峰顶相邻框贴连（6 阶常见）
+  const BOX_W = Math.min(132, Math.floor((X_R - X_L) / Math.max(1, n - 1)) - 12);
+
+  // 峰顶节点：优先认 header 含「高潮 / climax」，否则取偏后约 60% 处；可用 d.peak 指定索引
+  let peakIdx = (typeof d.peak === 'number')
+    ? d.peak
+    : steps.findIndex(s => /高潮|climax/i.test(s.header || ''));
+  if(peakIdx < 0) peakIdx = Math.round((n - 1) * 0.6);
+  peakIdx = Math.max(0, Math.min(n - 1, peakIdx));
+
+  // 节点坐标：x 等距；y 让「峰顶」单独最高——上坡 0→1、下坡 1→0，单峰才像故事山
+  const pos = [];
+  for(let i=0;i<n;i++){
+    const t = n>1 ? i/(n-1) : 0.5;
+    const x = X_L + (X_R - X_L) * t;
+    let frac;
+    if(i <= peakIdx) frac = peakIdx > 0 ? i/peakIdx : 1;
+    else            frac = (n-1-peakIdx) > 0 ? (n-1-i)/(n-1-peakIdx) : 1;
+    const y = Y_BASE - AMP * Math.sin(frac * Math.PI/2);
+    pos.push({x: Math.round(x), y: Math.round(y)});
+  }
+
+  // 平滑山形曲线（穿过各节点的折线 → 用平滑路径）
+  if(n >= 2){
+    let dstr = "M " + pos[0].x + " " + pos[0].y;
+    for(let i=1;i<n;i++){
+      const p0 = pos[i-1], p1 = pos[i];
+      const cx = (p0.x + p1.x) / 2;
+      dstr += " C " + cx + " " + p0.y + " " + cx + " " + p1.y + " " + p1.x + " " + p1.y;
+    }
+    svg.appendChild(el("path",{d:dstr, fill:"none", stroke:"#5B86A6", "stroke-width":3, "stroke-linecap":"round"}));
+    // 山脚地平线
+    svg.appendChild(el("line",{x1:60, y1:Y_BASE+4, x2:734, y2:Y_BASE+4, stroke:"#D8D2C5", "stroke-width":1.5}));
+  }
+
+  steps.forEach((st,i)=>{
+    const p = pos[i];
+    const color = PALETTE[i % PALETTE.length];
+    // 节点圆点
+    svg.appendChild(el("circle",{cx:p.x, cy:p.y, r:6, fill:"#FFFFFF", stroke:color, "stroke-width":3}));
+    // 框：位于节点上方，短连接线
+    const boxH = 104;
+    const bx = Math.max(8, Math.min(794-8-BOX_W, p.x - BOX_W/2));
+    const by = p.y - 18 - boxH;
+    svg.appendChild(el("line",{x1:p.x, y1:p.y-6, x2:p.x, y2:by+boxH, stroke:color, "stroke-width":1.6, "stroke-opacity":0.6}));
+    svg.appendChild(el("rect",{x:bx, y:by, width:BOX_W, height:boxH, rx:9, fill:"#FFFFFF", stroke:color, "stroke-width":1.6}));
+    // 头部色条
+    svg.appendChild(el("rect",{x:bx, y:by, width:BOX_W, height:24, rx:9, fill:color}));
+    svg.appendChild(el("rect",{x:bx, y:by+14, width:BOX_W, height:10, fill:color}));
+    const hd = el("text",{x:bx+BOX_W/2, y:by+16, class:"hd", fill:"#FFFFFF", "text-anchor":"middle"});
+    hd.textContent = st.header || ''; svg.appendChild(hd);
+    // 正文：示范填字（自动断行）/ 空白填写线
+    const items = st.items || ["",""];
+    const txt = items.find(x => x && x.trim() !== '');
+    if(txt){
+      const lines = wrap(String(txt), 9).slice(0,4);
+      lines.forEach((ln,li)=>{ const t=el("text",{x:bx+8, y:by+44+li*17, class:"ftxt"}); t.textContent=ln; svg.appendChild(t); });
+    } else {
+      for(let k=0;k<2;k++){ const ly=by+44+k*26; svg.appendChild(el("line",{x1:bx+8, y1:ly, x2:bx+BOX_W-8, y2:ly, stroke:"#CFC8BA", "stroke-width":1.2})); }
+    }
+  });
+  document.body.dataset.rendered = '1';
+}
+render();
+</script>
+</body>
+</html>

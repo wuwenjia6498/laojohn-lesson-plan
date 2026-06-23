@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  :root {
+    --brand:       #D84535;
+    --key-bg:      #f0d0c1;    /* 信息格键名底色 & 简介标签底色 */
+    --val-bg:      #f0f0f0;    /* 信息格数值底色（浅灰） */
+    --summary-bg:  #f0d0c1;    /* 内容简介标签底色 */
+    --table-bd:    #f0c6b3;    /* 表格线颜色 */
+    --ink:         #1A1A1A;
+    --ink-secondary: #444;
+    --page-w:      900px;
+    --pad:         52px;
+    --pad-top:     140px;      /* 顶部内边距（为商标留出充足空白区） */
+    --font: "Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei",sans-serif;
+    --font-serif: "Noto Serif CJK SC","Source Han Serif SC","SimSun",serif;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { background:#fff; }
+
+  /* ─── 页面容器（position:relative 供 logo 绝对定位） ─── */
+  #page {
+    width: var(--page-w);
+    background: #fff;
+    /* 顶部 110px：商标 + 充足留白；左右底部用 --pad */
+    padding: var(--pad-top) var(--pad) 60px;
+    font-family: var(--font);
+    color: var(--ink);
+    position: relative;
+  }
+
+  /* ─── Logo：绝对定位，距顶边 28px，右边与内容对齐 ─── */
+  /* 商标在 110px 顶部空间内居中：28px 上边距，52px 高度 → 底边 80px，内容从 110px 起 */
+  .logo-wrap {
+    position: absolute;
+    top: 52px;   /* 距顶边 52px，白边约 104px（2× 输出分辨率） */
+    right: var(--pad);
+    line-height: 0;
+    user-select: none;
+  }
+  .logo-img {
+    height: 52px;
+    display: block;
+    object-fit: contain;
+  }
+
+  /* ─── 标题区 ─── */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 36px;
+  }
+  .page-title {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: 5px;
+    color: var(--ink);
+    text-align: center;
+    line-height: 1;
+  }
+
+  /* ─── 书目信息区：封面（左）+ 信息表格（右） ─── */
+  .book-section {
+    display: flex;
+    gap: 36px;
+    align-items: flex-start;
+    margin-bottom: 36px;
+  }
+
+  /* 封面（无阴影，宽度缩小 20%：230 × 0.8 = 184px） */
+  .cover-col {
+    flex: 0 0 184px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+  }
+  .cover-img {
+    width: 100%;
+    border-radius: 6px;
+    display: block;
+    /* 无 box-shadow */
+  }
+  .cover-placeholder {
+    width: 100%;
+    height: 256px;   /* 320 × 0.8 */
+    background: #f5e8e4;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #bbb;
+    font-size: 14px;
+    border: 2px dashed #e0b0a6;
+  }
+
+  /* 信息表格：表格线 #f0c6b3；行高缩短 20%（62 → 50px） */
+  .info-table {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 84px 1fr 84px 1fr;
+    border-top: 1.5px solid var(--table-bd);
+    border-left: 1.5px solid var(--table-bd);
+    align-self: stretch;
+  }
+  .cell {
+    padding: 0 12px;
+    border-right: 1.5px solid var(--table-bd);
+    border-bottom: 1.5px solid var(--table-bd);
+    font-size: 16px;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    justify-content: center;   /* 水平居中（所有格） */
+    text-align: center;         /* 文字居中 */
+    min-height: 50px;           /* 高度缩短 20% */
+  }
+  .cell-key {
+    font-weight: 700;
+    background: var(--key-bg);  /* #f0d0c1 */
+    white-space: nowrap;
+    letter-spacing: 3px;
+    color: var(--ink);
+  }
+  .cell-key.wrap {
+    flex-direction: column;
+    line-height: 1.4;
+    letter-spacing: 0;
+  }
+  .cell-val {
+    color: var(--ink-secondary);
+    background: #ffffff;        /* 值列白色背景 */
+  }
+
+  /* 占位提示（B 类字段未填） */
+  .ph {
+    color: #E8553A;
+    font-size: 14px;
+    border: 1.5px dashed #E8553A;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #FFF3F0;
+    white-space: nowrap;
+  }
+
+  /* ─── 内容简介区 ─── */
+  .summary-section {
+    display: flex;
+    border-radius: 6px;
+    overflow: hidden;
+    min-height: 150px;
+  }
+  /* 左侧标签：底色 #f0d0c1，文字黑色 */
+  .summary-label {
+    width: 52px;
+    flex-shrink: 0;
+    background: var(--summary-bg);  /* #f0d0c1 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 0;
+  }
+  .summary-label-text {
+    writing-mode: vertical-rl;
+    font-size: 24px;        /* 大二号：20 → 24px */
+    font-weight: 800;
+    letter-spacing: 8px;
+    color: var(--ink);
+    font-family: var(--font-serif);
+  }
+  /* 正文区底色浅灰 */
+  .summary-body {
+    flex: 1;
+    background: #f0f0f0;
+    padding: 26px 30px;
+    font-size: 20px;        /* 大一号：18 → 20px */
+    line-height: 2;
+    color: var(--ink);
+    text-align: justify;
+  }
+</style>
+</head>
+<body>
+<div id="page">
+
+  <!-- Logo（绝对定位，独立于标题行） -->
+  <div class="logo-wrap">
+    <img class="logo-img" id="logo-img" src="/*__LOGO__*/" alt="老约翰">
+  </div>
+
+  <!-- 标题 -->
+  <div class="top-bar">
+    <div class="page-title">本期深度阅读书目</div>
+  </div>
+
+  <!-- 书目信息区（无分隔线） -->
+  <div class="book-section">
+    <div class="cover-col" id="cover-col">
+      <div class="cover-placeholder" id="cover-placeholder">封面加载中…</div>
+    </div>
+    <div class="info-table" id="info-table"></div>
+  </div>
+
+  <!-- 内容简介 -->
+  <div class="summary-section">
+    <div class="summary-label">
+      <span class="summary-label-text">内容简介</span>
+    </div>
+    <div class="summary-body" id="summary"></div>
+  </div>
+
+</div>
+<script>
+const DATA = /*__DATA__*/ null;
+
+function isPlaceholder(s) {
+  if (s === null || s === undefined || s === '') return false;
+  const str = String(s);
+  // 仅识别脚本生成的占位（含待/请/提炼/补充），不误伤作者国籍方括号如【英国】【美】
+  return /【[^】]*(?:待|请|提炼|补充)[^】]*】/.test(str) || str.includes('____') || str.includes('请回填');
+}
+function wrap(s) {
+  if (s === null || s === undefined || s === '') return '—';
+  const str = String(s);
+  const cleaned = str.replace(/^[^：:]{1,6}[：:]/, '').trim() || str;
+  if (isPlaceholder(cleaned)) return '<span class="ph">' + cleaned + '</span>';
+  return cleaned;
+}
+
+(function init() {
+  const d = DATA || {};
+
+  /* Logo */
+  const logoSrc = '/*__LOGO__*/';
+  if (!logoSrc || !logoSrc.startsWith('data:')) {
+    document.getElementById('logo-img').style.display = 'none';
+  }
+
+  /* 封面 */
+  const coverSrc = '/*__COVER__*/';
+  const col = document.getElementById('cover-col');
+  if (coverSrc && coverSrc.startsWith('data:')) {
+    col.innerHTML = '<img class="cover-img" src="' + coverSrc + '" alt="书封">';
+  } else {
+    document.getElementById('cover-placeholder').textContent = '【封面待补充】';
+  }
+
+  /* 信息表格 */
+  const titleVal = d.title ? '\u300a' + d.title + '\u300b' : '';
+  const rows = [
+    ['书名',   titleVal,            '字数',      d.word_count || ''],
+    ['作者',   d.author      || '', '页数',      d.page_count || ''],
+    ['出版社', d.publisher   || '', '阅读\n阶段', d.level     || ''],
+  ];
+  const table = document.getElementById('info-table');
+  table.innerHTML = rows.map(function([k1, v1, k2, v2]) {
+    const k2cls = k2.includes('\n') ? 'cell cell-key wrap' : 'cell cell-key';
+    const k2inner = k2.split('\n').join('<br>');
+    return (
+      '<div class="cell cell-key">'  + k1       + '</div>' +
+      '<div class="cell cell-val">'  + wrap(v1) + '</div>' +
+      '<div class="' + k2cls + '">'  + k2inner  + '</div>' +
+      '<div class="cell cell-val">'  + wrap(v2) + '</div>'
+    );
+  }).join('');
+
+  /* 内容简介 */
+  const sumEl  = document.getElementById('summary');
+  const sumTxt = d.summary || '';
+  sumEl.innerHTML = isPlaceholder(sumTxt)
+    ? '<span class="ph">' + sumTxt + '</span>'
+    : sumTxt;
+
+  document.body.setAttribute('data-rendered', '1');
+})();
+</script>
+</body>
+</html>

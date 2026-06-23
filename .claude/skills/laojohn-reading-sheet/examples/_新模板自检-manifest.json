@@ -1,0 +1,114 @@
+{
+  "book": "新模板自检",
+  "sheets": [
+    {"file": "01_story_mountain-空", "template": "story_mountain", "data": {
+      "title": "故事山形图 · 梳理故事情节", "subtitle": "用书里的事实，在每个阶段写一句话",
+      "variant": "空白版",
+      "steps": [
+        {"header": "起始", "items": ["", ""]},
+        {"header": "上升", "items": ["", ""]},
+        {"header": "高潮", "items": ["", ""]},
+        {"header": "下降", "items": ["", ""]},
+        {"header": "结局", "items": ["", ""]}
+      ]
+    }},
+    {"file": "02_story_mountain-示范", "template": "story_mountain", "data": {
+      "title": "故事山形图 · 梳理故事情节", "variant": "示范版（参考填法）",
+      "steps": [
+        {"header": "起始", "items": ["主人公在平静中登场"]},
+        {"header": "上升", "items": ["麻烦接连出现，处境变难"]},
+        {"header": "高潮", "items": ["矛盾爆发到顶点的关键一幕"]},
+        {"header": "下降", "items": ["局势开始扭转、收束"]},
+        {"header": "结局", "items": ["尘埃落定，人物有了变化"]}
+      ]
+    }},
+    {"file": "03_fishbone-空", "template": "fishbone", "data": {
+      "title": "鱼骨图 · 梳理重要人物对主人公的影响", "subtitle": "每根支骨写一件影响他的事",
+      "variant": "空白版", "tail_label": "出生", "head_label": "成为鹿王子",
+      "ribs": [
+        {"header": "童年 · 一"}, {"header": "童年 · 二"},
+        {"header": "青年 · 一"}, {"header": "青年 · 二"},
+        {"header": "中年 · 一"}, {"header": "中年 · 二"}
+      ]
+    }},
+    {"file": "04_fishbone-示范", "template": "fishbone", "data": {
+      "title": "鱼骨图 · 梳理重要人物对斑比的影响", "variant": "示范版（参考填法）",
+      "tail_label": "出生", "head_label": "成为鹿王子",
+      "ribs": [
+        {"header": "童年", "text": "教导斑比独自生活"},
+        {"header": "童年", "text": "赞赏和鼓励斑比"},
+        {"header": "青年", "text": "阻止斑比掉入猎人的圈套"},
+        {"header": "青年", "text": "提醒他生活要谨慎"},
+        {"header": "中年", "text": "教斑比救助其他小动物"},
+        {"header": "中年", "text": "斑比受伤后，照顾他"}
+      ]
+    }},
+    {"file": "05_timeline-空", "template": "timeline", "data": {
+      "title": "时间轴 · 整理主人公的历程", "subtitle": "每一站写下发生了什么",
+      "variant": "空白版",
+      "nodes": [
+        {"header": "第1站"}, {"header": "第2站"}, {"header": "第3站"},
+        {"header": "第4站"}, {"header": "第5站"}, {"header": "第6站"}
+      ]
+    }},
+    {"file": "06_timeline-示范", "template": "timeline", "data": {
+      "title": "时间轴 · 小王子拜访的星球", "variant": "示范版（参考填法）",
+      "nodes": [
+        {"header": "325星球", "value": "国王"},
+        {"header": "326星球", "value": "爱慕虚荣的人"},
+        {"header": "327星球", "value": "酒鬼"},
+        {"header": "328星球", "value": "商人"},
+        {"header": "329星球", "value": "点灯人"},
+        {"header": "330星球", "value": "地理学家"},
+        {"header": "地球", "value": "飞行员、蛇、狐狸"}
+      ]
+    }},
+    {"file": "07_bubble-空", "template": "bubble", "data": {
+      "title": "气泡图 · 帽子的每一次变形", "subtitle": "把每次变形的对象写进气泡里",
+      "variant": "空白版", "center": "魔法帽",
+      "bubbles": ["", "", "", "", "", ""]
+    }},
+    {"file": "08_bubble-示范", "template": "bubble", "data": {
+      "title": "气泡图 · 人物特征发散", "variant": "示范版（参考填法）", "center": "主人公",
+      "bubbles": ["勇敢", "好奇心强", "重情义", "有点鲁莽", "爱冒险", "善于思考"]
+    }},
+    {"file": "09_writing-空", "template": "writing", "data": {
+      "title": "写作页 · 写一首小诗", "subtitle": "给它取个题目，把想写的内容分成几行来写",
+      "variant": "空白版"
+    }},
+    {"file": "10_draw-空", "template": "draw", "data": {
+      "title": "绘画页 · 画出你心中的主人公", "subtitle": "根据书里的描述，画下他的样子",
+      "variant": "空白版", "prompt": "在这里画"
+    }},
+    {"file": "11_comic-空", "template": "comic", "data": {
+      "title": "图文并排 · 画出你最喜欢的情节", "subtitle": "左边写情节，右边画小漫画",
+      "variant": "空白版", "banner": "我的故事", "cells": 3
+    }},
+    {"file": "12_profile_card-空", "template": "profile", "data": {
+      "title": "人物名片 · 选一个你喜欢的人物", "subtitle": "给 TA 做一张名片",
+      "variant": "空白版", "banner": "人物名片",
+      "cards": [
+        {"box": {"label": "画像 / 贴图", "w": 130, "h": 150}, "fields": [
+          {"label": "姓名", "lines": 1}, {"label": "特点", "lines": 1},
+          {"label": "印象最深刻的一件事", "lines": 2}, {"label": "让你想到生活中的什么人？", "lines": 1}
+        ]},
+        {"box": {"label": "画像 / 贴图", "w": 130, "h": 150}, "fields": [
+          {"label": "姓名", "lines": 1}, {"label": "特点", "lines": 1},
+          {"label": "印象最深刻的一件事", "lines": 2}, {"label": "让你想到生活中的什么人？", "lines": 1}
+        ]}
+      ]
+    }},
+    {"file": "13_profile_file-空", "template": "profile", "data": {
+      "title": "人物档案 · 为主人公建一份档案", "subtitle": "左边画像，右边写信息",
+      "variant": "空白版", "banner": "人物档案",
+      "cards": [
+        {"box": {"label": "画出人物的样子", "w": 300, "h": 520}, "fields": [
+          {"label": "名字和年龄", "lines": 2},
+          {"label": "在故事中的角色地位", "lines": 2},
+          {"label": "性格是什么样的", "lines": 3},
+          {"label": "你还知道哪些信息", "lines": 3}
+        ]}
+      ]
+    }}
+  ]
+}

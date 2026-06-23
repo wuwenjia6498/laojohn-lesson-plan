@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  :root{
+    --brand:#E8553A;
+    --card-bg:#ffffff;
+    --label-band:#FCDAD6;
+    --label-bar:#E85C52;
+    --pill-bg:#F6CFC3;
+    --ink:#000000;
+    --placeholder-bd:#E8553A;
+    --placeholder-bg:#FBEAE5;
+    --placeholder-ink:#000000;
+    --page-w:1242px;
+    --pad:64px;
+    --font: "Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei",sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{background:#ffffff;}
+  #page{
+    width:var(--page-w);
+    background:var(--brand);
+    font-family:var(--font);
+    color:var(--ink);
+    padding-bottom:56px;
+    display:flex; flex-direction:column;
+  }
+
+  /* ---------- 1+2. 头部图(含信息卡空壳)+ 叠加层 ---------- */
+  .head-zone{ position:relative; width:100%; line-height:0; }
+  .head-img{ width:100%; display:block; }
+
+  .info-overlay{
+    position:absolute; left:0; right:0;
+    top:46.7%;
+    height:49.7%;
+    display:flex; align-items:center;
+    line-height:normal;
+  }
+  .info-left{
+    width:64.5%;
+    display:grid;
+    grid-template-columns:17.2% 1fr;
+    align-content:center; row-gap:2px;
+    padding-left:9.4%;
+  }
+  .info-key{
+    color:var(--ink); font-weight:400; font-size:32px; line-height:1.3;
+    letter-spacing:6px; white-space:nowrap;
+    display:flex; align-items:center; justify-content:flex-end;
+    padding:6px 8px 6px 0;
+  }
+  .info-val{
+    color:var(--ink); font-weight:400; font-size:32px; line-height:1.3;
+    display:flex; align-items:center;
+    padding:6px 0 6px 30px;
+  }
+  .info-cover-wrap{
+    position:absolute; right:0; width:35.5%;
+    height:100%; display:flex; align-items:center; justify-content:center;
+  }
+  .cover{ width:68.2%; border-radius:4px; }
+  .level-badge{
+    position:absolute; right:6%; bottom:6%;
+    width:78px; height:78px;
+    background:var(--brand); color:#fff; font-weight:900; font-size:34px; font-style:italic;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:50%;
+    box-shadow:0 0 0 5px rgba(255,255,255,0.85), 0 4px 10px rgba(0,0,0,0.25);
+  }
+
+  /* ---------- 3. 内容大卡 ---------- */
+  .content{
+    margin:-12px 61px 0 59px; background:var(--card-bg);
+    border-radius:0 0 28px 28px; padding:40px 52px 64px;
+    position:relative;
+  }
+  .award-block{ margin-bottom:36px; }
+  .award-line{
+    color:#4B8BCB; font-weight:700; font-size:36px; line-height:1.7;
+  }
+  .award-line .star{ color:#4B8BCB; margin-right:10px; }
+
+  .block{ margin-bottom:40px; }
+  .block:last-child{ margin-bottom:0; }
+  .pill-title{
+    display:inline-block; background:var(--pill-bg); color:var(--ink);
+    font-weight:400; font-size:36px; border-radius:999px;
+    padding:10px 30px; margin-bottom:18px;
+  }
+  .block-body{ font-size:34px; line-height:1.62; color:var(--ink); }
+  .gain-item{ font-size:34px; line-height:1.62; color:var(--ink); }
+
+  .ph{
+    color:#999999; font-weight:400; font-size:26px;
+  }
+
+  .qr-wrap{ position:absolute; right:52px; bottom:48px; text-align:center; }
+  .qr-img{ width:160px; height:160px; display:block; }
+  .qr-cap{ font-size:26px; color:var(--ink); margin-top:8px; letter-spacing:2px; }
+  .block:has(+ .qr-wrap){ padding-right:220px; min-height:210px; }
+</style>
+</head>
+<body>
+<div id="page">
+
+  <div class="head-zone">
+    <img class="head-img" id="header" src="" alt="老约翰深度阅读读书会">
+    <div class="info-overlay">
+      <div class="info-left" id="info-left"></div>
+      <div class="info-cover-wrap">
+        <img class="cover" id="cover" src="" alt="封面">
+        <div class="level-badge" id="level"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="award-block" id="award-block"></div>
+    <div class="block">
+      <span class="pill-title">内容简介：</span>
+      <div class="block-body" id="summary"></div>
+    </div>
+    <div class="block">
+      <span class="pill-title">阅读收获：</span>
+      <div id="gains"></div>
+    </div>
+    <div class="block">
+      <span class="pill-title">阅读策略学习&运用：</span>
+      <div class="block-body" id="strategies"></div>
+    </div>
+    <div class="block">
+      <span class="pill-title">可视化思维工具学习&运用：</span>
+      <div class="block-body" id="vistools"></div>
+    </div>
+    <div class="qr-wrap">
+      <img class="qr-img" id="qr" src="" alt="二维码">
+      <div class="qr-cap">详情扫码咨询</div>
+    </div>
+  </div>
+
+</div>
+<script>
+const DATA = /*__DATA__*/ null;
+
+function isPlaceholder(s){
+  if(s === null || s === undefined || s === '') return false;
+  const str = String(s);
+  // 仅识别脚本生成的占位（含待/请/提炼/补充），不误伤作者国籍方括号如【英国】【美】
+  return /【[^】]*(?:待|请|提炼|补充)[^】]*】/.test(str) || str.includes('____') || str.includes('请回填');
+}
+function wrap(s){
+  if(s === null || s === undefined || s === '') return '';
+  return isPlaceholder(s) ? '<span class="ph">'+s+'</span>' : s;
+}
+function stripPrefix(s){
+  if(!s) return s;
+  return String(s).replace(/^[^：:]{1,6}[：:]/, '');
+}
+
+(function init(){
+  const d = DATA || {};
+
+  document.getElementById('header').src = '/*__HEADER__*/';
+  document.getElementById('cover').src = '/*__COVER__*/';
+  document.getElementById('qr').src = '/*__QR__*/';
+
+  document.getElementById('level').textContent = d.level || 'L?';
+
+  const rows = [
+    ['书名', d.title || ''],
+    ['作者', stripPrefix(d.author)],
+    ['出版社', stripPrefix(d.publisher)],
+    ['字数', stripPrefix(d.word_count)],
+    ['页数', stripPrefix(d.page_count)],
+    ['类型', stripPrefix(d.book_type)],
+    ['主题', stripPrefix(d.theme)],
+  ];
+  document.getElementById('info-left').innerHTML = rows.map(function(r){
+    return '<div class="info-key">'+r[0]+'</div><div class="info-val">'+wrap(r[1])+'</div>';
+  }).join('');
+
+  const award = d.award;
+  const awardEl = document.getElementById('award-block');
+  const isEmpty = award === null || award === undefined || award === '' ||
+                  (Array.isArray(award) && award.length === 0);
+  if (isEmpty) {
+    awardEl.style.display = 'none';
+  } else {
+    const items = Array.isArray(award) ? award : [award];
+    awardEl.innerHTML = items.map(function(a){
+      return '<div class="award-line"><span class="star">★</span>'+wrap(a)+'</div>';
+    }).join('');
+  }
+
+  document.getElementById('summary').innerHTML = wrap(d.summary || '');
+
+  const gains = d.gains || [];
+  document.getElementById('gains').innerHTML = gains.map(function(g){
+    return '<div class="gain-item">'+wrap(g)+'</div>';
+  }).join('');
+
+  document.getElementById('strategies').innerHTML = wrap(d.strategies || '');
+  document.getElementById('vistools').innerHTML = wrap(d.vistools || '');
+
+  document.body.setAttribute("data-rendered","1");
+})();
+</script>
+</body>
+</html>

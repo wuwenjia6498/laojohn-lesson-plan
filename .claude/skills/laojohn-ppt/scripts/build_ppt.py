@@ -62,7 +62,7 @@ def build(input_md: str, output_pptx: str, *,
     blank_layout = prs.slide_layouts[6]
 
     # ===== 自动注入封面 + END =====
-    # 中间稿里 P 编号沿用详案，仅用于回溯；PPT 内显示顺序与页码计数独立于此。
+    # 中间稿 P 编号由 ppt-draft 工具自排（每课时 P01=封面、正文从 P02 起），仅作内部引用；PPT 不标注页码。
     pages = list(deck.pages)
 
     # 1) 若首页不是封面，按"和导读课起始页一样"的规则注入一页封面
@@ -75,6 +75,21 @@ def build(input_md: str, output_pptx: str, *,
 
     # 2) 始终追加一页 END
     pages.append(Page(num=999, page_type="_END"))
+
+    # 3) 给每个"环节标题"页打章节序号、"引导问题"页打问题序号（课时内从 1 递增）
+    section_counter = 0
+    guide_counter = 0
+    for p in pages:
+        if p.page_type == "环节标题":
+            section_counter += 1
+            p._section_no = section_counter
+        elif p.page_type == "引导问题":
+            guide_counter += 1
+            p._guide_no = guide_counter
+    section_total = sum(1 for p in pages if p.page_type == "环节标题")
+    for p in pages:
+        if p.page_type == "环节标题":
+            p._section_total = section_total
 
     # 页码：仅对中间内容页计数（封面、END 不纳入）
     inner_total = sum(1 for p in pages if p.page_type not in {"封面", "_END"})
@@ -105,9 +120,15 @@ def build(input_md: str, output_pptx: str, *,
         # 占位清单（仅对中间稿原生页报告，跳过 synthetic）
         if page.page_type in {"_END", "封面"} and page.num in {0, 999}:
             continue
-        sug = (page.image_suggestion or "").strip()
-        if sug and sug not in {"无", "无（页面已满）", "—", "无配图"} and page.page_type in {"引导问题", "要点小结", "环节标题"}:
-            placeholder_report.append((page.num, page.page_type, sug))
+        raw_sugs = page.image_suggestions or ([page.image_suggestion] if page.image_suggestion else [])
+        sugs = [s.strip() for s in raw_sugs
+                if s and s.strip() not in {"无", "无（页面已满）", "—", "无配图"}]
+        if sugs and page.page_type in {"引导问题", "要点小结", "环节标题"}:
+            if len(sugs) >= 2:
+                placeholder_report.append(
+                    (page.num, page.page_type, f"[四图网格×{len(sugs)}] " + " ／ ".join(sugs)))
+            else:
+                placeholder_report.append((page.num, page.page_type, sugs[0]))
         else:
             placeholder_report.append((page.num, page.page_type, "—"))
 

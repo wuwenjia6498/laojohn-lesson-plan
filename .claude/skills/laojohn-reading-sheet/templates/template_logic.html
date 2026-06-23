@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #page { width: 794px; min-height: 1123px; background: #FFFFFF; position: relative;
+    padding: 76px 64px 48px 64px; }
+  .brand-logo { position: absolute; top: 36px; right: 44px; height: 50px; }
+  .variant-tag { position: absolute; top: 40px; left: 48px; font-size: 13px; color: #9FA3B0; letter-spacing: 1px; }
+  .g-title { text-align: center; font-size: 24px; font-weight: 700; color: #1F3864; margin: 40px 0 8px; }
+  .g-sub { text-align: center; font-size: 15px; color: #6B7180; margin-bottom: 40px; line-height: 1.6; }
+  .layer { border: 2.5px solid #1F3864; background: #DADDE4; border-radius: 4px;
+    padding: 30px 34px; text-align: center; min-height: 185px;
+    display: flex; flex-direction: column; }
+  .layer .lab { font-size: 19px; font-weight: 700; color: #1F3864; }
+  .layer .body { font-size: 18px; color: #2B2B2B; line-height: 1.7; margin-top: 14px; }
+  .layer .fillspace { flex: 1; min-height: 110px; }
+  .arrow { display: flex; justify-content: center; align-items: center; height: 64px; }
+  .arrow svg { display: block; }
+  .g-foot { text-align: center; font-size: 14px; color: #8A90A0; margin-top: 34px; line-height: 1.7; }
+</style>
+</head>
+<body>
+<div id="page">
+  <img class="brand-logo" id="logo">
+  <div class="variant-tag" id="variantTag"></div>
+  <div class="g-title" id="title"></div>
+  <div class="g-sub" id="subtitle"></div>
+  <div id="stack"></div>
+  <div class="g-foot" id="foot"></div>
+</div>
+<script>
+const DATA = /*__DATA__*/ null;
+function arrowEl(){
+  const w=document.createElement('div'); w.className='arrow';
+  w.innerHTML='<svg width="30" height="50" viewBox="0 0 30 50">'+
+    '<line x1="15" y1="48" x2="15" y2="14" stroke="#1F3864" stroke-width="3.5"/>'+
+    '<polygon points="15,0 4,18 26,18" fill="#1F3864"/></svg>';
+  return w;
+}
+function render(){
+  const d=DATA;
+  document.getElementById('logo').src=d.logo;
+  document.getElementById('title').textContent=d.title||'';
+  const sub=document.getElementById('subtitle'); if(d.subtitle) sub.textContent=d.subtitle; else sub.style.display='none';
+  const tag=document.getElementById('variantTag'); if(d.variant) tag.textContent=d.variant; else tag.style.display='none';
+  const foot=document.getElementById('foot'); if(d.footer) foot.textContent=d.footer; else foot.style.display='none';
+
+  const stack=document.getElementById('stack');
+  const layers=d.layers||[];               // 自上而下：③ → ② → ①
+  layers.forEach((ly,i)=>{
+    const box=document.createElement('div'); box.className='layer';
+    const lab=document.createElement('div'); lab.className='lab'; lab.textContent=ly.label||''; box.appendChild(lab);
+    if(ly.text && ly.text.trim()!==''){
+      const b=document.createElement('div'); b.className='body'; b.textContent=ly.text; box.appendChild(b);
+    } else {
+      const sp=document.createElement('div'); sp.className='fillspace'; box.appendChild(sp);
+    }
+    stack.appendChild(box);
+    if(i<layers.length-1) stack.appendChild(arrowEl());
+  });
+  document.body.dataset.rendered='1';
+}
+render();
+</script>
+</body>
+</html>

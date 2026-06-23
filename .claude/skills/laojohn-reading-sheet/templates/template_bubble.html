@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<!-- 气泡/放射图：中心节点 + N 个放射气泡，连线相接。气泡内空白填写或示范填字。气泡数自适应。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #page { width: 794px; height: 1123px; background: #FFFFFF; position: relative; overflow: hidden; }
+  .brand-logo { position: absolute; top: 32px; right: 42px; height: 48px; }
+  .variant-tag { position: absolute; top: 36px; left: 46px; font-size: 13px; color: #B3A98F; letter-spacing: 1px; }
+  .l-title { position: absolute; top: 74px; left: 0; width: 100%; text-align: center;
+    font-size: 23px; font-weight: 700; color: #333; padding: 0 56px; line-height: 1.4; }
+  .l-sub { position: absolute; top: 116px; left: 0; width: 100%; text-align: center; font-size: 15px; color: #8A8268; }
+  .l-foot { position: absolute; bottom: 28px; left: 0; width: 100%; text-align: center; font-size: 14px; color: #9A937F; padding: 0 40px; }
+  .ctext { font-size: 17px; font-weight: 700; fill: #FFFFFF; }
+  .ftxt { font-size: 13.5px; fill: #3A3A33; }
+</style>
+</head>
+<body>
+<div id="page">
+  <img class="brand-logo" id="logo">
+  <div class="variant-tag" id="variantTag"></div>
+  <div class="l-title" id="title"></div>
+  <div class="l-sub" id="subtitle"></div>
+  <svg id="svg" width="794" height="960" style="position:absolute; top:150px; left:0;"></svg>
+  <div class="l-foot" id="foot"></div>
+</div>
+<script>
+const DATA = /*__DATA__*/ null;
+const SVGNS = "http://www.w3.org/2000/svg";
+function el(t,a){const e=document.createElementNS(SVGNS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+function wrap(s,max){const o=[];for(let i=0;i<s.length;i+=max)o.push(s.slice(i,i+max));return o;}
+
+const CX = 397, CY = 470, CR = 74, RX = 296, RY = 268, BX = 90, BY = 64;
+function render(){
+  const d = DATA;
+  document.getElementById('logo').src = d.logo;
+  document.getElementById('title').textContent = d.title || '';
+  const sub = document.getElementById('subtitle'); if(d.subtitle) sub.textContent = d.subtitle; else sub.style.display='none';
+  const tag = document.getElementById('variantTag'); if(d.variant) tag.textContent = d.variant; else tag.style.display='none';
+  const foot = document.getElementById('foot'); if(d.footer) foot.textContent = d.footer; else foot.style.display='none';
+
+  const svg = document.getElementById('svg');
+  const bubbles = d.bubbles || [];
+  const n = bubbles.length;
+  const color = d.color || "#7FA86A";
+  const center = (d.center && d.center.label) || (d.center || '');
+
+  // 放射位置（从正上方开始顺时针）
+  const pos = [];
+  for(let i=0;i<n;i++){
+    const ang = -Math.PI/2 + (2*Math.PI*i)/n;
+    pos.push({x: CX + RX*Math.cos(ang), y: CY + RY*Math.sin(ang)});
+  }
+  // 连线（先画，压在气泡下）
+  pos.forEach(p=>{ svg.appendChild(el("line",{x1:CX, y1:CY, x2:Math.round(p.x), y2:Math.round(p.y), stroke:"#C9C2B4", "stroke-width":1.6})); });
+  // 气泡
+  bubbles.forEach((b,i)=>{
+    const p = pos[i];
+    svg.appendChild(el("ellipse",{cx:Math.round(p.x), cy:Math.round(p.y), rx:BX, ry:BY, fill:"#EEF3E6", stroke:color, "stroke-width":1.8}));
+    const txt = (typeof b === 'string') ? b : (b && b.text) || '';
+    if(txt && txt.trim() !== ''){
+      const lines = wrap(String(txt), 8).slice(0,4);
+      const y0 = p.y - (lines.length-1)*9;
+      lines.forEach((ln,li)=>{ const t=el("text",{x:Math.round(p.x), y:Math.round(y0+li*18), class:"ftxt", "text-anchor":"middle"}); t.textContent=ln; svg.appendChild(t); });
+    }
+  });
+  // 中心节点（压在最上）
+  svg.appendChild(el("circle",{cx:CX, cy:CY, r:CR, fill:color}));
+  const ct = el("text",{x:CX, y:CY+6, class:"ctext", "text-anchor":"middle"});
+  const cl = wrap(String(center), 6);
+  if(cl.length<=1){ ct.textContent = center; svg.appendChild(ct); }
+  else { cl.slice(0,3).forEach((ln,li)=>{ const t=el("text",{x:CX, y:CY-6+li*22, class:"ctext", "text-anchor":"middle"}); t.textContent=ln; svg.appendChild(t); }); }
+
+  document.body.dataset.rendered = '1';
+}
+render();
+</script>
+</body>
+</html>

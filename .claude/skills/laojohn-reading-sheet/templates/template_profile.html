@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<!-- 人物名片/档案：图框/画框 + 字段清单，可重复卡片。名片=小图框+多字段多卡；档案=大画框+字段单卡。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #FFFFFF; }
+  body { font-family: "Microsoft YaHei", "微软雅黑", sans-serif; color: #2B2B2B;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #page { width: 794px; min-height: 1123px; background: #FFFFFF; position: relative;
+    padding: 84px 56px 48px 56px; }
+  .brand-logo { position: absolute; top: 40px; right: 48px; height: 56px; width: auto; }
+  .variant-tag { position: absolute; top: 64px; left: 56px; font-size: 12px; color: #A89B8A; letter-spacing: 1px; }
+  .sheet-title { font-size: 21px; font-weight: 700; color: #2B2B2B; margin: 40px 8px 12px; line-height: 1.5; }
+  .sheet-sub { font-size: 14px; color: #8A8175; margin: 0 8px 22px; line-height: 1.6; }
+  .banner { width: 300px; margin: 6px auto 24px; text-align: center; font-size: 18px; font-weight: 700;
+    color: #6B5644; border-top: 2px solid #C9B89A; border-bottom: 2px solid #C9B89A; padding: 8px 0; }
+  .card { display: flex; gap: 22px; background: #EEF3E6; border-radius: 14px; padding: 20px 22px; margin-bottom: 20px; }
+  .card .imgbox { flex: none; border: 1.6px dashed #A9BE8C; border-radius: 10px; background: #FBFCF8;
+    position: relative; display: flex; align-items: center; justify-content: center; }
+  .card .imgbox .ph { color: #A9A18C; font-size: 13px; }
+  .card .fields { flex: 1; }
+  .frow { margin-bottom: 12px; }
+  .frow .flab { font-size: 14px; font-weight: 700; color: #5C6E48; margin-bottom: 4px; }
+  .frow .fline { border-bottom: 1.3px dotted #ADB79C; height: 38px; position: relative; }
+  .frow .fline .pre { position: absolute; left: 2px; bottom: 6px; font-size: 14px; color: #3A4A45; }
+</style>
+</head>
+<body>
+<div id="page">
+  <img class="brand-logo" id="logo">
+  <div class="variant-tag" id="variantTag"></div>
+  <div class="sheet-title" id="title"></div>
+  <div class="sheet-sub" id="subtitle"></div>
+  <div class="banner" id="banner"></div>
+  <div id="cards"></div>
+</div>
+<script>
+const DATA = /*__DATA__*/ null;
+function render(){
+  const d = DATA;
+  document.getElementById('logo').src = d.logo;
+  document.getElementById('title').textContent = d.title || '';
+  const sub = document.getElementById('subtitle');
+  if (d.subtitle) sub.textContent = d.subtitle; else sub.style.display = 'none';
+  const tag = document.getElementById('variantTag');
+  if (d.variant) tag.textContent = d.variant; else tag.style.display = 'none';
+  const banner = document.getElementById('banner');
+  if (d.banner) banner.textContent = d.banner; else banner.style.display = 'none';
+
+  const wrap = document.getElementById('cards');
+  (d.cards || []).forEach(c => {
+    const card = document.createElement('div'); card.className = 'card';
+    if (c.box) {
+      const box = document.createElement('div'); box.className = 'imgbox';
+      box.style.width = (c.box.w || 150) + 'px';
+      box.style.minHeight = (c.box.h || 150) + 'px';
+      const ph = document.createElement('div'); ph.className = 'ph';
+      ph.textContent = c.box.label || '画像 / 贴图'; box.appendChild(ph);
+      card.appendChild(box);
+    }
+    const fields = document.createElement('div'); fields.className = 'fields';
+    (c.fields || []).forEach(f => {
+      const row = document.createElement('div'); row.className = 'frow';
+      const lab = document.createElement('div'); lab.className = 'flab'; lab.textContent = f.label || ''; row.appendChild(lab);
+      const pre = Array.isArray(f.value) ? f.value : (f.value ? [f.value] : []);
+      const n = f.lines || 1;
+      for (let i = 0; i < n; i++) {
+        const ln = document.createElement('div'); ln.className = 'fline';
+        if (pre[i] && pre[i].trim() !== '') { const t = document.createElement('div'); t.className = 'pre'; t.textContent = pre[i]; ln.appendChild(t); }
+        row.appendChild(ln);
+      }
+      fields.appendChild(row);
+    });
+    card.appendChild(fields);
+    wrap.appendChild(card);
+  });
+  document.body.dataset.rendered = '1';
+}
+render();
+</script>
+</body>
+</html>

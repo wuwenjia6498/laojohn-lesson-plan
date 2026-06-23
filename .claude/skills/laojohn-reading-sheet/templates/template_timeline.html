@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<!-- 横排时间轴（横向 A4 1123×794）：横轴 + N 节点；每点彩色时段标签(上) + 书写块(下)。节点数自适应(≤7 较佳)。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #page { width: 1123px; height: 794px; background: #FFFFFF; position: relative; overflow: hidden; }
+  .brand-logo { position: absolute; top: 30px; right: 48px; height: 48px; }
+  .variant-tag { position: absolute; top: 34px; left: 52px; font-size: 13px; color: #B3A98F; letter-spacing: 1px; }
+  .l-title { position: absolute; top: 52px; left: 0; width: 100%; text-align: center;
+    font-size: 24px; font-weight: 700; color: #333; padding: 0 90px; line-height: 1.4; }
+  .l-sub { position: absolute; top: 92px; left: 0; width: 100%; text-align: center; font-size: 15px; color: #8A8268; padding: 0 90px; }
+  .l-foot { position: absolute; bottom: 26px; left: 0; width: 100%; text-align: center; font-size: 14px; color: #9A937F; padding: 0 60px; }
+  .chip { font-size: 14px; font-weight: 700; fill: #FFFFFF; }
+  .ftxt { font-size: 14px; fill: #3A3A33; }
+</style>
+</head>
+<body>
+<div id="page">
+  <img class="brand-logo" id="logo">
+  <div class="variant-tag" id="variantTag"></div>
+  <div class="l-title" id="title"></div>
+  <div class="l-sub" id="subtitle"></div>
+  <svg id="svg" width="1123" height="600" style="position:absolute; top:150px; left:0;"></svg>
+  <div class="l-foot" id="foot"></div>
+</div>
+<script>
+const DATA = /*__DATA__*/ null;
+const SVGNS = "http://www.w3.org/2000/svg";
+function el(t,a){const e=document.createElementNS(SVGNS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+function wrap(s,max){const o=[];for(let i=0;i<s.length;i+=max)o.push(s.slice(i,i+max));return o;}
+const PALETTE = ["#4F86C6","#D9883A","#C49B3E","#6FA85A","#4E8C7D","#5B7FA6","#A8504F"];
+
+const AX_Y = 200, X0 = 64, X1 = 1059;
+function render(){
+  const d = DATA;
+  document.getElementById('logo').src = d.logo;
+  document.getElementById('title').textContent = d.title || '';
+  const sub = document.getElementById('subtitle'); if(d.subtitle) sub.textContent = d.subtitle; else sub.style.display='none';
+  const tag = document.getElementById('variantTag'); if(d.variant) tag.textContent = d.variant; else tag.style.display='none';
+  const foot = document.getElementById('foot'); if(d.footer) foot.textContent = d.footer; else foot.style.display='none';
+
+  const svg = document.getElementById('svg');
+  const nodes = d.nodes || [];
+  const n = nodes.length;
+
+  // 轴线 + 右箭头
+  svg.appendChild(el("line",{x1:X0, y1:AX_Y, x2:X1, y2:AX_Y, stroke:"#9A937F", "stroke-width":2.5}));
+  svg.appendChild(el("polygon",{points:`${X1},${AX_Y-7} ${X1+15},${AX_Y} ${X1},${AX_Y+7}`, fill:"#9A937F"}));
+  svg.appendChild(el("circle",{cx:X0, cy:AX_Y, r:5, fill:"#9A937F"}));
+
+  const colW = n>0 ? (X1 - X0) / n : 0;
+  nodes.forEach((nd,i)=>{
+    const cx = Math.round(X0 + colW * (i + 0.5));
+    const color = PALETTE[i % PALETTE.length];
+    // 轴上节点
+    svg.appendChild(el("circle",{cx:cx, cy:AX_Y, r:7, fill:"#FFFFFF", stroke:color, "stroke-width":3}));
+    // 时段标签 chip（轴上方）
+    const cw = Math.min(colW - 16, 210);
+    const chx = cx - cw/2;
+    svg.appendChild(el("rect",{x:chx, y:AX_Y-58, width:cw, height:30, rx:6, fill:color}));
+    svg.appendChild(el("polygon",{points:`${cx-6},${AX_Y-28} ${cx+6},${AX_Y-28} ${cx},${AX_Y-18}`, fill:color}));
+    const ch = el("text",{x:cx, y:AX_Y-38, class:"chip", "text-anchor":"middle"}); ch.textContent = nd.header || ''; svg.appendChild(ch);
+    // 书写块（轴下方）
+    const bx = cx - cw/2, by = AX_Y + 28;
+    const val = Array.isArray(nd.value) ? nd.value : (nd.value ? [nd.value] : []);
+    if(val.length){
+      let yy = by + 10;
+      val.forEach(item=>{ wrap(String(item), Math.max(6, Math.floor(cw/15))).forEach(ln=>{ const t=el("text",{x:cx, y:yy, class:"ftxt", "text-anchor":"middle"}); t.textContent=ln; svg.appendChild(t); yy+=20; }); yy+=6; });
+    } else {
+      const rows = nd.lines || 7;
+      for(let k=0;k<rows;k++){ const ly = by + 22 + k*46; svg.appendChild(el("line",{x1:bx, y1:ly, x2:bx+cw, y2:ly, stroke:"#CFC8BA", "stroke-width":1.2})); }
+    }
+  });
+  document.body.dataset.rendered = '1';
+}
+render();
+</script>
+</body>
+</html>

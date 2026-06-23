@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """通用绘制工具：文本框、矩形、占位框、表格。"""
 import os
+import math
 from pptx.util import Pt, Emu
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
@@ -12,6 +13,8 @@ from theme import (
     FONT_TITLE, FONT_BODY, FONT_ASCII,
     COLOR_DASH, COLOR_BG_PLACE, COLOR_MUTED, COLOR_BODY,
     SZ_PLACEHOLDER,
+    COLOR_NUMBOX_BG, COLOR_NUMBOX_FG, COLOR_BULLET_SEP,
+    COLOR_RED_ACCENT, COLOR_CARD_BG, COLOR_CARD_BORDER,
 )
 
 
@@ -58,6 +61,43 @@ def add_textbox(slide, x, y, w, h, text, *,
         f.color.rgb = rgb(color)
         # 显式设置东亚字体
         _set_east_asia_font(run, font)
+    return box
+
+
+def add_rich_textbox(slide, x, y, w, h, segments, *,
+                    font=FONT_BODY, size=20, default_color="404040",
+                    default_bold=False, default_italic=False,
+                    align="left", anchor="top", line_spacing=1.2):
+    """富文本框：segments = [(text, {color,bold,italic,size}), ...]。
+    text 内 \n 自动换段；style 缺省回退到 default_*。"""
+    box = slide.shapes.add_textbox(x, y, w, h)
+    tf = box.text_frame
+    tf.word_wrap = True
+    tf.margin_left = Emu(0); tf.margin_right = Emu(0)
+    tf.margin_top = Emu(0);  tf.margin_bottom = Emu(0)
+    anchor_map = {"top": MSO_ANCHOR.TOP, "middle": MSO_ANCHOR.MIDDLE, "bottom": MSO_ANCHOR.BOTTOM}
+    tf.vertical_anchor = anchor_map.get(anchor, MSO_ANCHOR.TOP)
+    align_map = {"left": PP_ALIGN.LEFT, "center": PP_ALIGN.CENTER, "right": PP_ALIGN.RIGHT}
+
+    p = tf.paragraphs[0]
+    p.alignment = align_map.get(align, PP_ALIGN.LEFT)
+    p.line_spacing = line_spacing
+
+    for text, style in segments:
+        for j, part in enumerate(str(text).split("\n")):
+            if j > 0:
+                p = tf.add_paragraph()
+                p.alignment = align_map.get(align, PP_ALIGN.LEFT)
+                p.line_spacing = line_spacing
+            run = p.add_run()
+            run.text = part
+            f = run.font
+            f.name = font
+            f.size = Pt(style.get("size", size))
+            f.bold = style.get("bold", default_bold)
+            f.italic = style.get("italic", default_italic)
+            f.color.rgb = rgb(style.get("color", default_color))
+            _set_east_asia_font(run, font)
     return box
 
 
@@ -168,6 +208,34 @@ def add_image_placeholder(slide, x, y, w, h, suggestion: str):
     )
 
 
+def add_image_grid(slide, x, y, w, h, suggestions, *, gap=None):
+    """四图网格占位：把 2–4 条配图建议排成 2 列网格，每条一个占位框。
+
+    用于"给你们看 N 幅画面"这类引导问题页（每幅一图，逐格各配一题）。
+    suggestions：已过滤掉"无"的配图建议字符串列表（每条仍是三段式）。
+    """
+    sugs = [s for s in suggestions if s and s.strip() not in
+            {"无", "无（页面已满）", "—", "无配图"}]
+    n = len(sugs)
+    if n == 0:
+        return
+    if gap is None:
+        gap = Emu(int(w * 0.02))
+    cols = 1 if n == 1 else 2
+    rows = (n + cols - 1) // cols
+    cell_w = (w - gap * (cols - 1)) // cols
+    cell_h = (h - gap * (rows - 1)) // rows
+    for i, sug in enumerate(sugs):
+        r, c = divmod(i, cols)
+        # 末行不足 cols 个时整行居中
+        in_row = cols if (r + 1) * cols <= n else (n - r * cols)
+        row_w = cell_w * in_row + gap * (in_row - 1)
+        x_off = x + (w - row_w) // 2
+        cx = x_off + c * (cell_w + gap)
+        cy = y + r * (cell_h + gap)
+        add_image_placeholder(slide, cx, cy, cell_w, cell_h, sug)
+
+
 def add_logo(slide, logo_path, x, y, w, h=None):
     """添加 LOGO。h=None 时按图片原比例自动缩放（推荐，避免拉伸变形）。"""
     if logo_path and os.path.isfile(logo_path):
@@ -194,6 +262,80 @@ def _disable_shape_effects(shape):
     etree.SubElement(spPr, qn("a:effectLst"))
 
 
+def add_conclusion_card(slide, x, y, w, h, text, *,
+                        bg_color=COLOR_CARD_BG, border_color=COLOR_CARD_BORDER,
+                        text_color=COLOR_RED_ACCENT, text_size=22):
+    """要点小结首条结论卡：浅奶油圆角矩形 + 红字加粗。"""
+    shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y, w, h)
+    try:
+        shape.adjustments[0] = 0.18
+    except Exception:
+        pass
+    shape.fill.solid()
+    shape.fill.fore_color.rgb = rgb(bg_color)
+    shape.line.color.rgb = rgb(border_color)
+    shape.line.width = Pt(1)
+    _disable_shape_effects(shape)
+
+    pad = Pt(20)
+    add_textbox(
+        slide, x + pad, y, w - 2 * pad, h, text,
+        font=FONT_TITLE, size=text_size, color=text_color,
+        bold=True, align="left", anchor="middle", line_spacing=1.4,
+    )
+
+
+def add_numbered_bullets(slide, x, y, w, h, bullets, *,
+                          text_size=20, columns=1,
+                          num_bg=COLOR_NUMBOX_BG, num_fg=COLOR_NUMBOX_FG,
+                          text_color=COLOR_BODY,
+                          line_spacing=1.45, start_index=1):
+    """要点列表：红方块编号 + 文字。
+
+    红方块去除主题阴影；要点之间不画分隔线。
+    columns=1 默认；调用方可传 columns=2 改双列。
+    """
+    n = len(bullets)
+    if n == 0:
+        return
+    cols = max(1, columns)
+    rows_per_col = (n + cols - 1) // cols
+    col_w = w // cols
+    row_h = h // rows_per_col
+
+    # 方块尺寸：随字号缩放
+    box_side = Pt(text_size + 8)
+    text_gap = Pt(14)   # 方块到文字的横向间隙
+
+    for i, b in enumerate(bullets):
+        col = i // rows_per_col
+        row = i % rows_per_col
+        cx = x + col * col_w
+        cy = y + row * row_h
+        box_top = cy + Pt(2)
+
+        # 红方块（去阴影）
+        box_shape = add_rect(slide, cx, box_top, box_side, box_side, num_bg)
+        _disable_shape_effects(box_shape)
+
+        # 数字
+        add_textbox(
+            slide, cx, box_top, box_side, box_side,
+            str(i + start_index),
+            font=FONT_TITLE, size=text_size - 2, color=num_fg,
+            bold=True, align="center", anchor="middle",
+        )
+        # 内容文字
+        text_x = cx + box_side + text_gap
+        text_w = col_w - box_side - text_gap - Pt(8)
+        add_textbox(
+            slide, text_x, cy, text_w, row_h,
+            b,
+            font=FONT_BODY, size=text_size, color=text_color,
+            align="left", anchor="top", line_spacing=line_spacing,
+        )
+
+
 def _remove_cell_borders(cell):
     """移除单元格四边边框（设为 noFill）。"""
     tc = cell._tc
@@ -208,59 +350,166 @@ def _remove_cell_borders(cell):
         etree.SubElement(ln, qn("a:noFill"))
 
 
+def _cell_segments(text):
+    """单元格文本 → 行段列表（`<br>` 与 `\n` 均视为换行）。"""
+    return str(text).replace("<br>", "\n").split("\n")
+
+
+def _cell_maxlen(text):
+    """单元格最长一行的字符数（按换行拆分后取最长段）。"""
+    return max((len(s) for s in _cell_segments(text)), default=0)
+
+
+def _content_col_widths(headers, rows, total_w):
+    """按各列"最长一行内容"自适应列宽：短列窄、长列宽。
+
+    用 len^0.7 软化极端差异，避免某一长列吃掉几乎全部宽度；每列设字符数下限 3。
+    返回 EMU 整数列表，合计 == total_w。
+    """
+    ncols = len(headers)
+    maxlen = [max(3, _cell_maxlen(headers[c])) for c in range(ncols)]
+    for row in rows:
+        for c in range(ncols):
+            if c < len(row):
+                maxlen[c] = max(maxlen[c], _cell_maxlen(row[c]))
+    weights = [m ** 0.7 for m in maxlen]
+    tot = sum(weights) or 1.0
+    widths = [int(int(total_w) * wt / tot) for wt in weights]
+    widths[-1] = int(total_w) - sum(widths[:-1])   # 余数归末列，保证合计精确
+    return widths
+
+
+def _fit_table_font(headers, rows, widths_emu, area_h_emu, marg_pt,
+                    size_hi=16, size_lo=10):
+    """自适应字号：从 size_hi 往下试，找到"全表估算高度 ≤ 区域高度"的最大字号。
+
+    估算逐行：每个单元格按列宽换算每行可容字符数（中文按 1 em≈字号宽），
+    对每个换行段做 ceil(段长/每行字符数) 累加得该格行数，取本行各格最大行数。
+    返回 (字号, [每行高度EMU]).
+    """
+    widths_pt = [wd / 914400 * 72 for wd in widths_emu]
+    area_h_pt = area_h_emu / 914400 * 72
+    all_rows = [headers] + list(rows)
+    ncols = len(headers)
+
+    best = None
+    for fs in range(size_hi, size_lo - 1, -1):
+        line_h = fs * 1.32           # 行距（含 1.1 行间）
+        row_heights_pt = []
+        total = 0.0
+        for row in all_rows:
+            row_lines = 1
+            for c in range(ncols):
+                txt = row[c] if c < len(row) else ""
+                avail_pt = max(8.0, widths_pt[c] - 2 * marg_pt)
+                cpl = max(1, int(avail_pt / (fs * 1.02)))   # 每行可容字符数（中文为主）
+                cell_lines = 0
+                for seg in _cell_segments(txt):
+                    cell_lines += max(1, math.ceil(len(seg) / cpl))
+                row_lines = max(row_lines, cell_lines)
+            rh = row_lines * line_h + 2 * marg_pt
+            row_heights_pt.append(rh)
+            total += rh
+        if total <= area_h_pt:
+            best = (fs, row_heights_pt)
+            break
+    if best is None:
+        # 连最小字号也放不下：用最小字号，并把行高等比压进区域（宁可挤，不可出界）
+        fs = size_lo
+        line_h = fs * 1.32
+        row_heights_pt = []
+        total = 0.0
+        for row in all_rows:
+            row_lines = 1
+            for c in range(ncols):
+                txt = row[c] if c < len(row) else ""
+                avail_pt = max(8.0, widths_pt[c] - 2 * marg_pt)
+                cpl = max(1, int(avail_pt / (fs * 1.02)))
+                cell_lines = sum(max(1, math.ceil(len(s) / cpl)) for s in _cell_segments(txt))
+                row_lines = max(row_lines, cell_lines)
+            rh = row_lines * line_h + 2 * marg_pt
+            row_heights_pt.append(rh); total += rh
+        scale = area_h_pt / total if total else 1.0
+        row_heights_pt = [rh * scale for rh in row_heights_pt]
+        best = (fs, row_heights_pt)
+
+    fs, row_heights_pt = best
+    row_heights_emu = [Emu(int(rh / 72 * 914400)) for rh in row_heights_pt]
+    return fs, row_heights_emu
+
+
 def add_table(slide, x, y, w, h, headers, rows,
               head_bg="44546A", head_fg="FFFFFF",
-              head_size=18, body_size=16,
-              zebra_bg="F5F5F5",
-              min_row_h_pt=44):
-    """添加表格：无边框 + 表头深色 + 斑马纹。
+              head_size=None, body_size=None,
+              zebra_bg="F5F5F5"):
+    """添加表格：无边框 + 表头深色 + 斑马纹，并**自适应塞进给定区域**。
 
-    样式参考：表头深灰蓝粗体白字居中；正文行白/浅灰交替、左对齐、垂直居中；无可见边框。
+    - `<br>` / `\n` 渲染为单元格内真实换行（多段落），不再印出字面量；
+    - 列宽按内容长短分配（短列窄、长列宽）；
+    - 字号按行数/内容自动下调（投屏可读下限 10pt），行高均分以不超出区域 h；
+    - head_size/body_size 传 None 时自动定档；显式传入则作为上限基准。
+    样式：表头深灰蓝粗体白字居中；正文行白/浅灰交替、左对齐、垂直居中；无可见边框。
     """
     n_cols = len(headers)
     n_rows = len(rows) + 1
+    dense = n_rows >= 7
+
+    # 边距（密集表收紧）
+    marg_l = Emu(45720) if dense else Emu(82296)   # 0.05" / 0.09"
+    marg_t = Emu(13716) if dense else Emu(27432)   # 0.015" / 0.03"
+    marg_pt = (marg_l / 914400 * 72)
+
+    # 列宽（内容自适应）
+    widths = _content_col_widths(headers, rows, w)
+
+    # 自适应字号 + 逐行行高（确保合计 ≤ 区域高度 h）
+    size_hi = body_size if body_size else 16
+    auto_fs, row_heights = _fit_table_font(headers, rows, widths, h, marg_pt, size_hi=size_hi)
+    body_fs = auto_fs
+    head_fs = head_size if head_size else min(auto_fs + 2, 18)
+
     shape = slide.shapes.add_table(n_rows, n_cols, x, y, w, h)
     table = shape.table
 
-    # 行高
-    row_h = Emu(int(Pt(min_row_h_pt)))
+    for c in range(n_cols):
+        table.columns[c].width = widths[c]
     for r in range(n_rows):
-        table.rows[r].height = row_h
+        table.rows[r].height = row_heights[r]
 
     def style_cell(cell, text, *, fill_color, font_color, size, bold, align):
-        # 边框
         _remove_cell_borders(cell)
-        # 填充
         cell.fill.solid()
         cell.fill.fore_color.rgb = rgb(fill_color)
-        # 垂直居中
         cell.vertical_anchor = MSO_ANCHOR.MIDDLE
-        # 文本
         cell.text = ""
         tf = cell.text_frame
-        tf.margin_left = Emu(91440)   # 0.1"
-        tf.margin_right = Emu(91440)
-        tf.margin_top = Emu(36000)
-        tf.margin_bottom = Emu(36000)
-        p = tf.paragraphs[0]
-        p.alignment = {"left": PP_ALIGN.LEFT, "center": PP_ALIGN.CENTER}.get(align, PP_ALIGN.LEFT)
-        run = p.add_run()
-        run.text = text
-        run.font.name = FONT_TITLE if bold else FONT_BODY
-        run.font.size = Pt(size)
-        run.font.bold = bold
-        run.font.color.rgb = rgb(font_color)
-        _set_east_asia_font(run, FONT_TITLE if bold else FONT_BODY)
+        tf.word_wrap = True
+        tf.margin_left = marg_l
+        tf.margin_right = marg_l
+        tf.margin_top = marg_t
+        tf.margin_bottom = marg_t
+        align_map = {"left": PP_ALIGN.LEFT, "center": PP_ALIGN.CENTER}
+        for j, seg in enumerate(_cell_segments(text)):
+            p = tf.paragraphs[0] if j == 0 else tf.add_paragraph()
+            p.alignment = align_map.get(align, PP_ALIGN.LEFT)
+            p.line_spacing = 1.1
+            run = p.add_run()
+            run.text = seg
+            run.font.name = FONT_TITLE if bold else FONT_BODY
+            run.font.size = Pt(size)
+            run.font.bold = bold
+            run.font.color.rgb = rgb(font_color)
+            _set_east_asia_font(run, FONT_TITLE if bold else FONT_BODY)
 
     # 表头
     for c, header in enumerate(headers):
         style_cell(
             table.cell(0, c), header,
             fill_color=head_bg, font_color=head_fg,
-            size=head_size, bold=True, align="center",
+            size=head_fs, bold=True, align="center",
         )
 
-    # 数据行（斑马纹：奇数行白，偶数行浅灰；r 从 1 开始，所以 r 奇=白，r 偶=灰）
+    # 数据行（斑马纹：奇数行白，偶数行浅灰）
     for r, row in enumerate(rows, start=1):
         bg = "FFFFFF" if r % 2 == 1 else zebra_bg
         for c in range(n_cols):
@@ -268,7 +517,19 @@ def add_table(slide, x, y, w, h, headers, rows,
             style_cell(
                 table.cell(r, c), text,
                 fill_color=bg, font_color=COLOR_BODY,
-                size=body_size, bold=False, align="left",
+                size=body_fs, bold=False, align="left",
             )
 
     return table
+
+
+def set_ascii_font(textbox, font_name):
+    """覆盖 textbox 内所有 run 的 latin 字体。
+    用于纯数字/英文场景换装饰字体（如章节序号用 Bahnschrift）。"""
+    for p in textbox.text_frame.paragraphs:
+        for run in p.runs:
+            rPr = run._r.get_or_add_rPr()
+            for latin in rPr.findall(qn("a:latin")):
+                rPr.remove(latin)
+            latin = etree.SubElement(rPr, qn("a:latin"))
+            latin.set("typeface", font_name)
