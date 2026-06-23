@@ -66,6 +66,10 @@
 │       ├── <阅读单名>-示范.pdf/.html    # 示范版(教师参考)
 │       └── <书名>-manifest.json         # 内容源头，改字段重渲
 │
+├── 测评输出\                       # ← laojohn-reading-assessment 产物（整本书阅读测评，一二年级15题/三至六年级20题）
+│   ├── <书名>_阅读测评.md           # 内容源头，改题重转 docx
+│   └── <书名>_阅读测评.docx
+│
 ├── 课程反馈话术输出\               # ← laojohn-course-feedback 产物（家长社群课后反馈话术）
 │   ├── 《书名》_课程反馈话术.docx
 │   └── 《书名》_课程反馈话术.md
@@ -90,6 +94,7 @@
         ├── laojohn-book-card\        # 本期深度阅读书目卡（社群传播）
         ├── laojohn-course-poster\    # 课程招生海报
         ├── laojohn-reading-guide\    # 阅读指南（给学生/家长）
+        ├── laojohn-reading-assessment\ # 整本书阅读测评（一二年级15题/三至六年级20题，五维命题）
         ├── laojohn-course-feedback\  # 家长社群课后反馈话术
         ├── laojohn-lesson-mindmap\   # 精彩抢先看思维导图（书是什么）
         ├── laojohn-teaching-mindmap\ # 教学思维导图（怎么教这本书）
@@ -111,6 +116,7 @@
 | `laojohn-course-poster` | 生成课程招生海报 | `课程海报输出\` | `<书名>_海报.jpg/.html/.json` |
 | `laojohn-reading-guide` | 生成阅读指南（给学生/家长**看**的导读卡） | `阅读指南输出\` | `<书名>_阅读指南.pdf/.html/.json` |
 | `laojohn-reading-sheet` | 生成学生阅读单（课堂**动手填**的学习单：13 模板=表格/维恩/阶梯/逻辑/导图/故事山/鱼骨/时间轴/气泡 + 写作/绘画/图文并排/人物名片，空白版+示范版） | `阅读单输出\<书名>\` | `<阅读单名>-空/-示范.pdf/.html` + `<书名>-manifest.json` |
+| `laojohn-reading-assessment` | 生成整本书阅读测评（单项选择题，**一二年级 15 题 / 三至六年级 20 题**，参照 PIRLS 五维=提取信息/整体感知/解释推断/评价鉴赏/转化运用，按年级 L1–L6 调配题量，附答案+维度+解析） | `测评输出\` | `<书名>_阅读测评.md/.docx` |
 | `laojohn-course-feedback` | 生成发给家长社群的课后反馈话术 | `课程反馈话术输出\` | `《书名》_课程反馈话术.docx/.md` |
 | `laojohn-lesson-mindmap` | 生成精彩抢先看思维导图（**讲书本身**：精彩抢先看 / 书籍概况） | `抢先看思维导图\` | `<书名>_抢先看.pdf/.html/.json` |
 | `laojohn-teaching-mindmap` | 生成教学思维导图（**讲教学设计**：备课/教研用） | `教学思维导图\` | `<书名>_教学导图.pdf/.html/.json` |
@@ -162,6 +168,7 @@
 7. 制作招生海报  → [laojohn-course-poster]       → 课程海报输出\<书名>_海报.*
 8. 生成阅读指南  → [laojohn-reading-guide]       → 阅读指南输出\<书名>_阅读指南.*
 8b. 生成阅读单   → [laojohn-reading-sheet]        → 阅读单输出\<书名>\<阅读单名>-空/-示范.*
+8c. 生成阅读测评 → [laojohn-reading-assessment]   → 测评输出\<书名>_阅读测评.md/.docx
 9. 生成抢先看导图 → [laojohn-lesson-mindmap]     → 抢先看思维导图\<书名>_抢先看.*
 10. 生成教学导图  → [laojohn-teaching-mindmap]   → 教学思维导图\<书名>_教学导图.*
 11. 生成反馈话术  → [laojohn-course-feedback]     → 课程反馈话术输出\《书名》_课程反馈话术.*

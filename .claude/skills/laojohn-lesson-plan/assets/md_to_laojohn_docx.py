@@ -60,10 +60,10 @@ _ensure_docx()
 
 from docx import Document
 from docx.shared import Pt, Cm, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT, WD_BREAK
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_ROW_HEIGHT_RULE, WD_TABLE_ALIGNMENT, WD_CELL_VERTICAL_ALIGNMENT
 from docx.enum.section import WD_SECTION
-from docx.oxml.ns import qn, nsdecls
+from docx.oxml.ns import qn
 from docx.oxml import OxmlElement, parse_xml
 
 # ===================== 官方样式常量（集中可调） =====================
@@ -293,20 +293,6 @@ LOGO_PATH = os.path.join(PROJECT_ROOT, '品牌资产', 'logo-01.jpg')
 for _alt in ('logo-emblem.png', 'logo.png'):
     if not os.path.isfile(LOGO_PATH):
         LOGO_PATH = os.path.join(PROJECT_ROOT, '品牌资产', _alt)
-
-try:
-    from PIL import Image, ImageDraw, ImageFont
-    _PIL_OK = True
-except Exception:
-    _PIL_OK = False
-
-FONT_MSYH_BOLD = 'C:/Windows/Fonts/msyhbd.ttc'
-FONT_MSYH_REG  = 'C:/Windows/Fonts/msyh.ttc'
-# 颜色（取自品牌样张 002）：标题墨色 / navy 副标 / 珊瑚粉徽标
-COVER_INK   = (45, 45, 45)
-COVER_NAVY  = (74, 82, 116)
-COVER_CORAL = (247, 160, 160)
-
 
 def find_cover(book_name):
     if not book_name:
@@ -672,6 +658,9 @@ TABLE_SEP_RE = re.compile(r'^\|?\s*:?-{2,}.*$')  # |---|---| 分隔行
 LIST_RE  = re.compile(r'^\s*(?:[-*+]|\d+[.)])\s+(.*\S.*)$')
 # 四级及以下标题 #### / ##### …（规范只定义到 ###，更深的剥掉 # 当正文）
 DEEP_H_RE = re.compile(r'^#{4,}\s+(.*\S.*)$')
+# 测评题题号行（reading-assessment 专用）：行首「数字＋全角句点」如 `1．…`。
+# 用于在题与题之间留出段前间距（详案/写作课均不用此写法，已核实零碰撞，故互不影响）。
+QNUM_RE = re.compile(r'^\d+．')
 
 
 def _split_table_row(line):
@@ -842,6 +831,10 @@ def convert(md_path, docx_path):
         m = LIST_RE.match(stripped)
         if m:
             render_para(doc, m.group(1).strip()); i += 1; continue
+
+        # 测评题题号行：每题之间留出段前间距（reading-assessment 专用，详见 QNUM_RE 注释）
+        if QNUM_RE.match(stripped):
+            render_para(doc, stripped, space_before=12); i += 1; continue
 
         # 默认正文（行内标记由 add_md_text 统一处理）
         # 【作者介绍】上方空一行（与【内容简介】区隔）

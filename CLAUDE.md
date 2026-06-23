@@ -17,14 +17,17 @@
 
 ```
 laojohn-book-profile（建档 · 下游唯一事实来源）
-        └─→ laojohn-lesson-plan（整本书课案详案）
-                └─→ ppt-draft→ppt / book-card / course-poster /
-                    reading-guide / lesson-mindmap / teaching-mindmap / course-feedback
+        ├─→ laojohn-lesson-plan（整本书课案详案）
+        │       └─→ ppt-draft→ppt / book-card / course-poster /
+        │           reading-guide / reading-sheet / lesson-mindmap /
+        │           teaching-mindmap / course-feedback
+        └─→ laojohn-reading-assessment（整本书阅读测评卷 · 直接读档案、不读详案）
 ```
 
 - **书籍档案是事实源头**：lesson-plan 生成详案时不再翻原书，只依赖 `书籍档案\<书名>书籍档案.md`。档案错一处、详案跟着错一处，且下游无从发现。
 - **书目/出版类基本信息（出版社/字数/页数/ISBN/出版年/译者/作者/类型/主题/获奖）的唯一固定源 = 书籍档案的 `## 海报/指南元数据` 机读块**。课案是教学文档、不收录这些字段，所以书目卡/海报/阅读指南/抢先看导图/反馈话术要这类信息时一律从该机读块取（book-card、course-poster 脚本正则解析，其余物料由 AI 读取）；绝不从课案正文猜或凭记忆补。
 - **缺失字段的呈现：「待补充」只存在于书籍档案机读块（人工回填提示），绝不进入对外物料**。生成的成品里某项基本信息没有就**留空白**——信息表/信息栏保留栏位、值空白（不写"待补充/请回填"、不画占位框）；获奖块、思维导图节点这类列表项缺失则**整条隐藏**；反馈话术等正文缺页数就不提，不写「【请补充…】」。
+- **`laojohn-reading-assessment`（阅读测评卷）直接消费书籍档案、与 lesson-plan 平行**：它出的是整本书阅读理解选择题（一二年级 15 题、三至六年级 20 题，PIRLS 五维 + 按年级 L1–L6 调配题量），只检测对书的理解、不需要教学设计，故**直接读档案、不读详案**。题干/选项/解析的情节·人物·章节只来自档案（真实性红线不豁免，无页码档案禁写"第X页"）；复用 lesson-plan 的 docx 引擎，但 H1 不带《》以免触发课案封面页。
 - **`laojohn-writing-lesson`（写作/习作课）是独立平行分支**：吃「习作主题 + 年级」+ `references/archive/` 习作档案，**不进**上面这条以书籍档案为源头的链路。
 
 ## 3. 共享资产 · 单一事实源（禁副本）
@@ -36,7 +39,7 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 | 品牌 logo / 二维码 | `品牌资产\logo.png`、`品牌资产\qrcode.png` | book-card、course-poster |
 | 书籍封面 | `书籍封面\<书名>.jpg/png`（书名不带书名号） | poster、book-card、reading-guide |
 | 书籍档案 | `书籍档案\<书名>书籍档案.md` | lesson-plan 及所有消费档案的下游 |
-| docx 排版引擎 | `.claude\skills\laojohn-lesson-plan\assets\md_to_laojohn_docx.py` | lesson-plan、writing-lesson（跨技能复用同一条流水线） |
+| docx 排版引擎 | `.claude\skills\laojohn-lesson-plan\assets\md_to_laojohn_docx.py` | lesson-plan、writing-lesson、reading-assessment（跨技能复用同一条流水线；assessment 用法见 §2 末条） |
 
 > 现存物理副本（`laojohn-ppt\assets\logo\`、`laojohn-course-poster\assets\qrcode.png` / `assets\covers\`）属历史遗留；以根目录单一源为准，勿据副本做新决策。
 

@@ -37,7 +37,8 @@ def find_default_asset(filename_candidates, asset_subdir):
 
 def build(input_md: str, output_pptx: str, *,
           course_name: str = "", book_title: str = "",
-          logo_path: str = None, banner_path: str = None) -> dict:
+          logo_path: str = None, banner_path: str = None,
+          anim: bool = True) -> dict:
     with open(input_md, encoding="utf-8") as f:
         md = f.read()
 
@@ -111,6 +112,7 @@ def build(input_md: str, output_pptx: str, *,
             "logo_white_path": logo_white_path,
             "banner_path": banner_path,
             "meta": f"{deck.author}　·　{deck.grade}" if (deck.author or deck.grade) else "",
+            "anim": anim,
         }
         renderer = RENDERERS.get(page.page_type)
         if renderer is None:
@@ -154,6 +156,8 @@ def main():
     ap.add_argument("--book", default="", help="书名（覆盖中间稿元信息）")
     ap.add_argument("--logo", default=None, help="LOGO 图片路径")
     ap.add_argument("--banner", default=None, help="封面横幅图片路径")
+    ap.add_argument("--no-anim", dest="anim", action="store_false",
+                    help="关闭逐条点击动画（默认开启：要点小结/引导问题追问逐条淡入）")
     args = ap.parse_args()
 
     info = build(
@@ -162,6 +166,7 @@ def main():
         book_title=args.book,
         logo_path=args.logo,
         banner_path=args.banner,
+        anim=args.anim,
     )
 
     print(f"[OK] 已生成 {info['pages']} 页 -> {info['output']}")

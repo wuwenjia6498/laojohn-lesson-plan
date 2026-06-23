@@ -294,10 +294,13 @@ def add_numbered_bullets(slide, x, y, w, h, bullets, *,
 
     红方块去除主题阴影；要点之间不画分隔线。
     columns=1 默认；调用方可传 columns=2 改双列。
+
+    返回：每条要点对应的 shape_id 分组列表 [[红方块id, 数字id, 文字id], ...]，
+    供逐条点击动画按"同一条一起淡入"成组（见 add_click_reveal）。
     """
     n = len(bullets)
     if n == 0:
-        return
+        return []
     cols = max(1, columns)
     rows_per_col = (n + cols - 1) // cols
     col_w = w // cols
@@ -307,6 +310,7 @@ def add_numbered_bullets(slide, x, y, w, h, bullets, *,
     box_side = Pt(text_size + 8)
     text_gap = Pt(14)   # 方块到文字的横向间隙
 
+    groups = []
     for i, b in enumerate(bullets):
         col = i // rows_per_col
         row = i % rows_per_col
@@ -319,7 +323,7 @@ def add_numbered_bullets(slide, x, y, w, h, bullets, *,
         _disable_shape_effects(box_shape)
 
         # 数字
-        add_textbox(
+        num_box = add_textbox(
             slide, cx, box_top, box_side, box_side,
             str(i + start_index),
             font=FONT_TITLE, size=text_size - 2, color=num_fg,
@@ -328,12 +332,103 @@ def add_numbered_bullets(slide, x, y, w, h, bullets, *,
         # 内容文字
         text_x = cx + box_side + text_gap
         text_w = col_w - box_side - text_gap - Pt(8)
-        add_textbox(
+        content_box = add_textbox(
             slide, text_x, cy, text_w, row_h,
             b,
             font=FONT_BODY, size=text_size, color=text_color,
             align="left", anchor="top", line_spacing=line_spacing,
         )
+        groups.append([box_shape.shape_id, num_box.shape_id, content_box.shape_id])
+    return groups
+
+
+# ---------- 点击逐条呈现动画（注入 OpenXML 时间树）----------
+def _sptgt_xml(target):
+    """构造 <p:spTgt>：int=整形动画；(spid, 段落号)=该形状第 N 段落动画。"""
+    if isinstance(target, tuple):
+        spid, pidx = target
+        return (f'<p:spTgt spid="{spid}">'
+                f'<p:txEl><p:pRg st="{pidx}" end="{pidx}"/></p:txEl>'
+                f'</p:spTgt>')
+    return f'<p:spTgt spid="{target}"/>'
+
+
+def add_click_reveal(slide, groups, *, dur=500):
+    """为 slide 注入"逐组点击淡入"动画时间树（PowerPoint 原生 mainSeq）。
+
+    groups：列表，每元素是一组 target（同一次鼠标点击一起淡入）。
+        target = int(shape_id)            —— 整个形状淡入
+              或 (shape_id, paragraph_idx) —— 该形状第 paragraph_idx 段落淡入（按段落构建）
+    每次点击推进一组；未点击的组初始隐藏（不支持动画的渲染器一般退化为全部直出）。
+    """
+    groups = [g for g in groups if g]
+    if not groups:
+        return
+    P = "http://schemas.openxmlformats.org/presentationml/2006/main"
+    A = "http://schemas.openxmlformats.org/drawingml/2006/main"
+
+    cid = [3]   # id 1=tmRoot、2=mainSeq；其余节点从 3 起，保证全树唯一
+    def nid():
+        v = cid[0]; cid[0] += 1; return v
+
+    steps_xml = []
+    para_spids = []
+    for group in groups:
+        eff_xml = []
+        for k, target in enumerate(group):
+            node_type = "clickEffect" if k == 0 else "withEffect"
+            tgt = _sptgt_xml(target)
+            if isinstance(target, tuple) and target[0] not in para_spids:
+                para_spids.append(target[0])
+            set_id, anim_id, eff_id = nid(), nid(), nid()
+            eff_xml.append(
+                f'<p:par><p:cTn id="{eff_id}" presetID="10" presetClass="entr"'
+                f' presetSubtype="0" fill="hold" grpId="0" nodeType="{node_type}">'
+                f'<p:stCondLst><p:cond delay="0"/></p:stCondLst><p:childTnLst>'
+                f'<p:set><p:cBhvr><p:cTn id="{set_id}" dur="1" fill="hold">'
+                f'<p:stCondLst><p:cond delay="0"/></p:stCondLst></p:cTn>'
+                f'<p:tgtEl>{tgt}</p:tgtEl>'
+                f'<p:attrNameLst><p:attrName>style.visibility</p:attrName></p:attrNameLst>'
+                f'</p:cBhvr><p:to><p:strVal val="visible"/></p:to></p:set>'
+                f'<p:animEffect transition="in" filter="fade"><p:cBhvr>'
+                f'<p:cTn id="{anim_id}" dur="{dur}"/><p:tgtEl>{tgt}</p:tgtEl>'
+                f'</p:cBhvr></p:animEffect></p:childTnLst></p:cTn></p:par>'
+            )
+        outer_id, inner_id = nid(), nid()
+        steps_xml.append(
+            f'<p:par><p:cTn id="{outer_id}" fill="hold">'
+            f'<p:stCondLst><p:cond delay="indefinite"/></p:stCondLst><p:childTnLst>'
+            f'<p:par><p:cTn id="{inner_id}" fill="hold">'
+            f'<p:stCondLst><p:cond delay="0"/></p:stCondLst>'
+            f'<p:childTnLst>{"".join(eff_xml)}</p:childTnLst></p:cTn></p:par>'
+            f'</p:childTnLst></p:cTn></p:par>'
+        )
+
+    bld_xml = ""
+    if para_spids:
+        bld_items = "".join(
+            f'<p:bldP spid="{spid}" grpId="0" build="byParagraph"/>'
+            for spid in para_spids)
+        bld_xml = f'<p:bldLst>{bld_items}</p:bldLst>'
+
+    timing_xml = (
+        f'<p:timing xmlns:p="{P}" xmlns:a="{A}"><p:tnLst><p:par>'
+        f'<p:cTn id="1" dur="indefinite" restart="never" nodeType="tmRoot">'
+        f'<p:childTnLst><p:seq concurrent="1" nextAc="seek">'
+        f'<p:cTn id="2" dur="indefinite" nodeType="mainSeq"><p:childTnLst>'
+        f'{"".join(steps_xml)}</p:childTnLst></p:cTn>'
+        f'<p:prevCondLst><p:cond evt="onPrev" delay="0"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:prevCondLst>'
+        f'<p:nextCondLst><p:cond evt="onNext" delay="0"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:nextCondLst>'
+        f'</p:seq></p:childTnLst></p:cTn></p:par></p:tnLst>{bld_xml}</p:timing>'
+    )
+
+    timing = etree.fromstring(timing_xml.encode("utf-8"))
+    sld = slide.element
+    ext = sld.find(qn("p:extLst"))
+    if ext is not None:
+        ext.addprevious(timing)
+    else:
+        sld.append(timing)
 
 
 def _remove_cell_borders(cell):
