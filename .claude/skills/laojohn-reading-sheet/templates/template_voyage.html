@@ -33,14 +33,18 @@
 <div id="page">
   <img class="brand-logo" id="logo">
   <div class="variant-tag" id="variantTag"></div>
-  <div class="topbox"><div class="t1" id="t1"></div><div class="t2" id="t2"></div></div>
+  <div class="topbox" data-content><div class="t1" id="t1"></div><div class="t2" id="t2"></div></div>
   <div class="connector"></div>
-  <div id="cards"></div>
+  <div id="cards" data-content></div>
   <div class="v-foot" id="foot"></div>
 </div>
 <script>
 const DATA = /*__DATA__*/ null;
+// PPT 导出标注：给「示范答案」加 data-answer/data-order，不影响打印外观。
+let __AO = 0;
+function mark(e){ e.setAttribute('data-answer','1'); e.setAttribute('data-order', __AO++); return e; }
 function render(){
+  __AO = 0;
   const d=DATA;
   document.getElementById('logo').src=d.logo;
   document.getElementById('t1').textContent=d.title_main||'';
@@ -60,6 +64,7 @@ function render(){
       if(hasVal){
         const arr = Array.isArray(f.value) ? f.value : [f.value];
         arr.forEach(item=>{ const v=document.createElement('div'); v.className='vtext'; v.textContent=item; val.appendChild(v); });
+        mark(val);   // 一个字段的填写值 = 一个示范答案格
       } else {
         const n=f.lines||1;
         for(let i=0;i<n;i++){ const ln=document.createElement('div'); ln.className='vline'; val.appendChild(ln); }

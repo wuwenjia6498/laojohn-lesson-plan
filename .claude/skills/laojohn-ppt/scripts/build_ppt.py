@@ -9,10 +9,8 @@
 """
 import argparse
 import os
-import sys
 
 from pptx import Presentation
-from pptx.util import Emu
 
 import theme
 from parser import parse_md, Page
@@ -121,6 +119,11 @@ def build(input_md: str, output_pptx: str, *,
 
         # 占位清单（仅对中间稿原生页报告，跳过 synthetic）
         if page.page_type in {"_END", "封面"} and page.num in {0, 999}:
+            continue
+        if page.page_type == "填空表格" and page.table_reveals:
+            placeholder_report.append(
+                (page.num, page.page_type,
+                 f"[填空表格] {len(page.table_reveals)} 格答案逐格点击"))
             continue
         raw_sugs = page.image_suggestions or ([page.image_suggestion] if page.image_suggestion else [])
         sugs = [s.strip() for s in raw_sugs

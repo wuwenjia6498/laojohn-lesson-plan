@@ -132,6 +132,12 @@ def check_file(target: str, expect_range=None) -> tuple[list[str], list[str], li
         if kp and '/' in kp.group(1).split('\n')[0] and '- ' not in kp.group(1):
             errs.append(f'[P{pid}] 要点用 / 分隔(旧格式)')
 
+        # 填空表格答案标记 {{}} 配对校验（避免漏写半个括号导致渲染错位）
+        if pt == '填空表格' and (p.count('{{') or p.count('}}')):
+            n_open, n_close = p.count('{{'), p.count('}}')
+            if n_open != n_close:
+                errs.append(f'[P{pid} {pt}] 答案标记花括号不配对：左 {n_open} / 右 {n_close}')
+
     return errs, warns, report
 
 

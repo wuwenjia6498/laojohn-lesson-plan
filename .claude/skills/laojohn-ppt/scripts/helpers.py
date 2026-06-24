@@ -533,10 +533,19 @@ def _fit_table_font(headers, rows, widths_emu, area_h_emu, marg_pt,
     return fs, row_heights_emu
 
 
+def cell_bg_color(data_row_idx, zebra_bg="F5F5F5"):
+    """数据行底色：与 add_table 斑马纹一致（d=0 白、d=1 浅灰、d=2 白……）。
+
+    add_table 内表头=第 0 行，数据行从第 1 行起（`r % 2 == 1` 为白）；
+    数据行 0 基索引 d 对应表行 r=d+1，故 d 偶=白、d 奇=斑马色。
+    """
+    return "FFFFFF" if data_row_idx % 2 == 0 else zebra_bg
+
+
 def add_table(slide, x, y, w, h, headers, rows,
               head_bg="44546A", head_fg="FFFFFF",
               head_size=None, body_size=None,
-              zebra_bg="F5F5F5"):
+              zebra_bg="F5F5F5", reveal_cells=None):
     """添加表格：无边框 + 表头深色 + 斑马纹，并**自适应塞进给定区域**。
 
     - `<br>` / `\n` 渲染为单元格内真实换行（多段落），不再印出字面量；
@@ -544,7 +553,16 @@ def add_table(slide, x, y, w, h, headers, rows,
     - 字号按行数/内容自动下调（投屏可读下限 10pt），行高均分以不超出区域 h；
     - head_size/body_size 传 None 时自动定档；显式传入则作为上限基准。
     样式：表头深灰蓝粗体白字居中；正文行白/浅灰交替、左对齐、垂直居中；无可见边框。
+
+    reveal_cells：`{(数据行0基, 列0基): {"blank": 占位版, "full": 完整版}}`。
+        - 几何/行高仍用传入的 `rows`（完整答案版）算 → 叠层放得下；
+        - 但底表里这些格只渲 `blank`（占位）；答案叠层由调用方（render_table）按
+          返回的 `geom` 定位 + 逐格点击。
+
+    返回：`(table, geom)`，geom = {x, y, col_x[相对左偏移], col_w, row_y[相对顶偏移],
+        row_h, body_fs, marg_l, marg_t, zebra_bg}，供调用方放置答案叠层。
     """
+    reveal_cells = reveal_cells or {}
     n_cols = len(headers)
     n_rows = len(rows) + 1
     dense = n_rows >= 7
@@ -554,10 +572,10 @@ def add_table(slide, x, y, w, h, headers, rows,
     marg_t = Emu(13716) if dense else Emu(27432)   # 0.015" / 0.03"
     marg_pt = (marg_l / 914400 * 72)
 
-    # 列宽（内容自适应）
+    # 列宽（内容自适应，按完整答案版 rows）
     widths = _content_col_widths(headers, rows, w)
 
-    # 自适应字号 + 逐行行高（确保合计 ≤ 区域高度 h）
+    # 自适应字号 + 逐行行高（确保合计 ≤ 区域高度 h，按完整答案版 rows）
     size_hi = body_size if body_size else 16
     auto_fs, row_heights = _fit_table_font(headers, rows, widths, h, marg_pt, size_hi=size_hi)
     body_fs = auto_fs
@@ -607,15 +625,34 @@ def add_table(slide, x, y, w, h, headers, rows,
     # 数据行（斑马纹：奇数行白，偶数行浅灰）
     for r, row in enumerate(rows, start=1):
         bg = "FFFFFF" if r % 2 == 1 else zebra_bg
+        d = r - 1                       # 数据行 0 基索引
         for c in range(n_cols):
             text = row[c] if c < len(row) else ""
+            # 答案格底表只渲占位（blank），完整答案由调用方做点击叠层
+            rv = reveal_cells.get((d, c))
+            if rv is not None:
+                text = rv["blank"]
             style_cell(
                 table.cell(r, c), text,
                 fill_color=bg, font_color=COLOR_BODY,
                 size=body_fs, bold=False, align="left",
             )
 
-    return table
+    # 几何：相对偏移（调用方加 x/y 得绝对坐标），用于放置答案叠层
+    col_x, acc = [], 0
+    for wd in widths:
+        col_x.append(acc); acc += int(wd)
+    row_y, acc = [], 0
+    for rh in row_heights:
+        row_y.append(acc); acc += int(rh)
+    geom = {
+        "x": x, "y": y,
+        "col_x": col_x, "col_w": [int(wd) for wd in widths],
+        "row_y": row_y, "row_h": [int(rh) for rh in row_heights],
+        "body_fs": body_fs, "marg_l": marg_l, "marg_t": marg_t,
+        "zebra_bg": zebra_bg,
+    }
+    return table, geom
 
 
 def set_ascii_font(textbox, font_name):

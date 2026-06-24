@@ -25,13 +25,16 @@
   <div class="variant-tag" id="variantTag"></div>
   <div class="l-title" id="title"></div>
   <div class="l-sub" id="subtitle"></div>
-  <svg id="svg" width="794" height="960" style="position:absolute; top:150px; left:0;"></svg>
+  <svg id="svg" width="794" height="960" style="position:absolute; top:150px; left:0;" data-content></svg>
   <div class="l-foot" id="foot"></div>
 </div>
 <script>
 const DATA = /*__DATA__*/ null;
 const SVGNS="http://www.w3.org/2000/svg";
 function el(t,a){const e=document.createElementNS(SVGNS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+// PPT 导出标注：给「示范答案」加 data-answer/data-order，不影响打印外观。
+let __AO = 0;
+function mark(e){ e.setAttribute('data-answer','1'); e.setAttribute('data-order', __AO++); return e; }
 // 阶数自适应：坐标按 steps 数量在版面内均分（支持 2–6+ 阶，左下→右上）
 const PALETTE=["#D9883A","#A8504F","#5B7FA6","#C49B3E","#4E8C7D","#8268A0"];
 const X_LEFT=72, X_TOP_MAX=392, Y_BOTTOM=815, Y_TOP=170, LINE_LEN=358, LINE_GAP=58;
@@ -46,9 +49,28 @@ function buildSteps(n){
   return {STEPS, RUN: run, RISE: rise};
 }
 
-function wrap(s, max){ const o=[]; for(let i=0;i<s.length;i+=max)o.push(s.slice(i,i+max)); return o; }
+// 智能折行：连续字母/数字(含 . - – 连接)视为不可拆 token，决不从中间断；
+// 并做避头尾——闭标点不落行首、开标点不落行尾。max=每行单位数(汉字记 1，字母数字串记其长度)。
+function wrap(s, max){
+  s = String(s);
+  const NO_HEAD = "，。、；：？！）】」』”’》%…—-";   // 不能在行首
+  const NO_TAIL = "（【「『“‘《";                       // 不能在行尾
+  const toks = s.match(/[A-Za-z0-9]+(?:[.\-–][A-Za-z0-9]+)*|[\s\S]/g) || [];
+  const lines = []; let cur = "";
+  for (const tk of toks){
+    if (tk === "\n"){ lines.push(cur); cur = ""; continue; }
+    if (cur !== "" && cur.length + tk.length > max && NO_HEAD.indexOf(tk) === -1){
+      let carry = "";
+      while (cur && NO_TAIL.indexOf(cur[cur.length - 1]) !== -1){ carry = cur[cur.length - 1] + carry; cur = cur.slice(0, -1); }
+      lines.push(cur); cur = carry + tk;
+    } else { cur += tk; }
+  }
+  if (cur !== "") lines.push(cur);
+  return lines;
+}
 
 function render(){
+  __AO = 0;
   const d=DATA;
   document.getElementById('logo').src=d.logo;
   document.getElementById('title').textContent=d.title||'';
@@ -84,11 +106,13 @@ function render(){
     let rowY=ly+6;
     items.slice(0,2).forEach(it=>{
       if(it && it.trim()!==''){
+        const g=mark(el("g",{}));
         const lines=wrap(String(it), 24);
         lines.forEach((ln,li)=>{
-          const t=el("text",{x:lx+6,y:rowY+li*22-4,class:"ftxt"}); t.textContent=ln; svg.appendChild(t);
+          const t=el("text",{x:lx+6,y:rowY+li*22-4,class:"ftxt"}); t.textContent=ln; g.appendChild(t);
         });
-        svg.appendChild(el("line",{x1:lx+2,y1:rowY+lines.length*22,x2:lx+2+LINE_LEN,y2:rowY+lines.length*22,stroke:"#D8D2C5","stroke-width":1.3}));
+        g.appendChild(el("line",{x1:lx+2,y1:rowY+lines.length*22,x2:lx+2+LINE_LEN,y2:rowY+lines.length*22,stroke:"#D8D2C5","stroke-width":1.3}));
+        svg.appendChild(g);
         rowY += Math.max(2,lines.length)*22 + 16;
       } else {
         svg.appendChild(el("line",{x1:lx+2,y1:rowY,x2:lx+2+LINE_LEN,y2:rowY,stroke:s.color,"stroke-width":1.4,"stroke-opacity":0.55}));

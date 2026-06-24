@@ -29,11 +29,14 @@
   <div class="variant-tag" id="variantTag"></div>
   <div class="g-title" id="title"></div>
   <div class="g-sub" id="subtitle"></div>
-  <div id="stack"></div>
+  <div id="stack" data-content></div>
   <div class="g-foot" id="foot"></div>
 </div>
 <script>
 const DATA = /*__DATA__*/ null;
+// PPT 导出标注：给「示范答案」加 data-answer/data-order，不影响打印外观。
+let __AO = 0;
+function mark(e){ e.setAttribute('data-answer','1'); e.setAttribute('data-order', __AO++); return e; }
 function arrowEl(){
   const w=document.createElement('div'); w.className='arrow';
   w.innerHTML='<svg width="30" height="50" viewBox="0 0 30 50">'+
@@ -42,6 +45,7 @@ function arrowEl(){
   return w;
 }
 function render(){
+  __AO = 0;
   const d=DATA;
   document.getElementById('logo').src=d.logo;
   document.getElementById('title').textContent=d.title||'';
@@ -55,7 +59,7 @@ function render(){
     const box=document.createElement('div'); box.className='layer';
     const lab=document.createElement('div'); lab.className='lab'; lab.textContent=ly.label||''; box.appendChild(lab);
     if(ly.text && ly.text.trim()!==''){
-      const b=document.createElement('div'); b.className='body'; b.textContent=ly.text; box.appendChild(b);
+      const b=document.createElement('div'); b.className='body'; b.textContent=ly.text; mark(b); box.appendChild(b);
     } else {
       const sp=document.createElement('div'); sp.className='fillspace'; box.appendChild(sp);
     }

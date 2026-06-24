@@ -17,7 +17,7 @@
   .v-title { position: absolute; top: 72px; left: 0; width: 100%; text-align: center;
     font-size: 26px; font-weight: 700; color: #4A4A42; padding: 0 40px; line-height: 1.4; }
   .v-sub { position: absolute; top: 120px; left: 0; width: 100%; text-align: center;
-    font-size: 16px; color: #8A8268; }
+    font-size: 16px; color: #8A8268; padding: 0 48px; line-height: 1.5; }
   svg { position: absolute; top: 170px; left: 0; }
   .lbl { font-family: "Microsoft YaHei", sans-serif; font-weight: 700; font-size: 24px; }
   .item { font-family: "Microsoft YaHei", sans-serif; font-size: 16px; fill: #3A3A33; }
@@ -31,13 +31,16 @@
   <div class="variant-tag" id="variantTag"></div>
   <div class="v-title" id="title"></div>
   <div class="v-sub" id="subtitle"></div>
-  <svg id="svg" width="794" height="900" viewBox="0 0 794 900"></svg>
+  <svg id="svg" width="794" height="900" viewBox="0 0 794 900" data-content></svg>
   <div class="v-foot" id="foot"></div>
 </div>
 <script>
 const DATA = /*__DATA__*/ null;
 const SVGNS = "http://www.w3.org/2000/svg";
 function el(tag, attrs){ const e=document.createElementNS(SVGNS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+// PPT 导出标注：给「示范答案」加 data-answer/data-order，不影响打印外观。
+let __AO = 0;
+function mark(e){ e.setAttribute('data-answer','1'); e.setAttribute('data-order', __AO++); return e; }
 
 // 圆圈与写入区锚点（竖版）
 const CX1=272, CX2=522, CY=440, R=212;
@@ -62,6 +65,7 @@ function drawItems(svg, slot, items, color){
         const ts = el("tspan", {x: conf.x, dy: li===0?0:20});
         ts.textContent = ln; t.appendChild(ts);
       });
+      mark(t);
       svg.appendChild(t);
     } else {
       const w = slot==="center" ? 120 : 158;
@@ -72,6 +76,7 @@ function drawItems(svg, slot, items, color){
 }
 
 function render(){
+  __AO = 0;
   const d = DATA;
   document.getElementById('logo').src = d.logo;
   document.getElementById('title').textContent = d.title || '';

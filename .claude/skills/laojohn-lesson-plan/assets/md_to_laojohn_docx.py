@@ -260,7 +260,7 @@ def render_ppt(doc, text):
 
 
 def render_pagetag(doc, text):
-    """〖PPT Pxx · 页型〗备课页标——青绿加粗，醒目但克制（备课交叉对照用）。"""
+    """〖PPT 第N页 · 页型〗备课页标——橙黄(#E99743)加粗，醒目但克制（备课交叉对照用）。"""
     p = doc.add_paragraph(); _fmt(p)
     add_md_text(p, text, size=BASE_SIZE, bold=True, color=PAGETAG_COLOR)
 
@@ -656,6 +656,10 @@ OBJ_RE   = re.compile(r'^【(知识技能|过程方法|情感价值|知识与技
 TABLE_SEP_RE = re.compile(r'^\|?\s*:?-{2,}.*$')  # |---|---| 分隔行
 # 列表标记：无序 - / * / +，有序 1. 1) （仅行首，且后面有空格+内容）
 LIST_RE  = re.compile(r'^\s*(?:[-*+]|\d+[.)])\s+(.*\S.*)$')
+# 水平分隔线（--- / *** / ___，可空格分隔）：Markdown 语义为分隔线、不是内容，
+# 不印出“---”小分隔符，改渲染成一个空段落留白。表格分隔行 |---| 以 `|`
+# 开头、已被 is_table_line 拦截，不会落到这里。
+HR_RE = re.compile(r'^\s*([-*_])(?:\s*\1){2,}\s*$')
 # 四级及以下标题 #### / ##### …（规范只定义到 ###，更深的剥掉 # 当正文）
 DEEP_H_RE = re.compile(r'^#{4,}\s+(.*\S.*)$')
 # 测评题题号行（reading-assessment 专用）：行首「数字＋全角句点」如 `1．…`。
@@ -826,8 +830,13 @@ def convert(md_path, docx_path):
         if m:
             render_para(doc, m.group(1).strip()); i += 1; continue
 
+        # 水平分隔线（--- / *** / ___）：不印出分隔符，改成空一行（空段落）留白
+        if HR_RE.match(stripped):
+            doc.add_paragraph()
+            i += 1; continue
+
         # 列表行：规范要求避免，但若 AI 误写，剥掉 -/数字. 标记当正文渲染
-        # （注意：表格行已在前面 is_table_line 拦截；水平线 --- 不含内容不匹配）
+        # （注意：表格行已在前面 is_table_line 拦截）
         m = LIST_RE.match(stripped)
         if m:
             render_para(doc, m.group(1).strip()); i += 1; continue

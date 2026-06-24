@@ -9,7 +9,7 @@ from pptx.util import Emu, Pt
 from pptx.enum.shapes import MSO_SHAPE
 from helpers import (
     add_textbox, add_rect, add_logo, add_image_or_skip,
-    add_image_placeholder, add_image_grid, add_table, rgb,
+    add_image_placeholder, add_image_grid, add_table, cell_bg_color, rgb,
     add_gradient_rect, _disable_shape_effects,
     add_numbered_bullets, add_click_reveal,
     add_rich_textbox, add_conclusion_card,
@@ -420,12 +420,51 @@ def render_table(slide, page, ctx):
             font=FONT_BODY, size=SZ_SUBTITLE, color=COLOR_MUTED,
             align="left", anchor="middle",
         )
-    if page.table_headers:
-        # 字号/行高/列宽由 add_table 按行数与内容自适应，确保整张表塞进区域
-        add_table(
-            slide, TABLE_AREA_X, TABLE_AREA_Y, TABLE_AREA_W, TABLE_AREA_H,
-            page.table_headers, page.table_rows,
+    if not page.table_headers:
+        return
+
+    # 字号/行高/列宽由 add_table 按行数与内容自适应，确保整张表塞进区域。
+    # 答案格（page.table_reveals）：底表渲占位、答案做成叠层逐格点击淡入。
+    reveals = page.table_reveals or {}
+    _table, geom = add_table(
+        slide, TABLE_AREA_X, TABLE_AREA_Y, TABLE_AREA_W, TABLE_AREA_H,
+        page.table_headers, page.table_rows, reveal_cells=reveals,
+    )
+    if not reveals:
+        return
+
+    # 为每个答案格叠"不透明底色矩形 + 完整答案文本框"，盖住底格占位
+    bx, by = geom["x"], geom["y"]
+    col_x, col_w = geom["col_x"], geom["col_w"]
+    row_y, row_h = geom["row_y"], geom["row_h"]
+    body_fs = geom["body_fs"]
+    marg_l, marg_t = geom["marg_l"], geom["marg_t"]
+    zebra = geom["zebra_bg"]
+
+    groups = []
+    for (d, c) in sorted(reveals.keys()):       # 阅读顺序：行优先、列内左→右
+        tr = d + 1                               # 数据行 d 对应表行 d+1（表头占第 0 行）
+        if tr >= len(row_y) or c >= len(col_x):
+            continue
+        cx = bx + col_x[c]
+        cy = by + row_y[tr]
+        cw, ch = col_w[c], row_h[tr]
+        bg = cell_bg_color(d, zebra)
+
+        rect = add_rect(slide, cx, cy, cw, ch, bg)
+        _disable_shape_effects(rect)
+        full = str(reveals[(d, c)]["full"]).replace("<br>", "\n")
+        text_box = add_textbox(
+            slide, cx + marg_l, cy + marg_t, cw - 2 * marg_l, ch - 2 * marg_t,
+            full,
+            font=FONT_BODY, size=body_fs, color=COLOR_BODY,
+            align="left", anchor="middle", line_spacing=1.1,
         )
+        groups.append([rect.shape_id, text_box.shape_id])
+
+    # 逐格点击：每格一击（矩形+文字一起淡入）；关动画/系统不支持时全部直出=答案静态全显
+    if ctx.get("anim") and groups:
+        add_click_reveal(slide, groups)
 
 
 _KEYWORD_RE = re.compile(r'(「[^」]+」|\u201c[^\u201d]+\u201d|"[^"]+")')
@@ -474,10 +513,10 @@ def render_end(slide, page, ctx):
     add_rect(slide, ANCHOR_BAR_X, ANCHOR_BAR_Y, ANCHOR_BAR_W, ANCHOR_BAR_H,
              COLOR_ANCHOR_BAR)
 
-    # 中央 END（白色，120pt）
+    # 中央 THE END（白色，120pt）
     add_textbox(
         slide, pct_x(0.10), pct_y(0.36), pct_x(0.80), pct_y(0.24),
-        "END",
+        "THE END",
         font=FONT_TITLE, size=120, color="FFFFFF",
         bold=False, italic=False, align="center", anchor="middle",
     )

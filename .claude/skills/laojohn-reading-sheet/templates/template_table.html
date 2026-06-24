@@ -57,6 +57,8 @@
     vertical-align: middle;
     padding: 13px 12px;
     border-right: 1px solid #C9C0B0;
+    /* 折行优化：数字/字母不从中间断、闭标点不落行首、各行长度均衡避免单字孤行 */
+    word-break: normal; line-break: strict; text-wrap: balance;
   }
   table.ws thead th:last-child { border-right: none; }
   /* 行标题列（首列）更深一档表头 */
@@ -70,6 +72,8 @@
     line-height: 1.8;
     vertical-align: top;
     color: #333;
+    /* 折行优化：数字/字母不从中间断、闭标点不落行首、末行不留单字孤行 */
+    word-break: normal; line-break: strict; text-wrap: pretty;
   }
   table.ws tbody td:last-child { border-right: none; }
   table.ws tbody tr:last-child td { border-bottom: none; }
@@ -114,7 +118,7 @@
     <div class="sheet-title" id="title"></div>
     <div class="sheet-sub" id="subtitle"></div>
   </div>
-  <table class="ws">
+  <table class="ws" data-content>
     <thead><tr id="thead"></tr></thead>
     <tbody id="tbody"></tbody>
   </table>
@@ -124,7 +128,18 @@
 <script>
 const DATA = /*__DATA__*/ null;
 
+// PPT 导出标注：给「示范答案格」加 data-answer/data-order（揭示顺序），不影响打印外观。
+let __AO = 0;
+function mark(e){ e.setAttribute('data-answer','1'); e.setAttribute('data-order', __AO++); return e; }
+
+// 短标签(无换行、≤6 字)整体不折行：让窄列(如"日期/章节量")自动让宽到一行，
+// 杜绝"第 1 天 / 天""章节量 / 量"这类单字孤行；长内容仍正常折行。
+function noWrapIfShort(elm, txt){
+  if (txt && txt.indexOf('\n') === -1 && Array.from(txt).length <= 6) elm.style.whiteSpace = 'nowrap';
+}
+
 function render() {
+  __AO = 0;
   const d = DATA;
   document.getElementById('logo').src = d.logo;
   document.getElementById('title').textContent = d.title || '';
@@ -141,6 +156,7 @@ function render() {
   d.columns.forEach((c, i) => {
     const th = document.createElement('th');
     th.textContent = c.name;
+    noWrapIfShort(th, c.name);
     if (c.width) th.style.width = (typeof c.width === 'number' ? c.width + '%' : c.width);
     if (d.label_first_col && i === 0) th.className = 'col-label';
     else if (i === hiCol) th.className = 'col-same';
@@ -158,9 +174,13 @@ function render() {
       td.style.height = minH + 'px';
       const txt = (cell == null) ? '' : String(cell);
       td.textContent = txt;
-      if (d.label_first_col && i === 0) td.className = 'cell-label';
+      noWrapIfShort(td, txt);
+      const isLabel = d.label_first_col && i === 0;
+      if (isLabel) td.className = 'cell-label';
       else if (i === hiCol) td.className = 'cell-same';
       else if (txt.trim() !== '') td.className = 'filled';
+      // 非行标签列、有内容的格 = 示范答案格（逐格揭示）
+      if (!isLabel && txt.trim() !== '') mark(td);
       tr.appendChild(td);
     });
     tbody.appendChild(tr);

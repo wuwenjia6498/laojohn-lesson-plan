@@ -24,18 +24,39 @@
   <div class="variant-tag" id="variantTag"></div>
   <div class="l-title" id="title"></div>
   <div class="l-sub" id="subtitle"></div>
-  <svg id="svg" width="794" height="950" style="position:absolute; top:128px; left:0;"></svg>
+  <svg id="svg" width="794" height="950" style="position:absolute; top:128px; left:0;" data-content></svg>
   <div class="l-foot" id="foot"></div>
 </div>
 <script>
 const DATA = /*__DATA__*/ null;
 const SVGNS = "http://www.w3.org/2000/svg";
 function el(t,a){const e=document.createElementNS(SVGNS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
-function wrap(s,max){const o=[];for(let i=0;i<s.length;i+=max)o.push(s.slice(i,i+max));return o;}
+// 智能折行：连续字母/数字(含 . - – 连接)视为不可拆 token，决不从中间断；并避头尾。
+function wrap(s,max){
+  s = String(s);
+  const NO_HEAD = "，。、；：？！）】」』”’》%…—-";
+  const NO_TAIL = "（【「『“‘《";
+  const toks = s.match(/[A-Za-z0-9]+(?:[.\-–][A-Za-z0-9]+)*|[\s\S]/g) || [];
+  const lines = []; let cur = "";
+  for (const tk of toks){
+    if (tk === "\n"){ lines.push(cur); cur = ""; continue; }
+    if (cur !== "" && cur.length + tk.length > max && NO_HEAD.indexOf(tk) === -1){
+      let carry = "";
+      while (cur && NO_TAIL.indexOf(cur[cur.length - 1]) !== -1){ carry = cur[cur.length - 1] + carry; cur = cur.slice(0, -1); }
+      lines.push(cur); cur = carry + tk;
+    } else { cur += tk; }
+  }
+  if (cur !== "") lines.push(cur);
+  return lines;
+}
+// PPT 导出标注：给「示范答案」加 data-answer/data-order，不影响打印外观。
+let __AO = 0;
+function mark(e){ e.setAttribute('data-answer','1'); e.setAttribute('data-order', __AO++); return e; }
 const PALETTE = ["#A8504F","#D9883A","#C49B3E","#4E8C7D","#5B7FA6","#8268A0","#7A8C3A"];
 
 const X_L = 84, X_R = 710, Y_BASE = 786, AMP = 384;
 function render(){
+  __AO = 0;
   const d = DATA;
   document.getElementById('logo').src = d.logo;
   document.getElementById('title').textContent = d.title || '';
@@ -101,8 +122,10 @@ function render(){
     const items = st.items || ["",""];
     const txt = items.find(x => x && x.trim() !== '');
     if(txt){
+      const g = mark(el("g",{}));
       const lines = wrap(String(txt), 9).slice(0,4);
-      lines.forEach((ln,li)=>{ const t=el("text",{x:bx+8, y:by+44+li*17, class:"ftxt"}); t.textContent=ln; svg.appendChild(t); });
+      lines.forEach((ln,li)=>{ const t=el("text",{x:bx+8, y:by+44+li*17, class:"ftxt"}); t.textContent=ln; g.appendChild(t); });
+      svg.appendChild(g);
     } else {
       for(let k=0;k<2;k++){ const ly=by+44+k*26; svg.appendChild(el("line",{x1:bx+8, y1:ly, x2:bx+BOX_W-8, y2:ly, stroke:"#CFC8BA", "stroke-width":1.2})); }
     }

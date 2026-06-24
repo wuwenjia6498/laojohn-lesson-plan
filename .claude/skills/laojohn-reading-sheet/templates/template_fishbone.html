@@ -32,7 +32,24 @@
 const DATA = /*__DATA__*/ null;
 const SVGNS = "http://www.w3.org/2000/svg";
 function el(t,a){const e=document.createElementNS(SVGNS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
-function wrap(s,max){const o=[];for(let i=0;i<s.length;i+=max)o.push(s.slice(i,i+max));return o;}
+// 智能折行：连续字母/数字(含 . - – 连接)视为不可拆 token，决不从中间断；并避头尾。
+function wrap(s,max){
+  s = String(s);
+  const NO_HEAD = "，。、；：？！）】」』”’》%…—-";
+  const NO_TAIL = "（【「『“‘《";
+  const toks = s.match(/[A-Za-z0-9]+(?:[.\-–][A-Za-z0-9]+)*|[\s\S]/g) || [];
+  const lines = []; let cur = "";
+  for (const tk of toks){
+    if (tk === "\n"){ lines.push(cur); cur = ""; continue; }
+    if (cur !== "" && cur.length + tk.length > max && NO_HEAD.indexOf(tk) === -1){
+      let carry = "";
+      while (cur && NO_TAIL.indexOf(cur[cur.length - 1]) !== -1){ carry = cur[cur.length - 1] + carry; cur = cur.slice(0, -1); }
+      lines.push(cur); cur = carry + tk;
+    } else { cur += tk; }
+  }
+  if (cur !== "") lines.push(cur);
+  return lines;
+}
 const PALETTE = ["#5B8C7B","#C18A3A","#7A8C3A","#5B7FA6","#A8634F","#8268A0"];
 
 const SPINE_Y = 470, X_TAIL = 150, X_HEAD = 596, BOX_W = 150, BOX_H = 80;

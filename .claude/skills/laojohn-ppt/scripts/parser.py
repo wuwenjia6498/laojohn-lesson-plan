@@ -19,6 +19,8 @@
 - 单值字段：眉标、标题、副标题、正文（可多行）
 - 列表字段：要点（以 `- ` 或 `• ` 开头）
 - 表格字段：`表格：` 之后跟标准 GFM 表格
+  - 单元格内 `{{答案}}` 标记 = 该格的"填空答案"片段；底表渲成空白占位、答案做成
+    叠层在 laojohn-ppt 端逐格点击淡入（见 layouts.render_table）。
 - 配图建议：可重复多行；单条走单图占位，引导问题页 ≥2 条触发 2×2 四图网格
   （image_suggestion 留首条兼容旧路径，image_suggestions 收全部）
 
@@ -27,10 +29,14 @@
 """
 import re
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, Dict, Tuple
 
 
 PAGE_TYPES = {"封面", "环节标题", "引导问题", "原文齐读", "要点小结", "填空表格"}
+
+# 表格单元格答案标记：{{答案}} —— full 取答案、blank 取占位
+ANSWER_RE = re.compile(r"\{\{(.+?)\}\}")
+BLANK_PLACEHOLDER = "＿＿"
 
 PAGE_HEADER_RE = re.compile(
     r"^##\s*P(?P<num>\d+)\s*\|\s*页型\s*:\s*(?P<type>\S+?)\s*(?:\|\s*课时\s*:\s*(?P<course>.+?))?\s*$"
@@ -47,7 +53,9 @@ class Page:
     body: str = ""             # 多行正文
     bullets: List[str] = field(default_factory=list)
     table_headers: List[str] = field(default_factory=list)
-    table_rows: List[List[str]] = field(default_factory=list)
+    table_rows: List[List[str]] = field(default_factory=list)   # 存"完整答案版"（{{X}}→X）
+    # 答案格：{(数据行0基, 列0基): {"blank": 占位版, "full": 完整版}}，供逐格点击叠层
+    table_reveals: Dict[Tuple[int, int], dict] = field(default_factory=dict)
     image_suggestion: str = ""                                  # 单条（兼容旧逻辑/单图页）
     image_suggestions: List[str] = field(default_factory=list)  # 多条（≥2 触发四图网格）
     course: str = ""           # 课时（如有）
@@ -62,25 +70,41 @@ class Deck:
     pages: List[Page] = field(default_factory=list)
 
 
-def parse_table(lines: List[str]) -> (List[str], List[List[str]]):
-    """解析 GFM 风格的 markdown 表格。返回 headers, rows。"""
+def parse_table(lines: List[str]):
+    """解析 GFM 风格的 markdown 表格。返回 (headers, rows, reveals)。
+
+    rows 存"完整答案版"（{{X}}→X）；reveals 收答案格：
+        {(数据行0基, 列0基): {"blank": 占位版, "full": 完整版}}。
+    含 {{}} 标记的单元格即为答案格，由 laojohn-ppt 做逐格点击叠层。
+    """
     headers = []
     rows = []
+    reveals = {}
     table_lines = [ln for ln in lines if ln.strip().startswith("|")]
     if not table_lines:
-        return headers, rows
+        return headers, rows, reveals
 
     def split_row(line: str) -> List[str]:
         # 去掉首尾 |
         cells = line.strip().strip("|").split("|")
         return [c.strip() for c in cells]
 
-    headers = split_row(table_lines[0])
+    headers = split_row(table_lines[0])  # 表头不参与答案揭示
     # 第二行是分隔线 |---|---|，跳过
     body_start = 2 if len(table_lines) > 1 and re.match(r"\|?\s*:?-+", table_lines[1].strip()) else 1
-    for ln in table_lines[body_start:]:
-        rows.append(split_row(ln))
-    return headers, rows
+    for d, ln in enumerate(table_lines[body_start:]):
+        cells = split_row(ln)
+        full_cells = []
+        for c, cell in enumerate(cells):
+            if ANSWER_RE.search(cell):
+                full = ANSWER_RE.sub(lambda m: m.group(1), cell)
+                blank = ANSWER_RE.sub(BLANK_PLACEHOLDER, cell)
+                reveals[(d, c)] = {"blank": blank, "full": full}
+                full_cells.append(full)
+            else:
+                full_cells.append(cell)
+        rows.append(full_cells)
+    return headers, rows, reveals
 
 
 def parse_md(md_text: str) -> Deck:
@@ -123,9 +147,10 @@ def parse_md(md_text: str) -> Deck:
         if pending_field == "正文":
             current.body = "\n".join(field_buf).strip()
         elif pending_field == "表格":
-            headers, rows = parse_table(pending_table_lines)
+            headers, rows, reveals = parse_table(pending_table_lines)
             current.table_headers = headers
             current.table_rows = rows
+            current.table_reveals = reveals
         pending_field = None
         field_buf = []
         pending_table_lines = []
