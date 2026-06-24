@@ -18,7 +18,7 @@ description: 生成“老约翰”校内同步习作课(写作课)逐字稿详�
 | **按需读** | `references/book-writing-map.md` | 生成详案时查一次:本任务有无对应读书会书目;未命中则全程不提书目 |
 | **按需读** | `laojohn-lesson-plan/references/visualization-tools.md` | 构思支架需要详细画法/引导话术时,只读对应工具一节;不可达则按 technique-levels.md 的对照表自行落地,勿中断 |
 | **按需读** | `laojohn-lesson-plan/assets/课案Markdown约定规范.md` | 需导出 .docx 时读一次 |
-| **基本不读** | 原始 docx(`1-6年级习作要求…docx`,仅作存根) | 生成流程不读;仅在怀疑档案加工有误时回查 |
+| **基本不读** | 原始 docx(《1-6年级习作要求…》,**已不随 skill 存放**) | 生成流程只读 `archive/` 加工后的 .md;怀疑档案加工有误需回查原始 docx 时,另行向用户索取 |
 
 ## 范围
 
