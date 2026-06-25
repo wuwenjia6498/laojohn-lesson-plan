@@ -22,3 +22,7 @@ desktop.ini
 # 临时文件
 *.tmp
 *.log
+~$*
+
+# 打包产物（skill 源文件已在仓库，zip 冗余）
+.claude/skills/**/*.zip

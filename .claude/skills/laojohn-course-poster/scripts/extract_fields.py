@@ -101,8 +101,8 @@ def parse_profile_metadata(profile_text):
 
 
 def extract_title(md):
-    """书名:一级标题 # 《X》... 里的书名。缺失 → 返回 None(由调用方报错停)。"""
-    m = re.search(r"^#\s*《([^》]+)》", md, re.M)
+    """书名:一级标题里的《X》。H1 可带年级等前缀(如 # 五年级《洞》整本书教学设计)。缺失 → 返回 None(由调用方报错停)。"""
+    m = re.search(r"^#[^《\n]*《([^》]+)》", md, re.M)
     return m.group(1).strip() if m else None
 
 

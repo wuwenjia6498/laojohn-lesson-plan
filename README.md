@@ -84,6 +84,15 @@
 │   ├── <书名>_教学导图.html
 │   └── <书名>_教学导图.json
 │
+├── 课程打包输出\                   # ← laojohn-course-package 产物（把全部成品归集成一个交付文件夹）
+│   └── <书名>\
+│       ├── 课件PPT\                # 投屏 .pptx
+│       ├── 课件下游物料\            # 书目卡/海报/阅读指南/两种导图/反馈话术
+│       ├── 阅读单\                 # 学生阅读单 .pdf
+│       ├── 逐页讲稿\               # 逐页讲稿 .md
+│       ├── <书名>-课案详案.docx     # 主交付件（根目录）
+│       └── <书名>_阅读测评.docx     # 主交付件（根目录）
+│
 └── .claude\
     └── skills\                    # AI Agent SKILL 定义
         ├── laojohn-book-profile\     # 电子书 → 书籍档案（上游建档）
@@ -98,7 +107,8 @@
         ├── laojohn-course-feedback\  # 家长社群课后反馈话术
         ├── laojohn-lesson-mindmap\   # 精彩抢先看思维导图（书是什么）
         ├── laojohn-teaching-mindmap\ # 教学思维导图（怎么教这本书）
-        └── laojohn-pipeline\         # 编排：一键按序生成全套下游物料
+        ├── laojohn-pipeline\         # 编排：一键按序生成全套下游物料
+        └── laojohn-course-package\   # 把一本书的全部成品归集进一个交付文件夹
 ```
 
 ---
@@ -121,6 +131,7 @@
 | `laojohn-lesson-mindmap` | 生成精彩抢先看思维导图（**讲书本身**：精彩抢先看 / 书籍概况） | `抢先看思维导图\` | `<书名>_抢先看.pdf/.html/.json` |
 | `laojohn-teaching-mindmap` | 生成教学思维导图（**讲教学设计**：备课/教研用） | `教学思维导图\` | `<书名>_教学导图.pdf/.html/.json` |
 | `laojohn-pipeline` | **编排层**：课案+档案就绪后，一键按序生成全套下游物料（书目卡/海报/阅读指南/两种导图/反馈话术，可选含 PPT 链） | （委托各下游 skill，无独立输出） | —— |
+| `laojohn-course-package` | **归集层**：把一本书散落在各输出目录的全部成品复制进一个交付文件夹（复制不移动），结构=课件PPT/课件下游物料/阅读单/逐页讲稿 + 根目录放课案详案.docx 与阅读测评.docx | `课程打包输出\<书名>\` | 子文件夹见左 + `<书名>-课案详案.docx`/`<书名>_阅读测评.docx` |
 
 ---
 
