@@ -16,7 +16,8 @@
 │
 ├── 书籍封面\                      # 📌 封面图统一维护在这里（所有 SKILL 共用）
 │   ├── 俗世奇人.png
-│   ├── 手斧男孩.png
+│   ├── 洞.png
+│   ├── 格列佛游记.png
 │   └── <书名>.jpg / .png          # 新增书时在此放封面图，无需改任何代码
 │
 ├── 品牌资产\                      # 📌 品牌固定素材（所有海报共用，非按书变化）
@@ -44,6 +45,13 @@
 │       ├── <书名>-阅读交流课1.pptx
 │       ├── <书名>-阅读交流课2.pptx
 │       └── <书名>-思辨应用课.pptx
+│
+├── 课件讲稿输出\                   # ← laojohn-ppt-draft 产物（逐页讲稿，与中间稿 1:1，.md 源 + .docx 干净版式）
+│   └── <书名>\
+│       ├── <书名>-导读课-逐页讲稿.md / .docx
+│       ├── <书名>-阅读交流课1-逐页讲稿.md / .docx
+│       ├── <书名>-阅读交流课2-逐页讲稿.md / .docx
+│       └── <书名>-思辨应用课-逐页讲稿.md / .docx
 │
 ├── 书目卡输出\                     # ← laojohn-book-card 产物
 │   ├── <书名>_书目卡.jpg
@@ -102,11 +110,13 @@
         ├── laojohn-ppt\              # 中间稿 → 投屏课件 .pptx
         ├── laojohn-book-card\        # 本期深度阅读书目卡（社群传播）
         ├── laojohn-course-poster\    # 课程招生海报
-        ├── laojohn-reading-guide\    # 阅读指南（给学生/家长）
+        ├── laojohn-reading-guide\    # 阅读指南（给学生/家长看的导读卡）
+        ├── laojohn-reading-sheet\    # 学生阅读单（课堂动手填的学习单：空白版+示范版）
         ├── laojohn-reading-assessment\ # 整本书阅读测评（一二年级15题/三至六年级20题，五维命题）
         ├── laojohn-course-feedback\  # 家长社群课后反馈话术
         ├── laojohn-lesson-mindmap\   # 精彩抢先看思维导图（书是什么）
         ├── laojohn-teaching-mindmap\ # 教学思维导图（怎么教这本书）
+        ├── laojohn-detail-review\    # 详案独立·冷启动复盘（课案/写作课通用，只审稿不生成）
         ├── laojohn-pipeline\         # 编排：一键按序生成全套下游物料
         └── laojohn-course-package\   # 把一本书的全部成品归集进一个交付文件夹
 ```
@@ -120,7 +130,7 @@
 | `laojohn-book-profile` | 从电子书/PDF/全文提取书籍档案（**下游课案唯一事实来源**，须基于原文、禁止凭记忆编造） | `书籍档案\` | `<书名>书籍档案.md` |
 | `laojohn-lesson-plan` | 生成整本书阅读逐字稿课案详案 | `课案输出\` | `<书名>-课案详案.md` / `.docx` |
 | `laojohn-writing-lesson` | 生成习作课（写作课）逐字稿详案（两节连排 × 45 分钟，含作前/作中/作后评改，配教师示范文） | `写作课输出\` | `<年级册>-<题目>-写作课详案.md` / `.docx` |
-| `laojohn-ppt-draft` | 详案 → PPT 中间稿 | `课件中间稿输出\<书名>\` | `<书名>-<课型>-中间稿.md` |
+| `laojohn-ppt-draft` | 详案 → PPT 中间稿 **+ 逐页讲稿**（每课时双产出，页序 1:1；自带教学节拍分页引擎，详案无需换页点） | 中间稿 `课件中间稿输出\<书名>\`；讲稿 `课件讲稿输出\<书名>\` | `<书名>-<课型>-中间稿.md`；`<书名>-<课型>-逐页讲稿.md` / `.docx` |
 | `laojohn-ppt` | 中间稿 → 投屏课件 PPT 成品 | `课件PPT输出\<书名>\` | `<书名>-<课型>.pptx` |
 | `laojohn-book-card` | 生成「本期深度阅读书目」书目卡（书封+信息格+内容简介，社群传播用） | `书目卡输出\` | `<书名>_书目卡.jpg/.html/.json` |
 | `laojohn-course-poster` | 生成课程招生海报 | `课程海报输出\` | `<书名>_海报.jpg/.html/.json` |
@@ -130,6 +140,7 @@
 | `laojohn-course-feedback` | 生成发给家长社群的课后反馈话术 | `课程反馈话术输出\` | `《书名》_课程反馈话术.docx/.md` |
 | `laojohn-lesson-mindmap` | 生成精彩抢先看思维导图（**讲书本身**：精彩抢先看 / 书籍概况） | `抢先看思维导图\` | `<书名>_抢先看.pdf/.html/.json` |
 | `laojohn-teaching-mindmap` | 生成教学思维导图（**讲教学设计**：备课/教研用） | `教学思维导图\` | `<书名>_教学导图.pdf/.html/.json` |
+| `laojohn-detail-review` | **复盘层**：对已成稿详案（课案/写作课，自动判型加载对应五维 rubric）做独立·冷启动通读复盘，查 checklist 查不出的质量/节奏/衔接问题，出「已自动改的无争议项 + 待定夺的教学判断项」三件套报告（只审稿，不生成详案、不出 docx、不碰下游物料；首选派 fresh 子 agent 或在新会话里跑） | （审稿报告，无固定产物目录） | —— |
 | `laojohn-pipeline` | **编排层**：课案+档案就绪后，一键按序生成全套下游物料（书目卡/海报/阅读指南/两种导图/反馈话术，可选含 PPT 链） | （委托各下游 skill，无独立输出） | —— |
 | `laojohn-course-package` | **归集层**：把一本书散落在各输出目录的全部成品复制进一个交付文件夹（复制不移动），结构=课件PPT/课件下游物料/阅读单/逐页讲稿 + 根目录放课案详案.docx 与阅读测评.docx | `课程打包输出\<书名>\` | 子文件夹见左 + `<书名>-课案详案.docx`/`<书名>_阅读测评.docx` |
 
@@ -141,7 +152,7 @@
 
 ```
 书籍封面\俗世奇人.png
-书籍封面\手斧男孩.jpg
+书籍封面\格列佛游记.png
 书籍封面\<书名>.jpg
 ```
 
@@ -173,8 +184,9 @@
 1. 准备电子书    → PDF / 全文文本（建档硬闸，无原文不开写）
 2. 生成书籍档案  → [laojohn-book-profile]        → 书籍档案\<书名>书籍档案.md
 3. 生成课案详案  → [laojohn-lesson-plan]        → 课案输出\<书名>-课案详案.md
+3b. 详案冷启动复盘 → [laojohn-detail-review]     → 派 fresh 子 agent / 新会话，出审稿三件套报告
 4. 生成书目卡    → [laojohn-book-card]           → 书目卡输出\<书名>_书目卡.*
-5. 提炼中间稿    → [laojohn-ppt-draft]           → 课件中间稿输出\<书名>\*.md
+5. 提炼中间稿+讲稿 → [laojohn-ppt-draft]         → 课件中间稿输出\<书名>\*.md ＋ 课件讲稿输出\<书名>\*.md/.docx
 6. 编译课件PPT   → [laojohn-ppt]                → 课件PPT输出\<书名>\*.pptx
 7. 制作招生海报  → [laojohn-course-poster]       → 课程海报输出\<书名>_海报.*
 8. 生成阅读指南  → [laojohn-reading-guide]       → 阅读指南输出\<书名>_阅读指南.*
@@ -185,7 +197,7 @@
 11. 生成反馈话术  → [laojohn-course-feedback]     → 课程反馈话术输出\《书名》_课程反馈话术.*
 ```
 
-> 写作课（习作课）是独立平行分支：`laojohn-writing-lesson` 吃「习作主题 + 年级」，不进上面这条以书籍档案为源头的链路，产物落 `写作课输出\`。
+> 写作课（习作课）是独立平行分支：`laojohn-writing-lesson` 吃「习作主题 + 年级」，不进上面这条以书籍档案为源头的链路，产物落 `写作课输出\`。其详案同样可复用 `laojohn-ppt-draft → laojohn-ppt` 链出投屏 PPT 与逐页讲稿（ppt-draft 自动判型走写作课模式），成稿亦可走 `laojohn-detail-review` 冷启动复盘。
 
 ---
 
