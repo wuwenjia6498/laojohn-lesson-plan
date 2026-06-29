@@ -14,7 +14,7 @@ import sys, io, re, os, glob
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 VALID_PAGE_TYPES = {'封面','环节标题','引导问题','原文齐读','要点小结','填空表格'}
-FORBID_KEYWORDS_IN_EYEBROW = ['导读课','阅读交流课','思辨应用课']
+FORBID_KEYWORDS_IN_EYEBROW = ['导读课','阅读交流课','思辨应用课','写作指导课','当堂写作与评改课']
 
 # v1.1 字段冲突矩阵（与 references/field-extraction.md 末尾矩阵保持一致）
 FIELD_MATRIX = {
@@ -31,9 +31,11 @@ def check_file(target: str, expect_range=None) -> tuple[list[str], list[str], li
     text = open(target, encoding='utf-8').read()
     errs, warns, report = [], [], []
 
-    # 元信息
+    # 元信息（写作课模式无书作者：以 `文体：写作` 开关，要求 文体、豁免 作者）
     head = text[:300]
-    for k in ['书名：','课时：','作者：','年级：']:
+    is_writing = '文体：写作' in head or '文体:写作' in head
+    required_meta = ['书名：','课时：','年级：'] + (['文体：'] if is_writing else ['作者：'])
+    for k in required_meta:
         if k not in head:
             errs.append(f'[meta] 缺 {k}')
 

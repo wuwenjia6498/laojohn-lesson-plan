@@ -9,12 +9,13 @@
     set PLAYWRIGHT_BROWSERS_PATH=C:/Users/<你>/AppData/Local/ms-playwright
     python render.py <manifest.json> <输出目录> [--png] [--no-bundle]
 
-渲染完默认再合出两份「全套」PDF（按 manifest 次序排，= 教学先后次序）：
-    <书名>-阅读单-空白版-全套.pdf   ← 各单子的空白/派发版（学生打印用）
-    <书名>-阅读单-示范版-全套.pdf   ← 各单子的示范版（无示范的用其唯一版兜底）
-归类规则：<名>-空 进空白册、<名>-示范 进示范册、无后缀单版两册都收；同一基名
-两册各取对应版、无对应版则兜底，保证两册都覆盖全部单子、不缺页。可在某 sheet
-上加 "packet": "both|blank|demo|none" 覆盖默认归属。--no-bundle 关掉合册。
+阅读单只产出「学生能填的版本」（空白/派发版 + 无后缀单版）。**示范版（教师参考）已
+停产**：引擎会自动跳过 manifest 里任何 <名>-示范 的 sheet（旧 manifest 无需手改）。
+
+渲染完默认再合出一份「全套」PDF（按 manifest 次序排，= 教学先后次序）：
+    <书名>-阅读单-全套.pdf   ← 各单子的学生版顺次合订（学生打印用）
+归类规则：每个基名取其学生版（<名>-空 或无后缀单版）进册；同基名只收一次。
+sheet 上加 "packet": "none" 可把该单子排除出全套册。--no-bundle 关掉合册。
 
 manifest.json 结构：
 {
@@ -24,7 +25,7 @@ manifest.json 结构：
     {"file": "维恩图-空",     "template": "venn",  "data": { ... }}
   ]
 }
-- file：输出文件名（不含扩展名），约定 <阅读单名>-空 / -示范。
+- file：输出文件名（不含扩展名），约定 <阅读单名>-空（或无后缀单版）；-示范 已停产、会被跳过。
 - template：模板键，对应 templates/template_<键>.html（table/venn/ladder/logic/voyage…）。
 - data：注入模板的字段；logo 由本脚本统一注入，data 里不用写。
 
@@ -64,6 +65,25 @@ def normalize_quotes(obj):
     return obj
 
 
+# 左上版本角标：学生拿到的「空白版/派发版」不再盖这个戳（恒久规则）。
+# 纯「空白版」「派发版」→ 整个隐藏；复合标签(如「空白版 · 换你来：xxx」「派发版（含示例…）」)
+# 只剥掉这两个前缀词及其后紧跟的分隔符、保留后半信息。示范版及其余角标原样保留。
+_BLANK_TAGS = ("空白版", "派发版")
+_TAG_SEPS = " ·・•|—-、\t"   # 前缀词与后半之间的分隔符（注意不含「（」，括注要留）
+
+
+def clean_variant(v):
+    if not isinstance(v, str):
+        return v
+    s = v.strip()
+    for tag in _BLANK_TAGS:
+        if s == tag:
+            return ""
+        if s.startswith(tag):
+            return s[len(tag):].lstrip(_TAG_SEPS)
+    return s
+
+
 def load_logo():
     p = PROJECT_ROOT / "品牌资产" / "logo.png"
     if not p.exists():
@@ -94,7 +114,7 @@ def safe_pdf(page, path, width, height):
         return str(alt.name)
 
 
-# ── 全套合册：把单张按 manifest 次序拼成「空白版」「示范版」两本 ──
+# ── 全套合册：把学生版单张按 manifest 次序拼成一本（示范版已停产，不参与） ──
 def _split_name(fname):
     """<名>-空 / <名>-示范 / <名>(单版) → (basename, version)。"""
     if fname.endswith("-空"):
@@ -104,31 +124,30 @@ def _split_name(fname):
     return fname, "单"
 
 
-def plan_bundles(sheets):
-    """按出现次序分组，定每本收哪些文件。返回 (空白册文件名表, 示范册文件名表)。
+def plan_bundle(sheets):
+    """按出现次序列出进「全套」册的学生版文件名。
 
-    同一基名的多版归一组：空白册取「空 > 单 > 示范」、示范册取「示范 > 空 > 单」，
-    故无示范版的单子(如故事山形图/两难思辨/纯主观单)也会以兜底版进两册、不缺页。
-    sheet 上的 "packet"(both|blank|demo|none) 覆盖该组默认归属。
+    每个基名取其学生版（空 > 单），示范版跳过、不进册；同基名只收一次。
+    sheet 上 "packet": "none" 把该单子排除出全套册。
     """
     import collections
     groups = collections.OrderedDict()
     for s in sheets:
         base, ver = _split_name(s["file"])
+        if ver == "示范":
+            continue
         g = groups.setdefault(base, {})
-        g[ver] = s["file"]
+        g.setdefault(ver, s["file"])
         if s.get("packet"):
             g["packet"] = s["packet"]
-    blank, demo = [], []
+    files = []
     for g in groups.values():
-        blank_pick = g.get("空") or g.get("单") or g.get("示范")
-        demo_pick = g.get("示范") or g.get("空") or g.get("单")
-        packet = g.get("packet", "both")
-        if packet in ("both", "blank") and blank_pick:
-            blank.append(blank_pick)
-        if packet in ("both", "demo") and demo_pick:
-            demo.append(demo_pick)
-    return blank, demo
+        if g.get("packet") == "none":
+            continue
+        pick = g.get("空") or g.get("单")
+        if pick:
+            files.append(pick)
+    return files
 
 
 def write_bundle(out_path, pdf_paths):
@@ -167,8 +186,13 @@ def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
         for s in sheets:
+            if _split_name(s["file"])[1] == "示范":   # 示范版已停产，旧 manifest 自动跳过
+                print("跳过(示范版已停产):", s["file"])
+                continue
             key = s["template"]
             data = normalize_quotes(dict(s["data"]))  # 直角引号「」→ 弯引号“”
+            if "variant" in data:                     # 空白版/派发版不盖角标
+                data["variant"] = clean_variant(data["variant"])
             data["logo"] = logo                      # 统一注入 logo
             html = template_text(key).replace(
                 "/*__DATA__*/ null", json.dumps(data, ensure_ascii=False))
@@ -198,7 +222,7 @@ def main():
             page.close()
             print("OK:", s["file"])
         browser.close()
-    print(f"\n完成 {len(sheets)} 张 → {out_dir}")
+    print(f"\n完成 {len(rendered_pdf)} 张 → {out_dir}")
 
     if want_bundle:
         try:
@@ -207,13 +231,11 @@ def main():
             sys.stderr.write("[warn] 未装 pypdf，跳过合册（pip install pypdf）。\n")
         else:
             book = manifest.get("book", "阅读单")
-            blank, demo = plan_bundles(sheets)
-            for tag, files in (("空白版", blank), ("示范版", demo)):
-                paths = [rendered_pdf[f] for f in files if f in rendered_pdf]
-                if not paths:
-                    continue
+            files = plan_bundle(sheets)
+            paths = [rendered_pdf[f] for f in files if f in rendered_pdf]
+            if paths:
                 name = write_bundle(
-                    out_dir / f"{book}-阅读单-{tag}-全套.pdf", paths)
+                    out_dir / f"{book}-阅读单-全套.pdf", paths)
                 print(f"合册 {name}：{len(paths)} 张")
 
 

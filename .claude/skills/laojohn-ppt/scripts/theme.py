@@ -11,7 +11,8 @@ SLIDE_H = Emu(6858000)    # 7.5"
 
 # ============ 字体 ============
 FONT_TITLE = "微软雅黑"
-FONT_BODY = "宋体"
+FONT_BODY = "微软雅黑"   # 全套正文统一微软雅黑（投屏更清晰）
+FONT_QUOTE = "宋体"      # 仅原文齐读页正文保留宋体（书卷感）
 FONT_ASCII = "Calibri"
 
 # ============ 颜色（RGB hex 字符串，无 #）============
@@ -58,6 +59,7 @@ SZ_ANCHOR_LABEL    = 20     # 左上章节铭牌（眉标）
 SZ_PAGE_EYEBROW    = 14     # 页内眉标小字
 SZ_HEADING         = 32     # 内页大标题
 SZ_BODY            = 20     # 正文 / 要点
+SZ_GUIDE_BULLET    = 24     # 引导问题页要点（①②③，用微软雅黑）
 SZ_QUOTE           = 24     # 原文齐读
 SZ_SUBTITLE        = 16     # 副标题（填空表格用）
 SZ_TABLE_HEAD      = 18

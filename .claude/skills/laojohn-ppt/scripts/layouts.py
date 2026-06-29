@@ -13,17 +13,18 @@ from helpers import (
     add_gradient_rect, _disable_shape_effects,
     add_numbered_bullets, add_click_reveal,
     add_rich_textbox, add_conclusion_card,
+    add_qa_textbox,
     set_ascii_font,
 )
 from theme import (
-    FONT_TITLE, FONT_BODY,
+    FONT_TITLE, FONT_BODY, FONT_QUOTE,
     COLOR_ANCHOR_BAR, COLOR_TITLE, COLOR_BODY, COLOR_MUTED, COLOR_ACCENT,
     COLOR_BG_QUOTE, COLOR_END_BG_FROM, COLOR_END_BG_TO,
     COLOR_SECTION_BG, COLOR_SECTION_FG, COLOR_SECTION_SUB,
     COLOR_SECTION_NUM, COLOR_SECTION_PG,
     COLOR_QMARK_WATER, COLOR_RED_ACCENT,
     SZ_COVER_TITLE, SZ_COVER_SUB, SZ_COVER_META,
-    SZ_ANCHOR_LABEL, SZ_PAGE_EYEBROW, SZ_HEADING, SZ_BODY, SZ_QUOTE,
+    SZ_ANCHOR_LABEL, SZ_PAGE_EYEBROW, SZ_HEADING, SZ_BODY, SZ_GUIDE_BULLET, SZ_QUOTE,
     SZ_SUBTITLE, SZ_TABLE_HEAD, SZ_TABLE_BODY, SZ_PAGE_NUM,
     # 坐标
     ANCHOR_BAR_X, ANCHOR_BAR_Y, ANCHOR_BAR_W, ANCHOR_BAR_H,
@@ -143,9 +144,11 @@ def render_cover(slide, page, ctx):
     # LOGO（位于横幅内部右上角，仅宽度，保持原比例）
     draw_logo_cover(slide, ctx.get("logo_path"))
 
-    # 大标题：自动包书名号、斜体（叠在横幅中央）；不加粗
+    # 大标题：读书会自动包书名号、斜体（叠在横幅中央）；不加粗
+    # 写作课标题是习作题目（如"这儿真美"），不是书名，不加《》
     title_text = (page.title or ctx.get("book_title", "")).strip()
-    if title_text and not (title_text.startswith("《") and title_text.endswith("》")):
+    if ctx.get("doc_kind") != "写作" and title_text \
+            and not (title_text.startswith("《") and title_text.endswith("》")):
         title_text = f"《{title_text}》"
     add_textbox(
         slide, COVER_TITLE_X, COVER_TITLE_Y, COVER_TITLE_W, COVER_TITLE_H,
@@ -291,7 +294,29 @@ def render_guide(slide, page, ctx):
 
     # 正文(引文)与要点(追问)可同页共存：引文在上、追问在下
     # （契约 field-extraction「引文+追问」模式；旧版 if/elif 会静默丢弃正文）
+    # 若要点带参考答案（page.bullet_answers），追问改走"问题+红色答案"交错版式
+    # （add_qa_textbox），先出问题、点击后出红字答案。
+    answers = getattr(page, "bullet_answers", None) or []
+    has_ans = any(a for a in answers)
     bullets_box = None
+    qa_groups = None
+
+    def _render_bullets(bx, by, bw, bh):
+        nonlocal bullets_box, qa_groups
+        if has_ans:
+            bullets_box, qa_groups = add_qa_textbox(
+                slide, bx, by, bw, bh,
+                page.bullets, answers,
+                text_size=SZ_GUIDE_BULLET, font=FONT_TITLE,
+            )
+        else:
+            bullets_box = add_textbox(
+                slide, bx, by, bw, bh,
+                bullets_text(page.bullets),
+                font=FONT_TITLE, size=SZ_GUIDE_BULLET, color=COLOR_BODY,
+                line_spacing=1.8, align="left", anchor="top",
+            )
+
     if page.body and page.bullets:
         add_textbox(
             slide, GUIDE_BULLETS_X, GUIDE_BULLETS_Y, GUIDE_BULLETS_W, pct_y(0.20),
@@ -299,19 +324,9 @@ def render_guide(slide, page, ctx):
             font=FONT_BODY, size=SZ_BODY, color=COLOR_BODY,
             line_spacing=1.6, align="left", anchor="top",
         )
-        bullets_box = add_textbox(
-            slide, GUIDE_BULLETS_X, pct_y(0.66), GUIDE_BULLETS_W, pct_y(0.24),
-            bullets_text(page.bullets),
-            font=FONT_BODY, size=SZ_BODY, color=COLOR_BODY,
-            line_spacing=1.8, align="left", anchor="top",
-        )
+        _render_bullets(GUIDE_BULLETS_X, pct_y(0.66), GUIDE_BULLETS_W, pct_y(0.24))
     elif page.bullets:
-        bullets_box = add_textbox(
-            slide, GUIDE_BULLETS_X, GUIDE_BULLETS_Y, GUIDE_BULLETS_W, GUIDE_BULLETS_H,
-            bullets_text(page.bullets),
-            font=FONT_BODY, size=SZ_BODY, color=COLOR_BODY,
-            line_spacing=1.8, align="left", anchor="top",
-        )
+        _render_bullets(GUIDE_BULLETS_X, GUIDE_BULLETS_Y, GUIDE_BULLETS_W, GUIDE_BULLETS_H)
     elif page.body:
         add_textbox(
             slide, GUIDE_BULLETS_X, GUIDE_BULLETS_Y, GUIDE_BULLETS_W, GUIDE_BULLETS_H,
@@ -320,10 +335,13 @@ def render_guide(slide, page, ctx):
             line_spacing=1.8, align="left", anchor="top",
         )
 
-    # 逐条点击：追问按段落构建，每点一次出一条（≥2 条才启用，单条直出）
-    if ctx.get("anim") and bullets_box is not None and len(page.bullets) >= 2:
-        spid = bullets_box.shape_id
-        add_click_reveal(slide, [[(spid, i)] for i in range(len(page.bullets))])
+    # 逐条点击：每点一次出一段（问题/答案各一击）；≥2 段才启用，单段直出
+    if ctx.get("anim"):
+        if qa_groups is not None and len(qa_groups) >= 2:
+            add_click_reveal(slide, qa_groups)
+        elif qa_groups is None and bullets_box is not None and len(page.bullets) >= 2:
+            spid = bullets_box.shape_id
+            add_click_reveal(slide, [[(spid, i)] for i in range(len(page.bullets))])
 
     maybe_placeholder(slide, page)
 
@@ -347,7 +365,7 @@ def render_quote(slide, page, ctx):
         add_textbox(
             slide, QUOTE_BODY_X, QUOTE_BODY_Y, QUOTE_BODY_W, QUOTE_BODY_H,
             page.body,
-            font=FONT_BODY, size=SZ_QUOTE, color=COLOR_TITLE,
+            font=FONT_QUOTE, size=SZ_QUOTE, color=COLOR_TITLE,
             line_spacing=1.8, first_line_indent_chars=2,
             align="left", anchor="top",
         )
@@ -368,7 +386,27 @@ def render_summary(slide, page, ctx):
 
     # 正文(引文)与要点可同页共存：引文在上、要点在下
     # （契约 field-extraction「引文+追问」模式；旧版 if/elif 会静默丢弃正文）
-    bullet_groups = None
+    # 若要点带参考答案（page.bullet_answers），改走"问题+红色答案"交错版式
+    # （add_qa_textbox 圈号问题在上、红字答案在下、逐段点击），不再用红方块编号。
+    answers = getattr(page, "bullet_answers", None) or []
+    has_ans = any(a for a in answers)
+    bullet_groups = None   # 红方块编号路径的点击分组
+    qa_groups = None       # 问答交错路径的逐段点击分组
+
+    def _render_bullets(bx, by, bw, bh):
+        nonlocal bullet_groups, qa_groups
+        if has_ans:
+            _box, qa_groups = add_qa_textbox(
+                slide, bx, by, bw, bh,
+                page.bullets, answers,
+                text_size=SZ_GUIDE_BULLET, font=FONT_TITLE,
+            )
+        else:
+            bullet_groups = add_numbered_bullets(
+                slide, bx, by, bw, bh,
+                page.bullets, columns=1, text_size=SZ_GUIDE_BULLET, text_font=FONT_TITLE,
+            )
+
     if page.body and page.bullets:
         add_textbox(
             slide, SUMMARY_BULLETS_X, SUMMARY_BULLETS_Y, SUMMARY_BULLETS_W, pct_y(0.18),
@@ -376,17 +414,9 @@ def render_summary(slide, page, ctx):
             font=FONT_BODY, size=SZ_BODY, color=COLOR_BODY,
             line_spacing=1.6, align="left", anchor="top",
         )
-        bullet_groups = add_numbered_bullets(
-            slide,
-            SUMMARY_BULLETS_X, pct_y(0.61), SUMMARY_BULLETS_W, pct_y(0.31),
-            page.bullets, columns=1, text_size=SZ_BODY,
-        )
+        _render_bullets(SUMMARY_BULLETS_X, pct_y(0.61), SUMMARY_BULLETS_W, pct_y(0.31))
     elif page.bullets:
-        bullet_groups = add_numbered_bullets(
-            slide,
-            SUMMARY_BULLETS_X, SUMMARY_BULLETS_Y, SUMMARY_BULLETS_W, SUMMARY_BULLETS_H,
-            page.bullets, columns=1, text_size=SZ_BODY,
-        )
+        _render_bullets(SUMMARY_BULLETS_X, SUMMARY_BULLETS_Y, SUMMARY_BULLETS_W, SUMMARY_BULLETS_H)
     elif page.body:
         add_textbox(
             slide, SUMMARY_BULLETS_X, SUMMARY_BULLETS_Y, SUMMARY_BULLETS_W, SUMMARY_BULLETS_H,
@@ -395,9 +425,12 @@ def render_summary(slide, page, ctx):
             line_spacing=1.8, align="left", anchor="top",
         )
 
-    # 逐条点击：每条要点的红方块+数字+文字成组，一次点击同出（≥2 条才启用）
-    if ctx.get("anim") and bullet_groups and len(bullet_groups) >= 2:
-        add_click_reveal(slide, bullet_groups)
+    # 逐条点击：每点一次出一组（≥2 组才启用）
+    if ctx.get("anim"):
+        if qa_groups is not None and len(qa_groups) >= 2:
+            add_click_reveal(slide, qa_groups)
+        elif bullet_groups and len(bullet_groups) >= 2:
+            add_click_reveal(slide, bullet_groups)
 
     maybe_placeholder(slide, page)
 

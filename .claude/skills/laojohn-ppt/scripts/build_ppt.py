@@ -109,7 +109,8 @@ def build(input_md: str, output_pptx: str, *,
             "logo_path": logo_path,
             "logo_white_path": logo_white_path,
             "banner_path": banner_path,
-            "meta": f"{deck.author}　·　{deck.grade}" if (deck.author or deck.grade) else "",
+            "meta": "　·　".join(p for p in (deck.author, deck.grade) if p),
+            "doc_kind": deck.doc_kind,
             "anim": anim,
         }
         renderer = RENDERERS.get(page.page_type)

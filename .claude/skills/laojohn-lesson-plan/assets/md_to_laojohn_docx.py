@@ -156,6 +156,60 @@ def smart_quotes(text: str) -> str:
     return ''.join(result)
 
 
+# ===================== 标点全角化（安全网） =====================
+
+# 中文语境下应为全角的半角标点：逗号 / 冒号 / 问号 / 叹号 / 分号 / 左右圆括号。
+# 不含句号 .——中文句末用 。，半角 . 多见于小数 / 序号 / 英文，全角化歧义大。
+_HALF2FULL = {',': '，', ':': '：', '?': '？', '!': '！',
+              ';': '；', '(': '（', ')': '）'}
+
+
+def _is_cn_ctx(ch: str) -> bool:
+    """该字符是否构成"中文上下文"——用于判断半角标点是否处在中文语境。
+    覆盖 CJK 汉字、CJK 符号与标点（、。「」等）、全角区（含已转的 ，：；？（））、
+    以及弯引号 “”‘’ / 省略号 … / 破折号 — / 间隔号 ·。"""
+    if not ch:
+        return False
+    if '一' <= ch <= '鿿':      # CJK 统一表意
+        return True
+    if '　' <= ch <= '〿':      # CJK 符号与标点
+        return True
+    if '＀' <= ch <= '￯':      # 全角 ASCII / 全角标点
+        return True
+    if ch in '“”‘’…—·':  # “ ” ‘ ’ … — ·
+        return True
+    return False
+
+
+def fullwidth_punct(text: str):
+    """把中文语境下的半角标点（, : ? ! ; ( )）兜底转为全角（， ： ？ ； （ ））。
+    上下文感知：仅当标点紧邻"中文上下文"字符时才转，故对 ASCII 代码、URL、
+    Markdown 链接 `](`、英文路径天然免疫；数字范围连接号 –、流程箭头 →、并列
+    斜杠 /、乘号 ×、全角竖线 ｜ 不在转换集合内，原样保留。相邻标点（如 ……) 或
+    ）;）一轮扫描互不影响，故循环到收敛。返回 (新文本, 转换处数)。
+    与 smart_quotes 同理须整篇一次性调用——但本函数无开/闭状态，逐行亦可，
+    仍整篇调用以与引号预处理同址、共用一次 join/split。
+    """
+    total = 0
+    while True:
+        out = []
+        changed = 0
+        for k, ch in enumerate(text):
+            if ch in _HALF2FULL:
+                prev = text[k - 1] if k > 0 else ''
+                nxt = text[k + 1] if k + 1 < len(text) else ''
+                if _is_cn_ctx(prev) or _is_cn_ctx(nxt):
+                    out.append(_HALF2FULL[ch])
+                    changed += 1
+                    continue
+            out.append(ch)
+        text = ''.join(out)
+        total += changed
+        if changed == 0:
+            break
+    return text, total
+
+
 # ===================== 统一文本入口（行内标记安全网） =====================
 
 # 成对的行内加粗标记 **…** 或 __…__
@@ -194,10 +248,17 @@ def add_md_text(p, text, size=BASE_SIZE, bold=False, color=None):
 
 # ===================== 各块渲染器 =====================
 
-def render_doc_title(doc, text):
-    # space_after 让主标题与紧随其后的「教案提纲」表格之间空出一行
-    p = doc.add_paragraph(); _fmt(p, space_after=16); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+def render_doc_title(doc, text, subtitle=None):
+    # 有副标题时:主副标题同段、软回车(<w:br/>)分行 + 单倍行距→上下不空太多;
+    # 无副标题(如阅读课案 H1 后是空行)时保持原样(space_after=16、默认行距)。
+    p = doc.add_paragraph()
+    _fmt(p, space_after=(6 if subtitle else 16),
+         line_spacing=(1.0 if subtitle else LINE_SPACING))
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     add_md_text(p, text, size=DOC_TITLE_SZ, bold=True)
+    if subtitle:
+        p.add_run().add_break()  # 软回车
+        add_md_text(p, subtitle, size=BASE_SIZE, bold=False)
 
 
 def render_subtitle(doc, text):
@@ -205,7 +266,7 @@ def render_subtitle(doc, text):
     add_md_text(p, text, size=BASE_SIZE, bold=False)
 
 
-def render_lesson_title(doc, text, page_break=False):
+def render_lesson_title(doc, text, page_break=False, align_left=False, head_sb=12):
     if page_break:
         # 分页：标题段设“段前分页”，并在其前插一个有高度的空行段，
         # 制造页眉与标题之间的视觉留白（空行段不分页，跟随标题翻到新页顶部）
@@ -216,8 +277,8 @@ def render_lesson_title(doc, text, page_break=False):
         spacer.paragraph_format.page_break_before = True
         set_font(spacer.add_run(' '), size=BASE_SIZE, bold=False)
     p = doc.add_paragraph()
-    _fmt(p, space_before=(6 if page_break else 12), space_after=6)
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    _fmt(p, space_before=(6 if page_break else head_sb), space_after=6)
+    p.alignment = WD_ALIGN_PARAGRAPH.LEFT if align_left else WD_ALIGN_PARAGRAPH.CENTER
     add_md_text(p, text, size=LESSON_SZ, bold=True, color=TITLE_COLOR)
 
 
@@ -701,6 +762,16 @@ def convert(md_path, docx_path):
               f'（双引号 {ascii_dq_count} 处，单引号 {ascii_sq_count} 处），'
               f'已整篇自动转换为中文弯引号。建议在源 .md 中修正。{odd_note}')
 
+    # 标点全角化预处理（整篇一次性，紧随引号规范化、无条件执行）：把中文语境下的
+    # 半角逗号/冒号/问号/分号/圆括号兜底转为全角。与引号同为安全网——CLAUDE.md §4
+    # 要求源 .md 自身就写对全角、不依赖兜底，这里只挡住源里漏改的半角标点。
+    # 上下文感知，ASCII 代码 / URL / 数字范围 – / 箭头 → / 斜杠 / 等不受影响。
+    raw, fw_count = fullwidth_punct('\n'.join(raw))
+    raw = raw.split('\n')
+    if fw_count:
+        print(f'[md_to_laojohn_docx] [WARN] 源文件含中文语境半角标点 {fw_count} 处'
+              f'（, : ? ! ; ( )），已整篇自动转为全角。建议在源 .md 中修正。')
+
     doc = Document()
 
     # 预扫描主标题里的《书名》，在正文前插入原生封面页（单节·首页独立页眉）。
@@ -716,10 +787,15 @@ def convert(md_path, docx_path):
     has_cover = render_cover_page(doc, book_name)
     setup_page(doc, has_cover=has_cover)
 
+    # 写作课详案(文件名含「写作课」)：给课时内环节标题(###)与书级头部(##)加段前留白，
+    # 让各环节明显分隔；阅读课案/测评卷不变（引擎有意让其课时内环节标题零段前距，
+    # 避免环节多时全文每个 ### 都留白）。判别用文件名，零误伤其他文档类型。
+    is_writing_lesson = '写作课' in os.path.basename(md_path)
+
     i = 0
     n = len(raw)
     seen_doc_title = False
-    seen_lesson = False
+    seen_lesson_title = False  # 仅在遇到「第N课时」时置位(头部章节/附录块不算)
     while i < n:
         line = raw[i]
         stripped = line.strip()
@@ -759,29 +835,38 @@ def convert(md_path, docx_path):
             m_book = re.search(r'《(.+?)》', title)
             if m_book:
                 book_name = m_book.group(1).strip()
-            render_doc_title(doc, title); seen_doc_title = True; i += 1
-            # 紧跟的非空非标记行当副标题
-            if i < n and raw[i].strip() and not raw[i].strip().startswith('#') \
-               and not raw[i].strip().startswith('师') and not is_table_line(raw[i]):
-                render_subtitle(doc, raw[i].strip()); i += 1
+            # 紧跟的非空非标记行当副标题:与主标题同段、软回车分行(见 render_doc_title)
+            subtitle = None
+            if i + 1 < n and raw[i+1].strip() and not raw[i+1].strip().startswith('#') \
+               and not raw[i+1].strip().startswith('师') and not is_table_line(raw[i+1]):
+                subtitle = raw[i+1].strip()
+            render_doc_title(doc, title, subtitle=subtitle)
+            seen_doc_title = True
+            i += 2 if subtitle else 1
             continue
         if stripped.startswith('## '):
             title_text = stripped[3:].strip()
-            # 课时标题(以"第"开头,如"第一课时")强制分页,即使是文档里第一个 ##;
-            # 其他 ## 沿用旧逻辑:第一次不分页、后续分页。
             is_lesson = title_text.startswith('第')
-            render_lesson_title(doc, title_text,
-                                page_break=(seen_lesson or is_lesson))
-            seen_lesson = True
+            if not is_lesson and not seen_lesson_title:
+                # 书级头部章节(教案提纲表/核心素养教学目标,在首个课时之前):
+                # 靠左、不分页(与上一节只空一行)、保留课时同款字号与色。
+                render_lesson_title(doc, title_text, page_break=False, align_left=True,
+                                    head_sb=(14 if is_writing_lesson else 12))
+            else:
+                # 课时标题(第…)强制分页;课时之后的附录块(附:…)沿用大标题+分页。
+                render_lesson_title(doc, title_text, page_break=True)
+                if is_lesson:
+                    seen_lesson_title = True
             i += 1; continue
         if stripped.startswith('### '):
             sec_text = stripped[4:].strip()
             # 书级章节(文本介绍/教学目标/教学流程,出现在首个课时之前)上方空一行；
-            # 课时内环节标题不加，避免全文每个 ### 前都留白。
+            # 课时内环节标题默认不加，避免全文每个 ### 前都留白——但写作课详案环节较少，
+            # 例外地也加段前留白(见 is_writing_lesson)，让 一/二/三 各环节明显分隔。
             render_section_title(doc, sec_text,
-                                 space_before=(14 if not seen_lesson else 0))
+                                 space_before=(14 if (not seen_lesson_title or is_writing_lesson) else 0))
             # 「一、文本介绍」标题下方插入书籍封面
-            if not seen_lesson and '文本介绍' in sec_text:
+            if not seen_lesson_title and '文本介绍' in sec_text:
                 render_cover(doc, book_name)
             i += 1; continue
 

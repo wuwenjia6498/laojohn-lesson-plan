@@ -102,18 +102,21 @@ def add_rich_textbox(slide, x, y, w, h, segments, *,
 
 
 def _set_east_asia_font(run, font_name):
-    """python-pptx 默认不设 eastAsia 字体，中文会回退到主题字体。手动注入。"""
+    """python-pptx 默认不设 eastAsia 字体，中文会回退到主题字体。手动注入。
+    注意：OOXML(CT_TextCharacterProperties) 规定 rPr 子元素须 latin 在前、
+    ea 在后。顺序写反会被 PowerPoint 判为非法而忽略 ea，导致中文也套用
+    latin 槽的字体(Calibri)，本地打开“所有字体显示 Calibri”。"""
     rPr = run._r.get_or_add_rPr()
-    # 移除已有 eastAsia
-    for ea in rPr.findall(qn("a:ea")):
-        rPr.remove(ea)
-    ea = etree.SubElement(rPr, qn("a:ea"))
-    ea.set("typeface", font_name)
-    # latin 设为 Calibri，避免中文字体应用到英文/数字时显丑
+    # 先 latin（须排在 ea 之前）：设为 Calibri，避免中文字体应用到英文/数字时显丑
     for latin in rPr.findall(qn("a:latin")):
         rPr.remove(latin)
     latin = etree.SubElement(rPr, qn("a:latin"))
     latin.set("typeface", FONT_ASCII)
+    # 再 ea：东亚字体
+    for ea in rPr.findall(qn("a:ea")):
+        rPr.remove(ea)
+    ea = etree.SubElement(rPr, qn("a:ea"))
+    ea.set("typeface", font_name)
 
 
 def add_rect(slide, x, y, w, h, fill_color, line=False, line_color=None):
@@ -288,7 +291,7 @@ def add_conclusion_card(slide, x, y, w, h, text, *,
 def add_numbered_bullets(slide, x, y, w, h, bullets, *,
                           text_size=20, columns=1,
                           num_bg=COLOR_NUMBOX_BG, num_fg=COLOR_NUMBOX_FG,
-                          text_color=COLOR_BODY,
+                          text_color=COLOR_BODY, text_font=FONT_BODY,
                           line_spacing=1.45, start_index=1):
     """要点列表：红方块编号 + 文字。
 
@@ -335,11 +338,76 @@ def add_numbered_bullets(slide, x, y, w, h, bullets, *,
         content_box = add_textbox(
             slide, text_x, cy, text_w, row_h,
             b,
-            font=FONT_BODY, size=text_size, color=text_color,
+            font=text_font, size=text_size, color=text_color,
             align="left", anchor="top", line_spacing=line_spacing,
         )
         groups.append([box_shape.shape_id, num_box.shape_id, content_box.shape_id])
     return groups
+
+
+_QA_CIRCLES = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨"]
+
+
+def add_qa_textbox(slide, x, y, w, h, bullets, answers, *,
+                   text_size=20, body_color=COLOR_BODY,
+                   answer_color=COLOR_RED_ACCENT, font=FONT_BODY,
+                   line_spacing=1.35):
+    """问题(圈号·正文色) + 参考答案(红字) 交错渲染为单个文本框。
+
+    bullets：问题列表；answers：与之平行对齐的参考答案列表（""=该题无答案）。
+    每条问题占一段（①②③…），其下若有答案再占一段（缩进、红字）。
+
+    返回 (box, reveal_groups)：
+        reveal_groups —— 按揭示顺序排列的逐段分组 [[(spid, pidx)], ...]，
+        问题段与答案段各自成组（各一次点击）。调用方据此调 add_click_reveal
+        做"先出问题、点击后出红色答案"的逐段淡入；动画关闭时全部静态显示
+        （问题正文色、答案红色），不影响线上系统。
+    """
+    box = slide.shapes.add_textbox(x, y, w, h)
+    tf = box.text_frame
+    tf.word_wrap = True
+    tf.margin_left = Emu(0); tf.margin_right = Emu(0)
+    tf.margin_top = Emu(0);  tf.margin_bottom = Emu(0)
+    tf.vertical_anchor = MSO_ANCHOR.TOP
+
+    reveal_order = []   # 段落 index，按出现(=揭示)顺序
+    pidx = 0
+    first = True
+
+    def _new_para(space_before_pt=0):
+        nonlocal first
+        p = tf.paragraphs[0] if first else tf.add_paragraph()
+        first = False
+        p.alignment = PP_ALIGN.LEFT
+        p.line_spacing = line_spacing
+        if space_before_pt:
+            p.space_before = Pt(space_before_pt)
+        return p
+
+    def _run(p, text, color, size):
+        run = p.add_run()
+        run.text = text
+        f = run.font
+        f.name = font
+        f.size = Pt(size)
+        f.color.rgb = rgb(color)
+        _set_east_asia_font(run, font)
+
+    for i, q in enumerate(bullets):
+        marker = _QA_CIRCLES[i] if i < len(_QA_CIRCLES) else f"{i + 1}."
+        p = _new_para(space_before_pt=0 if i == 0 else 10)
+        _run(p, f"{marker}  {q}", body_color, text_size)
+        reveal_order.append(pidx); pidx += 1
+
+        ans = answers[i] if i < len(answers) else ""
+        if ans:
+            pa = _new_para(space_before_pt=2)
+            # 缩进两个全角空格，与问题正文错开；红字
+            _run(pa, "　　" + ans, answer_color, text_size)
+            reveal_order.append(pidx); pidx += 1
+
+    groups = [[(box.shape_id, pi)] for pi in reveal_order]
+    return box, groups
 
 
 # ---------- 点击逐条呈现动画（注入 OpenXML 时间树）----------
@@ -663,5 +731,11 @@ def set_ascii_font(textbox, font_name):
             rPr = run._r.get_or_add_rPr()
             for latin in rPr.findall(qn("a:latin")):
                 rPr.remove(latin)
-            latin = etree.SubElement(rPr, qn("a:latin"))
+            latin = rPr.makeelement(qn("a:latin"), {})
             latin.set("typeface", font_name)
+            # OOXML 要求 latin 在 ea 之前；若已有 ea，插到它前面，否则追加
+            ea = rPr.find(qn("a:ea"))
+            if ea is not None:
+                ea.addprevious(latin)
+            else:
+                rPr.append(latin)

@@ -18,6 +18,9 @@
 字段集合：眉标 / 标题 / 副标题 / 正文 / 要点 / 表格 / 配图建议
 - 单值字段：眉标、标题、副标题、正文（可多行）
 - 列表字段：要点（以 `- ` 或 `• ` 开头）
+  - 某条要点(问题)下若紧跟一行 `参考：答案`，该答案挂到上一条要点，存进
+    bullet_answers[i]；laojohn-ppt 把它渲成红字、问题后逐段点击淡入（见
+    layouts.render_guide / render_summary）。
 - 表格字段：`表格：` 之后跟标准 GFM 表格
   - 单元格内 `{{答案}}` 标记 = 该格的"填空答案"片段；底表渲成空白占位、答案做成
     叠层在 laojohn-ppt 端逐格点击淡入（见 layouts.render_table）。
@@ -38,6 +41,9 @@ PAGE_TYPES = {"封面", "环节标题", "引导问题", "原文齐读", "要点�
 ANSWER_RE = re.compile(r"\{\{(.+?)\}\}")
 BLANK_PLACEHOLDER = "＿＿"
 
+# 要点列表里的"参考答案"行：紧跟某条要点之后的 `参考：答案`（可缩进，已 strip）
+REF_RE = re.compile(r"^参考\s*[:：]\s*(.+?)\s*$")
+
 PAGE_HEADER_RE = re.compile(
     r"^##\s*P(?P<num>\d+)\s*\|\s*页型\s*:\s*(?P<type>\S+?)\s*(?:\|\s*课时\s*:\s*(?P<course>.+?))?\s*$"
 )
@@ -52,6 +58,10 @@ class Page:
     subtitle: str = ""
     body: str = ""             # 多行正文
     bullets: List[str] = field(default_factory=list)
+    # 与 bullets 平行对齐：每条要点(问题)的参考答案，无答案处为 ""。
+    # 来源=要点列表里紧跟某条 `- 问题` 之后的 `参考：答案` 行；
+    # laojohn-ppt 把它渲成红字、问题之后逐段点击淡入（见 layouts.render_guide/summary）。
+    bullet_answers: List[str] = field(default_factory=list)
     table_headers: List[str] = field(default_factory=list)
     table_rows: List[List[str]] = field(default_factory=list)   # 存"完整答案版"（{{X}}→X）
     # 答案格：{(数据行0基, 列0基): {"blank": 占位版, "full": 完整版}}，供逐格点击叠层
@@ -67,6 +77,7 @@ class Deck:
     course: str = ""           # 课时（如"导读课"）
     author: str = ""           # 作者
     grade: str = ""            # 年级
+    doc_kind: str = ""         # 文体：""=读书会（缺省/向后兼容）、"写作"=写作课
     pages: List[Page] = field(default_factory=list)
 
 
@@ -113,7 +124,7 @@ def parse_md(md_text: str) -> Deck:
 
     # 第一阶段：扫元信息（可选 YAML front-matter 风格也行；这里用简单 key: value）
     i = 0
-    meta_pattern = re.compile(r"^(书名|课时|作者|年级)\s*[:：]\s*(.+?)\s*$")
+    meta_pattern = re.compile(r"^(书名|课时|作者|年级|文体)\s*[:：]\s*(.+?)\s*$")
     while i < len(lines):
         ln = lines[i].strip()
         if not ln:
@@ -132,6 +143,8 @@ def parse_md(md_text: str) -> Deck:
                 deck.author = val
             elif key == "年级":
                 deck.grade = val
+            elif key == "文体":
+                deck.doc_kind = val
         i += 1
 
     # 第二阶段：扫分页
@@ -209,7 +222,10 @@ def parse_md(md_text: str) -> Deck:
                 # 要点可能是单行/逗号分隔 / 也可能是后续 - 开头的列表
                 if tail.strip():
                     parts = re.split(r"\s*[/／、,，]\s*", tail.strip())
-                    current.bullets.extend([p for p in parts if p])
+                    for p in parts:
+                        if p:
+                            current.bullets.append(p)
+                            current.bullet_answers.append("")
                 pending_field = "要点"
             elif key == "表格":
                 pending_field = "表格"
@@ -232,6 +248,10 @@ def parse_md(md_text: str) -> Deck:
         if pending_field == "要点":
             if stripped.startswith(("- ", "• ", "* ")):
                 current.bullets.append(stripped[2:].strip())
+                current.bullet_answers.append("")
+            elif REF_RE.match(stripped) and current.bullets:
+                # `参考：答案` 行：挂到上一条要点（红字逐段点击）
+                current.bullet_answers[-1] = REF_RE.match(stripped).group(1)
             elif stripped == "":
                 pass
             else:
