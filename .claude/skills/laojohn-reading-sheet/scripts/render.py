@@ -168,13 +168,31 @@ def write_bundle(out_path, pdf_paths):
         return alt.name
 
 
+def _opt_value(argv, name, default=None):
+    """从 argv 取 `--name value`；缺省返回 default。"""
+    if name in argv:
+        i = argv.index(name)
+        if i + 1 < len(argv):
+            return argv[i + 1]
+    return default
+
+
 def main():
+    global TEMPLATES
     if len(sys.argv) < 3:
         raise SystemExit(__doc__)
     manifest_path = pathlib.Path(sys.argv[1]).resolve()
     out_dir = pathlib.Path(sys.argv[2]).resolve()
-    want_png = "--png" in sys.argv[3:]
-    want_bundle = "--no-bundle" not in sys.argv[3:]
+    rest = sys.argv[3:]
+    want_png = "--png" in rest
+    want_bundle = "--no-bundle" not in rest
+    # 课型无关参数（读书会默认不变；写作学习单等复用本引擎时传入）：
+    #   --templates-dir <dir>  换模板目录（缺省=本技能 templates/）
+    #   --bundle-label <词>     合册名里的物料词（缺省「阅读单」→ <book>-阅读单-全套.pdf）
+    tdir = _opt_value(rest, "--templates-dir")
+    if tdir:
+        TEMPLATES = pathlib.Path(tdir).resolve()
+    bundle_label = _opt_value(rest, "--bundle-label", "阅读单")
     out_dir.mkdir(parents=True, exist_ok=True)
 
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -230,12 +248,12 @@ def main():
         except ImportError:
             sys.stderr.write("[warn] 未装 pypdf，跳过合册（pip install pypdf）。\n")
         else:
-            book = manifest.get("book", "阅读单")
+            book = manifest.get("book", bundle_label)
             files = plan_bundle(sheets)
             paths = [rendered_pdf[f] for f in files if f in rendered_pdf]
             if paths:
                 name = write_bundle(
-                    out_dir / f"{book}-阅读单-全套.pdf", paths)
+                    out_dir / f"{book}-{bundle_label}-全套.pdf", paths)
                 print(f"合册 {name}：{len(paths)} 张")
 
 

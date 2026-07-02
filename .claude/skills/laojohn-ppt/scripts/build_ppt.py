@@ -14,7 +14,8 @@ from pptx import Presentation
 
 import theme
 from parser import parse_md, Page
-from layouts import RENDERERS
+from layouts_reading import RENDERERS_READING
+from layouts_writing import RENDERERS_WRITING
 
 
 def find_default_asset(filename_candidates, asset_subdir):
@@ -46,6 +47,9 @@ def build(input_md: str, output_pptx: str, *,
         deck.course = course_name
     if book_title:
         deck.title = book_title
+
+    # 按文体选 profile：写作课 → 写作 renderer 集；否则读书会（缺省/向后兼容）
+    renderers = RENDERERS_WRITING if deck.doc_kind == "写作" else RENDERERS_READING
 
     # 默认资源
     if logo_path is None:
@@ -113,7 +117,7 @@ def build(input_md: str, output_pptx: str, *,
             "doc_kind": deck.doc_kind,
             "anim": anim,
         }
-        renderer = RENDERERS.get(page.page_type)
+        renderer = renderers.get(page.page_type)
         if renderer is None:
             raise ValueError(f"P{page.num} 无渲染器：{page.page_type}")
         renderer(slide, page, ctx)

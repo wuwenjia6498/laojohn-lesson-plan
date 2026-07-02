@@ -1,7 +1,14 @@
 # -*- coding: utf-8 -*-
-"""通用绘制工具：文本框、矩形、占位框、表格。"""
+"""通用绘制工具：文本框、矩形、占位框、表格。
+
+【单一共享源 · 课型无关原语库】本模块是读书会与写作课两 profile 共用的底层渲染原语，
+是有 bug 史的横切层（字体槽顺序、表格自适应等修一处即重烘焙全部）。
+铁律：**永不 fork、禁出现 `doc_kind` / 课型分支**——课型差异在 layouts_reading /
+layouts_writing 各自的 renderer 与 theme_writing 变体里表达，不下沉到本层。
+"""
 import os
 import math
+import re
 from pptx.util import Pt, Emu
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
@@ -292,14 +299,22 @@ def add_numbered_bullets(slide, x, y, w, h, bullets, *,
                           text_size=20, columns=1,
                           num_bg=COLOR_NUMBOX_BG, num_fg=COLOR_NUMBOX_FG,
                           text_color=COLOR_BODY, text_font=FONT_BODY,
-                          line_spacing=1.45, start_index=1):
-    """要点列表：红方块编号 + 文字。
+                          line_spacing=1.45, start_index=1, num_style="box"):
+    """要点列表：序号标记 + 文字。
 
-    红方块去除主题阴影；要点之间不画分隔线。
+    num_style 决定标记视觉（纯样式参数，非课型分支——调用方按需选）：
+      - "box"（默认，读书会要点小结）：实心 num_bg 方块 + num_fg 数字。
+      - "outline"（写作课讲解页·有序要点）：白底 + num_bg 细描边 + num_bg 数字。
+      - "plain"：无方块，仅 num_bg 数字。
+      - "dot"（写作课讲解页·无序要点）：num_bg 实心小圆点，**不显示数字**——
+        并列要点不硬套 1/2/3 的次序暗示。
+      - "bar"（写作课讲解页·有序要点）：大号 num_bg 数字 + 右侧红色短竖线分隔正文，
+        **无方框**——比描边小方框更精致。
+    标记去除主题阴影；要点之间不画分隔线。
     columns=1 默认；调用方可传 columns=2 改双列。
 
-    返回：每条要点对应的 shape_id 分组列表 [[红方块id, 数字id, 文字id], ...]，
-    供逐条点击动画按"同一条一起淡入"成组（见 add_click_reveal）。
+    返回：每条要点对应的 shape_id 分组列表（成组供逐条点击动画同时淡入，
+    见 add_click_reveal）：含标记形状时 [标记id, (数字id,) 文字id]，plain 时 [数字id, 文字id]。
     """
     n = len(bullets)
     if n == 0:
@@ -312,6 +327,7 @@ def add_numbered_bullets(slide, x, y, w, h, bullets, *,
     # 方块尺寸：随字号缩放
     box_side = Pt(text_size + 8)
     text_gap = Pt(14)   # 方块到文字的横向间隙
+    num_text_color = num_fg if num_style == "box" else num_bg
 
     groups = []
     for i, b in enumerate(bullets):
@@ -321,17 +337,46 @@ def add_numbered_bullets(slide, x, y, w, h, bullets, *,
         cy = y + row * row_h
         box_top = cy + Pt(2)
 
-        # 红方块（去阴影）
-        box_shape = add_rect(slide, cx, box_top, box_side, box_side, num_bg)
-        _disable_shape_effects(box_shape)
-
-        # 数字
-        num_box = add_textbox(
-            slide, cx, box_top, box_side, box_side,
-            str(i + start_index),
-            font=FONT_TITLE, size=text_size - 2, color=num_fg,
-            bold=True, align="center", anchor="middle",
-        )
+        # 标记（去阴影）：box=实心方块 / outline=白底描边方块 / dot=实心小圆点 / plain=不画
+        box_shape = None
+        num_box = None
+        if num_style == "dot":
+            dot_d = Pt(int(text_size * 0.42))
+            dot_x = cx + (box_side - dot_d) // 2      # 在 box_side 缩进区居中，文字左界与其他模式对齐
+            dot_y = box_top + (box_side - dot_d) // 2
+            dot = slide.shapes.add_shape(MSO_SHAPE.OVAL, dot_x, dot_y, dot_d, dot_d)
+            dot.fill.solid()
+            dot.fill.fore_color.rgb = rgb(num_bg)
+            dot.line.fill.background()
+            _disable_shape_effects(dot)
+            box_shape = dot
+        elif num_style == "bar":
+            # 无框：大号 num_bg 数字 + 右侧红色短竖线分隔正文
+            num_box = add_textbox(
+                slide, cx, box_top, box_side, Pt(text_size + 8),
+                str(i + start_index),
+                font=FONT_TITLE, size=text_size + 4, color=num_bg,
+                bold=True, align="center", anchor="top",
+            )
+            bar_h = Pt(int(text_size * 1.4))
+            box_shape = add_rect(slide, cx + box_side, box_top, Pt(3), bar_h,
+                                 COLOR_RED_ACCENT)
+            _disable_shape_effects(box_shape)
+        else:
+            if num_style == "box":
+                box_shape = add_rect(slide, cx, box_top, box_side, box_side, num_bg)
+                _disable_shape_effects(box_shape)
+            elif num_style == "outline":
+                box_shape = add_rect(slide, cx, box_top, box_side, box_side,
+                                     "FFFFFF", line=True, line_color=num_bg)
+                _disable_shape_effects(box_shape)
+            # 数字
+            num_box = add_textbox(
+                slide, cx, box_top, box_side, box_side,
+                str(i + start_index),
+                font=FONT_TITLE, size=text_size - 2, color=num_text_color,
+                bold=True, align="center", anchor="middle",
+            )
         # 内容文字
         text_x = cx + box_side + text_gap
         text_w = col_w - box_side - text_gap - Pt(8)
@@ -341,7 +386,12 @@ def add_numbered_bullets(slide, x, y, w, h, bullets, *,
             font=text_font, size=text_size, color=text_color,
             align="left", anchor="top", line_spacing=line_spacing,
         )
-        groups.append([box_shape.shape_id, num_box.shape_id, content_box.shape_id])
+        grp = [content_box.shape_id]
+        if num_box is not None:
+            grp.insert(0, num_box.shape_id)
+        if box_shape is not None:
+            grp.insert(0, box_shape.shape_id)
+        groups.append(grp)
     return groups
 
 
@@ -513,6 +563,16 @@ def _remove_cell_borders(cell):
         etree.SubElement(ln, qn("a:noFill"))
 
 
+# 单元格分类上色标注：`[码:片段]`（与示范文分句上色同语法）。传 add_table(cell_colors=)
+# 时，标注片段渲染成该码对应的颜色；几何计算用剥掉标注后的纯文本。
+_CELL_ANNOT_RE = re.compile(r"\[([^:：\]]+)[:：]([^\]]+)\]")
+
+
+def _strip_cell_annot(text):
+    """剥掉单元格里的 `[码:片段]` 标注、只留片段文字（供列宽/字号几何估算）。"""
+    return _CELL_ANNOT_RE.sub(lambda m: m.group(2), str(text))
+
+
 def _cell_segments(text):
     """单元格文本 → 行段列表（`<br>` 与 `\n` 均视为换行）。"""
     return str(text).replace("<br>", "\n").split("\n")
@@ -613,7 +673,7 @@ def cell_bg_color(data_row_idx, zebra_bg="F5F5F5"):
 def add_table(slide, x, y, w, h, headers, rows,
               head_bg="44546A", head_fg="FFFFFF",
               head_size=None, body_size=None,
-              zebra_bg="F5F5F5", reveal_cells=None):
+              zebra_bg="F5F5F5", reveal_cells=None, cell_colors=None):
     """添加表格：无边框 + 表头深色 + 斑马纹，并**自适应塞进给定区域**。
 
     - `<br>` / `\n` 渲染为单元格内真实换行（多段落），不再印出字面量；
@@ -626,6 +686,10 @@ def add_table(slide, x, y, w, h, headers, rows,
         - 几何/行高仍用传入的 `rows`（完整答案版）算 → 叠层放得下；
         - 但底表里这些格只渲 `blank`（占位）；答案叠层由调用方（render_table）按
           返回的 `geom` 定位 + 逐格点击。
+
+    cell_colors：`{码: 颜色}`。给定时，单元格里 `[码:片段]` 标注的片段渲染成对应色并加粗
+        （与示范文分句上色同语法、同一套码 → 全课"颜色=手法/感官"一致）；几何用剥标注纯文本算。
+        不给（默认 None）时表格文字原样渲染——纯参数化加法，读书会调用不受影响。
 
     返回：`(table, geom)`，geom = {x, y, col_x[相对左偏移], col_w, row_y[相对顶偏移],
         row_h, body_fs, marg_l, marg_t, zebra_bg}，供调用方放置答案叠层。
@@ -640,12 +704,19 @@ def add_table(slide, x, y, w, h, headers, rows,
     marg_t = Emu(13716) if dense else Emu(27432)   # 0.015" / 0.03"
     marg_pt = (marg_l / 914400 * 72)
 
+    # 几何估算用文本：有分类上色标注时剥掉 `[码:]` 只留片段，避免列宽/字号被标记撑偏
+    if cell_colors:
+        calc_headers = [_strip_cell_annot(hh) for hh in headers]
+        calc_rows = [[_strip_cell_annot(c) for c in row] for row in rows]
+    else:
+        calc_headers, calc_rows = headers, rows
+
     # 列宽（内容自适应，按完整答案版 rows）
-    widths = _content_col_widths(headers, rows, w)
+    widths = _content_col_widths(calc_headers, calc_rows, w)
 
     # 自适应字号 + 逐行行高（确保合计 ≤ 区域高度 h，按完整答案版 rows）
     size_hi = body_size if body_size else 16
-    auto_fs, row_heights = _fit_table_font(headers, rows, widths, h, marg_pt, size_hi=size_hi)
+    auto_fs, row_heights = _fit_table_font(calc_headers, calc_rows, widths, h, marg_pt, size_hi=size_hi)
     body_fs = auto_fs
     head_fs = head_size if head_size else min(auto_fs + 2, 18)
 
@@ -670,17 +741,37 @@ def add_table(slide, x, y, w, h, headers, rows,
         tf.margin_top = marg_t
         tf.margin_bottom = marg_t
         align_map = {"left": PP_ALIGN.LEFT, "center": PP_ALIGN.CENTER}
+
+        def _mk_run(p, txt, color, run_bold):
+            run = p.add_run()
+            run.text = txt
+            font_name = FONT_TITLE if run_bold else FONT_BODY
+            run.font.name = font_name
+            run.font.size = Pt(size)
+            run.font.bold = run_bold
+            run.font.color.rgb = rgb(color)
+            _set_east_asia_font(run, font_name)
+
         for j, seg in enumerate(_cell_segments(text)):
             p = tf.paragraphs[0] if j == 0 else tf.add_paragraph()
             p.alignment = align_map.get(align, PP_ALIGN.LEFT)
             p.line_spacing = 1.1
-            run = p.add_run()
-            run.text = seg
-            run.font.name = FONT_TITLE if bold else FONT_BODY
-            run.font.size = Pt(size)
-            run.font.bold = bold
-            run.font.color.rgb = rgb(font_color)
-            _set_east_asia_font(run, FONT_TITLE if bold else FONT_BODY)
+            if cell_colors and _CELL_ANNOT_RE.search(seg):
+                # 分类上色：`[码:片段]` 片段用对应色+加粗，其余用默认色
+                pos = 0
+                for m in _CELL_ANNOT_RE.finditer(seg):
+                    if m.start() > pos:
+                        _mk_run(p, seg[pos:m.start()], font_color, bold)
+                    code, txt = m.group(1).strip(), m.group(2)
+                    if code in cell_colors:
+                        _mk_run(p, txt, cell_colors[code], True)
+                    else:
+                        _mk_run(p, txt, font_color, bold)
+                    pos = m.end()
+                if pos < len(seg):
+                    _mk_run(p, seg[pos:], font_color, bold)
+            else:
+                _mk_run(p, seg, font_color, bold)
 
     # 表头
     for c, header in enumerate(headers):

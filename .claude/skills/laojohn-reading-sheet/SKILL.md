@@ -5,7 +5,7 @@ description: 把一份「老约翰深度阅读」课程详案(.md)里学生要�
 
 # 老约翰课案 → 学生阅读单（学习单）
 
-把一份课程详案(`.md`)里**学生要动手填的那些表格/导图**，批量做成可打印的 A4 学习单——**只出学生能填的版本（空白版，不再出示范版）**，输出 PDF(交付打印) + HTML(可再编辑)。
+把一份课程详案(`.md`)里**学生要动手填的那些表格/导图**，批量做成可打印的 A4 学习单——**只出学生能填的版本（空白版，不再出示范版）**，输出 PDF(交付打印) + HTML(可再编辑)；并可**另出一份原生可编辑 PPTX**(每张单子重建成 PPT 原生表格/文本框/线条/形状，老师在 PowerPoint/WPS 里直接改字、加行、挪元素)。
 
 > ⚠ 本项目位于移动硬盘，盘符随挂载变动。执行前用 `(Get-Location).Path` 确认实际项目根目录，下文 `<项目根目录>` 代表该路径，**禁止硬编码盘符**。
 > 跑渲染脚本：用 `python`(非 `python3`)、命令加 `PYTHONUTF8=1`、并 `set PLAYWRIGHT_BROWSERS_PATH=C:/Users/<你>/AppData/Local/ms-playwright`。详见根 `CLAUDE.md` §1。
@@ -91,6 +91,12 @@ PYTHONUTF8=1 python scripts/render.py <manifest.json> "<项目根目录>\阅读�
 引擎逐张出 `<名>.pdf` + `<名>.html`(自包含)，logo 自动注入，A4 竖版、高度自适应。
 **渲完默认再合出一份「全套」PDF**(按 manifest 次序 = 教学先后次序排)：`<书名>-阅读单-全套.pdf`——各单子学生版顺次合订，给学生打印。归类：每个基名取其学生版（`-空` 或无后缀单版）进册，同基名只收一次；`-示范` 自动跳过。个别单子不想进全套册，在其 sheet 上加 `"packet": "none"`。
 
+**（可选）原生可编辑 PPTX**——用户要「能人工编辑的 PPT 版」时，跑平行引擎 `render_pptx.py`(读**同一份 manifest**，不必改 data)：
+```bash
+PYTHONUTF8=1 python scripts/render_pptx.py <manifest.json> "<项目根目录>\阅读单输出\<书名>"
+```
+出 `<书名>-阅读单.pptx`：一张单子一页、按 manifest(=教学先后)次序排，每张重建成 PPT 原生表格/文本框/线条/形状，可直接改字/加行/挪元素。`-示范` 同样自动跳过。**几何类(venn/ladder/logic/voyage/story_mountain/fishbone/timeline/bubble)为近似还原、与 PDF 有视觉差异**；其中 **timeline / story_mountain 原是横版，PPTX 里缩放横铺进竖版页(唯一已知近似点)**——交付时要显式提示用户「这两张如需精确横版以 PDF 为准」。内容超过一页的流式单子(如 4 分支 voyage)会自动纵向压缩入页、字号不变。不出 zip。
+
 ### 6. 自检 + 交付
 - 对照 `generation-rules.md` 末尾的**自检清单**逐条过(格子大小、书写空间、留白充分、真实性、品牌统一)。
 - 交付：把那份「全套」PDF 作成品 + 整批单张 PDF + 那份 `manifest.json` 一起给用户，说明"**manifest 是内容源头**，要改哪张就改它对应 sheet 再重渲——单张与合册同一次跑出、自动对齐；**别手改单张 HTML/PDF**(改不进 manifest、也带不动合册)"。
@@ -104,7 +110,7 @@ PYTHONUTF8=1 python scripts/render.py <manifest.json> "<项目根目录>\阅读�
 <项目根目录>\阅读单输出\<书名>\
 ```
 - `<书名>` 纯书名、不带书名号。一本书的所有阅读单 + manifest 都落这个子目录(一本书十几个文件，按书分文件夹)。
-- 文件命名：`<阅读单名>-空.pdf/.html`（或无后缀单版）、`<书名>-manifest.json`；合册 `<书名>-阅读单-全套.pdf`。
+- 文件命名：`<阅读单名>-空.pdf/.html`（或无后缀单版）、`<书名>-manifest.json`；合册 `<书名>-阅读单-全套.pdf`；可编辑 PPTX `<书名>-阅读单.pptx`(一份多页)。
 
 ---
 
@@ -119,12 +125,17 @@ PYTHONUTF8=1 python scripts/render.py <manifest.json> "<项目根目录>\阅读�
 
 `render.py` 只按 manifest 里 `template` 字段加载 `template_<键>.html`，所以**加模板=加一个守契约的 html + 登记表加一行**，引擎与已有模板零改动。
 
+> **若同时维护 PPTX 输出**：新模板还需在 `scripts/render_pptx.py` 的 `RENDERERS` 里注册一个 `render_<键>(slide, d)`(直接搬该 HTML render() 的像素坐标常量、按 `px→EMU` 复刻)；否则该模板的 PPTX 页会渲成「缺 renderer」占位提示。PDF 路径不受影响。
+
 > 优先判断：很多"新样式"其实只是现有原型换参数(3 圈维恩、5 阶阶梯、任意列表格)——这种**只改 data、不加模板**。真正结构不同的才走上面四步。
 
-> **历史说明**：曾有 `scripts/ppt_export.py` 把阅读单渲成「空白图 + 逐格答案小图」供 `laojohn-ppt` 的 `阅读单` 页型复用。因阅读单版式过多、破坏 PPT 排版一致性，该页型已下线——阅读单内容在 PPT 端改回**统一填空表格**呈现（答案 `{{}}` 标记、逐格点击，见 laojohn-ppt SKILL.md）。`ppt_export.py` 已删除；模板里残留的 `data-answer/data-content` 标注无害（不影响打印），保留即可，新模板无需再加。
+> **历史说明（勿与新 PPTX 输出混淆）**：曾有 `scripts/ppt_export.py` 把阅读单渲成「空白图 + 逐格答案小图」供 `laojohn-ppt` 的 `阅读单` 页型复用。因阅读单版式过多、破坏 PPT 排版一致性，该页型已下线——阅读单内容在 PPT 端改回**统一填空表格**呈现（答案 `{{}}` 标记、逐格点击，见 laojohn-ppt SKILL.md）。`ppt_export.py` 已删除；模板里残留的 `data-answer/data-content` 标注无害（不影响打印），保留即可，新模板无需再加。
+>
+> **本技能新增的 `render_pptx.py` 与上面那条无关**：它不是「阅读单塞进投屏课件」，而是把**阅读单本身**另出一份**老师可编辑的 PPTX 交付物**(原生形状/表格，独立于 laojohn-ppt、不耦合)，是 PDF/HTML 之外的第三种成品。
 
 ## 依赖与单一事实源
 
 - **logo**：根 `品牌资产\logo.png`(引擎注入，禁在 data 里另存副本)。
 - **数据事实源**：该书**课案详案**(列结构、节点、章节、参考答案)；书目/出版信息若需要则取**书籍档案**的机读块。**不翻原书、不凭记忆**。
-- 渲染管线复用 reading-guide 同款 Chromium 无头方案，零新依赖。
+- PDF/HTML 渲染管线复用 reading-guide 同款 Chromium 无头方案，零新依赖。
+- 可编辑 PPTX 引擎 `render_pptx.py` 仅依赖 `python-pptx`（复用 lesson-plan/ppt 链已装的同一个包），**自包含、不跨技能 import**（绘制原语就地移植，不引 laojohn-ppt 的 helpers/theme）。

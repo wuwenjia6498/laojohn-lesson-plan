@@ -16,6 +16,8 @@
 - **跑渲染脚本前先 `export PLAYWRIGHT_BROWSERS_PATH="C:/Users/69491/AppData/Local/ms-playwright"`**，否则 Playwright 去找不存在的 `/opt/pw-browsers` 报错。
 - **python 命令一律加 `PYTHONUTF8=1`**，避免脚本里 ✓ 等字符触发 GBK `UnicodeEncodeError`、中文路径乱码。
 
+**密钥承载约定（全仓首例，仅 `laojohn-picture-writing` 自动生图闭环用）：** 文生图/视觉验收的 AiHubMix 密钥经 **环境变量 `AIHUBMIX_API_KEY`（优先）** 或 **gitignored 的 `scripts/imggen.config.json`** 注入；base_url 默认 `https://aihubmix.com/v1`、模型 id 配置化、不写死。`imggen.config.json` 已入 `.gitignore`，**禁止提交密钥**；除此技能外全仓仍保持零网络调用。
+
 ## 2. 数据流主链
 
 ```
@@ -43,8 +45,12 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 | 书籍封面 | `书籍封面\<书名>.jpg/png`（书名不带书名号） | poster、book-card、reading-guide |
 | 书籍档案 | `书籍档案\<书名>书籍档案.md` | lesson-plan 及所有消费档案的下游 |
 | docx 排版引擎 | `.claude\skills\laojohn-lesson-plan\assets\md_to_laojohn_docx.py` | lesson-plan、writing-lesson、reading-assessment（跨技能复用同一条流水线；assessment 用法见 §2 末条） |
+| PPT 渲染原语 | `.claude\skills\laojohn-ppt\scripts\helpers.py`（文本框/表格/字体/点击动画/渐变/占位等底层件）+ `parser.py`（中间稿解析） | laojohn-ppt 读书会与写作课两 profile 共用；有 bug 史的横切层（字体槽顺序、表格自适应等修一处即重烘焙全部），**永不 fork、禁 `doc_kind`/课型分支** |
+| 学习单渲染引擎 | `.claude\skills\laojohn-reading-sheet\scripts\render.py`（PDF/HTML）+ `render_pptx.py`（可编辑 PPTX）+ `templates\`（模板库） | reading-sheet（整本书阅读单）与 writing-sheet（写作学习单）共用；课型无关，`render.py` 留 `--templates-dir`/`--bundle-label` 课型无关参数承载复用。**writing-sheet 不复制引擎/模板、跨技能调用**——改其路径/契约前须想到 writing-sheet 会静默失效 |
 
 > 现存物理副本（`laojohn-ppt\assets\logo\`、`laojohn-course-poster\assets\qrcode.png` / `assets\covers\`）属历史遗留；以根目录单一源为准，勿据副本做新决策。
+
+**PPT 引擎按课型分 profile（接缝原则）**：`laojohn-ppt` 的代码分两层——共享层 `helpers.py`/`parser.py`/`build_ppt.py` 课型无关、单一源；呈现层按 profile 分模块：`layouts_common.py`（公共元素+参数化封面基函数+END）、`layouts_reading.py`（读书会 6 页型 `RENDERERS_READING`）、`layouts_writing.py`（写作课 `RENDERERS_WRITING`）、`theme_writing.py`（写作课视觉变体）。`build_ppt.py` 按中间稿元信息 `文体：写作` 选 profile（缺省=读书会，向后兼容）。**新增写作课视觉/页型时只动 writing 模块 + theme_writing，绝不往 reading renderer 或 helpers 里塞课型分支**——否则共享引擎退化成条件分支堆。**页型枚举按 profile**：读书会 6 种（封面/环节标题/引导问题/原文齐读/要点小结/填空表格）；**写作课自成一套**——共用 封面/环节标题/填空表格（构思表·五感表·评价量表），**弃用 引导问题/要点小结**（读书会"思辨追问"的 Q 水印+红方块隐喻，套写作讲解会把连贯话切碎），改用写作专属 **情境任务**（设定情境/发布任务/课尾寄语，整段陈述不拆编号）/ **写法讲解**（讲写法·归纳要点·开放问句，克制序号：并列圆点·有序描边序号，去 Q 水印）/ **活动指令**（组织学生动手做，步骤条：深灰蓝方块+竖连接线）/ **示范文**（整篇教师范文塞一页、字号按字数自适应缩放，不拆页；区别于读书会原文齐读的大字满屏单段；**默认分句上色**——`图例`声明码=名、正文 `[码:片段]` 标注，渲染成顶部颜色图例+正文按手法上色，把"哪句写颜色/声音/比喻/中心句"显性化。**同一课的五感观察表（填空表格）、旁批表（双栏对照行模式）可复用同一 `图例`（同码同序）做单元格分类上色，三页颜色全课统一**——调色板单一源 `layouts_common.CATEGORY_PALETTE`、`add_table(cell_colors=)` 纯参数化不分课型）/ **双栏对照**（审题辨析/评改对照/逐句批注，左右并置）/ **写作任务**（静默写作定格，计时/字数 chip）。写作 profile 的 `引导问题/要点小结` 渲染器**重定向到 `render_teach`（去水印兜底）**，即便残留旧中间稿也不出 Q 水印/红方块。`parser.PAGE_TYPES` 是语法全集、按 profile 的 `RENDERERS_<profile>` 字典裁决某页型是否有效。写作页型字段写法的唯一源 = `laojohn-ppt-draft/references/writing-mode.md` §2/§2.5/§2.6。
 
 ## 4. 详案类两核心共用的不变量（lesson-plan / writing-lesson）
 
@@ -58,7 +64,7 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 - **交付双道工序**：先逐项 `checklist.md` 自检（合规），再独立复盘 `review-rubric.md`（质量；"审稿人协议五条"：身份重置 / 默认有问题 / 先摘后算 / 量化下限 / 真实性红线不豁免）。**第二道复盘已独立为冷启动执行**：由 `laojohn-detail-review` 技能承载，正常**派一个全新（fresh，非 fork）子 agent**、或在新会话里跑，**不在生成会话里自审**（顺接自审会为自己的设计辩护、`默认有问题`空转，沦为走过场；只有无法另起时才降级为同会话「显式封存生成过程后自审」）。两 skill 的 `review-rubric.md` 仍是各自五维与协议的唯一源——detail-review 只按文档类型加载对应 rubric、不复制其内容；改 rubric 五维即同时改了冷审依据。
 - **真实性红线**：伪摘录禁令——无可逐字核对的真实原文，禁止输出带引号的"原文"或"——节选自…"，一律占位；事实/页码/情节只来自档案，不得凭模型记忆补写（越是名作越易记错）。
 
-## 5. 全项目废弃约定
+- **「绝不联网」红线的作用域 + 看图写话生图例外口**：全仓「绝不联网、绝不凭记忆」红线**专指"事实不许凭网络或记忆补"**——书目/书封/页码/情节/人物只来自书籍档案（下游唯一事实源），不因网络搜到或模型记忆而混入。**`laojohn-picture-writing` 的自动生图闭环（按 imgspec 规格调 AiHubMix 文生图 + 多模态视觉验收）不属此禁**：方向与"从网络捞事实"相反——**规格是事实源、生成图必须服从规格**，并经「真图 vs 必须可见清单」自动验收 + 人工抽查双重把关（守门禁 4）。**铁律：生成插画不是"事实"，绝不可反过来用图去改写规格/正文的情节·数字**。此例外仅限看图写话生图；其余技能维持零网络调用。
 
 - **`【PPT换页-PXX】` 已废弃**（lesson-plan、writing-lesson 详案均不再写）。分页权归 `laojohn-ppt-draft`，由它按"教学节拍"自行切页；详案只需 `## 第N课时 · 课型` 划课时、`### 一、xx` 划环节。
 - docx 引擎仍把残留换页点渲染成橙色，**仅为向后兼容旧 docx**，新稿一律不产出。

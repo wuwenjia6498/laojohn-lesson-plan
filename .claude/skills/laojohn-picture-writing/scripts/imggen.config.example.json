@@ -1,0 +1,15 @@
+{
+  "_说明": "复制本文件为同目录 imggen.config.json 再填密钥。imggen.config.json 已被 .gitignore 忽略；本 example 入库，切勿在此填真 key。密钥也可改用环境变量 AIHUBMIX_API_KEY（优先级高于 api_key）。",
+  "api_key": "",
+  "base_url": "https://aihubmix.com/v1",
+  "gemini_base_url": "https://aihubmix.com/gemini",
+  "image_model": "gemini-3-pro-image-preview",
+  "vision_model": "gpt-4o",
+  "aspect_ratio": "4:3",
+  "image_size": "2K",
+  "size": "1536x1024",
+  "max_retries": 2,
+  "width_cm": 12.0,
+  "_备注_后端": "AiHubMix 图像分两条路（脚本按 image_model 自动选）：① gemini-*-image-preview（如 gemini-3-pro-image-preview，即 Nano Banana Pro）走原生 google-genai 客户端、base_url=gemini_base_url，用 aspect_ratio(1:1/4:3/16:9 等)+image_size(1K/2K/4K)，无 images.generate；② FLUX.1-Kontext-pro 等走 OpenAI 兼容 images.generate(/v1)，用 size。验收 vision_model 始终走 /v1 chat（gpt-4o 即可）。",
+  "_备注_成本": "max_retries 控成本：锚图缺项时最多重生次数。模型清单/计费见 AiHubMix 控制台。"
+}

@@ -208,16 +208,21 @@
       c.appendChild(img);
       coverBox.appendChild(c);
     } else {
-      coverBox.appendChild(el('div', 'cover placeholder', '书封待放'));
+      // 占位文字默认「书封待放」；写作学习指南等无书封场景可用 cover_placeholder 改写
+      coverBox.appendChild(el('div', 'cover placeholder',
+        (data.cover_placeholder != null ? data.cover_placeholder : '书封待放')));
     }
 
-    // 信息表:固定 3 行 × (键|值|键|值)
+    // 信息表:默认书目六格(读书会);若给 info_rows 则按它渲染(写作学习指南等复用)。
+    // info_rows: 每行 [k1, v1, k2, v2]，k 可为字符串或字符串数组(数组=分行堆叠显示)。
     const info = data.info || {};
-    const rows = [
-      ['书名', info['书名'], '字数', info['字数']],
-      ['作者', info['作者'], '页数', info['页数']],
-      ['出版社', info['出版社'], ['累计', '阅读'], info['累计阅读']],
-    ];
+    const rows = (Array.isArray(data.info_rows) && data.info_rows.length)
+      ? data.info_rows
+      : [
+          ['书名', info['书名'], '字数', info['字数']],
+          ['作者', info['作者'], '页数', info['页数']],
+          ['出版社', info['出版社'], ['累计', '阅读'], info['累计阅读']],
+        ];
     const tb = document.getElementById('infoBody');
     rows.forEach(([k1, v1, k2, v2]) => {
       const tr = el('tr');

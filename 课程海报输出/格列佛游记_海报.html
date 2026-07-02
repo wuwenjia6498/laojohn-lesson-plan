@@ -120,19 +120,19 @@
   <div class="content">
     <div class="award-block" id="award-block"></div>
     <div class="block">
-      <span class="pill-title">内容简介：</span>
+      <span class="pill-title" id="pt-summary">内容简介：</span>
       <div class="block-body" id="summary"></div>
     </div>
     <div class="block">
-      <span class="pill-title">阅读收获：</span>
+      <span class="pill-title" id="pt-gains">阅读收获：</span>
       <div id="gains"></div>
     </div>
     <div class="block">
-      <span class="pill-title">阅读策略学习&运用：</span>
+      <span class="pill-title" id="pt-strategies">阅读策略学习&运用：</span>
       <div class="block-body" id="strategies"></div>
     </div>
     <div class="block">
-      <span class="pill-title">可视化思维工具学习&运用：</span>
+      <span class="pill-title" id="pt-vistools">可视化思维工具学习&运用：</span>
       <div class="block-body" id="vistools"></div>
     </div>
     <div class="qr-wrap">
@@ -143,7 +143,7 @@
 
 </div>
 <script>
-const DATA = {"title": "格列佛游记", "level": "L6", "author": "作者：【英国】乔纳森·斯威夫特", "strategies": "预测、提问、联结、推断、比较、整合、转化、监控", "vistools": "预测阅读单（三列：我猜什么 / 我的依据 / 回看是否猜对）、对比表（双维对照）、讽刺手法逻辑图（三层）、维恩图、阶梯图（态度变化阶梯）、思维导图", "publisher": "江苏凤凰文艺出版社", "word_count": "23万", "page_count": "", "book_type": "游记体讽刺小说", "theme": "对人性、政治、战争与理性的讽刺", "award": ["世界讽刺文学的巅峰之作"], "summary": "外科医生兼船长格列佛四次航海，先后漂流到身高仅六英寸的小人国、巨人遍地的大人国、终日空想的飞岛，以及由理性的马“慧骃”统治、“野胡”四处游荡的国度。四段奇遇各自独立又层层推进，借一个“外来者”的眼睛，照见人性、政治、战争与理性。", "gains": ["讽刺手法：读懂夸张、对照与“外来者视角”如何把荒诞故事变成对现实的批评。", "结构把握：理清“四次航海·四个国度”的全书脉络与主要人物。", "批判性思考：学着用外来者的眼睛反观自身与社会，养成独立判断的习惯。"]};
+const DATA = {"title": "格列佛游记", "level": "L6", "author": "作者：【英国】乔纳森·斯威夫特", "strategies": "预测、提问、联结、推断、比较、整合、转化、监控", "vistools": "预测阅读单（三列：我猜什么 / 我的依据 / 回看是否猜对）、对比表（双维对照）、讽刺手法逻辑图（三层）、维恩图、阶梯图（态度变化阶梯）、思维导图", "publisher": "江苏凤凰文艺出版社", "word_count": "22.8万", "page_count": "304", "book_type": "游记体讽刺小说", "theme": "对人性、政治、战争与理性的讽刺", "award": ["世界讽刺文学的巅峰之作"], "summary": "外科医生兼船长格列佛四次航海，先后漂流到身高仅六英寸的小人国、巨人遍地的大人国、终日空想的飞岛，以及由理性的马“慧骃”统治、“野胡”四处游荡的国度。四段奇遇各自独立又层层推进，借一个“外来者”的眼睛，照见人性、政治、战争与理性。", "gains": ["讽刺手法：读懂夸张、对照与“外来者视角”如何把荒诞故事变成对现实的批评。", "结构把握：理清“四次航海·四个国度”的全书脉络与主要人物。", "批判性思考：学着用外来者的眼睛反观自身与社会，养成独立判断的习惯。"]};
 
 function isPlaceholder(s){
   if(s === null || s === undefined || s === '') return false;
@@ -169,15 +169,18 @@ function stripPrefix(s){
 
   document.getElementById('level').textContent = d.level || 'L?';
 
-  const rows = [
-    ['书名', d.title || ''],
-    ['作者', stripPrefix(d.author)],
-    ['出版社', stripPrefix(d.publisher)],
-    ['字数', stripPrefix(d.word_count)],
-    ['页数', stripPrefix(d.page_count)],
-    ['类型', stripPrefix(d.book_type)],
-    ['主题', stripPrefix(d.theme)],
-  ];
+  // 信息卡:默认书目字段(读书会);若给 info_rows(每行 [标签,值])则按它渲染(习作招生图等复用)。
+  const rows = (Array.isArray(d.info_rows) && d.info_rows.length)
+    ? d.info_rows
+    : [
+        ['书名', d.title || ''],
+        ['作者', stripPrefix(d.author)],
+        ['出版社', stripPrefix(d.publisher)],
+        ['字数', stripPrefix(d.word_count)],
+        ['页数', stripPrefix(d.page_count)],
+        ['类型', stripPrefix(d.book_type)],
+        ['主题', stripPrefix(d.theme)],
+      ];
   document.getElementById('info-left').innerHTML = rows.map(function(r){
     return '<div class="info-key">'+r[0]+'</div><div class="info-val">'+wrap(r[1])+'</div>';
   }).join('');
@@ -204,6 +207,14 @@ function stripPrefix(s){
 
   document.getElementById('strategies').innerHTML = wrap(d.strategies || '');
   document.getElementById('vistools').innerHTML = wrap(d.vistools || '');
+
+  // 栏目标题:默认读书会原文;给 labels 则覆盖(习作招生图等复用)。字段 id 不变、只换显示标签。
+  const L = d.labels || {};
+  function setPill(id, txt){ const e = document.getElementById(id); if (e && txt) e.textContent = txt; }
+  setPill('pt-summary', L.summary);
+  setPill('pt-gains', L.gains);
+  setPill('pt-strategies', L.strategies);
+  setPill('pt-vistools', L.vistools);
 
   document.body.setAttribute("data-rendered","1");
 })();

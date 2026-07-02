@@ -14,6 +14,8 @@ import sys, io, re, os, glob
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 VALID_PAGE_TYPES = {'封面','环节标题','引导问题','原文齐读','要点小结','填空表格'}
+# 写作课 profile 专属新页型（仅当 is_writing 时并入校验）
+WRITING_PAGE_TYPES = {'双栏对照','写作任务','情境任务','写法讲解','活动指令','示范文'}
 FORBID_KEYWORDS_IN_EYEBROW = ['导读课','阅读交流课','思辨应用课','写作指导课','当堂写作与评改课']
 
 # v1.1 字段冲突矩阵（与 references/field-extraction.md 末尾矩阵保持一致）
@@ -26,6 +28,18 @@ FIELD_MATRIX = {
     '填空表格': {'必填': ['眉标','标题','副标题','表格'],       '禁用': ['正文','要点','配图建议']},
 }
 
+# 写作课新页型字段矩阵（仅当 is_writing 时并入）。双栏对照字段灵活（块用左右栏、行用表格），
+# 故只约束眉标/标题必填；写作任务计时/字数可选（详案缺字数不强求），不列必填。
+# 讲解三页型：情境任务=整段陈述（必填正文）；写法讲解/活动指令=列点（必填要点）。
+WRITING_FIELD_MATRIX = {
+    '双栏对照': {'必填': ['眉标','标题'],          '禁用': []},
+    '写作任务': {'必填': ['眉标','标题','要点'],   '禁用': ['表格']},
+    '情境任务': {'必填': ['眉标','标题','正文'],   '禁用': ['表格','副标题']},
+    '写法讲解': {'必填': ['眉标','标题','要点'],   '禁用': ['表格','副标题']},
+    '活动指令': {'必填': ['眉标','标题','要点'],   '禁用': ['表格','副标题']},
+    '示范文':   {'必填': ['眉标','标题','正文'],   '禁用': ['表格','要点','副标题']},
+}
+
 
 def check_file(target: str, expect_range=None) -> tuple[list[str], list[str], list[tuple]]:
     text = open(target, encoding='utf-8').read()
@@ -35,6 +49,9 @@ def check_file(target: str, expect_range=None) -> tuple[list[str], list[str], li
     head = text[:300]
     is_writing = '文体：写作' in head or '文体:写作' in head
     required_meta = ['书名：','课时：','年级：'] + (['文体：'] if is_writing else ['作者：'])
+    # profile-aware：写作课并入新页型与其字段矩阵
+    valid_types = VALID_PAGE_TYPES | (WRITING_PAGE_TYPES if is_writing else set())
+    field_matrix = {**FIELD_MATRIX, **(WRITING_FIELD_MATRIX if is_writing else {})}
     for k in required_meta:
         if k not in head:
             errs.append(f'[meta] 缺 {k}')
@@ -54,7 +71,7 @@ def check_file(target: str, expect_range=None) -> tuple[list[str], list[str], li
 
     # 页型
     for m in re.finditer(r'^## P(\d+) \| 页型:(\S+)', text, re.MULTILINE):
-        if m.group(2) not in VALID_PAGE_TYPES:
+        if m.group(2) not in valid_types:
             errs.append(f'[P{m.group(1)}] 非法页型: {m.group(2)}')
 
     # 眉标禁课型
@@ -119,7 +136,7 @@ def check_file(target: str, expect_range=None) -> tuple[list[str], list[str], li
         is_image_grid = (pt == '引导问题' and img_sug_count >= 2)
 
         # 字段冲突矩阵
-        rules = FIELD_MATRIX.get(pt, {})
+        rules = field_matrix.get(pt, {})
         for must in rules.get('必填', []):
             if is_image_grid and must == '要点':
                 continue  # 网格页豁免要点必填

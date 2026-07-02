@@ -35,7 +35,12 @@ from dataclasses import dataclass, field
 from typing import List, Optional, Dict, Tuple
 
 
-PAGE_TYPES = {"封面", "环节标题", "引导问题", "原文齐读", "要点小结", "填空表格"}
+# 页型并集（课型无关）：原读书会 6 种 + 写作课新增「双栏对照 / 写作任务 / 情境任务 /
+# 写法讲解 / 活动指令」。本集合只是"语法上允许"的全集；某页型在某 profile 下是否有效，
+# 由 build_ppt 的 RENDERERS_<profile> 字典裁决（查不到 renderer 即报错）。reading profile
+# 不产出写作页型即可。
+PAGE_TYPES = {"封面", "环节标题", "引导问题", "原文齐读", "要点小结", "填空表格",
+              "双栏对照", "写作任务", "情境任务", "写法讲解", "活动指令", "示范文"}
 
 # 表格单元格答案标记：{{答案}} —— full 取答案、blank 取占位
 ANSWER_RE = re.compile(r"\{\{(.+?)\}\}")
@@ -43,6 +48,10 @@ BLANK_PLACEHOLDER = "＿＿"
 
 # 要点列表里的"参考答案"行：紧跟某条要点之后的 `参考：答案`（可缩进，已 strip）
 REF_RE = re.compile(r"^参考\s*[:：]\s*(.+?)\s*$")
+
+# 有序要点行：`1. ` / `1、` / `1) ` 起头（区别于无序 `- `/`• `/`* `）。
+# 命中即该页要点有先后次序，渲染成序号；否则圆点符号。
+ORDERED_BULLET_RE = re.compile(r"^\d+\s*[.、)]\s+(.+)$")
 
 PAGE_HEADER_RE = re.compile(
     r"^##\s*P(?P<num>\d+)\s*\|\s*页型\s*:\s*(?P<type>\S+?)\s*(?:\|\s*课时\s*:\s*(?P<course>.+?))?\s*$"
@@ -62,6 +71,9 @@ class Page:
     # 来源=要点列表里紧跟某条 `- 问题` 之后的 `参考：答案` 行；
     # laojohn-ppt 把它渲成红字、问题之后逐段点击淡入（见 layouts.render_guide/summary）。
     bullet_answers: List[str] = field(default_factory=list)
+    # 要点有无先后次序：无序(`- `列表)=False→渲染成圆点符号；有序(`1. `列表)=True→渲染成序号。
+    # 课型无关；主要供写作课「写法讲解」按内容语义切换标记（并列要点不硬套 1/2/3）。
+    bullets_ordered: bool = False
     table_headers: List[str] = field(default_factory=list)
     table_rows: List[List[str]] = field(default_factory=list)   # 存"完整答案版"（{{X}}→X）
     # 答案格：{(数据行0基, 列0基): {"blank": 占位版, "full": 完整版}}，供逐格点击叠层
@@ -69,6 +81,19 @@ class Page:
     image_suggestion: str = ""                                  # 单条（兼容旧逻辑/单图页）
     image_suggestions: List[str] = field(default_factory=list)  # 多条（≥2 触发四图网格）
     course: str = ""           # 课时（如有）
+    # —— 写作课页型用的通用数据字段（课型无关；reading profile 不产出即留默认空）——
+    # 「双栏对照」(render_compare)：块模式用 left_body/right_body（各一大段），
+    # 行模式用现有 table_headers/table_rows（2 列：句子↔批注）。模式在渲染端按内容自动判。
+    left_title: str = ""       # 左栏小标题（如"改前""A：跑题"）
+    left_body: str = ""        # 左栏正文（多行）
+    right_title: str = ""      # 右栏小标题（如"改后""B：切题"）
+    right_body: str = ""       # 右栏正文（多行）
+    # 「写作任务」(render_writing_task)：把计时/字数提为显要视觉元素，不压进 bullet
+    timer: str = ""            # 计时（如"约 22 分钟"）
+    word_count: str = ""       # 字数指引（如"150–250 字"；详案没给则留空）
+    # 「示范文」(render_model_essay) 分句上色图例：[(码, 图例名), ...]，颜色按序取调色板；
+    # 正文里 `[码:片段]` 标注的片段渲染成对应色，让"哪句写颜色/声音/比喻"在文字上跳出来。
+    legend: List[Tuple[str, str]] = field(default_factory=list)
 
 
 @dataclass
@@ -153,12 +178,15 @@ def parse_md(md_text: str) -> Deck:
     field_buf: List[str] = []
     pending_table_lines: List[str] = []
 
+    # 多行字段名 → Page 属性（正文/左正文/右正文 共用同一收集机制）
+    multiline_targets = {"正文": "body", "左正文": "left_body", "右正文": "right_body"}
+
     def flush_field():
         nonlocal pending_field, field_buf, pending_table_lines
         if current is None:
             return
-        if pending_field == "正文":
-            current.body = "\n".join(field_buf).strip()
+        if pending_field in multiline_targets:
+            setattr(current, multiline_targets[pending_field], "\n".join(field_buf).strip())
         elif pending_field == "表格":
             headers, rows, reveals = parse_table(pending_table_lines)
             current.table_headers = headers
@@ -168,7 +196,8 @@ def parse_md(md_text: str) -> Deck:
         field_buf = []
         pending_table_lines = []
 
-    field_single = {"眉标", "标题", "副标题", "配图建议"}
+    field_single = {"眉标", "标题", "副标题", "配图建议",
+                    "左标题", "右标题", "计时", "字数", "图例"}
 
     while i < len(lines):
         raw = lines[i]
@@ -194,7 +223,9 @@ def parse_md(md_text: str) -> Deck:
             continue
 
         # 字段头匹配："X：" 或 "X:"
-        m_field = re.match(r"^(眉标|标题|副标题|正文|要点|表格|配图建议)\s*[:：]\s*(.*)$", stripped)
+        m_field = re.match(
+            r"^(眉标|标题|副标题|正文|要点|表格|配图建议|左标题|左正文|右标题|右正文|计时|字数|图例)\s*[:：]\s*(.*)$",
+            stripped)
         if m_field:
             # 切换字段前 flush
             flush_field()
@@ -214,8 +245,23 @@ def parse_md(md_text: str) -> Deck:
                         # image_suggestion 保留首条非空，单图页/旧渲染路径继续可用
                         if not current.image_suggestion:
                             current.image_suggestion = val
-            elif key == "正文":
-                pending_field = "正文"
+                elif key == "左标题":
+                    current.left_title = tail.strip()
+                elif key == "右标题":
+                    current.right_title = tail.strip()
+                elif key == "计时":
+                    current.timer = tail.strip()
+                elif key == "字数":
+                    current.word_count = tail.strip()
+                elif key == "图例":
+                    # 形如 `中心=中心句｜色=看得见的颜色｜感=听到·摸到的感觉｜喻=打比方`
+                    for item in re.split(r"\s*[｜|]\s*", tail.strip()):
+                        if "=" in item:
+                            code, name = item.split("=", 1)
+                            if code.strip() and name.strip():
+                                current.legend.append((code.strip(), name.strip()))
+            elif key in multiline_targets:    # 正文 / 左正文 / 右正文
+                pending_field = key
                 if tail.strip():
                     field_buf.append(tail)
             elif key == "要点":
@@ -233,7 +279,7 @@ def parse_md(md_text: str) -> Deck:
             continue
 
         # 当前在收集字段
-        if pending_field == "正文":
+        if pending_field in multiline_targets:    # 正文 / 左正文 / 右正文
             if stripped == "":
                 # 空行：保留为段落分隔
                 field_buf.append("")
@@ -246,9 +292,15 @@ def parse_md(md_text: str) -> Deck:
             continue
 
         if pending_field == "要点":
+            _ordered_m = ORDERED_BULLET_RE.match(stripped)
             if stripped.startswith(("- ", "• ", "* ")):
                 current.bullets.append(stripped[2:].strip())
                 current.bullet_answers.append("")
+            elif _ordered_m:
+                # 有序列表 `1. 项`：去掉序号前缀（渲染端重排），并标记该页要点有次序
+                current.bullets.append(_ordered_m.group(1).strip())
+                current.bullet_answers.append("")
+                current.bullets_ordered = True
             elif REF_RE.match(stripped) and current.bullets:
                 # `参考：答案` 行：挂到上一条要点（红字逐段点击）
                 current.bullet_answers[-1] = REF_RE.match(stripped).group(1)

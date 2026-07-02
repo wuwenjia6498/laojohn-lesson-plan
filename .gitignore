@@ -9,6 +9,8 @@ env/
 # 环境与密钥
 .env
 .env.*
+# 看图写话生图密钥/配置（含 AiHubMix api_key，勿提交；example 模板照常入库）
+**/imggen.config.json
 
 # 系统文件
 .DS_Store

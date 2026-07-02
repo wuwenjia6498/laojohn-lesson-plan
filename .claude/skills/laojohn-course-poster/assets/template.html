@@ -120,19 +120,19 @@
   <div class="content">
     <div class="award-block" id="award-block"></div>
     <div class="block">
-      <span class="pill-title">内容简介：</span>
+      <span class="pill-title" id="pt-summary">内容简介：</span>
       <div class="block-body" id="summary"></div>
     </div>
     <div class="block">
-      <span class="pill-title">阅读收获：</span>
+      <span class="pill-title" id="pt-gains">阅读收获：</span>
       <div id="gains"></div>
     </div>
     <div class="block">
-      <span class="pill-title">阅读策略学习&运用：</span>
+      <span class="pill-title" id="pt-strategies">阅读策略学习&运用：</span>
       <div class="block-body" id="strategies"></div>
     </div>
     <div class="block">
-      <span class="pill-title">可视化思维工具学习&运用：</span>
+      <span class="pill-title" id="pt-vistools">可视化思维工具学习&运用：</span>
       <div class="block-body" id="vistools"></div>
     </div>
     <div class="qr-wrap">
@@ -169,15 +169,18 @@ function stripPrefix(s){
 
   document.getElementById('level').textContent = d.level || 'L?';
 
-  const rows = [
-    ['书名', d.title || ''],
-    ['作者', stripPrefix(d.author)],
-    ['出版社', stripPrefix(d.publisher)],
-    ['字数', stripPrefix(d.word_count)],
-    ['页数', stripPrefix(d.page_count)],
-    ['类型', stripPrefix(d.book_type)],
-    ['主题', stripPrefix(d.theme)],
-  ];
+  // 信息卡:默认书目字段(读书会);若给 info_rows(每行 [标签,值])则按它渲染(习作招生图等复用)。
+  const rows = (Array.isArray(d.info_rows) && d.info_rows.length)
+    ? d.info_rows
+    : [
+        ['书名', d.title || ''],
+        ['作者', stripPrefix(d.author)],
+        ['出版社', stripPrefix(d.publisher)],
+        ['字数', stripPrefix(d.word_count)],
+        ['页数', stripPrefix(d.page_count)],
+        ['类型', stripPrefix(d.book_type)],
+        ['主题', stripPrefix(d.theme)],
+      ];
   document.getElementById('info-left').innerHTML = rows.map(function(r){
     return '<div class="info-key">'+r[0]+'</div><div class="info-val">'+wrap(r[1])+'</div>';
   }).join('');
@@ -204,6 +207,14 @@ function stripPrefix(s){
 
   document.getElementById('strategies').innerHTML = wrap(d.strategies || '');
   document.getElementById('vistools').innerHTML = wrap(d.vistools || '');
+
+  // 栏目标题:默认读书会原文;给 labels 则覆盖(习作招生图等复用)。字段 id 不变、只换显示标签。
+  const L = d.labels || {};
+  function setPill(id, txt){ const e = document.getElementById(id); if (e && txt) e.textContent = txt; }
+  setPill('pt-summary', L.summary);
+  setPill('pt-gains', L.gains);
+  setPill('pt-strategies', L.strategies);
+  setPill('pt-vistools', L.vistools);
 
   document.body.setAttribute("data-rendered","1");
 })();
