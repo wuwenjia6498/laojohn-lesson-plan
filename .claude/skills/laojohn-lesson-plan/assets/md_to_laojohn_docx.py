@@ -550,16 +550,18 @@ def render_cover_page(doc, book_name):
                  _para_xml(_run_xml('老约翰深度阅读', 40, bold=True, color=GRAY)),
                  vert='eaVert', name='title', z=20)
     # 4) 左列《书名》+「教学设计」（深灰·同色；紧挨无空格；统一二号=22pt）
+    #    x 由 14.9 左移到 14.55：原竖排列与右侧「老约翰深度阅读」列间距仅 ~0.4cm、太挤，
+    #    净左移 0.35cm 拉开到 ~0.75cm。
     col = (_run_xml(f'《{book_name}》', 22, bold=False, color=GRAY)
            + _run_xml('教学设计', 22, bold=False, color=GRAY))
-    _add_textbox(r, 14.9, 4.9, 2.0, 16.5, _para_xml(col, jc='left'),
+    _add_textbox(r, 14.55, 4.9, 2.0, 16.5, _para_xml(col, jc='left'),
                  vert='eaVert', name='subtitle', z=20)
     # 5) 书封（左侧中下，略缩小；整体下移 1cm）
     _, bh = _add_float_picture(r, cpath, 2.9, 17.5, 6.0, name='cover', z=5)
     # 6) 获奖语（书封下方，随书封下移 1cm，不与书封重叠）
     if award:
         _add_textbox(r, 2.5, 17.5 + bh + 0.25, 14.5, 1.0,
-                     _para_xml(_run_xml(f'★{award}', 14, bold=True, color=INK), jc='left'),
+                     _para_xml(_run_xml(f'★{award}', 13, bold=False, color=INK), jc='left'),
                      vert='horz', name='award', z=22)
     # 7) 右下角贴角 1/4 圆徽标 + 年级（整圆圆心置于纸张右下角，被页边裁出 1/4）
     if level:
@@ -787,9 +789,9 @@ def convert(md_path, docx_path):
     has_cover = render_cover_page(doc, book_name)
     setup_page(doc, has_cover=has_cover)
 
-    # 写作课详案(文件名含「写作课」)：给课时内环节标题(###)与书级头部(##)加段前留白，
-    # 让各环节明显分隔；阅读课案/测评卷不变（引擎有意让其课时内环节标题零段前距，
-    # 避免环节多时全文每个 ### 都留白）。判别用文件名，零误伤其他文档类型。
+    # 环节标题(###)段前留白已统一为都加(见下方 stripped.startswith('### ') 分支)，
+    # 阅读课案/写作课/测评卷的课时内环节一致分隔。is_writing_lesson 仅剩书级头部(##)
+    # 字号微调用途(head_sb)。判别用文件名，零误伤其他文档类型。
     is_writing_lesson = '写作课' in os.path.basename(md_path)
 
     i = 0
@@ -860,11 +862,10 @@ def convert(md_path, docx_path):
             i += 1; continue
         if stripped.startswith('### '):
             sec_text = stripped[4:].strip()
-            # 书级章节(文本介绍/教学目标/教学流程,出现在首个课时之前)上方空一行；
-            # 课时内环节标题默认不加，避免全文每个 ### 前都留白——但写作课详案环节较少，
-            # 例外地也加段前留白(见 is_writing_lesson)，让 一/二/三 各环节明显分隔。
-            render_section_title(doc, sec_text,
-                                 space_before=(14 if (not seen_lesson_title or is_writing_lesson) else 0))
+            # 所有 ### 标题一律段前空一行：书级章节(文本介绍/教学目标/教学流程)、
+            # 写作课环节、以及阅读课案课时内的各环节(一/二/三…)都留白，让环节间明显分隔。
+            # (旧策略曾让阅读课案课时内环节零段前距以省留白，2026-07-04 按用户偏好统一改为都留白。)
+            render_section_title(doc, sec_text, space_before=14)
             # 「一、文本介绍」标题下方插入书籍封面
             if not seen_lesson_title and '文本介绍' in sec_text:
                 render_cover(doc, book_name)
