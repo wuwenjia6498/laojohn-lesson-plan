@@ -126,7 +126,8 @@ def _set_east_asia_font(run, font_name):
     ea.set("typeface", font_name)
 
 
-def add_rect(slide, x, y, w, h, fill_color, line=False, line_color=None):
+def add_rect(slide, x, y, w, h, fill_color, line=False, line_color=None,
+             shadow=False):
     shape = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, x, y, w, h)
     shape.fill.solid()
     shape.fill.fore_color.rgb = rgb(fill_color)
@@ -135,6 +136,9 @@ def add_rect(slide, x, y, w, h, fill_color, line=False, line_color=None):
         shape.line.width = Pt(0.5)
     else:
         shape.line.fill.background()
+    if not shadow:
+        # 平色条/分隔线/铭牌默认不要主题阴影（否则细线也拖一道灰影，AI 感重）
+        _disable_shape_effects(shape)
     return shape
 
 
@@ -176,6 +180,7 @@ def add_gradient_rect(slide, x, y, w, h, color_from, color_to, angle_deg=135):
 
     # 去边框
     shape.line.fill.background()
+    _disable_shape_effects(shape)
     return shape
 
 
@@ -261,15 +266,144 @@ def add_image_or_skip(slide, image_path, x, y, w, h):
         slide.shapes.add_picture(image_path, x, y, w, h)
 
 
+def _crop_to_fill(pic, target_w, target_h):
+    """把 add_picture 已按原比例放好的图裁成正好铺满 target 框（cover 语义）。
+
+    add_picture 给了 width→高按比例、或给了 width+height→拉伸。这里两边都给再用
+    crop 修掉溢出：先按较大缩放比铺满、算出溢出百分比、对称裁掉，杜绝拉伸变形。
+    pic.crop_* 取值是"裁掉的比例"(0~1)。图内在尺寸用 pic.image 原始像素算。
+    """
+    try:
+        iw, ih = pic.image.size  # 原始像素
+    except Exception:
+        return
+    if iw <= 0 or ih <= 0:
+        return
+    tw = float(target_w); th = float(target_h)
+    scale = max(tw / iw, th / ih)      # cover：取较大比，保证铺满
+    disp_w = iw * scale; disp_h = ih * scale
+    crop_x = (disp_w - tw) / disp_w / 2 if disp_w > tw else 0
+    crop_y = (disp_h - th) / disp_h / 2 if disp_h > th else 0
+    pic.crop_left = crop_x
+    pic.crop_right = crop_x
+    pic.crop_top = crop_y
+    pic.crop_bottom = crop_y
+
+
+def _round_picture(pic, radius_frac=0.06):
+    """把图形状换成圆角矩形（prstGeom = roundRect），radius_frac 控制圆角半径。"""
+    try:
+        spPr = pic._element.spPr
+        for tag in ("a:prstGeom", "a:custGeom"):
+            for el in spPr.findall(qn(tag)):
+                spPr.remove(el)
+        geom = etree.SubElement(spPr, qn("a:prstGeom"))
+        geom.set("prst", "roundRect")
+        av = etree.SubElement(geom, qn("a:avLst"))
+        gd = etree.SubElement(av, qn("a:gd"))
+        gd.set("name", "adj")
+        gd.set("fmla", f"val {int(radius_frac * 100000)}")
+    except Exception:
+        pass
+
+
+def add_image_cover(slide, x, y, w, h, image_path, *,
+                    rounded=True, radius_frac=0.05,
+                    caption=None, caption_band_color="6F9F5B",
+                    caption_fg="FFFFFF", caption_size=15,
+                    border_color=None):
+    """等比裁切铺满给定框放真图（cover），可选圆角 + 底部半透明说明条。
+
+    - image_path 不存在时：退回浅灰占位块 + 📷（不留白洞、不报错）。
+    - caption 非空时：在图底沿压一条 caption_band_color 说明条 + 白字场景名
+      （压的是纯色条不是文字浮层，不影响图面可读性；对齐文件4实景观察页样式）。
+    - border_color 非空时给图描一圈细边（浅灰卡感）。
+    返回 (pic_or_none, caption_shapes)——caption_shapes 供需要时纳入点击分组。
+    """
+    if not (image_path and os.path.isfile(image_path)):
+        # 占位兜底：浅灰圆角块 + 相机字
+        shp = slide.shapes.add_shape(
+            MSO_SHAPE.ROUNDED_RECTANGLE if rounded else MSO_SHAPE.RECTANGLE,
+            x, y, w, h)
+        if rounded:
+            try:
+                shp.adjustments[0] = radius_frac
+            except Exception:
+                pass
+        shp.fill.solid()
+        shp.fill.fore_color.rgb = rgb(COLOR_BG_PLACE)
+        shp.line.color.rgb = rgb(COLOR_DASH)
+        shp.line.width = Pt(1)
+        _disable_shape_effects(shp)
+        add_textbox(slide, x, y, w, h, "📷 待贴图" + (f"\n{caption}" if caption else ""),
+                    font=FONT_BODY, size=SZ_PLACEHOLDER, color=COLOR_MUTED,
+                    align="center", anchor="middle", line_spacing=1.4)
+        return None, []
+
+    pic = slide.shapes.add_picture(image_path, x, y, width=w, height=h)
+    _crop_to_fill(pic, w, h)
+    if rounded:
+        _round_picture(pic, radius_frac)
+    if border_color:
+        pic.line.color.rgb = rgb(border_color)
+        pic.line.width = Pt(0.75)
+
+    cap_shapes = []
+    if caption:
+        band_h = Pt(30)
+        band_y = y + h - band_h
+        band = add_rect(slide, x, band_y, w, band_h, caption_band_color)
+        _set_shape_alpha(band, 78000)        # 半透明说明条（78%），压图底沿
+        _disable_shape_effects(band)
+        cap = add_textbox(slide, x + Pt(12), band_y, w - Pt(24), band_h, caption,
+                          font=FONT_TITLE, size=caption_size, color=caption_fg,
+                          bold=True, align="left", anchor="middle")
+        cap_shapes = [band.shape_id, cap.shape_id]
+    return pic, cap_shapes
+
+
+def _round_rect_shape(shape, radius_frac=0.05):
+    """把一个已存在的矩形 shape 的几何换成圆角矩形。"""
+    try:
+        shape.adjustments[0] = radius_frac
+    except Exception:
+        pass
+
+
+def _set_shape_alpha(shape, alpha=78000):
+    """给实心填充加透明度（alpha 单位：0~100000，100000=不透明）。"""
+    try:
+        srgb = shape.fill.fore_color._xFill.find(qn("a:srgbClr"))
+        if srgb is not None:
+            a = etree.SubElement(srgb, qn("a:alpha"))
+            a.set("val", str(alpha))
+    except Exception:
+        pass
+
+
 def _disable_shape_effects(shape):
-    """禁用形状默认阴影等效果。注入空 <a:effectLst/> 元素覆盖主题 effect。"""
+    """禁用形状默认阴影等效果。
+
+    两处都要清才真正无阴影（历史 bug：只清 spPr 的 effectLst 时，<p:style> 里的
+    <a:effectRef idx="2"> 仍从主题拉回阴影，LibreOffice/PowerPoint 都会渲染出来）：
+      1) spPr 内注入空 <a:effectLst/> 覆盖局部效果；
+      2) 把 <p:style><a:effectRef> 的 idx 归 0（不引用主题效果矩阵）。
+    """
     spPr = shape.fill._xPr
-    # 移除已有 effectLst / effectDag
     for tag in ("a:effectLst", "a:effectDag"):
         for el in spPr.findall(qn(tag)):
             spPr.remove(el)
-    # 插入空 effectLst（必须在 scene3d/sp3d 之前，但放最后通常也兼容）
     etree.SubElement(spPr, qn("a:effectLst"))
+    # 2) 归零 styleRef 的 effectRef（主题阴影的真正来源）
+    try:
+        sp = shape._element
+        style = sp.find(qn("p:style"))
+        if style is not None:
+            eff_ref = style.find(qn("a:effectRef"))
+            if eff_ref is not None:
+                eff_ref.set("idx", "0")
+    except Exception:
+        pass
 
 
 def add_conclusion_card(slide, x, y, w, h, text, *,

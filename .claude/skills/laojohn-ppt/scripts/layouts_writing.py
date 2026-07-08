@@ -16,12 +16,15 @@
 封面、环节标题、原文齐读复用读书会/公共版式。
 """
 import math
+import os
 import re
-from pptx.util import Pt
+from pptx.util import Pt, Emu
+from pptx.enum.shapes import MSO_SHAPE
 from helpers import (
     add_textbox, add_rect, add_table, add_rich_textbox,
     add_numbered_bullets, add_qa_textbox, add_click_reveal,
-    add_image_placeholder,
+    add_image_placeholder, add_image_cover, rgb as _rgb,
+    _disable_shape_effects as _disable_effects,
 )
 from theme import (
     FONT_TITLE, FONT_BODY, FONT_QUOTE, COLOR_TITLE, COLOR_BODY, COLOR_RED_ACCENT,
@@ -66,13 +69,57 @@ def _fit_font_size(text, width_emu, height_emu, base, line_spacing, min_size=13,
     return size
 
 
-def _heading(slide, x, y, w, h, title, size=SZ_HEADING):
-    """带「」红字关键词高亮的内页大标题（沿用读书会引导问题页观感）。"""
+# 标题「纯文字」opt-out 值：不画色块（回到旧的纯文字标题）。
+_TITLE_PLAIN_STYLES = {"纯文字", "无"}
+
+
+def _title_boxed(style):
+    """判定该标题样式是否画粉底色块（供渲染器决定是否再补标题下红短线，避免双重强调）。
+    v8 起色块是**默认**：除 竖条 / 纯文字 外都画块（含 ""、"强调"、"默认"）。"""
+    return style not in _TITLE_PLAIN_STYLES and style != "竖条"
+
+
+def _heading(slide, x, y, w, h, title, size=SZ_HEADING, *, style=""):
+    """带「」红字关键词高亮的内页大标题（沿用读书会引导问题页观感）。
+
+    style（v8 · 纯样式、无课型分支）：
+      - ""（默认）/"强调"/"默认"：标题坐在粉底圆角块上（无描边、无下短线、无阴影）。
+        v8.1 起色块是**写作内页默认标题款**、铺到大部分页；"强调" 保留为同款别名（向后兼容）。
+      - "竖条"：标题左侧红竖条（密集讲解页可选）。
+      - "纯文字"/"无"：不画色块，回到纯文字标题（个别页想要素净时用）。
+    """
+    text_x = x
+    text_w = w
+    if style == "竖条":
+        # 左红竖条 + 文字右移让位
+        bar_h = Emu(int(h * 0.62))
+        bar_y = y + (h - bar_h) // 2
+        add_rect(slide, x, bar_y, tw.TITLE_BAR_W, bar_h, COLOR_RED_ACCENT)
+        text_x = x + tw.TITLE_BAR_W + tw.TITLE_BAR_INSET
+        text_w = w - (tw.TITLE_BAR_W + tw.TITLE_BAR_INSET)
+    elif style not in _TITLE_PLAIN_STYLES:
+        # 默认（含 "强调"/"默认"）：粉底圆角块托住标题（无描边、无下短线、无阴影）。
+        # 估算文字实际宽度，色块只包住文字（不铺满整行）——用字符数×字号近似。
+        plain = title or ""
+        est_w = min(w, Emu(int(len(plain) * size * 12700 * 1.05)) + 2 * tw.TITLE_BOX_PAD_X)
+        box = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y, est_w, h)
+        try:
+            box.adjustments[0] = tw.TITLE_BOX_RADIUS
+        except Exception:
+            pass
+        box.fill.solid()
+        box.fill.fore_color.rgb = _rgb(tw.COLOR_TITLE_BOX_BG)
+        box.line.fill.background()          # 无描边
+        _disable_effects(box)               # 无阴影
+        text_x = x + tw.TITLE_BOX_PAD_X
+        text_w = est_w - 2 * tw.TITLE_BOX_PAD_X
+    # 纯文字/无：不画色块，纯文字标题（旧默认观感）
+
     segs = []
     for txt, is_kw in _split_title_keywords(title or ""):
         color = COLOR_RED_ACCENT if is_kw else COLOR_TITLE
         segs.append((txt, {"color": color, "bold": True}))
-    add_rich_textbox(slide, x, y, w, h, segs,
+    add_rich_textbox(slide, text_x, y, text_w, h, segs,
                      font=FONT_TITLE, size=size,
                      align="left", anchor="middle", line_spacing=1.3)
 
@@ -225,10 +272,11 @@ def render_task_intro(slide, page, ctx):
     draw_page_num(slide, ctx["page_index"], ctx["page_total"])
 
     _heading(slide, tw.TASKINTRO_TITLE_X, tw.TASKINTRO_TITLE_Y,
-             tw.TASKINTRO_TITLE_W, tw.TASKINTRO_TITLE_H, page.title)
-    # 标题下红短线
-    add_rect(slide, tw.TASKINTRO_RULE_X, tw.TASKINTRO_RULE_Y,
-             tw.TASKINTRO_RULE_W, tw.TASKINTRO_RULE_H, tw.COLOR_ACCENT_RULE)
+             tw.TASKINTRO_TITLE_W, tw.TASKINTRO_TITLE_H, page.title, style=page.title_style)
+    # 标题下红短线：仅纯文字标题才补（画了色块的默认/强调样式自带衬托，避免双重强调）
+    if not _title_boxed(page.title_style):
+        add_rect(slide, tw.TASKINTRO_RULE_X, tw.TASKINTRO_RULE_Y,
+                 tw.TASKINTRO_RULE_W, tw.TASKINTRO_RULE_H, tw.COLOR_ACCENT_RULE)
 
     has_notes = bool(page.bullets)
     body_h = (tw.TASKINTRO_BODY_H_WITHNOTES if has_notes
@@ -262,9 +310,11 @@ def render_teach(slide, page, ctx):
     draw_page_num(slide, ctx["page_index"], ctx["page_total"])
 
     _heading(slide, tw.TEACH_TITLE_X, tw.TEACH_TITLE_Y,
-             tw.TEACH_TITLE_W, tw.TEACH_TITLE_H, page.title)
-    add_rect(slide, tw.TEACH_RULE_X, tw.TEACH_RULE_Y,
-             tw.TEACH_RULE_W, tw.TEACH_RULE_H, tw.COLOR_ACCENT_RULE)
+             tw.TEACH_TITLE_W, tw.TEACH_TITLE_H, page.title, style=page.title_style)
+    # 标题下红短线：仅纯文字标题才补（画了色块的默认/强调样式自带衬托，避免双重强调）
+    if not _title_boxed(page.title_style):
+        add_rect(slide, tw.TEACH_RULE_X, tw.TEACH_RULE_Y,
+                 tw.TEACH_RULE_W, tw.TEACH_RULE_H, tw.COLOR_ACCENT_RULE)
 
     has_body = bool(page.body)
     if has_body:
@@ -282,17 +332,16 @@ def render_teach(slide, page, ctx):
     qa_groups = bullet_groups = None
     if page.bullets:
         if has_ans:
+            # 有参考答案→问答交错优先（教学正确性高于版式花样，卡片/菱形不承载红答案）
             _box, qa_groups = add_qa_textbox(
                 slide, bx, by, bw, bh, page.bullets, answers,
                 text_size=tw.SZ_TEACH_BULLET, font=FONT_TITLE,
             )
         else:
-            # 有先后次序→大数字+红竖线；并列无序→圆点符号（不硬套 1/2/3）
-            style = "bar" if page.bullets_ordered else "dot"
-            bullet_groups = add_numbered_bullets(
-                slide, bx, by, bw, bh, page.bullets, columns=1,
+            # 无答案→按 bullet_style 选版式（竖排/卡片/步骤/图文/节点），默认竖排
+            bullet_groups = _render_bullets(
+                slide, page, ctx, bx, by, bw, bh,
                 text_size=tw.SZ_TEACH_BULLET, text_font=FONT_TITLE,
-                num_bg=tw.COLOR_TEACH_NUM, num_style=style,
             )
 
     if ctx.get("anim"):
@@ -429,6 +478,197 @@ def render_model_essay(slide, page, ctx):
                         align="left", anchor="top")
 
 
+# ============ v8 图片路径解析 ============
+def _resolve_image(ctx, path):
+    """把中间稿里的相对图片路径解析为绝对路径（相对中间稿 .md 所在目录）。
+    绝对路径原样返回；空/不存在返回原值交给 add_image_cover 兜底占位。"""
+    if not path:
+        return path
+    if os.path.isabs(path):
+        return path
+    base = ctx.get("input_dir") or ""
+    return os.path.normpath(os.path.join(base, path))
+
+
+# ============ v8 要点多版式分派 ============
+def _render_bullets(slide, page, ctx, x, y, w, h, *,
+                    text_size=tw.SZ_TEACH_BULLET, text_font=FONT_TITLE):
+    """按 page.bullet_style 选版式渲染要点，统一返回逐条点击分组（供 add_click_reveal）。
+    竖排＝复用 add_numbered_bullets（现有行为，默认）。其余走本模块新版式。
+    有参考答案(bullet_answers)时优先走问答交错（add_qa_textbox），版式选择器让位教学正确性。
+    """
+    bullets = page.bullets or []
+    if not bullets:
+        return []
+    style = page.bullet_style or "竖排"
+
+    if style == "卡片":
+        return _bullets_cards(slide, bullets, page, x, y, w, h, text_size)
+    if style == "节点":
+        return _bullets_diamond(slide, bullets, x, y, w, h, text_size)
+    if style == "图文":
+        return _bullets_media(slide, page, ctx, bullets, y, text_size)
+    if style == "步骤":
+        return add_numbered_bullets(slide, x, y, w, h, bullets, columns=1,
+                                    text_size=text_size, text_font=text_font,
+                                    num_bg=tw.COLOR_ACTIVITY_NUM, num_style="box")
+    # 竖排（默认）：有序→bar、无序→dot，沿用讲解页观感
+    num_style = "bar" if page.bullets_ordered else "dot"
+    return add_numbered_bullets(slide, x, y, w, h, bullets, columns=1,
+                                text_size=text_size, text_font=text_font,
+                                num_bg=tw.COLOR_TEACH_NUM, num_style=num_style)
+
+
+def _bullets_cards(slide, bullets, page, x, y, w, h, text_size):
+    """要点卡片横排：每条一张浅底圆角卡 + 序号圆章。末条可红底强调（bullets_highlight_last）。
+    3 条稳、4 条自动缩窄。返回每卡的形状分组（卡+章+字一次点击同出）。"""
+    n = len(bullets)
+    cols = min(n, 4)
+    gap = tw.CARDS_GAP
+    card_w = (w - gap * (cols - 1)) // cols
+    groups = []
+    hl_last = getattr(page, "bullets_highlight_last", False)
+    for i, b in enumerate(bullets):
+        cx = x + i * (card_w + gap)
+        is_hl = hl_last and i == n - 1
+        fill = tw.COLOR_CARD_FILL_HL if is_hl else tw.COLOR_CARD_FILL
+        num_bg = tw.COLOR_CARD_NUM_HL if is_hl else tw.COLOR_CARD_NUM
+        card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, cx, y, card_w, h)
+        try:
+            card.adjustments[0] = tw.CARD_RADIUS
+        except Exception:
+            pass
+        card.fill.solid(); card.fill.fore_color.rgb = _rgb(fill)
+        card.line.fill.background()
+        _disable_effects(card)
+        # 序号圆章
+        num_d = tw.CARD_NUM_D
+        num_x = cx + Emu(int(card_w * 0.08))
+        num_y = y + Emu(int(h * 0.08))
+        chip = slide.shapes.add_shape(MSO_SHAPE.OVAL, num_x, num_y, num_d, num_d)
+        chip.fill.solid(); chip.fill.fore_color.rgb = _rgb(num_bg)
+        chip.line.fill.background(); _disable_effects(chip)
+        num_t = add_textbox(slide, num_x, num_y, num_d, num_d, str(i + 1),
+                            font=FONT_TITLE, size=tw.SZ_CARD_NUM, color="FFFFFF",
+                            bold=True, align="center", anchor="middle")
+        # 卡内正文
+        pad = Emu(int(card_w * 0.09))
+        txt = add_textbox(slide, cx + pad, num_y + num_d + Emu(int(h * 0.04)),
+                          card_w - 2 * pad, h - num_d - Emu(int(h * 0.16)), b,
+                          font=FONT_BODY, size=text_size, color=COLOR_BODY,
+                          align="left", anchor="top", line_spacing=1.35)
+        groups.append([card.shape_id, chip.shape_id, num_t.shape_id, txt.shape_id])
+    return groups
+
+
+def _bullets_diamond(slide, bullets, x, y, w, h, text_size):
+    """要点菱形节点竖排：双层菱形序号节点（不放图标）+ 折线引导 + 文字。3–4 条。
+    折线：节点右尖 → 短横 → 斜折 → 文字带。返回每条分组（菱形组+折线+字一次点击）。"""
+    n = len(bullets)
+    step = tw.DIAMOND_STEP if n <= 4 else Emu(int((h) / n))
+    cx = tw.DIAMOND_X
+    groups = []
+    for i, b in enumerate(bullets):
+        cy = tw.DIAMOND_TOP + i * step
+        # 外层浅蓝菱形（旋转45°的方块用菱形自选图形 MSO_SHAPE.DIAMOND）
+        o = tw.DIAMOND_OUTER
+        outer = slide.shapes.add_shape(MSO_SHAPE.DIAMOND, cx - o, cy - o, 2 * o, 2 * o)
+        outer.fill.solid(); outer.fill.fore_color.rgb = _rgb(tw.COLOR_DIAMOND_OUTER)
+        outer.line.fill.background(); _disable_effects(outer)
+        ii = tw.DIAMOND_INNER
+        inner = slide.shapes.add_shape(MSO_SHAPE.DIAMOND, cx - ii, cy - ii, 2 * ii, 2 * ii)
+        inner.fill.solid(); inner.fill.fore_color.rgb = _rgb(tw.COLOR_DIAMOND_INNER)
+        inner.line.fill.background(); _disable_effects(inner)
+        num_t = add_textbox(slide, cx - ii, cy - ii, 2 * ii, 2 * ii, str(i + 1),
+                            font=FONT_TITLE, size=tw.SZ_DIAMOND_NUM, color="FFFFFF",
+                            bold=True, align="center", anchor="middle")
+        # 折线引导：节点右尖 → 文字带左侧（细灰折线，用两段矩形近似避免自定义几何）
+        line_y = cy
+        seg1_x = cx + o
+        seg1_w = tw.DIAMOND_TEXT_X - seg1_x
+        conn = add_rect(slide, seg1_x, line_y - Emu(6000), max(Emu(1), seg1_w), Emu(12000),
+                        tw.COLOR_DIAMOND_LINE)
+        _disable_effects(conn)
+        # 文字
+        txt = add_textbox(slide, tw.DIAMOND_TEXT_X, cy - Emu(int(step * 0.32)),
+                          tw.DIAMOND_TEXT_W, Emu(int(step * 0.64)), b,
+                          font=FONT_BODY, size=tw.SZ_DIAMOND_TEXT, color=COLOR_BODY,
+                          align="left", anchor="middle", line_spacing=1.3)
+        groups.append([outer.shape_id, inner.shape_id, num_t.shape_id,
+                       conn.shape_id, txt.shape_id])
+    return groups
+
+
+def _bullets_media(slide, page, ctx, bullets, y, text_size):
+    """图文版式：左真图（image_path→add_image_cover）+ 右要点竖排。
+    图无路径时 add_image_cover 自兜底占位。返回右侧要点的逐条分组（图不入点击、首屏即在）。"""
+    img_path = _resolve_image(ctx, getattr(page, "image_path", ""))
+    add_image_cover(slide, tw.MEDIA_IMG_X, tw.MEDIA_IMG_Y, tw.MEDIA_IMG_W, tw.MEDIA_IMG_H,
+                    img_path)
+    return add_numbered_bullets(slide, tw.MEDIA_BULLETS_X, tw.MEDIA_BULLETS_Y,
+                                tw.MEDIA_BULLETS_W, tw.MEDIA_BULLETS_H, bullets,
+                                columns=1, text_size=text_size, text_font=FONT_TITLE,
+                                num_bg=tw.COLOR_TEACH_NUM, num_style="dot")
+
+
+# ============ v8 实景观察页（大图 + 感官问答，图外文字、不压图）============
+def render_scene_observe(slide, page, ctx):
+    """实景观察：给学生看真实场景图，问"看/听/闻/摸到什么"。图在上、绿色说明条压图底沿、
+    问答文字在图外下方、绿线收尾（还原文件4老槐树S5/荷塘石头S6）。
+    场景数自动切版面：1 景→图占右侧、问答在左；2 景→两卡并排。逐场景点击揭示答案。"""
+    draw_anchor(slide, page.eyebrow)
+    draw_logo_inner(slide, ctx.get("logo_path"))
+    draw_page_num(slide, ctx["page_index"], ctx["page_total"])
+
+    _heading(slide, tw.SCENE_TITLE_X, tw.SCENE_TITLE_Y, tw.SCENE_TITLE_W,
+             tw.SCENE_TITLE_H, page.title, style=page.title_style or "强调")
+
+    scenes = page.scenes or []
+    if not scenes:
+        # 没写场景就退化成占位提示，不报错
+        add_image_placeholder(slide, tw.SCENE1_IMG_X, tw.SCENE1_IMG_Y,
+                              tw.SCENE1_IMG_W, tw.SCENE1_IMG_H,
+                              page.image_suggestion or "实景照片")
+        return
+
+    reveal = []
+    if len(scenes) == 1:
+        sc = scenes[0]
+        img = _resolve_image(ctx, sc.get("image_path", ""))
+        _pic, _caps = add_image_cover(
+            slide, tw.SCENE1_IMG_X, tw.SCENE1_IMG_Y, tw.SCENE1_IMG_W, tw.SCENE1_IMG_H,
+            img, caption=sc.get("name") or None,
+            caption_band_color=tw.COLOR_SCENE_BAND, caption_size=tw.SZ_SCENE_NAME)
+        # 左侧问答：问题黑字 + 答案红字，逐段点击
+        q = sc.get("question", ""); a = sc.get("answer", "")
+        _box, groups = add_qa_textbox(
+            slide, tw.SCENE1_QA_X, tw.SCENE1_QA_Y, tw.SCENE1_QA_W, tw.SCENE1_QA_H,
+            [q] if q else [], [a] if a else [],
+            text_size=tw.SZ_SCENE_Q, font=FONT_TITLE,
+            body_color=tw.COLOR_SCENE_QUESTION, answer_color=tw.COLOR_SCENE_ANSWER)
+        reveal.extend(groups)
+    else:
+        for col_x, sc in zip((tw.SCENE2_LEFT_X, tw.SCENE2_RIGHT_X), scenes[:2]):
+            img = _resolve_image(ctx, sc.get("image_path", ""))
+            add_image_cover(
+                slide, col_x, tw.SCENE2_CARD_TOP, tw.SCENE2_CARD_W, tw.SCENE2_IMG_H,
+                img, caption=sc.get("name") or None,
+                caption_band_color=tw.COLOR_SCENE_BAND, caption_size=tw.SZ_SCENE_NAME)
+            q = sc.get("question", ""); a = sc.get("answer", "")
+            _box, groups = add_qa_textbox(
+                slide, col_x, tw.SCENE2_TEXT_Y, tw.SCENE2_CARD_W, tw.SCENE2_TEXT_H,
+                [q] if q else [], [a] if a else [],
+                text_size=tw.SZ_SCENE_Q, font=FONT_TITLE,
+                body_color=tw.COLOR_SCENE_QUESTION, answer_color=tw.COLOR_SCENE_ANSWER)
+            reveal.extend(groups)
+            # 卡底绿细线
+            add_rect(slide, col_x, tw.SCENE2_RULE_Y, tw.SCENE2_CARD_W, Emu(9000),
+                     tw.COLOR_SCENE_RULE)
+
+    if ctx.get("anim") and len(reveal) >= 2:
+        add_click_reveal(slide, reveal)
+
+
 RENDERERS_WRITING = {
     "封面": render_cover,
     # —— 写作课专属页型 ——
@@ -438,6 +678,7 @@ RENDERERS_WRITING = {
     "示范文": render_model_essay,
     "双栏对照": render_compare,
     "写作任务": render_writing_task,
+    "实景观察": render_scene_observe,
     # —— 复用公共/读书会课型无关版式 ——
     "环节标题": render_section,
     "原文齐读": render_quote,

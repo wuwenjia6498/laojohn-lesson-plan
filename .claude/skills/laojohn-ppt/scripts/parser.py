@@ -40,7 +40,8 @@ from typing import List, Optional, Dict, Tuple
 # 由 build_ppt 的 RENDERERS_<profile> 字典裁决（查不到 renderer 即报错）。reading profile
 # 不产出写作页型即可。
 PAGE_TYPES = {"封面", "环节标题", "引导问题", "原文齐读", "要点小结", "填空表格",
-              "双栏对照", "写作任务", "情境任务", "写法讲解", "活动指令", "示范文"}
+              "双栏对照", "写作任务", "情境任务", "写法讲解", "活动指令", "示范文",
+              "实景观察"}
 
 # 表格单元格答案标记：{{答案}} —— full 取答案、blank 取占位
 ANSWER_RE = re.compile(r"\{\{(.+?)\}\}")
@@ -80,6 +81,9 @@ class Page:
     table_reveals: Dict[Tuple[int, int], dict] = field(default_factory=dict)
     image_suggestion: str = ""                                  # 单条（兼容旧逻辑/单图页）
     image_suggestions: List[str] = field(default_factory=list)  # 多条（≥2 触发四图网格）
+    # 真实图片路径（相对中间稿目录或绝对路径）。来源=`配图建议：图=<路径>｜说明…` 的 图= 段。
+    # 有路径→渲染端铺真图（add_image_cover）；无→退回虚线占位框。课型无关；仅写作 profile 用。
+    image_path: str = ""
     course: str = ""           # 课时（如有）
     # —— 写作课页型用的通用数据字段（课型无关；reading profile 不产出即留默认空）——
     # 「双栏对照」(render_compare)：块模式用 left_body/right_body（各一大段），
@@ -94,6 +98,19 @@ class Page:
     # 「示范文」(render_model_essay) 分句上色图例：[(码, 图例名), ...]，颜色按序取调色板；
     # 正文里 `[码:片段]` 标注的片段渲染成对应色，让"哪句写颜色/声音/比喻"在文字上跳出来。
     legend: List[Tuple[str, str]] = field(default_factory=list)
+    # —— v8 视觉版式选择器（写作 profile 用；不声明＝默认，向后兼容）——
+    # 标题样式：""=纯文字（默认）/ "强调"=粉底圆角+红边+红短线 / "竖条"=左红竖条。
+    # 来源=页内 `标题样式：强调|竖条` 行。渲染端 _heading 据此切换，纯样式、无课型分支。
+    title_style: str = ""
+    # 要点样式：""=竖排(默认) / "卡片" / "步骤" / "图文" / "节点"。来源=页内 `要点样式：X` 行。
+    # 写法讲解/情境任务的要点渲染据此分派；未知值回退竖排。
+    bullet_style: str = ""
+    # 卡片版式末条红底强调（来源=`要点样式：卡片强调`）。仅卡片版式生效。
+    bullets_highlight_last: bool = False
+    # 「实景观察」(render_scene_observe) 用：每个场景一组 (图路径, 场景名, 问题, 答案)。
+    # 来源=页内重复的 `场景：图=<路径>｜名=<场景名>｜问=<问题>｜答=<答案>` 行。
+    # 1 景→单景版面(图右/图上)，2 景→双景并排。无图路径的场景仍渲染卡片骨架（图位留占位）。
+    scenes: List[dict] = field(default_factory=list)
 
 
 @dataclass
@@ -197,7 +214,8 @@ def parse_md(md_text: str) -> Deck:
         pending_table_lines = []
 
     field_single = {"眉标", "标题", "副标题", "配图建议",
-                    "左标题", "右标题", "计时", "字数", "图例"}
+                    "左标题", "右标题", "计时", "字数", "图例",
+                    "标题样式", "要点样式", "场景"}
 
     while i < len(lines):
         raw = lines[i]
@@ -224,7 +242,7 @@ def parse_md(md_text: str) -> Deck:
 
         # 字段头匹配："X：" 或 "X:"
         m_field = re.match(
-            r"^(眉标|标题|副标题|正文|要点|表格|配图建议|左标题|左正文|右标题|右正文|计时|字数|图例)\s*[:：]\s*(.*)$",
+            r"^(眉标|标题样式|标题|副标题|正文|要点样式|要点|表格|配图建议|左标题|左正文|右标题|右正文|计时|字数|图例|场景)\s*[:：]\s*(.*)$",
             stripped)
         if m_field:
             # 切换字段前 flush
@@ -241,10 +259,44 @@ def parse_md(md_text: str) -> Deck:
                 elif key == "配图建议":
                     val = tail.strip()
                     if val:
-                        current.image_suggestions.append(val)
-                        # image_suggestion 保留首条非空，单图页/旧渲染路径继续可用
+                        # 可选真图路径：`图=<路径>｜说明…`。拆出 图= 段存 image_path，
+                        # 其余段仍作占位说明文字（无图时退回虚线占位框、有图直接铺图）。
+                        segs = [s.strip() for s in re.split(r"\s*[｜|]\s*", val) if s.strip()]
+                        kept = []
+                        for s in segs:
+                            m_img = re.match(r"^图\s*[=＝]\s*(.+)$", s)
+                            if m_img and not current.image_path:
+                                current.image_path = m_img.group(1).strip()
+                            else:
+                                kept.append(s)
+                        sug = "｜".join(kept) if kept else val
+                        current.image_suggestions.append(sug)
                         if not current.image_suggestion:
-                            current.image_suggestion = val
+                            current.image_suggestion = sug
+                elif key == "标题样式":
+                    v = tail.strip()
+                    # v8.1：粉底色块是默认标题款；"强调"/"默认"=同款别名，"竖条"/"纯文字"/"无"=例外。
+                    if v in {"强调", "默认", "竖条", "纯文字", "无"}:
+                        current.title_style = v
+                elif key == "要点样式":
+                    v = tail.strip()
+                    if v == "卡片强调":
+                        current.bullet_style = "卡片"
+                        current.bullets_highlight_last = True
+                    elif v in {"竖排", "卡片", "步骤", "图文", "节点"}:
+                        current.bullet_style = v
+                elif key == "场景":
+                    # `场景：图=<路径>｜名=<场景名>｜问=<问题>｜答=<答案>`（后三段可缺）
+                    sc = {"image_path": "", "name": "", "question": "", "answer": ""}
+                    for s in re.split(r"\s*[｜|]\s*", tail.strip()):
+                        m_kv = re.match(r"^(图|名|问|答)\s*[=＝:：]\s*(.*)$", s.strip())
+                        if not m_kv:
+                            continue
+                        k2, v2 = m_kv.group(1), m_kv.group(2).strip()
+                        sc[{"图": "image_path", "名": "name",
+                            "问": "question", "答": "answer"}[k2]] = v2
+                    if any(sc.values()):
+                        current.scenes.append(sc)
                 elif key == "左标题":
                     current.left_title = tail.strip()
                 elif key == "右标题":

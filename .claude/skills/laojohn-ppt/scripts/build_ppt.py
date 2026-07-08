@@ -112,6 +112,7 @@ def build(input_md: str, output_pptx: str, *,
             "meta": "　·　".join(p for p in (deck.author, deck.grade) if p),
             "doc_kind": deck.doc_kind,
             "anim": anim,
+            "input_dir": os.path.dirname(os.path.abspath(input_md)),
         }
         renderer = renderers.get(page.page_type)
         if renderer is None:

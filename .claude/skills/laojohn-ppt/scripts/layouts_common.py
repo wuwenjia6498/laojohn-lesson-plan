@@ -104,6 +104,7 @@ def draw_cover_triangle(slide):
     shape.fill.solid()
     shape.fill.fore_color.rgb = rgb(COLOR_ANCHOR_BAR)
     shape.line.fill.background()
+    _disable_shape_effects(shape)
 
 
 def draw_eyebrow(slide, page):

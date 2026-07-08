@@ -183,3 +183,94 @@ SZ_MODELESSAY_LEGEND = 15
 # 有图例时正文下移让出图例行（无图例用上面的 BODY_Y/H 占满）
 MODELESSAY_BODY_Y_LEGEND = pct_y(0.322)
 MODELESSAY_BODY_H_LEGEND = pct_y(0.608)
+
+
+# ============ v8 标题样式（_heading 的 boxed/bar 分支）============
+# 样式"强调"：粉底圆角框 + 红描边 + 标题下红短线（抓注意力页用，如情境任务/环节起始）。
+# 样式"竖条"：标题左侧红竖条（克制，密集讲解页用）。不声明＝纯文字（默认）。
+COLOR_TITLE_BOX_BG = "FBEEF0"          # 标题强调粉底
+COLOR_TITLE_BOX_BORDER = COLOR_RED_ACCENT
+TITLE_BOX_PAD_X = pct_x(0.012)         # 粉底框比文字左右各外扩
+TITLE_BOX_RADIUS = 0.28                # 圆角比例（roundRect adj）
+TITLE_BOX_RULE_W = pct_x(0.055)        # 框下红短线宽
+TITLE_BOX_RULE_H = pct_y(0.008)
+TITLE_BOX_RULE_GAP = pct_y(0.012)      # 框底到红短线的间隙
+TITLE_BAR_W = pct_x(0.006)             # 竖条样式：左红竖条宽
+TITLE_BAR_INSET = pct_x(0.006)         # 竖条与文字的间隙（竖条在文字左侧）
+
+# ============ v8 要点·卡片版式（render_bullets_cards）============
+# 每条要点一张浅底圆角卡横排；序号圆章；末条可红底强调。3 条稳、4 条缩。
+CARDS_Y = pct_y(0.40)
+CARDS_H = pct_y(0.45)
+CARDS_X = pct_x(0.07)
+CARDS_W = pct_x(0.86)
+CARDS_GAP = pct_x(0.02)
+COLOR_CARD_FILL = "F1EFE8"             # 卡底（浅灰米）
+COLOR_CARD_FILL_HL = "FBEEF0"          # 强调卡底（浅粉）
+COLOR_CARD_NUM = COLOR_ANCHOR_BAR      # 序号章底（深灰蓝）
+COLOR_CARD_NUM_HL = COLOR_RED_ACCENT   # 强调卡序号章底（红）
+CARD_RADIUS = 0.08
+CARD_NUM_D = pct_y(0.075)              # 序号圆章直径
+SZ_CARD_TEXT = 17
+SZ_CARD_NUM = 18
+
+# ============ v8 要点·菱形节点版式（render_bullets_diamond）============
+# 双层菱形序号节点（不放语义图标）+ 折线引导 + 文字带。3–4 条竖排。
+DIAMOND_X = pct_x(0.055)               # 节点中心 X
+DIAMOND_TOP = pct_y(0.40)              # 第一个节点中心 Y
+DIAMOND_STEP = pct_y(0.155)            # 节点垂直间距（4 条约到 0.86）
+DIAMOND_OUTER = pct_x(0.030)           # 外层菱形对角半宽（缩小：0.040→0.030）
+DIAMOND_INNER = pct_x(0.021)           # 内层菱形对角半宽（缩小：0.029→0.021）
+COLOR_DIAMOND_OUTER = "C7D3DE"         # 外层雾霾蓝（低饱和）
+COLOR_DIAMOND_INNER = "7B93A8"         # 内层雾霾蓝（低饱和）
+COLOR_DIAMOND_OUTER_HL = "F4C0D1"      # 强调外层浅粉
+COLOR_DIAMOND_INNER_HL = COLOR_RED_ACCENT
+COLOR_DIAMOND_LINE = "B4B2A9"          # 折线引导（浅灰）
+DIAMOND_TEXT_X = pct_x(0.115)          # 文字左界（菱形缩小后左移：0.135→0.115）
+DIAMOND_TEXT_W = pct_x(0.82)
+SZ_DIAMOND_TEXT = 18
+SZ_DIAMOND_NUM = 13                     # 序号字号（随菱形缩小：16→13）
+
+# ============ v8 要点·图文版式（render_bullets_media）============
+# 左真图（image_path，走 add_image_cover）+ 右要点竖排。
+MEDIA_IMG_X = pct_x(0.07)
+MEDIA_IMG_Y = pct_y(0.40)
+MEDIA_IMG_W = pct_x(0.36)
+MEDIA_IMG_H = pct_y(0.46)
+MEDIA_BULLETS_X = pct_x(0.48)
+MEDIA_BULLETS_Y = pct_y(0.40)
+MEDIA_BULLETS_W = pct_x(0.45)
+MEDIA_BULLETS_H = pct_y(0.46)
+
+# ============ v8 实景观察页（render_scene_observe）============
+# 图在上、绿色半透明说明条压图底沿、问答文字在图外下方、绿线收尾。
+# 1 景→单景（图占右上、问答在左）；2 景→双景并排。对齐文件4老槐树S5/荷塘石头S6。
+SCENE_TITLE_X = pct_x(0.07)
+SCENE_TITLE_Y = pct_y(0.185)
+SCENE_TITLE_W = pct_x(0.86)
+SCENE_TITLE_H = pct_y(0.12)
+COLOR_SCENE_BAND = "6F9F5B"            # 场景说明条（绿，还原文件4）
+COLOR_SCENE_RULE = "8FB877"            # 卡片底部绿细线
+COLOR_SCENE_ANSWER = COLOR_RED_ACCENT  # 答案红字
+COLOR_SCENE_QUESTION = COLOR_TITLE     # 问题黑字
+# —— 双景并排：两张卡左右分列 ——
+SCENE2_CARD_TOP = pct_y(0.33)
+SCENE2_LEFT_X = pct_x(0.055)
+SCENE2_RIGHT_X = pct_x(0.515)
+SCENE2_CARD_W = pct_x(0.43)
+SCENE2_IMG_H = pct_y(0.30)             # 卡内图高
+SCENE2_TEXT_Y = pct_y(0.65)            # 图下问答文字起点
+SCENE2_TEXT_H = pct_y(0.22)
+SCENE2_RULE_Y = pct_y(0.90)
+# —— 单景：图占右侧、问答卡在左 ——
+SCENE1_IMG_X = pct_x(0.60)
+SCENE1_IMG_Y = pct_y(0.33)
+SCENE1_IMG_W = pct_x(0.34)
+SCENE1_IMG_H = pct_y(0.55)
+SCENE1_QA_X = pct_x(0.07)
+SCENE1_QA_Y = pct_y(0.35)
+SCENE1_QA_W = pct_x(0.48)
+SCENE1_QA_H = pct_y(0.55)
+SZ_SCENE_NAME = 15                     # 说明条场景名
+SZ_SCENE_Q = 17                        # 问题
+SZ_SCENE_A = 17                        # 答案
