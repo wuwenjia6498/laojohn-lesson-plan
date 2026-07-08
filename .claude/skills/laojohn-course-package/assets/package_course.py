@@ -78,43 +78,10 @@ CATEGORIES = [
 ]
 
 
-# 写作课（习作课）模式分类（--mode writing）：吃写作各输出目录、按「题目」归集。
-# 写作课无书目卡/反馈话术/抢先看导图/阅读测评，故不收；下游只收教学导图。
-# book 形参此时传「习作题目」（如 这儿真美）。写作详案文件名含年级册前缀，用 *book* 通配匹配。
-WRITING_CATEGORIES = [
-    {
-        "label": "写作课详案",
-        "dest": "",
-        "globs": ["写作课输出/*{book}*写作课详案.*"],
-        "primary": {".docx"},
-    },
-    {
-        "label": "投屏PPT",
-        "dest": "课件PPT",
-        "globs": ["课件PPT输出/{book}/*"],
-        "primary": {".pptx"},
-    },
-    {
-        "label": "逐页讲稿",
-        "dest": "逐页讲稿",
-        "globs": ["课件讲稿输出/{book}/*"],
-        "primary": {".docx"},
-    },
-    {
-        "label": "写作下游物料",
-        "dest": "写作下游物料",
-        "globs": [
-            "教学思维导图/{book}_教学导图.*",
-        ],
-        "primary": {".jpg", ".jpeg", ".png", ".pdf", ".docx"},
-    },
-]
-
-
-def gather(root: Path, book: str, with_sources: bool, categories=CATEGORIES):
+def gather(root: Path, book: str, with_sources: bool):
     """返回 [(category_label, [(src_path, picked_bool, reason)])]，picked=是否复制。"""
     plan = []
-    for cat in categories:
+    for cat in CATEGORIES:
         items = []
         seen = set()
         for tmpl in cat["globs"]:
@@ -138,12 +105,10 @@ def gather(root: Path, book: str, with_sources: bool, categories=CATEGORIES):
 
 def main():
     ap = argparse.ArgumentParser(description="把一本书的全部成品归集进一个交付文件夹")
-    ap.add_argument("book", help="书名/习作题目（不带书名号），如：洞 / 这儿真美")
-    ap.add_argument("--mode", choices=["reading", "writing"], default="reading",
-                    help="reading=读书会(默认)；writing=写作课(吃写作输出目录、按题目归集)")
+    ap.add_argument("book", help="书名（不带书名号），如：洞")
     ap.add_argument("--root", default=None, help="项目根目录（默认当前工作目录）")
     ap.add_argument("--out", default=None,
-                    help="打包输出顶层目录名（默认：读书会 课程打包输出 / 写作课 写作课打包输出）")
+                    help="打包输出顶层目录名（默认：课程打包输出）")
     ap.add_argument("--dest", default=None, help="直接指定打包目标文件夹（覆盖 --out/<书名>）")
     ap.add_argument("--with-sources", action="store_true", help="连可编辑源文件(md/json/html)一起打包")
     ap.add_argument("--dry-run", action="store_true", help="只打印计划，不实际复制")
@@ -151,8 +116,7 @@ def main():
 
     book = args.book.strip().strip("《》").strip()
     root = Path(args.root).resolve() if args.root else Path.cwd()
-    categories = WRITING_CATEGORIES if args.mode == "writing" else CATEGORIES
-    out_top = args.out or ("写作课打包输出" if args.mode == "writing" else "课程打包输出")
+    out_top = args.out or "课程打包输出"
     dest_root = Path(args.dest).resolve() if args.dest else (root / out_top / book)
 
     if not root.exists():
@@ -161,12 +125,11 @@ def main():
 
     print(f"项目根目录 : {root}")
     print(f"打包目标   : {dest_root}")
-    print(f"课型       : {'写作课' if args.mode == 'writing' else '读书会'}")
     print(f"包含源文件 : {'是' if args.with_sources else '否（仅成品）'}")
     print(f"模式       : {'演练(dry-run)' if args.dry_run else '复制'}")
     print("=" * 60)
 
-    plan = gather(root, book, args.with_sources, categories)
+    plan = gather(root, book, args.with_sources)
 
     total_copied = 0
     summary = []
