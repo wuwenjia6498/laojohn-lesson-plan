@@ -18,7 +18,7 @@ bubble）为近似还原；timeline / story_mountain 原为横版，这里缩放
 
 加模板：在 RENDERERS 注册一个 render_<键>(slide, d) 即可，引擎不动（同 render.py 的扩展性）。
 """
-import os, sys, json, base64, pathlib
+import os, sys, json, base64, pathlib, math, unicodedata
 
 from pptx import Presentation
 from pptx.util import Emu, Pt, Mm
@@ -193,6 +193,8 @@ def add_line(slide, x1, y1, x2, y2, color, w=1.4, dash=None, tf=ID):
     if dash:
         ln = conn.line._get_or_add_ln()
         etree.SubElement(ln, qn("a:prstDash")).set("val", dash)
+    # 连接线默认继承主题投影（气泡连线/维恩书写线会带阴影）——空 effectLst 覆盖掉
+    _no_shadow(conn)
     return conn
 
 
@@ -226,10 +228,24 @@ def clean_variant(v):
     return s
 
 
+def _wrap_lines(text, width_px, size_px):
+    """估算一段文字在给定宽度/字号下的换行行数（含显式 \\n）。
+    PPTX 是绝对定位、无浏览器流式排版，长副标题会压到下方正文，故正文起点须按此下推。
+    宽度按东亚全角=1em、其余≈0.55em 估算，模糊向上取整（宁可多留空、不撞版）。"""
+    per_line = max(1.0, width_px / float(size_px))       # 每行可容纳的 em 单位数
+    total = 0
+    for seg in str(text).split("\n"):
+        units = 0.0
+        for ch in seg:
+            units += 1.0 if unicodedata.east_asian_width(ch) in ("W", "F", "A") else 0.55
+        total += max(1, math.ceil(units / per_line))
+    return max(1, total)
+
+
 def header(slide, d, *, title_align="center", title_px=72, title_size=23,
            sub_px=112, title_color="333333", sub_color="8A8268",
            variant_color="B3A98F", title=None):
-    """通用页眉：logo + 版本角标 + 标题 + 副标题。返回正文起始 y(px)。"""
+    """通用页眉：logo + 版本角标 + 标题 + 副标题。返回正文起始 y(px)（副标题多行时随之下推）。"""
     add_logo(slide)
     var = clean_variant(d.get("variant", ""))
     if var:
@@ -248,14 +264,17 @@ def header(slide, d, *, title_align="center", title_px=72, title_size=23,
         sx, sw = (64, 640) if title_align == "left" else (48, 698)
         add_text(slide, sx, sub_px, sw, 50, sub, size=15, color=sub_color,
                  align=sa, line_spacing=1.5)
-        y = max(y, sub_px + 40)
+        # 15px 行高 ×1.5 ≈ 23px/行；末行下留 16px 间隔
+        lines = _wrap_lines(sub, sw, 15)
+        y = max(y, sub_px + lines * 23 + 16)
     return y
 
 
 def footer(slide, d, key="footer", color="9A937F", y=1075):
+    # PDF 模板的 note/foot 一律左对齐（padding 40px）——PPTX 对齐之
     txt = d.get(key, "")
     if txt:
-        add_text(slide, 40, y, 714, 30, txt, size=14, color=color, align="center")
+        add_text(slide, 40, y, 714, 30, txt, size=14, color=color, align="left")
 
 
 # ─────────────────────────── 表格内边框 ───────────────────────────
@@ -305,9 +324,9 @@ CONTENT_X, CONTENT_W = 56, 682           # #page padding 56 两侧 → 正文区
 
 
 def render_table(slide, d):
-    header(slide, d, title_align="left", title_px=108, title_size=21,
-           sub_px=146, title_color="2B2B2B", sub_color="8A8175",
-           variant_color="A89B8A")
+    body_y = header(slide, d, title_align="left", title_px=108, title_size=21,
+                    sub_px=146, title_color="2B2B2B", sub_color="8A8175",
+                    variant_color="A89B8A")
     cols = d.get("columns", [])
     rows = d.get("rows", [])
     ncol = len(cols)
@@ -317,13 +336,23 @@ def render_table(slide, d):
         hi = -1
     row_min_h = d.get("row_min_h", 64)
 
-    y0 = 190 if d.get("subtitle") else 168
+    y0 = max(168, int(round(body_y))) if d.get("subtitle") else 168
     # 表头高度随表头换行数
     hd_lines = max((str(c.get("name", "")).count("\n") + 1) for c in cols) if cols else 1
     head_h = 30 + 20 * hd_lines
 
+    # 竖版页固定高，行多/行高大的表（如 9 行自读检测表）会挂出页底——按可用高度把行高
+    # 等比压到入页，设可书写下限 84px（低于此宁可挂底也不再压，保住书写空间）。
+    PAGE_H, BOT_MARGIN, ROW_FLOOR = 1123, 28, 84
+    if rows:
+        avail_rows = PAGE_H - BOT_MARGIN - y0 - head_h
+        fit_h = avail_rows / len(rows)
+        row_h = row_min_h if row_min_h * len(rows) <= avail_rows else max(ROW_FLOOR, int(fit_h))
+    else:
+        row_h = row_min_h
+
     shape = slide.shapes.add_table(len(rows) + 1, ncol, E(CONTENT_X), E(y0),
-                                   E(CONTENT_W), E(head_h + row_min_h * len(rows)))
+                                   E(CONTENT_W), E(head_h + row_h * len(rows)))
     table = shape.table
     table.first_row = False
     table.horz_banding = False
@@ -337,7 +366,7 @@ def render_table(slide, d):
         acc += w
     table.rows[0].height = E(head_h)
     for r in range(len(rows)):
-        table.rows[r + 1].height = E(row_min_h)
+        table.rows[r + 1].height = E(row_h)
 
     # 表头
     for c in range(ncol):
@@ -698,12 +727,13 @@ def render_bubble(slide, d):
 
 
 def render_writing(slide, d):
-    header(slide, d, title_align="left", title_px=108, title_size=21, sub_px=142,
-           title_color="2B2B2B", sub_color="8A8175", variant_color="A89B8A")
+    body_y = header(slide, d, title_align="left", title_px=108, title_size=21, sub_px=142,
+                    title_color="2B2B2B", sub_color="8A8175", variant_color="A89B8A")
     n = d.get("lines", 13)
     pre = d.get("value", [])
     pre = pre if isinstance(pre, list) else ([pre] if pre else [])
-    fy = 182
+    # 长副标题（如创作任务单的任务 A/B 大段说明）会换多行，书写框起点须随之下推
+    fy = max(182, int(round(body_y)))
     fh = max(800, 74 + n * 48 + 26)
     fh = min(fh, 1075 - fy)
     add_round_rect(slide, CONTENT_X, fy, CONTENT_W, fh, radius=0.04, line="9BBF84",

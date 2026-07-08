@@ -74,6 +74,8 @@
     color: #333;
     /* 折行优化：数字/字母不从中间断、闭标点不落行首、末行不留单字孤行 */
     word-break: normal; line-break: strict; text-wrap: pretty;
+    /* 单元格支持 \n 硬换行（如判断列 □ 选项逐行排）；无 \n 的旧数据行为不变 */
+    white-space: pre-line;
   }
   table.ws tbody td:last-child { border-right: none; }
   table.ws tbody tr:last-child td { border-bottom: none; }

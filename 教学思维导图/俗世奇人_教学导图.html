@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  :root {
+    --ink:        #3a3531;
+    --line:       #c7a98a;
+    --root-bg:    #BF826F;
+    --root-ink:   #ffffff;
+    --branch-bg:  #D1B397;
+    --branch-ink: #3a3531;
+    --leaf-ink:   #4a443f;
+    --header-ink: #B8B8B8;
+    --rule:       #B8B8B8;
+    --page:       #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    font-family: "Noto Sans CJK SC", "Source Han Sans SC", "Microsoft YaHei", sans-serif;
+    color: var(--ink);
+    background: var(--page);
+  }
+  .page {
+    position: relative;
+    width: 794px;
+    min-height: 1123px;
+    padding: 48px 52px 44px;
+    background: var(--page);
+    display: flex;
+    flex-direction: column;
+  }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 13px;
+    color: var(--header-ink);
+    letter-spacing: 1px;
+    padding-bottom: 9px;
+    border-bottom: 1.5px solid var(--rule);
+    flex: 0 0 auto;
+  }
+  .doc-title {
+    position: absolute;
+    top: 112px; left: 0; right: 0;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 2px;
+    z-index: 3;
+  }
+  /* 导图区吃满页眉以下全部高度,导图作为紧凑块在其中垂直居中 */
+  /* padding-top 把导图块压到标题下方,避免内容少时上飘贴住标题 */
+  .map {
+    position: relative;
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    padding-top: 72px;
+  }
+  .svg-layer {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none; z-index: 1;
+  }
+  .nodes-layer {
+    position: relative; z-index: 2;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 132px 1fr;   /* 中心列 | 右侧分支区 */
+    align-items: center;
+    column-gap: 40px;
+  }
+  .root-col { display: flex; align-items: center; justify-content: center; }
+  .root {
+    background: var(--root-bg);
+    color: var(--root-ink);
+    border-radius: 16px;
+    padding: 18px 16px;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.5;
+    text-align: center;
+    width: 142px;
+    box-shadow: 0 2px 7px rgba(150,110,80,.18);
+  }
+  /* 右侧分支区:每个分支一行,纵向按内容自然高度堆叠 */
+  .branch-area {
+    display: flex; flex-direction: column;
+    gap: 20px;                  /* 分支之间的固定间距 */
+  }
+  /* 一行 = [分支节点 | 子组],分支垂直居中对齐到子组中线 */
+  .branch-row {
+    display: grid;
+    grid-template-columns: 104px 1fr;
+    align-items: center;
+    column-gap: 36px;
+  }
+  .branch {
+    background: var(--branch-bg);
+    color: var(--branch-ink);
+    border-radius: 9px;
+    padding: 9px 4px;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+  .branch-group {
+    display: flex; flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+  }
+  .l2-row { display: flex; align-items: center; }
+  .l2 {
+    font-size: 12.5px; font-weight: 600;
+    color: var(--leaf-ink); line-height: 1.45;
+    padding: 2px 0 2px 6px; max-width: 360px;
+    overflow-wrap: break-word; word-break: break-word;
+  }
+  .l3-col {
+    display: flex; flex-direction: column;
+    justify-content: center; gap: 6px;
+    margin-left: 34px;   /* 二级→三级跨度 */
+  }
+  .l3 {
+    font-size: 11.5px; color: var(--leaf-ink);
+    line-height: 1.4; padding: 1px 0 1px 6px;
+    max-width: 320px;
+    overflow-wrap: break-word; word-break: break-word;
+  }
+  .leaf {
+    font-size: 11.5px; color: var(--leaf-ink);
+    line-height: 1.4; padding: 2px 0 2px 6px;
+    max-width: 360px;
+    overflow-wrap: break-word; word-break: break-word;
+  }
+</style>
+</head>
+<body>
+<div class="page" id="page">
+  <div class="header">
+    <span id="hL"></span>
+    <span id="hR"></span>
+  </div>
+  <div class="doc-title" id="docTitle"></div>
+  <div class="map" id="map">
+    <svg class="svg-layer" id="svg"></svg>
+    <div class="nodes-layer" id="nodes"></div>
+  </div>
+</div>
+<script>
+  const DATA = {"title": "《俗世奇人》教学思维导图", "header_left": "老约翰深度阅读", "header_right": "阅读 · 思辨 · 表达", "branches": [{"name": "教学目标", "children": [{"label": "知识与技能：了解「每人一篇、各不相关」的短篇集体例，说清六位精读奇人的「绝活＋奇事」，辨识正面描写、侧面烘托与一波三折的写人笔法。"}, {"label": "过程与方法：综合运用预测、提问、筛选、推断、比较、联结、整合、监控、转化策略，借助多种图表做「篇与篇」的横向梳理、赏析与思辨。"}, {"label": "情感态度价值观：体会普通人靠一双手、一项真本事立身的骨气与尊严；在两难处养成回到文本找证据、不急着下结论的审慎。"}]}, {"name": "教学流程", "children": [{"label": "第一课时：导读课", "children": [{"label": "课程导入·从一串绰号猜起"}, {"label": "精彩片段共读·三段「抢先看」"}, {"label": "自由阅读·「奇人」特征气泡图"}, {"label": "阅读建议与 7 天阅读计划"}]}, {"label": "第二课时：阅读交流课1", "children": [{"label": "分享感受·「奇人见面会」开张"}, {"label": "情节梳理·绝活梳理表＋故事山形图"}, {"label": "内容梳理讨论·「码头规矩」四字"}, {"label": "总结概括·任务衔接"}]}, {"label": "第三课时：阅读交流课2", "children": [{"label": "细读关键片段做推断"}, {"label": "维恩图·「手上绝活↔嘴上绝活」对照"}, {"label": "人物对照表·泥人张↔海张五"}, {"label": "布置思辨任务"}]}, {"label": "第四课时：思辨&应用课", "children": [{"label": "趣味表达·「如果你是老板」"}, {"label": "思辨应用·两难思辨阅读单"}, {"label": "主题分享·从书里到生活里"}, {"label": "课堂总结"}]}]}, {"name": "重点教学环节", "children": [{"label": "三段「抢先看」共读：听苏七块、泥人张、酒婆三段选段，先预测情节走向，读书时再回来对答案。"}, {"label": "绝活梳理表＋故事山形图：把六位奇人的绝活摆到一起横向看，再以《刷子李》为例画出一篇内的反转曲线。"}, {"label": "维恩图＋人物对照表：比较「手上绝活↔嘴上绝活」的异同，理清泥人张与海张五的反差并联结生活。"}, {"label": "两难思辨阅读单：围绕作者留下的两难题分组讨论，凭文本证据下判断。"}]}, {"name": "阅读策略学习", "children": [{"label": "预测与提问：看绰号、听选段预测奇人的绝活与结局，记下最想问的问题，建立读前预设、读中验证的回路。"}, {"label": "筛选与推断：从一整篇里筛出最能说明绝活的一句，从叙事视角与留白推断作者用意。"}, {"label": "比较与联结：把两位奇人对照着看，再把手艺人的硬气联结到自己见过的人和事。"}, {"label": "转化与监控：把读过的篇章转化为对一个真问题的判断，随时监控自己有没有凭印象说话。"}]}, {"name": "可视化工具的运用", "children": [{"label": "气泡图：围绕「奇人」二字写下初印象词，建立读前预设。"}, {"label": "绝活梳理表：把六位奇人的绰号与绝活放进同一张表横向梳理。"}, {"label": "故事山形图：以《刷子李》为例画出一篇内的情节起伏与反转。"}, {"label": "维恩图：对比刷子李「手上绝活」与好嘴杨巴「嘴上绝活」的异同。"}, {"label": "人物对照表：挑三个维度快速理清泥人张与海张五的反差。"}, {"label": "两难思辨阅读单：把书里的两难处摆上桌，凭证据说看法。"}]}]};
+  const GAP = 6;        // 弧线端点与节点的水平间隙
+  function el(tag, cls, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function render(data) {
+    document.getElementById('hL').textContent = data.header_left || '';
+    document.getElementById('hR').textContent = data.header_right || '';
+    document.getElementById('docTitle').textContent = data.title || '';
+    const nodes = document.getElementById('nodes');
+    nodes.innerHTML = '';
+    const rootCol = el('div', 'root-col');
+    const root = el('div', 'root', data.title);
+    root.id = 'node-root';
+    rootCol.appendChild(root);
+    nodes.appendChild(rootCol);
+
+    const area = el('div', 'branch-area');
+    data.branches.forEach((br, bi) => {
+      const rowEl = el('div', 'branch-row');
+      const b = el('div', 'branch', br.name);
+      b.id = 'branch-' + bi;
+      rowEl.appendChild(b);
+
+      const group = el('div', 'branch-group');
+      group.id = 'group-' + bi;
+      (br.children || []).forEach((c2, ci) => {
+        const row = el('div', 'l2-row');
+        const lbl = el('div', c2.children ? 'l2' : 'leaf', c2.label);
+        lbl.id = `n-${bi}-${ci}`;
+        row.appendChild(lbl);
+        if (c2.children) {
+          const l3col = el('div', 'l3-col');
+          c2.children.forEach((c3, ti) => {
+            const t = el('div', 'l3', c3.label);
+            t.id = `n-${bi}-${ci}-${ti}`;
+            l3col.appendChild(t);
+          });
+          row.appendChild(l3col);
+        }
+        group.appendChild(row);
+      });
+      rowEl.appendChild(group);
+      area.appendChild(rowEl);
+    });
+    nodes.appendChild(area);
+    requestAnimationFrame(drawLines);
+  }
+  function box(id) {
+    const map = document.getElementById('map').getBoundingClientRect();
+    const r = document.getElementById(id).getBoundingClientRect();
+    return {
+      leftX:  r.left - map.left,
+      rightX: r.right - map.left,
+      midY:   r.top - map.top + r.height / 2
+    };
+  }
+  // 舒展大弧:水平方向用较大的控制点偏移,弧度更圆润
+  function curve(x1, y1, x2, y2, spread) {
+    spread = spread == null ? 0.6 : spread;
+    const dx = (x2 - x1) * spread;
+    return `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+  }
+  function mkpath(d, w) {
+    const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    p.setAttribute('d', d);
+    p.setAttribute('fill', 'none');
+    p.setAttribute('stroke', getComputedStyle(document.documentElement).getPropertyValue('--line').trim());
+    p.setAttribute('stroke-width', w || '1.6');
+    p.setAttribute('stroke-linecap', 'round');
+    return p;
+  }
+  function drawLines() {
+    const svg = document.getElementById('svg');
+    const map = document.getElementById('map').getBoundingClientRect();
+    svg.setAttribute('width', map.width);
+    svg.setAttribute('height', map.height);
+    svg.setAttribute('viewBox', `0 0 ${map.width} ${map.height}`);
+    svg.innerHTML = '';
+
+    const rootB = box('node-root');
+    // 主干竖线的 x 位置:中心节点右缘与分支左缘之间约 40%
+    const branch0 = box('branch-0');
+    const trunkX = rootB.rightX + (branch0.leftX - rootB.rightX) * 0.42;
+
+    // 计算各分支竖向范围,画主干竖线
+    const brBoxes = DATA.branches.map((_, bi) => box('branch-' + bi));
+    const topY = brBoxes[0].midY;
+    const botY = brBoxes[brBoxes.length - 1].midY;
+
+    // 1) 中心节点 -> 主干:一条短弧从中心右缘接到主干中点
+    const trunkMidY = (topY + botY) / 2;
+    svg.appendChild(mkpath(curve(rootB.rightX + GAP, rootB.midY, trunkX, trunkMidY, 0.7)));
+    // 2) 主干竖线(两端略微内收,后面用弧接到首末分支,形成自然收尾)
+    const cap = 10;
+    svg.appendChild(mkpath(`M ${trunkX} ${topY} L ${trunkX} ${botY}`, '1.6'));
+    // 3) 主干 -> 各分支:从主干对应高度分出小弧接入分支左缘
+    DATA.branches.forEach((br, bi) => {
+      const brB = brBoxes[bi];
+      svg.appendChild(mkpath(curve(trunkX, brB.midY, brB.leftX - GAP, brB.midY, 0.55)));
+
+      // 4) 分支 -> 子节点:舒展大弧分叉(spread 越大越舒展)
+      (br.children || []).forEach((c2, ci) => {
+        const n2 = box(`n-${bi}-${ci}`);
+        svg.appendChild(mkpath(curve(brB.rightX + GAP, brB.midY, n2.leftX - GAP, n2.midY, 0.75)));
+        if (c2.children) {
+          c2.children.forEach((c3, ti) => {
+            const n3 = box(`n-${bi}-${ci}-${ti}`);
+            svg.appendChild(mkpath(curve(n2.rightX + GAP, n2.midY, n3.leftX - GAP, n3.midY, 0.75)));
+          });
+        }
+      });
+    });
+    document.body.setAttribute('data-rendered', '1');
+  }
+  if (DATA) render(DATA);
+</script>
+</body>
+</html>

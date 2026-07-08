@@ -18,7 +18,7 @@ from theme import (
     COLOR_TITLE, COLOR_BODY, COLOR_MUTED,
     COLOR_BG_QUOTE,
     COLOR_SECTION_BG, COLOR_SECTION_FG, COLOR_SECTION_SUB, COLOR_SECTION_NUM,
-    COLOR_QMARK_WATER, COLOR_RED_ACCENT,
+    COLOR_RED_ACCENT,
     SZ_HEADING, SZ_BODY, SZ_GUIDE_BULLET, SZ_QUOTE, SZ_SUBTITLE,
     GUIDE_TITLE_Y, GUIDE_TITLE_H,
     GUIDE_BULLETS_X, GUIDE_BULLETS_Y, GUIDE_BULLETS_W, GUIDE_BULLETS_H,
@@ -111,25 +111,14 @@ def render_section(slide, page, ctx):
 # ---------- 引导问题 ----------
 def render_guide(slide, page, ctx):
     """引导问题（方案 A）：
-    - 右半区一个超大半透明问号水印
     - 标题左侧加一根红色 ▎竖色条作为视觉引导
     - 其余排版（铭牌/要点/占位）沿用
 
     四图网格模式：当本页带 ≥2 条配图建议时，标题下整幅排 2×2 占位网格
-    （"给你们看 N 幅画面"类页），此模式不画问号水印、不渲染要点文本。
+    （"给你们看 N 幅画面"类页），此模式不渲染要点文本。
     """
     grid_sugs = _real_suggestions(page)
     grid_mode = len(grid_sugs) >= 2
-
-    # 水印优先画（被后续元素覆盖）；网格模式不画，避免从格缝透出
-    if not grid_mode:
-        guide_no = getattr(page, "_guide_no", 1)
-        add_textbox(
-            slide, pct_x(0.50), pct_y(0.20), pct_x(0.48), pct_y(0.55),
-            f"Q{guide_no}",
-            font=FONT_TITLE, size=240, color=COLOR_QMARK_WATER,
-            bold=True, italic=True, align="center", anchor="middle",
-        )
 
     draw_anchor(slide, page.eyebrow)
     draw_logo_inner(slide, ctx.get("logo_path"))

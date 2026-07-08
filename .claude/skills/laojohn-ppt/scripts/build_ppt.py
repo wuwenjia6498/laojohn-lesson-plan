@@ -79,16 +79,12 @@ def build(input_md: str, output_pptx: str, *,
     # 2) 始终追加一页 END
     pages.append(Page(num=999, page_type="_END"))
 
-    # 3) 给每个"环节标题"页打章节序号、"引导问题"页打问题序号（课时内从 1 递增）
+    # 3) 给每个"环节标题"页打章节序号（课时内从 1 递增）
     section_counter = 0
-    guide_counter = 0
     for p in pages:
         if p.page_type == "环节标题":
             section_counter += 1
             p._section_no = section_counter
-        elif p.page_type == "引导问题":
-            guide_counter += 1
-            p._guide_no = guide_counter
     section_total = sum(1 for p in pages if p.page_type == "环节标题")
     for p in pages:
         if p.page_type == "环节标题":

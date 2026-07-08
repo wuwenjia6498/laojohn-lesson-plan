@@ -46,7 +46,7 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 | 书籍档案 | `书籍档案\<书名>书籍档案.md` | lesson-plan 及所有消费档案的下游 |
 | docx 排版引擎 | `.claude\skills\laojohn-lesson-plan\assets\md_to_laojohn_docx.py` | lesson-plan、writing-lesson、reading-assessment（跨技能复用同一条流水线；assessment 用法见 §2 末条） |
 | PPT 渲染原语 | `.claude\skills\laojohn-ppt\scripts\helpers.py`（文本框/表格/字体/点击动画/渐变/占位等底层件）+ `parser.py`（中间稿解析） | laojohn-ppt 读书会与写作课两 profile 共用；有 bug 史的横切层（字体槽顺序、表格自适应等修一处即重烘焙全部），**永不 fork、禁 `doc_kind`/课型分支** |
-| 学习单渲染引擎 | `.claude\skills\laojohn-reading-sheet\scripts\render.py`（PDF/HTML）+ `render_pptx.py`（可编辑 PPTX）+ `templates\`（模板库） | reading-sheet（整本书阅读单）与 writing-sheet（写作学习单）共用；课型无关，`render.py` 留 `--templates-dir`/`--bundle-label` 课型无关参数承载复用。**writing-sheet 不复制引擎/模板、跨技能调用**——改其路径/契约前须想到 writing-sheet 会静默失效 |
+| 学习单渲染引擎 | `.claude\skills\laojohn-reading-sheet\scripts\render.py`（PDF/HTML）+ `render_pptx.py`（可编辑 PPTX）+ `templates\`（模板库） | reading-sheet（整本书阅读单）专用；`render.py` 的 `--templates-dir`/`--bundle-label` 是课型无关的可选参数（reading-sheet 自用，`--bundle-label` 默认「阅读单」），保留不删 |
 
 > 现存物理副本（`laojohn-ppt\assets\logo\`、`laojohn-course-poster\assets\qrcode.png` / `assets\covers\`）属历史遗留；以根目录单一源为准，勿据副本做新决策。
 
