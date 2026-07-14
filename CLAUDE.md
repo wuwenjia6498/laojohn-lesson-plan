@@ -91,3 +91,7 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 | 写作课详案 | `<年级册>-<题目>-写作课详案.md` / `.docx` |
 
 各物料的输出目录与文件命名权威表见 `README.md`「SKILL 与输出目录对照」（此处不重列，避免双写漂移）。
+
+## 8. 产物不进 git（提交纪律）
+
+各输出目录的**渲染产物**（docx/pptx/pdf/jpg/渲染 html/png，及 `课程打包输出\`、`课件PPT输出\` 整目录）已 gitignore——它们都能从 md/json 源 + 引擎脚本重渲，只存本地不进仓库。**只提交 md/json 源与输入资产**（书籍档案、中间稿/讲稿 md、各 `_content.json`/`-manifest.json`、书籍封面、品牌资产、skill 参考件、看图写话图位 png）。提交前 `git status` 里不该出现产物文件；若出现，说明有人改了 `.gitignore` 或新增了未纳规则的输出目录——新输出目录要同步补 ignore 规则，**严禁用 `git add -f` 把产物强加回来**。
