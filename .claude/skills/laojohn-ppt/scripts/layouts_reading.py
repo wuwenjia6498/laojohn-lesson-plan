@@ -202,6 +202,31 @@ def render_guide(slide, page, ctx):
 
 
 # ---------- 原文齐读 ----------
+_EMU_PER_PT = 12700.0
+
+# 超长引文的降档梯（字号, 行距）：默认 24pt/1.8 放得下就完全不动（向后兼容）；
+# 放不下才逐档降，宁可小一点也不让引文出血到书页底外（十问全文这类整段照录页用）。
+_QUOTE_FIT_LADDER = (
+    (SZ_QUOTE, 1.8), (22, 1.65), (20, 1.5), (18, 1.4),
+    (17, 1.35), (16, 1.3), (15, 1.3), (14, 1.25),
+)
+
+
+def _quote_fit(text):
+    """按字符数估算引文在正文区的占高，从默认档起逐档试到放得下为止。
+    保守系数与写作 profile 示范文同源（中文每字约 1.15 倍字号宽、行高略大于标称）。"""
+    import math
+    width_pt = QUOTE_BODY_W / _EMU_PER_PT
+    avail_pt = QUOTE_BODY_H / _EMU_PER_PT
+    lines = (text or "").split("\n")
+    for size, spacing in _QUOTE_FIT_LADDER:
+        cpl = max(1, int(width_pt / (size * 1.15)))
+        total = sum(max(1, math.ceil((len(ln) + 2) / cpl)) for ln in lines)
+        if total * size * spacing * 1.1 <= avail_pt:
+            return size, spacing
+    return _QUOTE_FIT_LADDER[-1]
+
+
 def render_quote(slide, page, ctx):
     draw_anchor(slide, page.eyebrow)
     draw_logo_inner(slide, ctx.get("logo_path"))
@@ -218,11 +243,12 @@ def render_quote(slide, page, ctx):
             align="left", anchor="middle",
         )
     if page.body:
+        body_size, body_spacing = _quote_fit(page.body)
         add_textbox(
             slide, QUOTE_BODY_X, QUOTE_BODY_Y, QUOTE_BODY_W, QUOTE_BODY_H,
             page.body,
-            font=FONT_QUOTE, size=SZ_QUOTE, color=COLOR_TITLE,
-            line_spacing=1.8, first_line_indent_chars=2,
+            font=FONT_QUOTE, size=body_size, color=COLOR_TITLE,
+            line_spacing=body_spacing, first_line_indent_chars=2,
             align="left", anchor="top",
         )
 
