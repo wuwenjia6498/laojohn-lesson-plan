@@ -147,12 +147,29 @@ def _gemini_image_bytes(resp):
     raise RuntimeError('Gemini 响应里未找到图像数据（检查模型 id / 额度 / 安全拦截）')
 
 
-def _gen_gemini(cfg, prompt, out_png):
+_STYLE_REF_INSTR = (
+    '\n\n【画风参考】随附的参考图是本期的锚图。请**严格沿用参考图的绘画风格**——'
+    '线条粗细与颜色、上色方式与笔触质感、色彩饱和度与明暗、人物造型比例与脸部画法、背景留白处理，都要与参考图看起来出自同一位插画师、同一套绘本。'
+    '**只改变画面内容**（人物、场景、动作按上面的描述画），不要改变画风。'
+)
+
+
+def _gen_gemini(cfg, prompt, out_png, style_ref=None):
     from google.genai import types
     client = _genai_client(cfg)
+    # 画风靠参考图锁定：纯文字描述控不住画风（同一句"绘本插画风"在不同题材上会漂成
+    # 水彩晕染或粗描边矢量卡通），故例库图一律带锚图作参考图生成。
+    contents = prompt
+    if style_ref and os.path.isfile(style_ref):
+        with open(style_ref, 'rb') as f:
+            ref_bytes = f.read()
+        contents = [
+            types.Part.from_bytes(data=ref_bytes, mime_type='image/png'),
+            prompt + _STYLE_REF_INSTR,
+        ]
     resp = client.models.generate_content(
         model=cfg['image_model'],
-        contents=prompt,
+        contents=contents,
         config=types.GenerateContentConfig(
             response_modalities=['TEXT', 'IMAGE'],
             image_config=types.ImageConfig(
@@ -181,10 +198,13 @@ def _gen_openai_images(client, cfg, prompt, out_png):
     return _openai_image_bytes(resp.data[0])
 
 
-def generate_one(client, cfg, prompt, out_png):
-    """按 image_model 选后端生成并落盘。client 为 OpenAI 兼容客户端（gemini 通道不用它）。"""
+def generate_one(client, cfg, prompt, out_png, style_ref=None):
+    """按 image_model 选后端生成并落盘。client 为 OpenAI 兼容客户端（gemini 通道不用它）。
+
+    style_ref：画风参考图（本期锚图）。仅 gemini 通道支持；给了就走图生图锁画风。
+    """
     if is_gemini(cfg['image_model']):
-        img = _gen_gemini(cfg, prompt, out_png)
+        img = _gen_gemini(cfg, prompt, out_png, style_ref)
     else:
         img = _gen_openai_images(client, cfg, prompt, out_png)
     os.makedirs(os.path.dirname(out_png), exist_ok=True)
@@ -284,7 +304,7 @@ def process_anchor(client, cfg, md_path, spec, log):
             'issues': result['issues'], 'png': out, 'manual': not passed}
 
 
-def process_library(client, cfg, md_path, spec, log):
+def process_library(client, cfg, md_path, spec, log, style_ref=None):
     # 例库图轻量：验「能否支撑该句式 / 时间线索」，缺则告警不强制重生
     items = []
     if spec.support_pattern:
@@ -293,16 +313,55 @@ def process_library(client, cfg, md_path, spec, log):
         items.append(f'画面与「{spec.one_line}」一致')
     if spec.time_clue:
         items.append(f'含可推断时间的线索：{spec.time_clue}')
+    if spec.accept:
+        items.append(f'满足验收条款：{spec.accept}')
     if not items:
         items = ['画面内容与生图提示词一致']
     out = ip.image_path(md_path, spec.code)
-    log(f'  [{spec.code}] 生图…')
-    generate_one(client, cfg, spec.build_prompt(), out)
+    ref = style_ref if (style_ref and style_ref != out) else None
+    log(f'  [{spec.code}] 生图{"（沿用锚图画风）" if ref else ""}…')
+    generate_one(client, cfg, spec.build_prompt(), out, style_ref=ref)
     result = verify_image(client, cfg, out, items)
     passed = not result['missing']
     return {'code': spec.code, 'role': spec.role, 'passed': passed, 'attempts': 1,
             'items': items, 'present': result['present'], 'missing': result['missing'],
             'issues': result['issues'], 'png': out, 'manual': False}  # 例库图不拦交付
+
+
+def verify_only(client, cfg, md_path, spec, log):
+    """只验收已存在的图，绝不重生（--verify-only）。
+
+    用于「规格收紧后回验」：改了必须可见元素清单，但图不该重画——重画会丢掉
+    已人工核准的画面。缺图则记为需人工，不触发生成。
+    """
+    out = ip.image_path(md_path, spec.code)
+    if not os.path.isfile(out):
+        return {'code': spec.code, 'role': spec.role, 'passed': False, 'attempts': 0,
+                'items': spec.must_see or ['（未生成）'], 'present': [], 'missing': spec.must_see or [],
+                'issues': ['图不存在，未生成——本次为只验收模式，不代生图'],
+                'png': out, 'manual': True}
+    if spec.is_anchor:
+        items = spec.must_see
+        extra = '画面只能有一个小孩；整体为低龄儿童绘本插画风、画面干净。'
+    else:
+        items = []
+        if spec.support_pattern:
+            items.append(f'画面能支撑句式「{spec.support_pattern}」所述场景')
+        if spec.one_line:
+            items.append(f'画面与「{spec.one_line}」一致')
+        if spec.time_clue:
+            items.append(f'含可推断时间的线索：{spec.time_clue}')
+        if spec.accept:
+            items.append(f'满足验收条款：{spec.accept}')
+        if not items:
+            items = ['画面内容与生图提示词一致']
+        extra = ''
+    log(f'  [{spec.code}] 只验收（不重生）…')
+    result = verify_image(client, cfg, out, items, extra)
+    passed = not result['missing']
+    return {'code': spec.code, 'role': spec.role, 'passed': passed, 'attempts': 0,
+            'items': items, 'present': result['present'], 'missing': result['missing'],
+            'issues': result['issues'], 'png': out, 'manual': spec.is_anchor and not passed}
 
 
 def write_report(md_path, records, cfg):
@@ -338,6 +397,8 @@ def main():
     ap.add_argument('md_path')
     ap.add_argument('--max-retries', type=int, default=None)
     ap.add_argument('--only', default='', help='只生指定编号，逗号分隔，如 锚-01,例-03')
+    ap.add_argument('--verify-only', action='store_true',
+                    help='只按现行规格验收已有的图、绝不重生（规格收紧后回验用；缺图记为需人工，不代生）')
     args = ap.parse_args()
 
     cfg = load_config()
@@ -353,16 +414,30 @@ def main():
         print('没有可生成的锚图/例库图（格式图跳过）。')
         return
 
+    # 本期锚图＝全期画风基准；例库图带它做图生图，保证五张图一套画风
+    anchor_png = None
+    for s in specs:
+        if s.is_anchor:
+            cand = ip.image_path(args.md_path, s.code)
+            if os.path.isfile(cand):
+                anchor_png = cand
+            break
+
     client = make_client(cfg)
     log = print
-    print(f'共 {len(targets)} 图待生成（锚图严格验收+重生，例库图轻量）…')
+    if args.verify_only:
+        print(f'共 {len(targets)} 图待验收（只验收模式：按现行规格核对已有的图，不重生、不覆盖）…')
+    else:
+        print(f'共 {len(targets)} 图待生成（锚图严格验收+重生，例库图轻量）…')
     records = []
     for s in targets:
         try:
-            if s.is_anchor:
+            if args.verify_only:
+                records.append(verify_only(client, cfg, args.md_path, s, log))
+            elif s.is_anchor:
                 records.append(process_anchor(client, cfg, args.md_path, s, log))
             else:
-                records.append(process_library(client, cfg, args.md_path, s, log))
+                records.append(process_library(client, cfg, args.md_path, s, log, style_ref=anchor_png))
         except Exception as e:
             print(f'  [{s.code}] 生成失败：{e}')
             records.append({'code': s.code, 'role': s.role, 'passed': False, 'attempts': 0,

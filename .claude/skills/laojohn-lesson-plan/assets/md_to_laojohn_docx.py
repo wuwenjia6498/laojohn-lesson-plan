@@ -635,7 +635,14 @@ def render_table(doc, header_cells, body_rows):
 
 # ===================== 页面 / 页眉页脚 =====================
 
-def setup_page(doc, has_cover=False):
+# 页眉默认文案（读书会/写作课/测评卷共用）。看图写话等课型可经 convert(header_left=,
+# header_right=) 或 CLI --header-left/--header-right 覆盖——**这是课型无关的可选参数，
+# 不是课型分支**：引擎不认识"哪种课"，只负责把传进来的两串字印在页眉左右。
+HEADER_LEFT_DEFAULT  = '老约翰深度阅读'
+HEADER_RIGHT_DEFAULT = '阅读·思辨·表达'
+
+
+def setup_page(doc, has_cover=False, header_left=None, header_right=None):
     style = doc.styles['Normal']
     style.font.name = CN_FONT
     style.font.size = Pt(BASE_SIZE)
@@ -676,10 +683,10 @@ def setup_page(doc, has_cover=False):
     lc.width = Cm(8.0); rc.width = Cm(8.0)
     # 左格
     lp = lc.paragraphs[0]; _fmt(lp, line_spacing=1.0); lp.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    set_font(lp.add_run('老约翰深度阅读'), size=HEADER_SZ, bold=False)
+    set_font(lp.add_run(header_left or HEADER_LEFT_DEFAULT), size=HEADER_SZ, bold=False)
     # 右格
     rp = rc.paragraphs[0]; _fmt(rp, line_spacing=1.0); rp.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    rr = rp.add_run('阅读·思辨·表达')
+    rr = rp.add_run(header_right or HEADER_RIGHT_DEFAULT)
     set_font(rr, size=HEADER_SZ, bold=False)
     rr.font.color.rgb = HEADER_GREY
     # 表格整体无外框，只给两个单元格加“下边框”作分隔线（线紧贴文字下方）
@@ -743,7 +750,7 @@ def is_table_line(line):
     return line.strip().startswith('|') and line.count('|') >= 2
 
 
-def convert(md_path, docx_path):
+def convert(md_path, docx_path, header_left=None, header_right=None):
     with open(md_path, encoding='utf-8') as f:
         raw = f.read().splitlines()
 
@@ -787,7 +794,8 @@ def convert(md_path, docx_path):
                 book_name = mb.group(1).strip()
             break
     has_cover = render_cover_page(doc, book_name)
-    setup_page(doc, has_cover=has_cover)
+    setup_page(doc, has_cover=has_cover,
+               header_left=header_left, header_right=header_right)
 
     # 环节标题(###)段前留白已统一为都加(见下方 stripped.startswith('### ') 分支)，
     # 阅读课案/写作课/测评卷的课时内环节一致分隔。is_writing_lesson 仅剩书级头部(##)
@@ -941,16 +949,31 @@ def convert(md_path, docx_path):
 
 
 def main():
-    if len(sys.argv) < 2:
-        print('用法: python md_to_laojohn_docx.py 输入.md [输出.docx]')
+    argv, header_left, header_right = sys.argv[1:], None, None
+    # 可选页眉覆盖（不传即用默认「老约翰深度阅读 / 阅读·思辨·表达」）
+    for flag, setter in (('--header-left', 'L'), ('--header-right', 'R')):
+        while flag in argv:
+            i = argv.index(flag)
+            if i + 1 >= len(argv):
+                print(f'用法错误: {flag} 后需跟文案'); sys.exit(1)
+            val = argv[i + 1]
+            if setter == 'L':
+                header_left = val
+            else:
+                header_right = val
+            del argv[i:i + 2]
+    if not argv:
+        print('用法: python md_to_laojohn_docx.py 输入.md [输出.docx] '
+              '[--header-left 左侧文案] [--header-right 右侧文案]')
         sys.exit(1)
-    md_path = sys.argv[1]
-    if len(sys.argv) >= 3:
-        docx_path = sys.argv[2]
+    md_path = argv[0]
+    if len(argv) >= 2:
+        docx_path = argv[1]
     else:
         base = os.path.splitext(md_path)[0]
         docx_path = base + '.docx'
-    out = convert(md_path, docx_path)
+    out = convert(md_path, docx_path,
+                  header_left=header_left, header_right=header_right)
     print(f'saved -> {out}')
 
 

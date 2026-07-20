@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<!-- 推断卡链：一条线索的完整推理（①线索 ↓ ②追问 ↓ ③裁决）。两种版式：
+     matrix（默认，各卡共用同一组步骤时）——步骤说明只在左侧竖排一次，右侧每列一条线索只留格子；
+     cards（各卡有各自步骤时）——每张卡自带步骤文字。底部可挂一条「合起来看」收口条。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #page { width: 794px; min-height: 1123px; background: #FFFFFF; position: relative;
+    padding: 84px 34px 34px 34px; }
+  .brand-logo { position: absolute; top: 32px; right: 42px; height: 48px; }
+  .variant-tag { position: absolute; top: 36px; left: 46px; font-size: 13px; color: #B3A98F; letter-spacing: 1px; }
+  .l-title { margin-top: 22px; text-align: center; font-size: 23px; font-weight: 700; color: #333; line-height: 1.4; }
+  .l-sub { margin-top: 10px; text-align: center; font-size: 13.5px; color: #8A8268; line-height: 1.6; padding: 0 10px; }
+
+  /* ── matrix 版式 ── */
+  .mx { display: grid; margin-top: 20px; column-gap: 10px; }
+  .mx-corner { }
+  .mx-head { border-radius: 10px 10px 0 0; padding: 9px 8px; color: #FFFFFF; text-align: center;
+    font-size: 14.5px; font-weight: 700; line-height: 1.35; white-space: pre-line; }
+  .mx-step { display: flex; gap: 6px; padding: 12px 10px 0 2px; font-size: 12.5px;
+    font-weight: 700; color: #6E6656; line-height: 1.5; }
+  .mx-no { flex: 0 0 auto; font-size: 13.5px; color: #8A8268; }
+  .mx-cell { border: 1.4px solid #D8D1C2; background: #FCFBF8; padding: 8px 10px 10px; border-radius: 10px; }
+  .mx-cell.first { border-top: none; border-radius: 0 0 10px 10px; }
+  .mx-pad { }
+  .mx-lines div { height: 56px; border-bottom: 1.2px solid #CFC8BA; }
+  .mx-val { font-size: 12.5px; color: #3A3A33; line-height: 1.6; white-space: pre-line; }
+  .mx-verdict { font-size: 13px; color: #4A4238; padding: 4px 0 2px; letter-spacing: 0.5px; }
+  .mx-arrow { text-align: right; padding-right: 12px; font-size: 17px; color: #C2BBA9; line-height: 1; }
+
+  /* ── cards 版式 ── */
+  .chain { display: grid; gap: 12px; margin-top: 20px; }
+  .card { border: 1.6px solid #D8D1C2; border-radius: 12px; overflow: hidden; background: #FCFBF8; }
+  .c-head { padding: 8px 10px; color: #FFFFFF; text-align: center; }
+  .c-h1 { font-size: 14.5px; font-weight: 700; line-height: 1.35; white-space: pre-line; }
+  .c-body { padding: 10px 12px 12px; }
+  .step-lb { display: flex; gap: 6px; font-size: 12.5px; font-weight: 700; color: #6E6656; line-height: 1.45; }
+  .step-no { flex: 0 0 auto; }
+  .step-lines div { height: 56px; border-bottom: 1.2px solid #CFC8BA; }
+  .step-val { font-size: 12.5px; color: #3A3A33; line-height: 1.6; white-space: pre-line; }
+  .down { text-align: center; font-size: 17px; color: #C2BBA9; line-height: 1; margin: 8px 0 6px; }
+  .v-opts { font-size: 12.5px; color: #4A4238; margin-top: 6px; }
+
+  .tail { margin-top: 16px; border: 1.8px solid #C9A24A; border-radius: 12px; background: #FFFFFF;
+    padding: 12px 16px 14px; }
+  .t-lb { font-size: 14px; font-weight: 700; color: #5A5048; line-height: 1.5; }
+  .t-lines { margin-top: 6px; }
+  .t-lines div { height: 56px; border-bottom: 1.2px solid #CFC8BA; }
+  .l-foot { margin-top: 14px; font-size: 13.5px; color: #9A937F; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div id="page">
+  <img class="brand-logo" id="logo">
+  <div class="variant-tag" id="variantTag"></div>
+  <div class="l-title" id="title"></div>
+  <div class="l-sub" id="subtitle"></div>
+  <div id="board"></div>
+  <div class="tail" id="tail"></div>
+  <div class="l-foot" id="foot"></div>
+</div>
+<script>
+const DATA = /*__DATA__*/ null;
+const PALETTE = ["#5B8C7B","#C18A3A","#5B7FA6","#8268A0"];
+const NOS = ["①","②","③","④","⑤"];
+const STEP_COL_W = 168;
+
+function fillCell(host, st){
+  if(st.verdict){
+    const v = document.createElement('div'); v.className = 'mx-verdict';
+    v.textContent = (st.options || ['真','假']).map(o=>'□ '+o).join('　　');
+    host.appendChild(v); return;
+  }
+  const vals = Array.isArray(st.value) ? st.value : (st.value ? [st.value] : []);
+  if(vals.length){
+    const v = document.createElement('div'); v.className = 'mx-val';
+    v.textContent = vals.join('\n'); host.appendChild(v);
+  } else {
+    const box = document.createElement('div'); box.className = 'mx-lines';
+    for(let k=0;k<(st.lines || 2);k++) box.appendChild(document.createElement('div'));
+    host.appendChild(box);
+  }
+}
+
+function renderMatrix(d, cards, steps, host){
+  const n = cards.length;
+  const mx = document.createElement('div'); mx.className = 'mx';
+  mx.style.gridTemplateColumns = STEP_COL_W + 'px repeat(' + n + ', 1fr)';
+  // 表头行：左上角空 + 每列线索名
+  const corner = document.createElement('div'); corner.className = 'mx-corner'; mx.appendChild(corner);
+  cards.forEach((cd,i)=>{
+    const h = document.createElement('div'); h.className = 'mx-head';
+    h.style.background = cd.color || PALETTE[i % PALETTE.length];
+    h.textContent = cd.header || ('线索'+(i+1)); mx.appendChild(h);
+  });
+  steps.forEach((st,si)=>{
+    if(si){  // 箭头行：只在左侧步骤列显示 ↓
+      const a = document.createElement('div'); a.className = 'mx-arrow'; a.textContent = '↓'; mx.appendChild(a);
+      for(let i=0;i<n;i++){ const pad = document.createElement('div'); pad.className = 'mx-pad';
+        pad.style.height = '16px'; mx.appendChild(pad); }
+    }
+    const lb = document.createElement('div'); lb.className = 'mx-step';
+    const no = document.createElement('span'); no.className = 'mx-no'; no.textContent = NOS[si] || (si+1);
+    const tx = document.createElement('span'); tx.textContent = st.label || '';
+    lb.appendChild(no); lb.appendChild(tx); mx.appendChild(lb);
+    for(let i=0;i<n;i++){
+      const cell = document.createElement('div');
+      cell.className = 'mx-cell' + (si === 0 ? ' first' : '');
+      fillCell(cell, st); mx.appendChild(cell);
+    }
+  });
+  host.appendChild(mx);
+}
+
+function renderCards(d, cards, host){
+  const chain = document.createElement('div'); chain.className = 'chain';
+  chain.style.gridTemplateColumns = 'repeat(' + (d.columns || cards.length || 1) + ', 1fr)';
+  cards.forEach((cd,i)=>{
+    const color = cd.color || PALETTE[i % PALETTE.length];
+    const box = document.createElement('div'); box.className = 'card';
+    const hd = document.createElement('div'); hd.className = 'c-head'; hd.style.background = color;
+    const h1 = document.createElement('div'); h1.className = 'c-h1';
+    h1.textContent = cd.header || ('线索'+(i+1)); hd.appendChild(h1); box.appendChild(hd);
+    const bd = document.createElement('div'); bd.className = 'c-body';
+    (cd.steps || d.steps || []).forEach((st,si)=>{
+      if(si){ const ar = document.createElement('div'); ar.className = 'down'; ar.textContent = '↓'; bd.appendChild(ar); }
+      const lb = document.createElement('div'); lb.className = 'step-lb';
+      const no = document.createElement('span'); no.className = 'step-no'; no.textContent = NOS[si] || (si+1);
+      const tx = document.createElement('span'); tx.textContent = st.label || '';
+      lb.appendChild(no); lb.appendChild(tx); bd.appendChild(lb);
+      if(st.verdict){
+        const v = document.createElement('div'); v.className = 'v-opts';
+        v.textContent = (st.options || ['真','假']).map(o=>'□ '+o).join('　'); bd.appendChild(v);
+      } else {
+        const vals = Array.isArray(st.value) ? st.value : (st.value ? [st.value] : []);
+        if(vals.length){ const v = document.createElement('div'); v.className = 'step-val';
+          v.textContent = vals.join('\n'); bd.appendChild(v); }
+        else { const lines = document.createElement('div'); lines.className = 'step-lines';
+          for(let k=0;k<(st.lines || 2);k++) lines.appendChild(document.createElement('div'));
+          bd.appendChild(lines); }
+      }
+    });
+    box.appendChild(bd); chain.appendChild(box);
+  });
+  host.appendChild(chain);
+}
+
+function render(){
+  const d = DATA;
+  document.getElementById('logo').src = d.logo;
+  document.getElementById('title').textContent = d.title || '';
+  const sub = document.getElementById('subtitle'); if(d.subtitle) sub.textContent = d.subtitle; else sub.style.display='none';
+  const tag = document.getElementById('variantTag'); if(d.variant) tag.textContent = d.variant; else tag.style.display='none';
+  const foot = document.getElementById('foot'); if(d.footer) foot.textContent = d.footer; else foot.style.display='none';
+
+  const cards = d.cards || [];
+  const shared = d.steps || [];
+  // 各卡共用同一组步骤 → matrix（步骤文字只出现一次）；某卡自带步骤 → cards
+  const layout = d.layout || ((shared.length && cards.every(c=>!c.steps)) ? 'matrix' : 'cards');
+  const board = document.getElementById('board');
+  if(layout === 'matrix') renderMatrix(d, cards, shared, board);
+  else renderCards(d, cards, board);
+
+  const tail = document.getElementById('tail');
+  const t = d.tail;
+  if(t){
+    const lb = document.createElement('div'); lb.className = 't-lb';
+    lb.textContent = t.label || ''; tail.appendChild(lb);
+    const box = document.createElement('div'); box.className = 't-lines';
+    for(let k=0;k<(t.lines || 2);k++) box.appendChild(document.createElement('div'));
+    tail.appendChild(box);
+  } else { tail.style.display = 'none'; }
+
+  document.body.dataset.rendered = '1';
+}
+render();
+</script>
+</body>
+</html>

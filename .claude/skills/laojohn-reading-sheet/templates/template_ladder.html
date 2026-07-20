@@ -39,7 +39,9 @@ function mark(e){ e.setAttribute('data-answer','1'); e.setAttribute('data-order'
 const PALETTE=["#D9883A","#A8504F","#5B7FA6","#C49B3E","#4E8C7D","#8268A0"];
 const X_LEFT=72, X_TOP_MAX=392, Y_BOTTOM=815, Y_TOP=170, LINE_LEN=358, LINE_GAP=58;
 function buildSteps(n){
-  const rise = n>1 ? (Y_BOTTOM - Y_TOP)/(n-1) : 0;
+  // 阶数少时 rise 变大，顶端箭头(Y_TOP-rise-14)会冲出画布顶压到副标题；抬高顶阶保证箭头顶 ≥24
+  const yTop = Math.max(Y_TOP, Math.ceil((Y_BOTTOM + (n-1)*38)/n));
+  const rise = n>1 ? (Y_BOTTOM - yTop)/(n-1) : 0;
   const run  = n>1 ? (X_TOP_MAX - X_LEFT)/(n-1) : 0;
   const STEPS=[];
   for(let i=0;i<n;i++){

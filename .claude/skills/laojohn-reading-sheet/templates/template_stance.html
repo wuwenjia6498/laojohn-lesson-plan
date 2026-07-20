@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<!-- 立场表 / 正反对峙单：顶部亮出要辩的那句话 → 中部左右两栏对峙（每栏：理由 + 书里的证据）
+     → 底部落一个立场。用于两难思辨、辩论前置单。栏数 2、每栏字段数自适应。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #page { width: 794px; min-height: 1123px; background: #FFFFFF; position: relative;
+    padding: 84px 40px 34px 40px; }
+  .brand-logo { position: absolute; top: 32px; right: 42px; height: 48px; }
+  .variant-tag { position: absolute; top: 36px; left: 46px; font-size: 13px; color: #B3A98F; letter-spacing: 1px; }
+  .l-title { margin-top: 22px; text-align: center; font-size: 23px; font-weight: 700; color: #333; line-height: 1.4; }
+  .l-sub { margin-top: 8px; text-align: center; font-size: 14px; color: #8A8268; line-height: 1.5; }
+  .claim { margin-top: 18px; border: 2px solid #C9A24A; background: #F8F4E9; border-radius: 12px;
+    padding: 14px 22px; text-align: center; }
+  .claim-t { font-size: 16.5px; font-weight: 700; color: #4A4238; line-height: 1.6; }
+  .claim-q { margin-top: 6px; font-size: 13.5px; color: #8A7A4E; }
+  .arena { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 52px; margin-top: 22px; }
+  .vs { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+    width: 44px; height: 44px; border-radius: 50%; background: #FFFFFF; border: 2px solid #C2BBA9;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: #8A8268; letter-spacing: 0.5px; z-index: 2; }
+  .side { border: 1.6px solid #D8D1C2; border-radius: 12px; overflow: hidden; background: #FCFBF8; }
+  .s-head { height: 40px; display: flex; align-items: center; justify-content: center;
+    color: #FFFFFF; font-size: 15px; font-weight: 700; text-align: center; padding: 0 8px; }
+  .s-body { padding: 12px 14px 14px; }
+  .f-lb { font-size: 13px; font-weight: 700; color: #6E6656; margin-top: 12px; }
+  .f-lb:first-child { margin-top: 0; }
+  .f-lines div { height: 56px; border-bottom: 1.2px solid #CFC8BA; }
+  .f-val { font-size: 13px; color: #3A3A33; line-height: 1.6; white-space: pre-line; }
+  /* ── matrix 版式：字段标签只在中间轴排一次，左右两栏只留格子 ── */
+  .mx { display: grid; margin-top: 22px; column-gap: 12px; row-gap: 10px; align-items: stretch; }
+  .mx-head { border-radius: 10px; height: 40px; display: flex; align-items: center;
+    justify-content: center; color: #FFFFFF; font-size: 15px; font-weight: 700; padding: 0 8px; text-align: center; }
+  .mx-axis { display: flex; align-items: center; justify-content: center; }
+  .mx-vs { width: 40px; height: 40px; border-radius: 50%; background: #FFFFFF; border: 2px solid #C2BBA9;
+    display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #8A8268; }
+  .mx-lb { display: flex; align-items: center; justify-content: center; text-align: center;
+    font-size: 13px; font-weight: 700; color: #6E6656; line-height: 1.5; padding: 0 4px; }
+  .mx-cell { border: 1.4px solid #D8D1C2; border-radius: 10px; background: #FCFBF8; padding: 8px 12px 10px; }
+  .mx-lines div { height: 56px; border-bottom: 1.2px solid #CFC8BA; }
+  .mx-val { font-size: 13px; color: #3A3A33; line-height: 1.6; white-space: pre-line; }
+
+  .verdict { margin-top: 18px; border: 1.8px solid #C9A24A; border-radius: 12px; background: #FFFFFF;
+    padding: 12px 16px 14px; }
+  .v-lb { font-size: 14px; font-weight: 700; color: #5A5048; }
+  .v-opt { margin-left: 10px; font-weight: 400; color: #6E6656; }
+  .v-lines { margin-top: 6px; }
+  .v-lines div { height: 56px; border-bottom: 1.2px solid #CFC8BA; }
+  .l-foot { margin-top: 14px; font-size: 13.5px; color: #9A937F; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div id="page">
+  <img class="brand-logo" id="logo">
+  <div class="variant-tag" id="variantTag"></div>
+  <div class="l-title" id="title"></div>
+  <div class="l-sub" id="subtitle"></div>
+  <div class="claim" id="claim"></div>
+  <div class="arena" id="arena"></div>
+  <div class="mx" id="mx"></div>
+  <div class="verdict" id="verdict"></div>
+  <div class="l-foot" id="foot"></div>
+</div>
+<script>
+const DATA = /*__DATA__*/ null;
+const PALETTE = ["#A8634F","#5B7FA6"];
+function fieldBlock(f, host){
+  const lb = document.createElement('div'); lb.className = 'f-lb';
+  lb.textContent = f.label || ''; host.appendChild(lb);
+  const vals = Array.isArray(f.value) ? f.value : (f.value ? [f.value] : []);
+  if(vals.length){
+    const v = document.createElement('div'); v.className = 'f-val';
+    v.textContent = vals.join('\n'); host.appendChild(v);
+  } else {
+    const box = document.createElement('div'); box.className = 'f-lines';
+    for(let k=0;k<(f.lines || 3);k++) box.appendChild(document.createElement('div'));
+    host.appendChild(box);
+  }
+}
+function render(){
+  const d = DATA;
+  document.getElementById('logo').src = d.logo;
+  document.getElementById('title').textContent = d.title || '';
+  const sub = document.getElementById('subtitle'); if(d.subtitle) sub.textContent = d.subtitle; else sub.style.display='none';
+  const tag = document.getElementById('variantTag'); if(d.variant) tag.textContent = d.variant; else tag.style.display='none';
+  const foot = document.getElementById('foot'); if(d.footer) foot.textContent = d.footer; else foot.style.display='none';
+
+  // 要辩的那句话
+  const cl = document.getElementById('claim');
+  if(d.claim){
+    const t = document.createElement('div'); t.className = 'claim-t';
+    t.textContent = d.claim; cl.appendChild(t);
+    if(d.claim_question){ const q = document.createElement('div'); q.className = 'claim-q';
+      q.textContent = d.claim_question; cl.appendChild(q); }
+  } else { cl.style.display = 'none'; }
+
+  const sides = d.sides || [];
+  const sharedFields = d.fields || [];
+  // 两栏共用同一组字段 → matrix（标签只在中间轴排一次）；某栏自带 fields → 两栏各印一遍
+  const layout = d.layout || ((sharedFields.length && sides.length === 2
+                    && sides.every(s=>!s.fields)) ? 'matrix' : 'columns');
+  const arena = document.getElementById('arena');
+  const mxBox = document.getElementById('mx');
+  if(layout === 'matrix'){
+    arena.style.display = 'none';
+    mxBox.style.gridTemplateColumns = '1fr 150px 1fr';
+    // 表头行：左彩条 + VS + 右彩条
+    sides.forEach((sd,i)=>{
+      const h = document.createElement('div'); h.className = 'mx-head';
+      h.style.background = sd.color || PALETTE[i % PALETTE.length];
+      h.textContent = sd.label || ('立场'+(i+1));
+      if(i === 1){
+        const ax = document.createElement('div'); ax.className = 'mx-axis';
+        const vs = document.createElement('div'); vs.className = 'mx-vs';
+        vs.textContent = d.vs_label || 'VS'; ax.appendChild(vs); mxBox.appendChild(ax);
+      }
+      mxBox.appendChild(h);
+    });
+    // 每个字段一行：左格 | 标签 | 右格
+    sharedFields.forEach(f=>{
+      const mk = ()=>{
+        const c = document.createElement('div'); c.className = 'mx-cell';
+        const vals = Array.isArray(f.value) ? f.value : (f.value ? [f.value] : []);
+        if(vals.length){ const v = document.createElement('div'); v.className = 'mx-val';
+          v.textContent = vals.join('\n'); c.appendChild(v); }
+        else { const b = document.createElement('div'); b.className = 'mx-lines';
+          for(let k=0;k<(f.lines || 3);k++) b.appendChild(document.createElement('div')); c.appendChild(b); }
+        return c;
+      };
+      mxBox.appendChild(mk());
+      const lb = document.createElement('div'); lb.className = 'mx-lb';
+      lb.textContent = f.label || ''; mxBox.appendChild(lb);
+      mxBox.appendChild(mk());
+    });
+    finishVerdict(d, sides);
+    document.body.dataset.rendered = '1';
+    return;
+  }
+  mxBox.style.display = 'none';
+  sides.forEach((sd,i)=>{
+    const color = sd.color || PALETTE[i % PALETTE.length];
+    const box = document.createElement('div'); box.className = 'side';
+    const hd = document.createElement('div'); hd.className = 's-head';
+    hd.style.background = color; hd.textContent = sd.label || ('立场'+(i+1));
+    box.appendChild(hd);
+    const bd = document.createElement('div'); bd.className = 's-body';
+    (sd.fields || d.fields || []).forEach(f=>fieldBlock(f, bd));
+    box.appendChild(bd); arena.appendChild(box);
+  });
+  if(sides.length === 2){
+    const vs = document.createElement('div'); vs.className = 'vs';
+    vs.textContent = d.vs_label || 'VS'; arena.appendChild(vs);
+  }
+
+  finishVerdict(d, sides);
+
+  document.body.dataset.rendered = '1';
+}
+
+function finishVerdict(d, sides){
+  const vd = document.getElementById('verdict');
+  const v = d.verdict;
+  if(v){
+    const lb = document.createElement('div'); lb.className = 'v-lb';
+    lb.textContent = v.label || '听完两边，我站……';
+    const opts = v.options || sides.map(s=>s.label);
+    if(opts && opts.length){
+      const sp = document.createElement('span'); sp.className = 'v-opt';
+      sp.textContent = opts.map(o=>'□ ' + o).join('　　');
+      lb.appendChild(sp);
+    }
+    vd.appendChild(lb);
+    const box = document.createElement('div'); box.className = 'v-lines';
+    for(let k=0;k<(v.lines || 3);k++) box.appendChild(document.createElement('div'));
+    vd.appendChild(box);
+  } else { vd.style.display = 'none'; }
+}
+render();
+</script>
+</body>
+</html>

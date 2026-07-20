@@ -74,6 +74,12 @@ class ImgSpec:
         return self.fields.get('支持句式', '').strip()
 
     @property
+    def accept(self):
+        """例库图「验收:」条款。曾长期只解析不使用（验收项只取支持句式/一句话画面），
+        导致规格里收紧的条款从未被机器验过——例-02 的动作与地点失配正是这样漏过去的。"""
+        return self.fields.get('验收', '').strip()
+
+    @property
     def is_anchor(self):
         return self.role == ROLE_ANCHOR
 

@@ -432,7 +432,9 @@ def render_ladder(slide, d):
     n = len(steps)
     PALETTE = ["#D9883A", "#A8504F", "#5B7FA6", "#C49B3E", "#4E8C7D", "#8268A0"]
     X_LEFT, X_TOP_MAX, Y_BOTTOM, Y_TOP, LINE_LEN, LINE_GAP = 72, 392, 815, 170, 358, 58
-    rise = (Y_BOTTOM - Y_TOP) / (n - 1) if n > 1 else 0
+    # 与 template_ladder.html buildSteps 同步：阶数少时抬高顶阶，防顶段冲进副标题
+    y_top = max(Y_TOP, -(-(Y_BOTTOM + (n - 1) * 38) // n)) if n > 1 else Y_TOP
+    rise = (Y_BOTTOM - y_top) / (n - 1) if n > 1 else 0
     run = (X_TOP_MAX - X_LEFT) / (n - 1) if n > 1 else 0
     ST = [{"X": round(X_LEFT + run * i), "Y": round(Y_BOTTOM - rise * i),
            "color": PALETTE[i % len(PALETTE)]} for i in range(n)]
@@ -880,6 +882,431 @@ def render_profile(slide, d):
         y += card_h + 20
 
 
+def render_relation(slide, d):
+    header(slide, d, title_px=74, title_size=23, sub_px=116)
+    OFF = 150
+    groups = d.get("groups", [])
+    n = len(groups) or 1
+    PALETTE = ["#5B8C7B", "#C18A3A", "#5B7FA6", "#8268A0", "#A8634F", "#7A8C3A"]
+    MARGIN, GAP, BOX_TOP, BOX_BOTTOM, HEAD_H = 34, 16, 50, 740, 36
+    HUB_Y, HUB_H, HUB_W = 830, 64, 560
+    colW = (794 - 2 * MARGIN - (n - 1) * GAP) / n
+    rel_label = d.get("relation_label", "组内关系")
+    for gi, g in enumerate(groups):
+        x = MARGIN + gi * (colW + GAP)
+        cx = x + colW / 2
+        color = PALETTE[gi % len(PALETTE)].lstrip("#")
+        members = g.get("members", [])
+        slots = max(g.get("slots", 0), len(members), 1)
+        rel_lines = g.get("relation_lines", d.get("relation_lines", 3))
+        # 围栏 + 组名彩条
+        add_round_rect(slide, x, BOX_TOP + OFF, colW, BOX_BOTTOM - BOX_TOP, radius=0.03,
+                       fill="FCFBF8", line=color, line_w=1.6, dash="dash")
+        add_rect(slide, x, BOX_TOP + OFF, colW, HEAD_H, fill=color)
+        add_text(slide, x, BOX_TOP + 7 + OFF, colW, 26, g.get("header", f"第{gi+1}组"),
+                 size=15, bold=True, color="FFFFFF", align="center")
+        inner_top = BOX_TOP + HEAD_H + 22
+        lab_max = max(4, int((colW - 28) / 12.6))
+        lab_rows = max(1, min(2, math.ceil(len(rel_label) / lab_max)))
+        lab_block = 40 + (lab_rows - 1) * 16
+        rel_h = lab_block + rel_lines * 62
+        rel_top = BOX_BOTTOM - rel_h
+        slot_region = rel_top - inner_top
+        cols = 2 if colW >= 200 else 1
+        rows = math.ceil(slots / cols)
+        row_step = slot_region / rows
+        ry = max(18, min(34, row_step / 2 - 8))
+        rx = (colW / 4 - 10) if cols == 2 else (colW / 2 - 16)
+        for i in range(slots):
+            r, c = divmod(i, cols)
+            scx = (cx + (-colW / 4 if c == 0 else colW / 4)) if cols == 2 else cx
+            scy = inner_top + row_step * (r + 0.5)
+            add_oval(slide, scx - rx, scy - ry + OFF, 2 * rx, 2 * ry,
+                     fill="FFFFFF", line="C2BBA9", line_w=1.4)
+            txt = members[i] if i < len(members) else ""
+            if isinstance(txt, str) and txt.strip():
+                add_text(slide, scx - rx + 4, scy - ry + 4 + OFF, 2 * rx - 8, 2 * ry - 8,
+                         txt, size=13, color="3A3A33", align="center", anchor="middle",
+                         line_spacing=1.2)
+        # 组内关系书写线
+        add_text(slide, x + 14, rel_top + 2 + OFF, colW - 24, lab_rows * 18, rel_label,
+                 size=12, color="8A8268", line_spacing=1.2)
+        for i in range(rel_lines):
+            ly = rel_top + lab_block + i * 62 + OFF
+            add_line(slide, x + 14, ly, x + colW - 14, ly, "CFC8BA", 1.2)
+        add_line(slide, cx, BOX_BOTTOM + OFF, 397, HUB_Y + OFF, "C9C2B4", 1.6)
+    if d.get("bottom_label"):
+        add_round_rect(slide, 397 - HUB_W / 2, HUB_Y + OFF, HUB_W, HUB_H, radius=0.12,
+                       fill="F3EFE4", line="C9A24A", line_w=1.8)
+        add_text(slide, 397 - HUB_W / 2 + 12, HUB_Y + OFF, HUB_W - 24, HUB_H,
+                 d["bottom_label"], size=15, bold=True, color="5A5048",
+                 align="center", anchor="middle", line_spacing=1.25)
+    footer(slide, d, key="footer", y=1080)
+
+
+def render_facets(slide, d):
+    header(slide, d, title_px=106, title_size=23, sub_px=148)
+    facets = d.get("facets", [])
+    n = len(facets)
+    cols = d.get("columns", 2)
+    rows = math.ceil(n / cols) if n else 1
+    PALETTE = ["#5B8C7B", "#C18A3A", "#5B7FA6", "#8268A0", "#A8634F", "#7A8C3A"]
+    PAD, GAP, TOP = 40, 14, 208
+    cardW = (PAGE_W_PX - 2 * PAD - (cols - 1) * GAP) / cols
+    HEAD_H, Q_H, LINE_H = 36, 39, 56
+    max_lines = max([(f.get("lines", d.get("lines", 3))) for f in facets] or [3])
+    cardH = HEAD_H + 8 + Q_H + 8 + max_lines * LINE_H + 10
+    for i, f in enumerate(facets):
+        r, c = divmod(i, cols)
+        x = PAD + c * (cardW + GAP)
+        y = TOP + r * (cardH + GAP)
+        color = (f.get("color") or PALETTE[i % len(PALETTE)]).lstrip("#")
+        add_round_rect(slide, x, y, cardW, cardH, radius=0.04, fill="FCFBF8",
+                       line="D8D1C2", line_w=1.4)
+        add_rect(slide, x, y, cardW, HEAD_H, fill=color)
+        add_text(slide, x + 12, y + 7, cardW - 100, 24, f.get("label", f"第{i+1}面"),
+                 size=15, bold=True, color="FFFFFF")
+        if f.get("required"):
+            add_round_rect(slide, x + cardW - 64, y + 8, 52, 20, radius=0.4,
+                           fill="FFFFFF", line=color, line_w=0.8)
+            add_text(slide, x + cardW - 64, y + 10, 52, 18,
+                     f.get("required_label", "必写"), size=11, bold=True,
+                     color=color, align="center")
+        add_text(slide, x + 12, y + HEAD_H + 6, cardW - 24, Q_H + 6,
+                 f.get("question", ""), size=13, color="6E6656", line_spacing=1.4)
+        val = f.get("value")
+        vals = val if isinstance(val, list) else ([val] if val else [])
+        body_y = y + HEAD_H + 8 + Q_H + 8
+        if vals:
+            add_text(slide, x + 12, body_y, cardW - 24, max_lines * LINE_H,
+                     "\n".join(vals), size=13, color="3A3A33", line_spacing=1.5)
+        else:
+            k = f.get("lines", d.get("lines", 3))
+            for j in range(k):
+                ly = body_y + (j + 1) * LINE_H
+                add_line(slide, x + 12, ly, x + cardW - 12, ly, "CFC8BA", 1.2)
+    footer(slide, d, key="footer", y=TOP + rows * (cardH + GAP) + 6)
+
+
+def render_lanes(slide, d):
+    header(slide, d, title_px=74, title_size=23, sub_px=116)
+    OFF = 150
+    stages, lanes = d.get("stages", []), d.get("lanes", [])
+    ns, nl = len(stages) or 1, len(lanes) or 1
+    PALETTE = ["#5B8C7B", "#C18A3A", "#5B7FA6"]
+    MARGIN, LAB_W, END_W, GAP, END_GAP = 18, 40, 100, 8, 20
+    STAGE_Y, STAGE_H, LANE_Y0, LANE_GAP = 70, 46, 136, 30
+    x0 = MARGIN + LAB_W + GAP
+    endX = 794 - MARGIN - END_W
+    colW = ((endX - END_GAP - x0) - (ns - 1) * GAP) / ns
+    laneH = (900 - LANE_Y0 - (nl - 1) * LANE_GAP) / nl
+    cap = max(1, int((laneH - 40) // 56))
+    n_lines = min(d["lines"], cap) if d.get("lines") is not None else cap
+    line_step = (laneH - 40) / n_lines
+    for si, st in enumerate(stages):
+        sx = x0 + si * (colW + GAP)
+        add_round_rect(slide, sx, STAGE_Y + OFF, colW, STAGE_H, radius=0.12, fill="8A8268")
+        name = st if isinstance(st, str) else st.get("name", "")
+        sub = st.get("sub", "") if isinstance(st, dict) else ""
+        add_text(slide, sx, STAGE_Y + 5 + OFF, colW, 20, name, size=13.5, bold=True,
+                 color="FFFFFF", align="center")
+        if sub:
+            add_text(slide, sx, STAGE_Y + 25 + OFF, colW, 16, sub, size=11,
+                     color="FFFFFF", align="center")
+    if d.get("start_label"):
+        sw = max(110, len(str(d["start_label"])) * 13 + 26)
+        add_round_rect(slide, MARGIN, 22 + OFF, sw, 32, radius=0.5, fill="F3EFE4",
+                       line="C9A24A", line_w=1.6)
+        add_text(slide, MARGIN, 22 + OFF, sw, 32, d["start_label"], size=13, bold=True,
+                 color="5A5048", align="center", anchor="middle")
+        last_top = LANE_Y0 + (nl - 1) * (laneH + LANE_GAP)
+        add_line(slide, MARGIN + LAB_W / 2, 54 + OFF, MARGIN + LAB_W / 2,
+                 last_top + 14 + OFF, "C9A24A", 2)
+    for li, ln in enumerate(lanes):
+        top = LANE_Y0 + li * (laneH + LANE_GAP)
+        mid = top + laneH / 2
+        color = (ln.get("color") or PALETTE[li % len(PALETTE)]).lstrip("#")
+        add_round_rect(slide, MARGIN, top + OFF, LAB_W, laneH, radius=0.06, fill=color)
+        add_text(slide, MARGIN, top + OFF, LAB_W, laneH,
+                 "\n".join(str(ln.get("label", ""))), size=15, bold=True, color="FFFFFF",
+                 align="center", anchor="middle", line_spacing=1.1)
+        cells = ln.get("cells", [])
+        for si in range(ns):
+            sx = x0 + si * (colW + GAP)
+            add_round_rect(slide, sx, top + OFF, colW, laneH, radius=0.04,
+                           fill="FCFBF8", line=color, line_w=1.5)
+            val = cells[si] if si < len(cells) else None
+            vals = val if isinstance(val, list) else ([val] if val else [])
+            if vals:
+                add_text(slide, sx + 10, top + 14 + OFF, colW - 20, laneH - 24,
+                         "\n".join(vals), size=13, color="3A3A33", line_spacing=1.45)
+            else:
+                for k in range(n_lines):
+                    ly = top + 22 + k * line_step + OFF
+                    add_line(slide, sx + 10, ly, sx + colW - 10, ly, "CFC8BA", 1.2)
+            if si < ns - 1:
+                add_triangle(slide, sx + colW - 2, mid - 6 + OFF, 11, 12, color, rotation=90)
+        lastR = x0 + (ns - 1) * (colW + GAP) + colW
+        endH = 116
+        off = 0 if nl == 1 else (-1 if li == 0 else 1) * min(46, (laneH - endH) / 2)
+        eY = top + (laneH - endH) / 2 + off
+        add_line(slide, lastR, mid + OFF, endX - 10, eY + endH / 2 + OFF, color, 2, dash="dash")
+        add_triangle(slide, endX - 11, eY + endH / 2 - 6 + OFF, 11, 12, color, rotation=90)
+        add_round_rect(slide, endX, eY + OFF, END_W, endH, radius=0.06, fill="FFFFFF",
+                       line=color, line_w=1.8)
+        add_text(slide, endX + 10, eY + 8 + OFF, END_W - 20, 20,
+                 ln.get("end_label", "最后……"), size=12, bold=True, color="6E6656")
+        for k in range(d.get("end_lines", 2)):
+            ly = eY + 44 + k * 32 + OFF
+            add_line(slide, endX + 10, ly, endX + END_W - 10, ly, "CFC8BA", 1.2)
+    footer(slide, d, key="footer", y=1080)
+
+
+def render_stance(slide, d):
+    """立场表：claim 横幅 + 左右两栏对峙 + 底部落立场。坐标按 template_stance.html 的流式版面复刻。"""
+    header(slide, d, title_px=106, title_size=23, sub_px=146)
+    PAL = ["#A8634F", "#5B7FA6"]
+    PAD, GAP_MID = 40, 52
+    sideW = (PAGE_W_PX - 2 * PAD - GAP_MID) / 2
+    y = 184
+    if d.get("claim"):
+        ch = 80 if d.get("claim_question") else 54
+        add_round_rect(slide, PAD, y, PAGE_W_PX - 2 * PAD, ch, radius=0.1,
+                       fill="F8F4E9", line="C9A24A", line_w=2)
+        add_text(slide, PAD + 22, y + 14, PAGE_W_PX - 2 * PAD - 44, 30, d["claim"],
+                 size=16.5, bold=True, color="4A4238", align="center", line_spacing=1.5)
+        if d.get("claim_question"):
+            add_text(slide, PAD + 22, y + 48, PAGE_W_PX - 2 * PAD - 44, 22,
+                     d["claim_question"], size=13.5, color="8A7A4E", align="center")
+        y += ch
+    arena_y = y + 22
+    HEAD_H = 40
+    sides = d.get("sides", [])
+    shared = d.get("fields") or []
+    fields_of = lambda sd: sd.get("fields") or shared
+    layout = d.get("layout") or ("matrix" if (shared and len(sides) == 2
+                 and all(not sd.get("fields") for sd in sides)) else "columns")
+    if layout == "matrix":
+        LBL, GAP = 150, 12
+        cw = (PAGE_W_PX - 2 * PAD - LBL - 2 * GAP) / 2
+        lx = [PAD, PAD + cw + GAP + LBL + GAP]
+        for i, sd in enumerate(sides):
+            color = (sd.get("color") or PAL[i % len(PAL)]).lstrip("#")
+            add_round_rect(slide, lx[i], arena_y, cw, HEAD_H, radius=0.1, fill=color)
+            add_text(slide, lx[i] + 8, arena_y + 9, cw - 16, 24, sd.get("label", ""),
+                     size=15, bold=True, color="FFFFFF", align="center")
+        add_oval(slide, 397 - 20, arena_y, 40, 40, fill="FFFFFF", line="C2BBA9", line_w=2)
+        add_text(slide, 397 - 20, arena_y, 40, 40, d.get("vs_label", "VS"), size=13,
+                 bold=True, color="8A8268", align="center", anchor="middle")
+        ry = arena_y + HEAD_H + 10
+        for f in shared:
+            n = f.get("lines", 3)
+            rh = 8 + n * 56 + 10
+            for i in range(2):
+                add_round_rect(slide, lx[i], ry, cw, rh, radius=0.04, fill="FCFBF8",
+                               line="D8D1C2", line_w=1.4)
+                val = f.get("value")
+                vals = val if isinstance(val, list) else ([val] if val else [])
+                if vals:
+                    add_text(slide, lx[i] + 12, ry + 8, cw - 24, n * 56, "\n".join(vals),
+                             size=13, color="3A3A33", line_spacing=1.6)
+                else:
+                    for k in range(n):
+                        add_line(slide, lx[i] + 12, ry + 8 + (k + 1) * 56,
+                                 lx[i] + cw - 12, ry + 8 + (k + 1) * 56, "CFC8BA", 1.2)
+            add_text(slide, PAD + cw + GAP, ry, LBL, rh, f.get("label", ""), size=13,
+                     bold=True, color="6E6656", align="center", anchor="middle",
+                     line_spacing=1.5)
+            ry += rh + 10
+        sideH = ry - 10 - (arena_y + HEAD_H)
+        vy = ry + 8
+        v = d.get("verdict")
+        if v:
+            vlines = v.get("lines", 3)
+            vh = 12 + 20 + 6 + vlines * 56 + 14
+            add_round_rect(slide, PAD, vy, PAGE_W_PX - 2 * PAD, vh, radius=0.06,
+                           fill="FFFFFF", line="C9A24A", line_w=1.8)
+            opts = v.get("options")
+            if opts is None:
+                opts = [sd.get("label", "") for sd in sides]
+            lab = v.get("label", "听完两边，我站……")
+            if opts:
+                lab += "　　" + "　　".join("□ " + o for o in opts)
+            add_text(slide, PAD + 16, vy + 12, PAGE_W_PX - 2 * PAD - 32, 22, lab,
+                     size=14, bold=True, color="5A5048")
+            for k in range(vlines):
+                add_line(slide, PAD + 16, vy + 38 + (k + 1) * 56,
+                         PAGE_W_PX - PAD - 16, vy + 38 + (k + 1) * 56, "CFC8BA", 1.2)
+            vy += vh
+        footer(slide, d, key="footer", y=vy + 14)
+        return
+    body_h = 0
+    for sd in sides:
+        h = 12
+        for fi, f in enumerate(fields_of(sd)):
+            h += (12 if fi else 0) + 18 + (f.get("lines", 3)) * 56
+        body_h = max(body_h, h + 14)
+    sideH = HEAD_H + body_h
+    for i, sd in enumerate(sides):
+        x = PAD + i * (sideW + GAP_MID)
+        color = (sd.get("color") or PAL[i % len(PAL)]).lstrip("#")
+        add_round_rect(slide, x, arena_y, sideW, sideH, radius=0.03, fill="FCFBF8",
+                       line="D8D1C2", line_w=1.6)
+        add_rect(slide, x, arena_y, sideW, HEAD_H, fill=color)
+        add_text(slide, x + 8, arena_y + 9, sideW - 16, 24, sd.get("label", f"立场{i+1}"),
+                 size=15, bold=True, color="FFFFFF", align="center")
+        fy = arena_y + HEAD_H + 12
+        for fi, f in enumerate(fields_of(sd)):
+            if fi:
+                fy += 12
+            add_text(slide, x + 14, fy, sideW - 28, 18, f.get("label", ""), size=13,
+                     bold=True, color="6E6656")
+            fy += 18
+            val = f.get("value")
+            vals = val if isinstance(val, list) else ([val] if val else [])
+            n = f.get("lines", 3)
+            if vals:
+                add_text(slide, x + 14, fy + 4, sideW - 28, n * 56, "\n".join(vals),
+                         size=13, color="3A3A33", line_spacing=1.6)
+            else:
+                for k in range(n):
+                    ly = fy + (k + 1) * 56
+                    add_line(slide, x + 14, ly, x + sideW - 14, ly, "CFC8BA", 1.2)
+            fy += n * 56
+    if len(sides) == 2:
+        cy = arena_y + sideH / 2
+        add_oval(slide, 397 - 22, cy - 22, 44, 44, fill="FFFFFF", line="C2BBA9", line_w=2)
+        add_text(slide, 397 - 22, cy - 22, 44, 44, d.get("vs_label", "VS"), size=14,
+                 bold=True, color="8A8268", align="center", anchor="middle")
+    vy = arena_y + sideH + 18
+    v = d.get("verdict")
+    if v:
+        vlines = v.get("lines", 3)
+        vh = 12 + 20 + 6 + vlines * 56 + 14
+        add_round_rect(slide, PAD, vy, PAGE_W_PX - 2 * PAD, vh, radius=0.06,
+                       fill="FFFFFF", line="C9A24A", line_w=1.8)
+        opts = v.get("options") or [s.get("label", "") for s in sides]
+        lab = v.get("label", "听完两边，我站……")
+        if opts:
+            lab += "　　" + "　　".join("□ " + o for o in opts)
+        add_text(slide, PAD + 16, vy + 12, PAGE_W_PX - 2 * PAD - 32, 22, lab,
+                 size=14, bold=True, color="5A5048")
+        for k in range(vlines):
+            ly = vy + 38 + (k + 1) * 56
+            add_line(slide, PAD + 16, ly, PAGE_W_PX - PAD - 16, ly, "CFC8BA", 1.2)
+        vy += vh
+    footer(slide, d, key="footer", y=vy + 14)
+
+
+def render_deduce(slide, d):
+    """推断卡链。matrix（默认，共用步骤时）：步骤文字只在左列排一次，右侧每列一条线索只留格子；
+    cards：每卡自带步骤文字。底部可挂收口条。"""
+    header(slide, d, title_px=106, title_size=23, sub_px=146)
+    PAL = ["#5B8C7B", "#C18A3A", "#5B7FA6", "#8268A0"]
+    NOS = ["①", "②", "③", "④", "⑤"]
+    PAD, GAP = 34, 10
+    cards = d.get("cards", [])
+    shared = d.get("steps", [])
+    layout = d.get("layout") or ("matrix" if shared and all(not c.get("steps") for c in cards) else "cards")
+    top = 210
+
+    def step_h(st):
+        return (8 + 22 + 10) if st.get("verdict") else (8 + st.get("lines", 2) * 56 + 10)
+
+    def fill(x, y, w, st):
+        if st.get("verdict"):
+            add_text(slide, x + 10, y + 8, w - 20, 22,
+                     "　　".join("□ " + o for o in st.get("options", ["真", "假"])),
+                     size=13, color="4A4238")
+            return
+        n = st.get("lines", 2)
+        val = st.get("value")
+        vals = val if isinstance(val, list) else ([val] if val else [])
+        if vals:
+            add_text(slide, x + 10, y + 8, w - 20, n * 56, "\n".join(vals),
+                     size=12.5, color="3A3A33", line_spacing=1.6)
+        else:
+            for k in range(n):
+                add_line(slide, x + 10, y + 8 + (k + 1) * 56, x + w - 10,
+                         y + 8 + (k + 1) * 56, "CFC8BA", 1.2)
+
+    if layout == "matrix":
+        STEPW, HEAD_H, ARROW_H = 168, 46, 16
+        n = len(cards) or 1
+        colW = (PAGE_W_PX - 2 * PAD - STEPW - n * GAP) / n
+        colX = lambda i: PAD + STEPW + GAP + i * (colW + GAP)
+        for i, cd in enumerate(cards):
+            color = (cd.get("color") or PAL[i % len(PAL)]).lstrip("#")
+            add_rect(slide, colX(i), top, colW, HEAD_H, fill=color)
+            add_text(slide, colX(i) + 6, top + 6, colW - 12, HEAD_H - 10,
+                     str(cd.get("header", f"线索{i+1}")),
+                     size=14.5, bold=True, color="FFFFFF", align="center", line_spacing=1.3)
+        y = top + HEAD_H
+        for si, st in enumerate(shared):
+            if si:
+                add_text(slide, PAD, y, STEPW - 12, 20, "↓", size=17, color="C2BBA9",
+                         align="right")
+                y += ARROW_H
+            h = step_h(st)
+            add_text(slide, PAD + 2, y + 10, STEPW - 12, h - 12,
+                     f"{NOS[si] if si < len(NOS) else si+1} {st.get('label','')}",
+                     size=12.5, bold=True, color="6E6656", line_spacing=1.5)
+            for i in range(len(cards)):
+                add_round_rect(slide, colX(i), y, colW, h, radius=0.04, fill="FCFBF8",
+                               line="D8D1C2", line_w=1.4)
+                fill(colX(i), y, colW, st)
+            y += h
+        board_bottom = y
+    else:
+        cols = d.get("columns") or len(cards) or 1
+        cardW = (PAGE_W_PX - 2 * PAD - (cols - 1) * 12) / cols
+        HEAD_H, ARROW_H = 46, 30
+        body_h = 0
+        for cd in cards:
+            sts = cd.get("steps") or shared
+            body_h = max(body_h, 10 + sum(step_h(s) for s in sts)
+                         + ARROW_H * max(0, len(sts) - 1) + 12)
+        cardH = HEAD_H + body_h
+        for i, cd in enumerate(cards):
+            x = PAD + i * (cardW + 12)
+            color = (cd.get("color") or PAL[i % len(PAL)]).lstrip("#")
+            add_round_rect(slide, x, top, cardW, cardH, radius=0.03, fill="FCFBF8",
+                           line="D8D1C2", line_w=1.6)
+            add_rect(slide, x, top, cardW, HEAD_H, fill=color)
+            add_text(slide, x + 8, top + 6, cardW - 16, HEAD_H - 10,
+                     str(cd.get("header", f"线索{i+1}")), size=14.5,
+                     bold=True, color="FFFFFF", align="center", line_spacing=1.3)
+            fy = top + HEAD_H + 10
+            sts = cd.get("steps") or shared
+            for si, st in enumerate(sts):
+                if si:
+                    add_text(slide, x, fy - 24, cardW, 22, "↓", size=17, color="C2BBA9",
+                             align="center")
+                add_text(slide, x + 12, fy, cardW - 24, 18,
+                         f"{NOS[si] if si < len(NOS) else si+1} {st.get('label','')}",
+                         size=12.5, bold=True, color="6E6656", line_spacing=1.4)
+                fy += 18
+                fill(x, fy - 8, cardW, st)
+                fy += (26 if st.get("verdict") else st.get("lines", 2) * 56)
+                fy += ARROW_H if si < len(sts) - 1 else 0
+        board_bottom = top + cardH
+
+    ty = board_bottom + 16
+    t = d.get("tail")
+    if t:
+        tl = t.get("lines", 2)
+        th = 12 + 40 + 6 + tl * 56 + 14
+        add_round_rect(slide, PAD, ty, PAGE_W_PX - 2 * PAD, th, radius=0.05,
+                       fill="FFFFFF", line="C9A24A", line_w=1.8)
+        add_text(slide, PAD + 16, ty + 12, PAGE_W_PX - 2 * PAD - 32, 42,
+                 t.get("label", ""), size=14, bold=True, color="5A5048", line_spacing=1.45)
+        for k in range(tl):
+            add_line(slide, PAD + 16, ty + 58 + (k + 1) * 56,
+                     PAGE_W_PX - PAD - 16, ty + 58 + (k + 1) * 56, "CFC8BA", 1.2)
+        ty += th
+    footer(slide, d, key="footer", y=ty + 14)
+
+
 def _has_val(v):
     if isinstance(v, list):
         return len(v) > 0
@@ -900,7 +1327,9 @@ RENDERERS = {
     "story_mountain": render_story_mountain, "fishbone": render_fishbone,
     "timeline": render_timeline, "bubble": render_bubble,
     "writing": render_writing, "draw": render_draw, "comic": render_comic,
-    "profile": render_profile,
+    "profile": render_profile, "relation": render_relation,
+    "facets": render_facets, "lanes": render_lanes, "stance": render_stance,
+    "deduce": render_deduce,
 }
 
 

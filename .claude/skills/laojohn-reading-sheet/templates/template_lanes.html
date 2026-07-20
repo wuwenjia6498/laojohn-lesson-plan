@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<!-- 双泳道故事线：共同起点 → N 个阶段并排推进（每条泳道一个角色/对象）→ 末端向外分岔各接一个结局框。
+     用于「两个角色走过同一段故事、结局却不同」的对照梳理。泳道数 2–3、阶段数 2–4 自适应。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #page { width: 794px; height: 1123px; background: #FFFFFF; position: relative; overflow: hidden; }
+  .brand-logo { position: absolute; top: 32px; right: 42px; height: 48px; }
+  .variant-tag { position: absolute; top: 36px; left: 46px; font-size: 13px; color: #B3A98F; letter-spacing: 1px; }
+  .l-title { position: absolute; top: 110px; left: 0; width: 100%; text-align: center;
+    font-size: 23px; font-weight: 700; color: #333; padding: 0 56px; line-height: 1.4; }
+  .l-sub { position: absolute; top: 154px; left: 0; width: 100%; text-align: center; font-size: 15px; color: #8A8268; }
+  .l-foot { position: absolute; bottom: 26px; left: 0; width: 100%; text-align: left; font-size: 14px; color: #9A937F; padding: 0 40px; }
+  .stg { font-size: 13.5px; font-weight: 700; fill: #FFFFFF; }
+  .stgs { font-size: 11px; fill: #FFFFFF; }
+  .lane-lb { font-size: 15px; font-weight: 700; fill: #FFFFFF; }
+  .start-lb { font-size: 13px; font-weight: 700; fill: #5A5048; }
+  .end-lb { font-size: 12px; font-weight: 700; fill: #6E6656; }
+  .cell { font-size: 13px; fill: #3A3A33; }
+</style>
+</head>
+<body>
+<div id="page">
+  <img class="brand-logo" id="logo">
+  <div class="variant-tag" id="variantTag"></div>
+  <div class="l-title" id="title"></div>
+  <div class="l-sub" id="subtitle"></div>
+  <svg id="svg" width="794" height="950" style="position:absolute; top:150px; left:0;"></svg>
+  <div class="l-foot" id="foot"></div>
+</div>
+<script>
+const DATA = /*__DATA__*/ null;
+const SVGNS = "http://www.w3.org/2000/svg";
+function el(t,a){const e=document.createElementNS(SVGNS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+// 智能折行：连续字母/数字(含 . - – 连接)视为不可拆 token，决不从中间断；并避头尾。
+function wrap(s,max){
+  s = String(s);
+  const NO_HEAD = "，。、；：？！）】」』”’》%…—-";
+  const NO_TAIL = "（【「『“‘《";
+  const toks = s.match(/[A-Za-z0-9]+(?:[.\-–][A-Za-z0-9]+)*|[\s\S]/g) || [];
+  const lines = []; let cur = "";
+  for (const tk of toks){
+    if (tk === "\n"){ lines.push(cur); cur = ""; continue; }
+    if (cur !== "" && cur.length + tk.length > max && NO_HEAD.indexOf(tk) === -1){
+      let carry = "";
+      while (cur && NO_TAIL.indexOf(cur[cur.length - 1]) !== -1){ carry = cur[cur.length - 1] + carry; cur = cur.slice(0, -1); }
+      lines.push(cur); cur = carry + tk;
+    } else { cur += tk; }
+  }
+  if (cur !== "") lines.push(cur);
+  return lines;
+}
+const PALETTE = ["#5B8C7B","#C18A3A","#5B7FA6"];
+const MARGIN = 18, LAB_W = 40, END_W = 100, GAP = 8, END_GAP = 20;
+const STAGE_Y = 70, STAGE_H = 46, LANE_Y0 = 136, LANE_GAP = 30;
+
+function arrow(svg, x, y, color){
+  svg.appendChild(el("polygon",{points:`${x},${y-6} ${x+11},${y} ${x},${y+6}`, fill:color}));
+}
+function render(){
+  const d = DATA;
+  document.getElementById('logo').src = d.logo;
+  document.getElementById('title').textContent = d.title || '';
+  const sub = document.getElementById('subtitle'); if(d.subtitle) sub.textContent = d.subtitle; else sub.style.display='none';
+  const tag = document.getElementById('variantTag'); if(d.variant) tag.textContent = d.variant; else tag.style.display='none';
+  const foot = document.getElementById('foot'); if(d.footer) foot.textContent = d.footer; else foot.style.display='none';
+
+  const svg = document.getElementById('svg');
+  const stages = d.stages || [];
+  const lanes = d.lanes || [];
+  const ns = stages.length || 1, nl = lanes.length || 1;
+
+  const x0 = MARGIN + LAB_W + GAP;
+  const endX = 794 - MARGIN - END_W;
+  const availW = endX - END_GAP - x0;
+  const colW = (availW - (ns - 1) * GAP) / ns;
+  const laneH = (900 - LANE_Y0 - (nl - 1) * LANE_GAP) / nl;
+  // 书写线铺满格高：条数按 56px 硬下限算容量，实际间距再均分铺开（不留半截空格）
+  const cap = Math.max(1, Math.floor((laneH - 40) / 56));
+  const nLines = (d.lines != null) ? Math.min(d.lines, cap) : cap;
+  const lineStep = (laneH - 40) / nLines;
+
+  // 阶段标题条
+  stages.forEach((st,si)=>{
+    const sx = x0 + si * (colW + GAP);
+    svg.appendChild(el("rect",{x:sx, y:STAGE_Y, width:colW, height:STAGE_H, rx:8, fill:"#8A8268"}));
+    const nm = el("text",{x:sx+colW/2, y:STAGE_Y+20, class:"stg", "text-anchor":"middle"});
+    nm.textContent = (typeof st === 'string') ? st : (st.name || ''); svg.appendChild(nm);
+    const sb = (typeof st === 'object' && st.sub) ? st.sub : '';
+    if(sb){ const t=el("text",{x:sx+colW/2, y:STAGE_Y+37, class:"stgs", "text-anchor":"middle"});
+      t.textContent = sb; svg.appendChild(t); }
+  });
+
+  // 起点标记（左上），引线到各泳道
+  if(d.start_label){
+    const sw = Math.max(110, String(d.start_label).length * 13 + 26);
+    svg.appendChild(el("rect",{x:MARGIN, y:22, width:sw, height:32, rx:16,
+      fill:"#F3EFE4", stroke:"#C9A24A", "stroke-width":1.6}));
+    const t = el("text",{x:MARGIN+sw/2, y:43, class:"start-lb", "text-anchor":"middle"});
+    t.textContent = d.start_label; svg.appendChild(t);
+    const lastTop = LANE_Y0 + (nl-1)*(laneH + LANE_GAP);
+    svg.appendChild(el("line",{x1:MARGIN+LAB_W/2, y1:54, x2:MARGIN+LAB_W/2, y2:lastTop+14,
+      stroke:"#C9A24A", "stroke-width":2}));
+  }
+
+  lanes.forEach((ln,li)=>{
+    const top = LANE_Y0 + li * (laneH + LANE_GAP);
+    const mid = top + laneH/2;
+    const color = ln.color || PALETTE[li % PALETTE.length];
+
+    // 角色标签（竖条）
+    svg.appendChild(el("rect",{x:MARGIN, y:top, width:LAB_W, height:laneH, rx:8, fill:color}));
+    const lb = el("text",{x:MARGIN+LAB_W/2, y:mid, class:"lane-lb", "text-anchor":"middle"});
+    const ll = wrap(String(ln.label||''), 1);
+    const y0 = mid - (ll.length-1)*10;
+    ll.forEach((c,ci)=>{ const t=el("text",{x:MARGIN+LAB_W/2, y:Math.round(y0+ci*20), class:"lane-lb", "text-anchor":"middle"});
+      t.textContent = c; svg.appendChild(t); });
+
+    const cells = ln.cells || [];
+    for(let si=0; si<ns; si++){
+      const sx = x0 + si * (colW + GAP);
+      svg.appendChild(el("rect",{x:sx, y:top, width:colW, height:laneH, rx:10,
+        fill:"#FCFBF8", stroke:color, "stroke-width":1.5}));
+      const val = cells[si];
+      const vals = Array.isArray(val) ? val : (val ? [val] : []);
+      if(vals.length){
+        let yy = top + 24;
+        vals.forEach(v=>{ wrap(String(v), Math.floor((colW-20)/13.2)).forEach(cl=>{
+          const t=el("text",{x:sx+10, y:yy, class:"cell"}); t.textContent=cl; svg.appendChild(t); yy += 19; }); });
+      } else {
+        for(let k=0;k<nLines;k++){
+          const ly = top + 22 + k*lineStep;
+          if(ly > top + laneH - 12) break;
+          svg.appendChild(el("line",{x1:sx+10, y1:ly, x2:sx+colW-10, y2:ly, stroke:"#CFC8BA", "stroke-width":1.2}));
+        }
+      }
+      // 段间推进箭头
+      if(si < ns-1) arrow(svg, sx+colW-2, mid, color);
+    }
+
+    // 末端分岔 → 结局框（上道往上错、下道往下错）
+    const lastR = x0 + (ns-1)*(colW+GAP) + colW;
+    const endH = 116;
+    const off = (nl === 1) ? 0 : (li === 0 ? -1 : 1) * Math.min(46, (laneH - endH)/2);
+    const eY = top + (laneH - endH)/2 + off;
+    svg.appendChild(el("path",{d:`M ${lastR} ${mid} C ${lastR+12} ${mid}, ${endX-12} ${eY+endH/2}, ${endX} ${eY+endH/2}`,
+      fill:"none", stroke:color, "stroke-width":2, "stroke-dasharray":"6 4"}));
+    arrow(svg, endX-11, eY+endH/2, color);
+    svg.appendChild(el("rect",{x:endX, y:eY, width:END_W, height:endH, rx:10,
+      fill:"#FFFFFF", stroke:color, "stroke-width":1.8}));
+    const el2 = el("text",{x:endX+10, y:eY+20, class:"end-lb"});
+    el2.textContent = ln.end_label || '最后……'; svg.appendChild(el2);
+    const endLines = (d.end_lines != null) ? d.end_lines : 2;
+    for(let k=0;k<endLines;k++){
+      const ly = eY + 44 + k*32;
+      if(ly > eY + endH - 8) break;
+      svg.appendChild(el("line",{x1:endX+10, y1:ly, x2:endX+END_W-10, y2:ly, stroke:"#CFC8BA", "stroke-width":1.2}));
+    }
+  });
+
+  document.body.dataset.rendered = '1';
+}
+render();
+</script>
+</body>
+</html>

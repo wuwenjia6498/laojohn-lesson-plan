@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<!-- 人物关系图：N 户/组并排，每组一个围栏（组名彩条 + 若干人物槽 + 组内关系书写线），
+     各组连线汇到底部一个「共同处境」节点。组数 2–4 自适应，人物槽数自适应。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #page { width: 794px; height: 1123px; background: #FFFFFF; position: relative; overflow: hidden; }
+  .brand-logo { position: absolute; top: 32px; right: 42px; height: 48px; }
+  .variant-tag { position: absolute; top: 36px; left: 46px; font-size: 13px; color: #B3A98F; letter-spacing: 1px; }
+  .l-title { position: absolute; top: 110px; left: 0; width: 100%; text-align: center;
+    font-size: 23px; font-weight: 700; color: #333; padding: 0 56px; line-height: 1.4; }
+  .l-sub { position: absolute; top: 154px; left: 0; width: 100%; text-align: center; font-size: 15px; color: #8A8268; }
+  .l-foot { position: absolute; bottom: 28px; left: 0; width: 100%; text-align: left; font-size: 14px; color: #9A937F; padding: 0 40px; }
+  .gh { font-size: 15px; font-weight: 700; fill: #FFFFFF; }
+  .rl { font-size: 12.5px; fill: #8A8268; }
+  .mtxt { font-size: 13.5px; fill: #3A3A33; }
+  .hub { font-size: 15px; font-weight: 700; fill: #5A5048; }
+</style>
+</head>
+<body>
+<div id="page">
+  <img class="brand-logo" id="logo">
+  <div class="variant-tag" id="variantTag"></div>
+  <div class="l-title" id="title"></div>
+  <div class="l-sub" id="subtitle"></div>
+  <svg id="svg" width="794" height="950" style="position:absolute; top:150px; left:0;"></svg>
+  <div class="l-foot" id="foot"></div>
+</div>
+<script>
+const DATA = /*__DATA__*/ null;
+const SVGNS = "http://www.w3.org/2000/svg";
+function el(t,a){const e=document.createElementNS(SVGNS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+// 智能折行：连续字母/数字(含 . - – 连接)视为不可拆 token，决不从中间断；并避头尾。
+function wrap(s,max){
+  s = String(s);
+  const NO_HEAD = "，。、；：？！）】」』”’》%…—-";
+  const NO_TAIL = "（【「『“‘《";
+  const toks = s.match(/[A-Za-z0-9]+(?:[.\-–][A-Za-z0-9]+)*|[\s\S]/g) || [];
+  const lines = []; let cur = "";
+  for (const tk of toks){
+    if (tk === "\n"){ lines.push(cur); cur = ""; continue; }
+    if (cur !== "" && cur.length + tk.length > max && NO_HEAD.indexOf(tk) === -1){
+      let carry = "";
+      while (cur && NO_TAIL.indexOf(cur[cur.length - 1]) !== -1){ carry = cur[cur.length - 1] + carry; cur = cur.slice(0, -1); }
+      lines.push(cur); cur = carry + tk;
+    } else { cur += tk; }
+  }
+  if (cur !== "") lines.push(cur);
+  return lines;
+}
+const PALETTE = ["#5B8C7B","#C18A3A","#5B7FA6","#8268A0","#A8634F","#7A8C3A"];
+
+const MARGIN = 34, GAP = 16, BOX_TOP = 50, BOX_BOTTOM = 740, HEAD_H = 36;
+const HUB_Y = 830, HUB_H = 64, HUB_W = 560;
+function render(){
+  const d = DATA;
+  document.getElementById('logo').src = d.logo;
+  document.getElementById('title').textContent = d.title || '';
+  const sub = document.getElementById('subtitle'); if(d.subtitle) sub.textContent = d.subtitle; else sub.style.display='none';
+  const tag = document.getElementById('variantTag'); if(d.variant) tag.textContent = d.variant; else tag.style.display='none';
+  const foot = document.getElementById('foot'); if(d.footer) foot.textContent = d.footer; else foot.style.display='none';
+
+  const svg = document.getElementById('svg');
+  const groups = d.groups || [];
+  const n = groups.length || 1;
+  const colW = (794 - 2*MARGIN - (n-1)*GAP) / n;
+  const relLabel = d.relation_label || '组内关系';
+
+  groups.forEach((g,gi)=>{
+    const x = MARGIN + gi*(colW+GAP);
+    const cx = x + colW/2;
+    const color = PALETTE[gi % PALETTE.length];
+    const members = g.members || [];
+    const slots = Math.max(g.slots || 0, members.length, 1);
+    const relLines = (g.relation_lines != null) ? g.relation_lines : (d.relation_lines != null ? d.relation_lines : 3);
+
+    // 围栏（虚线圆角框）+ 组名彩条
+    svg.appendChild(el("rect",{x:x, y:BOX_TOP, width:colW, height:BOX_BOTTOM-BOX_TOP, rx:14,
+      fill:"#FCFBF8", stroke:color, "stroke-width":1.6, "stroke-dasharray":"7 5"}));
+    svg.appendChild(el("rect",{x:x, y:BOX_TOP, width:colW, height:HEAD_H, rx:14, fill:color}));
+    svg.appendChild(el("rect",{x:x, y:BOX_TOP+HEAD_H-14, width:colW, height:14, fill:color}));
+    const gh = el("text",{x:cx, y:BOX_TOP+24, class:"gh", "text-anchor":"middle"});
+    gh.textContent = g.header || ('第'+(gi+1)+'组'); svg.appendChild(gh);
+
+    // 版面分配：人物槽区在上、关系书写线区在下
+    const innerTop = BOX_TOP + HEAD_H + 22;
+    // 标签按列宽折行（窄列/长标签不再溢出到相邻组），最多 2 行
+    const labMax = Math.max(4, Math.floor((colW - 28) / 12.6));
+    const labLines = wrap(relLabel, labMax).slice(0, 2);
+    const labBlock = 40 + (labLines.length - 1) * 16;
+    const relH = labBlock + relLines*62;
+    const relTop = BOX_BOTTOM - relH;
+    const slotRegion = relTop - innerTop;
+
+    const cols = (colW >= 200) ? 2 : 1;
+    const rows = Math.ceil(slots / cols);
+    const rowStep = slotRegion / rows;
+    const ry = Math.max(18, Math.min(34, rowStep/2 - 8));
+    const rx = (cols === 2) ? (colW/4 - 10) : (colW/2 - 16);
+
+    for(let i=0;i<slots;i++){
+      const r = Math.floor(i/cols), c = i % cols;
+      const scx = (cols === 2) ? (cx + (c === 0 ? -colW/4 : colW/4)) : cx;
+      const scy = innerTop + rowStep*(r + 0.5);
+      svg.appendChild(el("ellipse",{cx:Math.round(scx), cy:Math.round(scy), rx:Math.round(rx), ry:Math.round(ry),
+        fill:"#FFFFFF", stroke:"#C2BBA9", "stroke-width":1.4}));
+      const txt = members[i] || '';
+      if(String(txt).trim() !== ''){
+        const lines = wrap(String(txt), cols === 2 ? 5 : 8).slice(0,2);
+        const y0 = scy + 5 - (lines.length-1)*8;
+        lines.forEach((ln,li)=>{ const t=el("text",{x:Math.round(scx), y:Math.round(y0+li*16), class:"mtxt", "text-anchor":"middle"});
+          t.textContent = ln; svg.appendChild(t); });
+      }
+    }
+
+    // 组内关系书写线
+    labLines.forEach((ln,li)=>{
+      const lb = el("text",{x:x+14, y:relTop+18+li*16, class:"rl"}); lb.textContent = ln; svg.appendChild(lb);
+    });
+    for(let i=0;i<relLines;i++){
+      const ly = relTop + labBlock + i*62;
+      svg.appendChild(el("line",{x1:x+14, y1:ly, x2:x+colW-14, y2:ly, stroke:"#CFC8BA", "stroke-width":1.2}));
+    }
+
+    // 连到底部共同节点
+    svg.appendChild(el("line",{x1:Math.round(cx), y1:BOX_BOTTOM, x2:397, y2:HUB_Y, stroke:"#C9C2B4", "stroke-width":1.6}));
+  });
+
+  // 底部共同节点
+  if(d.bottom_label){
+    svg.appendChild(el("rect",{x:397-HUB_W/2, y:HUB_Y, width:HUB_W, height:HUB_H, rx:12,
+      fill:"#F3EFE4", stroke:"#C9A24A", "stroke-width":1.8}));
+    const bl = wrap(String(d.bottom_label), 30).slice(0,2);
+    const y0 = HUB_Y + HUB_H/2 + 6 - (bl.length-1)*11;
+    bl.forEach((ln,li)=>{ const t=el("text",{x:397, y:Math.round(y0+li*22), class:"hub", "text-anchor":"middle"});
+      t.textContent = ln; svg.appendChild(t); });
+  }
+
+  document.body.dataset.rendered = '1';
+}
+render();
+</script>
+</body>
+</html>

@@ -82,9 +82,16 @@ function render(){
     // 时段标签 chip（轴上方）
     const cw = Math.min(colW - 16, 210);
     const chx = cx - cw/2;
-    svg.appendChild(el("rect",{x:chx, y:AX_Y-58, width:cw, height:30, rx:6, fill:color}));
+    // 长时段标签按 chip 宽折行、chip 高度随行数自适应（短标签行为不变）
+    const chLines = wrap(String(nd.header || ''), Math.max(4, Math.floor((cw - 16) / 14.5)));
+    const chH = 30 + (chLines.length - 1) * 19;
+    const chTop = AX_Y - 28 - chH;
+    svg.appendChild(el("rect",{x:chx, y:chTop, width:cw, height:chH, rx:6, fill:color}));
     svg.appendChild(el("polygon",{points:`${cx-6},${AX_Y-28} ${cx+6},${AX_Y-28} ${cx},${AX_Y-18}`, fill:color}));
-    const ch = el("text",{x:cx, y:AX_Y-38, class:"chip", "text-anchor":"middle"}); ch.textContent = nd.header || ''; svg.appendChild(ch);
+    chLines.forEach((ln,li)=>{
+      const ch = el("text",{x:cx, y:chTop + 20 + li*19, class:"chip", "text-anchor":"middle"});
+      ch.textContent = ln; svg.appendChild(ch);
+    });
     // 书写块（轴下方）
     const bx = cx - cw/2, by = AX_Y + 28;
     const val = Array.isArray(nd.value) ? nd.value : (nd.value ? [nd.value] : []);

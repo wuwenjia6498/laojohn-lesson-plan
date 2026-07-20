@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<!-- N 面卡片墙：一个话题拆成若干「面」，每面一张卡（面名彩条 + 该面的问题 + 书写线）。
+     典型用法=六面体讨论图（联系/描述/比较/争论/应用/分析）。卡数与列数自适应。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #page { width: 794px; min-height: 1123px; background: #FFFFFF; position: relative;
+    padding: 84px 40px 34px 40px; }
+  .brand-logo { position: absolute; top: 32px; right: 42px; height: 48px; }
+  .variant-tag { position: absolute; top: 36px; left: 46px; font-size: 13px; color: #B3A98F; letter-spacing: 1px; }
+  .l-title { margin-top: 22px; text-align: center; font-size: 23px; font-weight: 700; color: #333; line-height: 1.4; }
+  .l-sub { margin-top: 10px; text-align: center; font-size: 15px; color: #8A8268; }
+  .wall { display: grid; gap: 14px; margin-top: 20px; }
+  .card { border: 1.4px solid #D8D1C2; border-radius: 12px; overflow: hidden; background: #FCFBF8; }
+  .c-head { height: 36px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 12px; color: #FFFFFF; }
+  .c-name { font-size: 15px; font-weight: 700; letter-spacing: 1px; }
+  .c-req { font-size: 11.5px; font-weight: 700; background: rgba(255,255,255,.26);
+    border-radius: 9px; padding: 2px 8px; }
+  .c-body { padding: 8px 12px 10px; }
+  .c-q { font-size: 13px; color: #6E6656; line-height: 1.5; min-height: 32px; }
+  .c-lines { margin-top: 8px; }
+  .c-lines div { height: 56px; border-bottom: 1.2px solid #CFC8BA; }
+  .c-val { margin-top: 8px; font-size: 13.5px; color: #3A3A33; line-height: 1.55; }
+  .l-foot { margin-top: 12px; font-size: 14px; color: #9A937F; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div id="page">
+  <img class="brand-logo" id="logo">
+  <div class="variant-tag" id="variantTag"></div>
+  <div class="l-title" id="title"></div>
+  <div class="l-sub" id="subtitle"></div>
+  <div class="wall" id="wall"></div>
+  <div class="l-foot" id="foot"></div>
+</div>
+<script>
+const DATA = /*__DATA__*/ null;
+const PALETTE = ["#5B8C7B","#C18A3A","#5B7FA6","#8268A0","#A8634F","#7A8C3A"];
+function render(){
+  const d = DATA;
+  document.getElementById('logo').src = d.logo;
+  document.getElementById('title').textContent = d.title || '';
+  const sub = document.getElementById('subtitle'); if(d.subtitle) sub.textContent = d.subtitle; else sub.style.display='none';
+  const tag = document.getElementById('variantTag'); if(d.variant) tag.textContent = d.variant; else tag.style.display='none';
+  const foot = document.getElementById('foot'); if(d.footer) foot.textContent = d.footer; else foot.style.display='none';
+
+  const facets = d.facets || [];
+  const cols = d.columns || 2;
+  const wall = document.getElementById('wall');
+  wall.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
+
+  facets.forEach((f,i)=>{
+    const color = f.color || PALETTE[i % PALETTE.length];
+    const card = document.createElement('div'); card.className = 'card';
+
+    const head = document.createElement('div'); head.className = 'c-head';
+    head.style.background = color;
+    const nm = document.createElement('span'); nm.className = 'c-name';
+    nm.textContent = f.label || ('第'+(i+1)+'面'); head.appendChild(nm);
+    if(f.required){ const rq = document.createElement('span'); rq.className = 'c-req';
+      rq.textContent = f.required_label || '必写'; head.appendChild(rq); }
+    card.appendChild(head);
+
+    const body = document.createElement('div'); body.className = 'c-body';
+    const q = document.createElement('div'); q.className = 'c-q';
+    q.textContent = f.question || ''; body.appendChild(q);
+
+    const val = f.value;
+    const vals = Array.isArray(val) ? val : (val ? [val] : []);
+    if(vals.length){
+      const v = document.createElement('div'); v.className = 'c-val';
+      v.textContent = vals.join('\n'); v.style.whiteSpace = 'pre-line'; body.appendChild(v);
+    } else {
+      const box = document.createElement('div'); box.className = 'c-lines';
+      const n = (f.lines != null) ? f.lines : (d.lines != null ? d.lines : 3);
+      for(let k=0;k<n;k++) box.appendChild(document.createElement('div'));
+      body.appendChild(box);
+    }
+    card.appendChild(body);
+    wall.appendChild(card);
+  });
+
+  document.body.dataset.rendered = '1';
+}
+render();
+</script>
+</body>
+</html>
