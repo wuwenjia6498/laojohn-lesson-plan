@@ -148,7 +148,7 @@ def _gemini_image_bytes(resp):
 
 
 _STYLE_REF_INSTR = (
-    '\n\n【画风参考】随附的参考图是本期的锚图。请**严格沿用参考图的绘画风格**——'
+    '\n\n【画风参考】随附的参考图是本课的锚图。请**严格沿用参考图的绘画风格**——'
     '线条粗细与颜色、上色方式与笔触质感、色彩饱和度与明暗、人物造型比例与脸部画法、背景留白处理，都要与参考图看起来出自同一位插画师、同一套绘本。'
     '**只改变画面内容**（人物、场景、动作按上面的描述画），不要改变画风。'
     '参考图应有的质感：水彩淡彩叠彩铅的手绘感、看得见纸纹与笔触、线条粗细有变化、'
@@ -205,7 +205,7 @@ def _gen_openai_images(client, cfg, prompt, out_png):
 def generate_one(client, cfg, prompt, out_png, style_ref=None):
     """按 image_model 选后端生成并落盘。client 为 OpenAI 兼容客户端（gemini 通道不用它）。
 
-    style_ref：画风参考图（本期锚图）。仅 gemini 通道支持；给了就走图生图锁画风。
+    style_ref：画风参考图（本课锚图）。仅 gemini 通道支持；给了就走图生图锁画风。
     """
     if is_gemini(cfg['image_model']):
         img = _gen_gemini(cfg, prompt, out_png, style_ref)
@@ -418,7 +418,7 @@ def main():
         print('没有可生成的锚图/例库图（格式图跳过）。')
         return
 
-    # 本期锚图＝全期画风基准；例库图带它做图生图，保证五张图一套画风
+    # 本课锚图＝全课画风基准；例库图带它做图生图，保证五张图一套画风
     anchor_png = None
     for s in specs:
         if s.is_anchor:
