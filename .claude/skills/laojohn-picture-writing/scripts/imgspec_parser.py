@@ -23,6 +23,29 @@ ROLE_ANCHOR = '锚图'
 ROLE_LIBRARY = '例库图'
 ROLE_FORMAT = '格式图'
 
+# —— 全局画风令牌（运行时事实源在这里；人读文档见 references/style-tokens.md，两处必须一字一致）——
+# 收成全局两档的原因：风格若散在每张图的「生图提示词」里各写各的，只会漂到模型默认的
+# 塑料感儿童插画档。锚图定调、例库图靠图生图跟随，所以真正要拉起来的是锚图这一张。
+# 锚图档收在「可读」——学生要数要素、圈画面，可读性优先于美观（硬红线）。
+ANCHOR_STYLE_TOKEN = (
+    '画风：柔和的水彩淡彩叠加彩色铅笔质感的手绘插画，看得见纸张纹理与自然笔触，'
+    '不要矢量扁平风、不要塑料光泽、不要均匀渐变；线条轻盈、粗细有变化，'
+    '不要每个物体都描一圈同样粗细的黑色轮廓；配色低饱和、以柔和的暖色系为主，'
+    '只保留一处克制的强调色，不要糖果色、荧光色、不要整体高饱和拉满；'
+    '光线是柔和的自然方向光，带轻微的环境光与柔和投影，画面有空气感、有主次虚实。'
+    '同时保证可读：主角与每一个要素都清晰、边缘可辨，构图干净、留白充足，'
+    '孩子要能一眼看清、数得出、圈得住，氛围一律服从可读。'
+)
+# 例库图档基调与锚图同源（否则图生图跟随会打架），只在收尾放开氛围。
+LIBRARY_STYLE_TOKEN = (
+    '画风：柔和的水彩淡彩叠加彩色铅笔质感的手绘插画，看得见纸张纹理与自然笔触，'
+    '不要矢量扁平风、不要塑料光泽、不要均匀渐变；线条轻盈、粗细有变化，'
+    '不要每个物体都描一圈同样粗细的黑色轮廓；配色低饱和、以柔和的暖色系为主，'
+    '只保留一处克制的强调色，不要糖果色、荧光色、不要整体高饱和拉满；'
+    '光线是柔和的自然方向光，带轻微的环境光与柔和投影，光影可以更丰富、'
+    '氛围可以更浓一些，但仍要看起来与本期锚图出自同一位插画师、同一套绘本。'
+)
+
 _FENCE_RE = re.compile(r'```imgspec\s*\n(.*?)```', re.S)
 _FIELD_RE = re.compile(r'^[ \t]*([^\s:：][^:：]*?)[：:][ \t]*(.*)$')
 _PLACEHOLDER_RE = re.compile(r'【图位[：:]\s*([锚例格]-\d+)')
@@ -92,7 +115,11 @@ class ImgSpec:
         return self.role == ROLE_FORMAT
 
     def build_prompt(self, enforce_must_see=False):
-        """组装喂生图工具的最终提示词：提示词 + 风格/比例（+ 锚图可选把必须可见清单逐条拼入）。"""
+        """组装喂生图工具的最终提示词：提示词 + 风格/比例（+ 锚图可选把必须可见清单逐条拼入）
+        + 按角色自动追加全局画风令牌（锚图 clean 档 / 例库图 atmos 档）。
+
+        画风令牌统一在这里注入，规格里不再逐图写风格形容词——见 references/style-tokens.md。
+        `风格/比例` 字段保留原样拼接（它管的是比例/横版，与令牌不冲突）。"""
         parts = []
         if self.prompt:
             parts.append(self.prompt)
@@ -100,6 +127,10 @@ class ImgSpec:
             parts.append('风格与比例：' + self.style)
         if enforce_must_see and self.must_see:
             parts.append('画面必须同时清晰包含以下全部元素：' + '；'.join(self.must_see) + '。')
+        if self.is_anchor:
+            parts.append(ANCHOR_STYLE_TOKEN)
+        elif self.is_library:
+            parts.append(LIBRARY_STYLE_TOKEN)
         return '\n'.join(parts).strip()
 
     def __repr__(self):

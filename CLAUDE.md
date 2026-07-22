@@ -44,7 +44,8 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 | 品牌 logo / 二维码 | `品牌资产\logo.png`、`品牌资产\qrcode.png` | book-card、course-poster |
 | 书籍封面 | `书籍封面\<书名>.jpg/png`（书名不带书名号） | poster、book-card、reading-guide |
 | 书籍档案 | `书籍档案\<书名>书籍档案.md` | lesson-plan 及所有消费档案的下游 |
-| docx 排版引擎 | `.claude\skills\laojohn-lesson-plan\assets\md_to_laojohn_docx.py` | lesson-plan、writing-lesson、reading-assessment（跨技能复用同一条流水线；assessment 用法见 §2 末条） |
+| docx 排版引擎 | `.claude\skills\laojohn-lesson-plan\assets\md_to_laojohn_docx.py` | lesson-plan、writing-lesson、reading-assessment（跨技能复用同一条流水线；assessment 用法见 §2 末条）。**页眉经课型无关的可选参数 `--header-left/--header-right` 传入**：读书会缺省「老约翰深度阅读／阅读·思辨·表达」，看图写话「老约翰·看图写话／从看懂一幅图，到写成一个故事」，同步习作「老约翰·同步习作／写清楚·写生动·有章法」——各 SKILL 导出时必带，漏传即回落读书会页眉 |
+| docx 首页版式化 | `.claude\skills\laojohn-lesson-plan\assets\style_front_page.py` | picture-writing、writing-lesson 两线共用（2026-07-22 由 picture-writing\scripts\ 迁入）。把共享引擎产的朴素首页重排为「居中三行标题区＋两区分组表」示例版式；**课型差异全收敛在脚本顶部 `PROFILES` 表（H1 判型／品牌行／两区锚／值列渲染规则／底部提示框），禁 fork、禁往渲染原语里塞课型分支**；改它须同时回归两条线 |
 | PPT 渲染原语 | `.claude\skills\laojohn-ppt\scripts\helpers.py`（文本框/表格/字体/点击动画/渐变/占位等底层件）+ `parser.py`（中间稿解析） | laojohn-ppt 读书会与写作课两 profile 共用；有 bug 史的横切层（字体槽顺序、表格自适应等修一处即重烘焙全部），**永不 fork、禁 `doc_kind`/课型分支** |
 | 学习单渲染引擎 | `.claude\skills\laojohn-reading-sheet\scripts\render.py`（PDF/HTML）+ `render_pptx.py`（可编辑 PPTX）+ `templates\`（模板库） | reading-sheet（整本书阅读单）专用；`render.py` 的 `--templates-dir`/`--bundle-label` 是课型无关的可选参数（reading-sheet 自用，`--bundle-label` 默认「阅读单」），保留不删 |
 
@@ -59,7 +60,8 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 - **中文弯引号铁律**：正文一律全角 `""` / `''`，**严禁** ASCII 直引号 `"` `'`（Markdown 语法/代码/英文路径除外）。源 `.md` 阶段就要正确，不依赖引擎安全网兜底；旧文件批修用根 `fix_quotes_md.py`，校验用 `check_quotes.py`。
 - **行内强调克制**：正文流水句里不做行内强调；**尤其禁用单星/单下划线斜体 `*…*`、`_…_`——引擎不解析这两者，会把星号/下划线原样印进 docx**。成对的 `**…**`／`__…__` 引擎会转成真实加粗、未配对的残余标记自动剥除（不会泄漏星号）。整行的 `**小标题**` 引擎会识别成加粗小标题，但**两 skill 的写法政策不同**：**lesson-plan 用它**（如 `**本节三维目标**`）；**writing-lesson 更严、连整行 `**` 也不用**，教学目标（核心素养四维）等小标题改用 `【】` 标签与固定话术骨架承载，详案检索 `*` 应为零。两 skill 共用同一引擎，差异是各自的写法政策、非引擎能力——单星斜体两边都禁，是唯一对两 skill 完全一致的硬线。**同理禁用任何 HTML 样式/高亮标签承载强调**（`<mark>`／`<b>`／`<u>`／`<span>` 等）：引擎不解析这些标签，会把 `<mark>…</mark>` 之类原样印进 docx（曾在《格列佛》详案泄漏两处）；行内强调一律只用 `**`，需要「下节课再议」这类伏笔用文字直说、不靠视觉高亮。唯一放行的 HTML 是引擎明确支持的表格换行 `<br>` 与整块跳过的注释 `<!-- -->`。此禁对两 skill 同样是硬线。
 - **固定话术骨架**：`师：`（师话）/ `参考：`（参考答案）/ 整行 `学生互动分享`·`学生自由分享` / `（教师总结）`。
-- **教学目标标签（⚠ 此项两 skill 已分叉，不再共用）**：lesson-plan 仍用三维 `【知识技能】`/`【过程方法】`/`【情感价值】`；writing-lesson 改用 2022 课标核心素养四维 `【语言运用】`/`【思维能力】`/`【审美创造】`/`【文化自信】`（写作 SKILL 唯一源：`lesson-structure.md` §四.3 + `variation-pools.md`「核心素养目标句式变化」）。两者仍共用 `【】` 标签承载机制、及"标签为既定符号、不进语言风格红线"的处理。
+- **教学目标标签（⚠ 三条线已各走各路）**：lesson-plan（读书会）仍用三维 `【知识技能】`/`【过程方法】`/`【情感价值】`；**writing-lesson 与 picture-writing 均已取消独立教学目标节**——writing-lesson 的核心素养四维 `【语言运用】` 等于 2026-07-22 停用（此前 2026-06 的四维改制作废），目标改由首页提纲表「核心技法」＋「学生带走」两行承载（唯一源：`writing-lesson/references/lesson-structure.md` §四）；picture-writing 于 2026-07-21 同样取消，由「教什么」＋各课时「本课目标」承载。两写作线详案检索四维标签应为零。`【】` 标签承载机制、及"标签为既定符号、不进语言风格红线"的处理仍三线共用。
+- **首页形态（writing-lesson / picture-writing 已重新对齐）**：两者书级头部统一为**首页两区表**——`## 教案提纲表` 下「本课要点」区 + 加粗行 `**这一课在整个课程里的位置**` 下「课程定位」区，docx 侧由共享的 `style_front_page.py` 重排（见 §3）。**两区的行名与事实源各自不同、不得互抄**：picture-writing 定位区取 `picture-writing/references/course-map.md`（24 期七模块），writing-lesson 取 `writing-lesson/references/course-map.md`（六阶轴 + 63 任务全表）。lesson-plan（读书会）不适用此形态。
 - **收尾**：每课时末 `本课完。`，全文末 `全课完。`。
 - **交付双道工序**：先逐项 `checklist.md` 自检（合规），再独立复盘 `review-rubric.md`（质量；"审稿人协议五条"：身份重置 / 默认有问题 / 先摘后算 / 量化下限 / 真实性红线不豁免）。**第二道复盘已独立为冷启动执行**：由 `laojohn-detail-review` 技能承载，正常**派一个全新（fresh，非 fork）子 agent**、或在新会话里跑，**不在生成会话里自审**（顺接自审会为自己的设计辩护、`默认有问题`空转，沦为走过场；只有无法另起时才降级为同会话「显式封存生成过程后自审」）。各 skill 的 `review-rubric.md` 仍是各自五维与协议的唯一源——detail-review 只按文档类型加载对应 rubric、不复制其内容；改 rubric 五维即同时改了冷审依据。**现有三份 rubric**：`laojohn-lesson-plan`（读书会）/ `laojohn-writing-lesson`（写作课）/ `laojohn-picture-writing`（看图写话，2026-07-19 补齐，事实核对源不是书籍档案而是「图位规格清单＋curriculum-archive＋course-map」三处）；detail-review 判型表三类一一对应，新增第四类课型时须同时补 rubric 与判型行，否则冷审加载不到判据、空转。
 - **真实性红线**：伪摘录禁令——无可逐字核对的真实原文，禁止输出带引号的"原文"或"——节选自…"，一律占位；事实/页码/情节只来自档案，不得凭模型记忆补写（越是名作越易记错）。
@@ -89,6 +91,7 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 | 书籍档案 | `<书名>书籍档案.md`（**无连字符、不带书名号**——下游脚本按此路径查档案，带横杠会查不到） |
 | 课案详案 | `<书名>-课案详案.md` / `.docx` |
 | 写作课详案 | `<年级册>-<题目>-写作课详案.md` / `.docx` |
+| 看图写话详案 | `<年级册>（<季>）第 N 次 · <课型>.md` / `.docx`（如 `二上（秋）第 1 次 · 方法课.md`；**不带主题、不带「看图写话详案」尾缀**，课次/课型按 picture-writing `course-map.md` §五推导；H1 仍为 `期N《标题》· 看图写话详案`，两套口径） |
 
 各物料的输出目录与文件命名权威表见 `README.md`「SKILL 与输出目录对照」（此处不重列，避免双写漂移）。
 

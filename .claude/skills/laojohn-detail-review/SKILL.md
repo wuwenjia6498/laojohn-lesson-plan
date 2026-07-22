@@ -35,7 +35,7 @@ description: 对一份已成稿的「老约翰」详案(.md)做独立·冷启动
 |---|---|---|---|
 | 文件名 `*-课案详案.md`；正文有 `## 第N课时 · 课型`、`阅读策略`、`可视化工具`、`思辨` | **整本书阅读详案** | `.claude/skills/laojohn-lesson-plan/references/review-rubric.md` | 书籍档案 `书籍档案\<书名>书籍档案.md` |
 | 文件名 `*-写作课详案.md`；正文有「两节连排 / 45 分钟 / 全感官唤醒 / 构思支架 / 【教师示范文】」 | **校内同步习作（写作课）详案** | `.claude/skills/laojohn-writing-lesson/references/review-rubric.md` | 习作档案 `laojohn-writing-lesson/references/archive/`（按册检索 index.md） |
-| 文件名 `*-看图写话详案.md`；正文有 `【图位:编号】` 占位、文末有「生图工单」与 ` ```imgspec ` 块 | **低年级看图写话详案** | `.claude/skills/laojohn-picture-writing/references/review-rubric.md` | **三处并用**（详见该 rubric「事实核对源」节）：① 文末生图工单各图「必须可见元素清单」＝画面事实唯一源；② `laojohn-picture-writing/references/curriculum-archive.md`＝教材锚点唯一源；③ `course-map.md`／`ability-ladder.md`＝期次与不可越阶；已回插时另核真图 `看图写话输出\<详案stem>\图位\*.png` |
+| 文件名为课次口径 `<年级册>（季）第 N 次 · <课型>.md`（位于 `看图写话输出\`；旧稿或为 `*-看图写话详案.md`）；正文有 `【图位:编号】` 占位、文末有「生图工单」与 ` ```imgspec ` 块 | **低年级看图写话详案** | `.claude/skills/laojohn-picture-writing/references/review-rubric.md` | **三处并用**（详见该 rubric「事实核对源」节）：① 文末生图工单各图「必须可见元素清单」＝画面事实唯一源；② `laojohn-picture-writing/references/curriculum-archive.md`＝教材锚点唯一源；③ `course-map.md`／`ability-ladder.md`＝期次与不可越阶；已回插时另核真图 `看图写话输出\<详案stem>\图位\*.png` |
 
 - 三类信号都不明显或冲突时，**停下问用户**这是哪类详案，不要猜。
 - 看图写话的辨识度最高、优先按它判：**只要正文出现 `【图位:` 占位或文末有 `imgspec` 块，就是看图写话详案**，另两类都不含这两个标记。
