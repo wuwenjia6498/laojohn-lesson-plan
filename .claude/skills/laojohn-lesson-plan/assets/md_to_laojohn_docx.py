@@ -346,8 +346,8 @@ def render_end(doc, text):
 # <项目根>/.claude/skills/laojohn-lesson-plan/assets/，上溯 4 层到项目根。
 PROJECT_ROOT = os.path.normpath(os.path.join(
     os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', '..'))
-COVER_DIR   = os.path.join(PROJECT_ROOT, '书籍封面')
-PROFILE_DIR = os.path.join(PROJECT_ROOT, '书籍档案')
+COVER_DIR   = os.path.join(PROJECT_ROOT, '读书会书籍封面')
+PROFILE_DIR = os.path.join(PROJECT_ROOT, '读书会书籍档案')
 # 封面 logo：圆形徽标「老约翰·引领儿童阅读与成长」(不含「阅读·思辨·表达」，
 # 后者由封面文本框单独渲染)。优先 logo-01.jpg，缺失回退。
 LOGO_PATH = os.path.join(PROJECT_ROOT, '品牌资产', 'logo-01.jpg')
@@ -366,7 +366,7 @@ def find_cover(book_name):
 
 
 def find_book_meta(book_name):
-    """从 <项目根>/书籍档案/<书名>书籍档案.md 机读块取 等级 / 获奖（短字段）。
+    """从 <项目根>/读书会书籍档案/<书名>书籍档案.md 机读块取 等级 / 获奖（短字段）。
     取不到/档案不存在 → 返回 (None, None)；写作课等无档案时静默跳过封面页元信息。"""
     level = award = None
     path = os.path.join(PROFILE_DIR, f'{book_name}书籍档案.md')

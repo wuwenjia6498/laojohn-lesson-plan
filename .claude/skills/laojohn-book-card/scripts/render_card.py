@@ -81,12 +81,20 @@ def render(data_path, out_base, covers_dir=None, logo_path=None):
     cover_data_uri = data_uri(cover_path) if cover_ok else ""
 
     # ── Logo ──────────────────────────────────────────────────────────────────
-    # 优先用 --logo 传入的路径；未传则尝试从 JSON 所在目录向上推断品牌资产目录
+    # 优先用 --logo 传入的路径；未传则从 JSON 所在目录逐级向上找品牌资产目录
+    # （典型路径：<root>/读书会配套输出/<书名>/xxx.json → <root>/品牌资产/logo.png，层级不定故向上搜）
     if not logo_path:
-        json_dir = os.path.dirname(os.path.abspath(data_path))
-        # 典型路径：<root>/书目卡输出/xxx.json → <root>/品牌资产/logo.png
-        candidate = os.path.join(json_dir, "..", "品牌资产", "logo.png")
-        logo_path = os.path.normpath(candidate)
+        cur = os.path.dirname(os.path.abspath(data_path))
+        logo_path = os.path.join(cur, "品牌资产", "logo.png")  # 兜底值（找不到时用于报错提示）
+        for _ in range(6):
+            candidate = os.path.join(cur, "品牌资产", "logo.png")
+            if os.path.isfile(candidate):
+                logo_path = candidate
+                break
+            parent = os.path.dirname(cur)
+            if parent == cur:
+                break
+            cur = parent
 
     logo_data_uri = data_uri(logo_path)
     if not logo_data_uri:
@@ -144,7 +152,7 @@ if __name__ == "__main__":
         "--covers",
         default=None,
         help="封面图目录（默认：assets/covers/）。\n"
-             "项目级共用封面目录：<项目根目录>\\书籍封面",
+             "项目级共用封面目录：<项目根目录>\\读书会书籍封面",
     )
     ap.add_argument(
         "--logo",

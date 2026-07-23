@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>学生合订</title>
+<style>
+  /* ===== 设计令牌（固定骨架，勿改）===== */
+  :root{
+    --brand-red:#C8352B;
+    --ink:#3A3A38;
+    --ink-soft:#7A7568;
+    --paper:#FFFFFF;
+    --brown-head:#A89B8A;
+    --brown-deep:#7D7468;
+    --brown-cell:#EFEBE3;
+    --brown-line:#C9C0B0;
+    --zebra:#F7F5F0;
+    --blue-head:#5B7A99;
+    --blue-soft:#E7EEF3;
+    --blue-line:#AEC2D2;
+    --blue-deep:#3E5A73;
+    --grid-line:#D8D2C6;
+    --note-bg:#FBF3EC;
+    --note-line:#D8B99C;
+    --note-ink:#9A6A44;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{background:#EDEAE3;}
+  @media print{
+    html,body{background:#fff;}
+    .sheet{box-shadow:none!important;margin:0!important;min-height:auto!important;}
+    .sheet.page2{min-height:calc(297mm - 2px)!important;}
+    .no-print{display:none;}
+  }
+  .page-break{ page-break-before:always; }
+
+  body{
+    font-family:"PingFang SC","Microsoft YaHei","Source Han Sans SC","Noto Sans CJK SC",sans-serif;
+    color:var(--ink); line-height:1.6; -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .sheet{
+    width:210mm; min-height:297mm; margin:14px auto; background:var(--paper);
+    padding:16mm 15mm 14mm; box-shadow:0 2px 18px rgba(0,0,0,.12); position:relative;
+  }
+
+  /* ===== 品牌页眉：真 logo（品牌资产\logo.png，渲染脚本 base64 注入，固定骨架勿改）===== */
+  .brandbar{display:flex;justify-content:flex-end;align-items:flex-start;margin-bottom:6mm;}
+  .logo-img{height:46px;width:auto;display:block;}
+
+  /* ===== 标题区（共用）===== */
+  .titlewrap{border-bottom:2.5px solid var(--brown-head);padding-bottom:4mm;margin-bottom:5mm;}
+  .kicker{font-size:11px;color:var(--blue-deep);font-weight:700;letter-spacing:2px;margin-bottom:2px;}
+  h1{font-size:22px;font-weight:800;color:var(--ink);letter-spacing:.5px;}
+  h1 .light{color:var(--ink-soft);font-weight:600;font-size:17px;}
+  .lead{font-size:11.5px;color:var(--ink-soft);margin-top:5px;line-height:1.55;}
+
+  /* ===== 页面级间距微调（保持三份原版各自版式）===== */
+  .pg-essay .brandbar{margin-bottom:4mm;}
+  .pg-essay .titlewrap{padding-bottom:3mm;margin-bottom:4mm;}
+  .pg-hw .brandbar{margin-bottom:5mm;}
+  .pg-hw .titlewrap{padding-bottom:3.5mm;margin-bottom:5mm;}
+  .pg-hw .lead{line-height:1.6;}
+
+  /* ===== 学习单：模块框架 ===== */
+  .mod{margin-bottom:6mm;}
+  .modhead{display:flex;align-items:center;gap:7px;margin-bottom:3mm;}
+  .step{ display:none; }
+  .modhead h2{font-size:14.5px;font-weight:800;color:var(--blue-deep);}
+  .modhead .hint{font-size:10.5px;color:var(--ink-soft);font-weight:500;margin-left:2px;}
+
+  /* ===== 学习单：构思表 ===== */
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  .plan th{
+    background:var(--brown-head);color:#fff;font-weight:700;padding:7px 9px;text-align:left;
+    font-size:12px;border:1px solid var(--brown-line);
+  }
+  .plan td{border:1px solid var(--brown-line);padding:0;vertical-align:top;}
+  .plan .rowlabel{
+    background:var(--brown-cell);font-weight:700;color:var(--brown-deep);padding:9px;width:34%;
+    font-size:11.5px;line-height:1.45;
+  }
+  .plan .rowlabel small{display:block;font-weight:500;color:var(--ink-soft);font-size:10px;margin-top:2px;}
+  .plan .fill{height:52px;background:#fff;}
+  .plan tr:nth-child(even) .fill{background:var(--zebra);}
+
+  .draftnote{font-size:10.5px;color:var(--ink-soft);margin-bottom:2mm;}
+
+  /* ===== 格子稿纸（固定骨架，勿改）：左刻度 + 中格子 + 右批改栏 ===== */
+  .writezone{display:flex;align-items:stretch;gap:0;margin-bottom:2mm;}
+  .scale{width:34px;flex-shrink:0;position:relative;}
+  .scale .tick{position:absolute;right:4px;font-size:9px;color:var(--blue-deep);font-weight:700;
+    white-space:nowrap;transform:translateY(-50%);}
+  .scale .tickline{position:absolute;right:0;width:6px;height:0;border-top:1.5px solid var(--blue-head);}
+  .gridwrap{flex:0 0 82%;}
+  .grid{display:grid;grid-template-columns:repeat(18,1fr);gap:0;border:1.5px solid var(--blue-line);
+    overflow:hidden;}
+  .grid .cell{aspect-ratio:1/1;border-right:1px solid var(--grid-line);border-bottom:1px solid var(--grid-line);}
+  .grid .cell:nth-child(18n){border-right:none;}
+  .writezone .grid{border-radius:3px 0 0 3px;}
+  .correctcol{flex:1;border:1.5px solid var(--blue-line);border-left:none;border-radius:0 3px 3px 0;
+    padding:3mm 2mm 0;display:flex;align-items:flex-start;justify-content:center;background:#FCFBF9;}
+  .correctcol .label{font-size:10px;color:var(--brown-deep);letter-spacing:1px;
+    font-weight:600;text-align:center;}
+
+  /* 学习单第二页：flex 列，把改一改推到底 */
+  .sheet.page2{display:flex;flex-direction:column;}
+  .sheet.page2 .mod-marks{margin-top:auto;}
+
+  /* ===== 修改符号表（固定骨架，勿改）===== */
+  .marks{background:var(--blue-soft);border:1px solid var(--blue-line);border-radius:5px;padding:4mm 5mm;}
+  .marks-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:3mm 7mm;}
+  .mark{display:flex;align-items:baseline;gap:8px;font-size:11.5px;}
+  .mark .sym{font-family:"Courier New",monospace;font-weight:800;color:var(--blue-deep);
+    font-size:14px;min-width:34px;}
+  .mark .desc{color:var(--ink);}
+
+  /* ===== 底部能力点条（共用）===== */
+  .footer-skill{
+    border-top:1.5px dashed var(--brown-line);padding-top:3.5mm;margin-top:5mm;
+    display:flex;align-items:flex-start;gap:8px;
+  }
+  .footer-skill .badge{background:var(--brown-deep);color:#fff;font-size:9.5px;font-weight:700;
+    padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;margin-top:1px;}
+  .footer-skill p{font-size:11px;color:var(--ink-soft);line-height:1.55;}
+  .footer-skill b{color:var(--ink);}
+
+  /* ===== 范文页：范文 + 批注双栏 ===== */
+  .essaywrap{display:flex;gap:5mm;margin-bottom:4mm;}
+  .essay{flex:0 0 62%;}
+  .essay .paper{border:1.5px solid var(--brown-line);border-radius:4px;padding:5mm 6mm;background:#FEFDFB;}
+  .essay .ptitle{font-size:15px;font-weight:800;color:var(--ink);text-align:center;margin-bottom:4mm;}
+  .essay p{font-size:12px;line-height:1.8;text-indent:2em;margin-bottom:1mm;color:var(--ink);}
+  .essay .hl{background:linear-gradient(transparent 60%, #FBE6D2 60%);padding:0 1px;}
+  .essay .tag-teacher{font-size:10px;color:var(--ink-soft);text-align:right;margin-top:3mm;font-style:italic;}
+
+  .notes{flex:1;display:flex;flex-direction:column;gap:3mm;}
+  .notes-title{font-size:12px;font-weight:800;color:var(--note-ink);margin-bottom:1mm;
+    display:flex;align-items:center;gap:5px;}
+  .notes-title::before{content:"✍";font-size:13px;}
+  .note{background:var(--note-bg);border-left:3px solid var(--note-line);border-radius:0 4px 4px 0;
+    padding:2.5mm 3mm;}
+  .note .q{font-size:10.5px;color:var(--note-ink);font-weight:700;margin-bottom:1mm;line-height:1.4;}
+  .note .a{font-size:10.5px;color:var(--ink);line-height:1.5;}
+  .note .a b{color:var(--brown-deep);}
+
+  .method{background:var(--blue-soft);border:1px solid var(--blue-line);border-radius:5px;padding:3mm 5mm;margin-bottom:4mm;}
+  .method h3{font-size:12.5px;font-weight:800;color:var(--blue-deep);margin-bottom:2mm;}
+  .method p{font-size:11.5px;color:var(--ink);line-height:1.7;}
+  .method b{color:var(--blue-deep);}
+
+  /* ===== 课后练笔 ===== */
+  .task{background:var(--blue-soft);border:1px solid var(--blue-line);border-radius:6px;
+    padding:5mm 6mm;margin-bottom:6mm;}
+  .task .t-label{display:inline-block;background:var(--blue-head);color:#fff;font-size:10px;font-weight:700;
+    padding:2px 9px;border-radius:10px;margin-bottom:3mm;}
+  .task h2{font-size:14px;font-weight:800;color:var(--blue-deep);margin-bottom:2mm;}
+  .task p{font-size:12px;color:var(--ink);line-height:1.7;}
+  .task .pick{margin-top:3mm;font-size:11.5px;color:var(--ink-soft);}
+  .task .pick b{color:var(--brown-deep);}
+
+  .steps{display:flex;gap:4mm;margin-bottom:6mm;}
+  .stepcard{flex:1;background:var(--note-bg);border-radius:5px;padding:3.5mm 4mm;text-align:center;}
+  .stepcard .n{font-size:11px;font-weight:800;color:var(--note-ink);margin-bottom:1.5mm;}
+  .stepcard .d{font-size:10.5px;color:var(--ink);line-height:1.45;}
+
+  .writehead{display:flex;align-items:center;gap:7px;margin-bottom:3mm;}
+  .writehead h3{font-size:13.5px;font-weight:800;color:var(--blue-deep);}
+  .writehead .hint{font-size:10.5px;color:var(--ink-soft);}
+  .pg-hw .grid{border-radius:3px;margin-bottom:6mm;}
+
+  .bottomrow{display:flex;gap:5mm;}
+  .selfcheck{flex:1.4;background:var(--zebra);border:1px solid var(--brown-line);border-radius:5px;padding:4mm 5mm;}
+  .selfcheck h4{font-size:11.5px;font-weight:800;color:var(--brown-deep);margin-bottom:2.5mm;}
+  .selfcheck .item{font-size:11px;color:var(--ink);margin-bottom:1.5mm;display:flex;align-items:center;gap:6px;}
+  .selfcheck .box{width:12px;height:12px;border:1.5px solid var(--brown-line);border-radius:2px;flex-shrink:0;}
+  .parent{flex:1;border:1.5px dashed var(--brown-line);border-radius:5px;padding:4mm 5mm;
+    display:flex;flex-direction:column;justify-content:center;}
+  .parent .plabel{font-size:11px;font-weight:700;color:var(--brown-deep);margin-bottom:3mm;}
+  .parent .pline{font-size:10.5px;color:var(--ink-soft);margin-bottom:5mm;}
+  .parent .sign{font-size:10.5px;color:var(--ink-soft);border-top:1px solid var(--brown-line);padding-top:2mm;}
+</style>
+</head>
+<body>
+
+<!-- ============ 第 1 页：写作学习单 · 构思表 ============ -->
+<div class="sheet pg-ws1">
+
+  <div class="brandbar">
+    <img class="logo-img" src="__LOGO_SRC__" alt="老约翰深度阅读" onerror="this.style.display='none'">
+  </div>
+
+  <div class="titlewrap">
+    <div class="kicker js-kicker"></div>
+    <h1>写作学习单 <span class="light js-topic"></span></h1>
+    <p class="lead" id="ws-lead"></p>
+  </div>
+
+  <div class="mod">
+    <div class="modhead">
+      <span class="step">1</span>
+      <h2>理思路 · 构思表</h2>
+      <span class="hint">每格只填关键词，3 分钟填完</span>
+    </div>
+    <table class="plan">
+      <tbody id="plan-body">
+        <tr><th style="width:34%">想清楚这一步</th><th>写下你的关键词</th></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer-skill">
+    <span class="badge">这一课在练</span>
+    <p id="ws-skills"></p>
+  </div>
+
+</div>
+
+<!-- ============ 第 2 页：写作学习单 · 格子稿纸 ============ -->
+<div class="sheet page-break page2">
+
+  <div class="brandbar">
+    <img class="logo-img" src="__LOGO_SRC__" alt="老约翰深度阅读" onerror="this.style.display='none'">
+  </div>
+
+  <div class="titlewrap" style="border-bottom-width:2px;padding-bottom:3mm;margin-bottom:5mm;">
+    <h1 style="font-size:19px;">写作稿纸 <span class="light js-topic"></span></h1>
+    <p class="lead" id="ws2-lead"></p>
+  </div>
+
+  <div class="mod">
+    <div class="modhead">
+      <span class="step">2</span>
+      <h2>写下来 · 格子稿纸</h2>
+      <span class="hint">照第一页的构思表，一样一样写</span>
+    </div>
+    <p class="draftnote" id="ws-draftnote"></p>
+    <div class="writezone">
+      <div class="scale" id="scale"></div>
+      <div class="gridwrap"><div class="grid" id="grid"></div></div>
+      <div class="correctcol"><span class="label">老师批改</span></div>
+    </div>
+  </div>
+
+  <!-- 修改符号表（固定骨架，勿改） -->
+  <div class="mod mod-marks">
+    <div class="modhead">
+      <span class="step">3</span>
+      <h2>改一改 · 修改符号</h2>
+      <span class="hint">写完读一遍，用这些符号改</span>
+    </div>
+    <div class="marks">
+      <div class="marks-grid" id="marks-grid">
+        <!-- 缺省四条通用符号；详案教了具体修改符号的课，由 data.worksheet.marks 覆盖 -->
+        <div class="mark"><span class="sym">○</span><span class="desc">用错或多余的字，圈起来</span></div>
+        <div class="mark"><span class="sym">∨</span><span class="desc">漏了字，在下面尖尖处补上</span></div>
+        <div class="mark"><span class="sym">——</span><span class="desc">写得好的句子，在下面画一横</span></div>
+        <div class="mark"><span class="sym">/</span><span class="desc">要删掉的，斜线划去</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============ 第 3 页：范文页 ============ -->
+<div class="sheet page-break pg-essay">
+
+  <div class="brandbar">
+    <img class="logo-img" src="__LOGO_SRC__" alt="老约翰深度阅读" onerror="this.style.display='none'">
+  </div>
+
+  <div class="titlewrap">
+    <div class="kicker js-kicker"></div>
+    <h1>范文页 <span class="light js-topic"></span></h1>
+    <p class="lead" id="es-lead"></p>
+  </div>
+
+  <div class="essaywrap">
+    <div class="essay">
+      <div class="paper" id="es-paper">
+        <div class="ptitle" id="es-title"></div>
+        <!-- 段落由 JS 注入 -->
+        <div class="tag-teacher">—— 教师下水文</div>
+      </div>
+    </div>
+
+    <div class="notes" id="es-notes">
+      <div class="notes-title">看老师用了什么办法</div>
+      <!-- 旁批卡由 JS 注入 -->
+    </div>
+  </div>
+
+  <div class="method">
+    <h3>一句话记住</h3>
+    <p id="es-method"></p>
+  </div>
+
+  <div class="footer-skill">
+    <span class="badge">读范文是为了</span>
+    <p id="es-footer"></p>
+  </div>
+
+</div>
+
+<!-- ============ 第 4 页：课后练笔 ============ -->
+<div class="sheet page-break pg-hw">
+
+  <div class="brandbar">
+    <img class="logo-img" src="__LOGO_SRC__" alt="老约翰深度阅读" onerror="this.style.display='none'">
+  </div>
+
+  <div class="titlewrap">
+    <div class="kicker" id="hw-kicker"></div>
+    <h1><span id="hw-title"></span> <span class="light js-topic"></span></h1>
+    <p class="lead" id="hw-lead"></p>
+  </div>
+
+  <div class="task">
+    <span class="t-label">今天的小任务</span>
+    <h2 id="hw-task-heading"></h2>
+    <p id="hw-task-body"></p>
+    <div class="pick"><span id="hw-pick-label"></span><b>＿＿＿＿＿＿＿＿＿＿＿＿＿</b></div>
+  </div>
+
+  <div class="steps" id="hw-steps">
+    <!-- 三步卡由 JS 注入 -->
+  </div>
+
+  <div class="writehead">
+    <h3>写下来</h3>
+    <span class="hint" id="hw-write-hint"></span>
+  </div>
+  <div class="grid" id="hw-grid"></div>
+
+  <div class="bottomrow">
+    <div class="selfcheck">
+      <h4>写完自己读一遍</h4>
+      <div id="hw-selfcheck"></div>
+    </div>
+    <div class="parent">
+      <div class="plabel">家长陪读一分钟</div>
+      <div class="pline" id="hw-parent-line"></div>
+      <div class="sign">家长签字：＿＿＿＿＿＿</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const DATA = /*__DATA__*/ null;
+
+  /* ---------- 文本工具：先转义再解富文本标记 ---------- */
+  function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  // 富文本标记：{hl}…{/hl} → 荧光高亮；{b}…{/b} → 加粗
+  function rich(s){return esc(s)
+    .replace(/\{hl\}/g,'<span class="hl">').replace(/\{\/hl\}/g,'</span>')
+    .replace(/\{b\}/g,'<b>').replace(/\{\/b\}/g,'</b>');}
+
+  /* ---------- 数据填充 ---------- */
+  function fill(){
+    const d=DATA, m=d.meta;
+    document.title='学生合订 · '+m.topic;
+    document.querySelectorAll('.js-kicker').forEach(e=>e.textContent=m.kicker);
+    document.querySelectorAll('.js-topic').forEach(e=>e.textContent='· '+m.topic);
+
+    /* 学习单 */
+    const w=d.worksheet;
+    document.getElementById('ws-lead').textContent=w.lead;
+    const tbody=document.getElementById('plan-body');
+    w.plan_rows.forEach(r=>{
+      const tr=document.createElement('tr');
+      const lab='<td class="rowlabel">'+esc(r.label)+(r.note?'<small>'+esc(r.note)+'</small>':'')+'</td>';
+      const fillTd=r.prefill
+        ?'<td class="fill" style="padding:9px;color:var(--ink-soft);font-size:11.5px">'+esc(r.prefill)+'</td>'
+        :'<td class="fill"></td>';
+      tr.innerHTML=lab+fillTd;
+      tbody.appendChild(tr);
+    });
+    document.getElementById('ws-skills').innerHTML=rich(w.skills);
+    document.getElementById('ws2-lead').textContent=w.page2_lead;
+    document.getElementById('ws-draftnote').textContent=w.draftnote;
+    // 修改符号：详案教了具体符号的课覆盖缺省四条（须与课堂教的一致）
+    if(w.marks && w.marks.length){
+      const mg=document.getElementById('marks-grid');
+      mg.innerHTML='';
+      w.marks.forEach(mk=>{
+        const div=document.createElement('div'); div.className='mark';
+        div.innerHTML='<span class="sym">'+esc(mk.sym)+'</span><span class="desc">'+esc(mk.desc)+'</span>';
+        mg.appendChild(div);
+      });
+    }
+
+    /* 范文页 */
+    const e=d.essay;
+    document.getElementById('es-lead').textContent=e.lead;
+    document.getElementById('es-title').textContent=e.title;
+    const paper=document.getElementById('es-paper');
+    const tail=paper.querySelector('.tag-teacher');
+    e.paragraphs.forEach(t=>{
+      const p=document.createElement('p'); p.innerHTML=rich(t);
+      paper.insertBefore(p,tail);
+    });
+    const notes=document.getElementById('es-notes');
+    e.notes.forEach(n=>{
+      const div=document.createElement('div'); div.className='note';
+      div.innerHTML='<div class="q">'+esc(n.q)+'</div><div class="a">'+rich(n.a)+'</div>';
+      notes.appendChild(div);
+    });
+    document.getElementById('es-method').innerHTML=rich(e.method);
+    document.getElementById('es-footer').innerHTML=rich(e.footer);
+
+    /* 课后练笔 */
+    const h=d.homework;
+    document.getElementById('hw-kicker').textContent=m.kicker+'　｜　课后练笔';
+    document.getElementById('hw-title').textContent=h.title;
+    document.getElementById('hw-lead').textContent=h.lead;
+    document.getElementById('hw-task-heading').textContent=h.task_heading;
+    document.getElementById('hw-task-body').textContent=h.task_body;
+    document.getElementById('hw-pick-label').textContent=(h.pick_label||'我挑的地方是')+'：';
+    const steps=document.getElementById('hw-steps');
+    h.steps.forEach(s=>{
+      const div=document.createElement('div'); div.className='stepcard';
+      div.innerHTML='<div class="n">'+esc(s.n)+'</div><div class="d">'+esc(s.d)+'</div>';
+      steps.appendChild(div);
+    });
+    document.getElementById('hw-write-hint').textContent=h.write_hint;
+    const sc=document.getElementById('hw-selfcheck');
+    h.selfcheck.forEach(t=>{
+      const div=document.createElement('div'); div.className='item';
+      div.innerHTML='<span class="box"></span>'+esc(t);
+      sc.appendChild(div);
+    });
+    document.getElementById('hw-parent-line').textContent=h.parent_line;
+  }
+
+  /* ---------- 格子稿纸（固定骨架版式，勿改逻辑）---------- */
+  function buildGrid(){
+    const cols=18;
+    const sheet=document.querySelector('.sheet.page2');
+    const grid=sheet.querySelector('#grid');
+    const scale=sheet.querySelector('#scale');
+    const gwEl=sheet.querySelector('.gridwrap');
+    const cw=gwEl.clientWidth;
+    const cellSize=(cw-3)/cols;
+    // 可用高度 = sheet内容高 - (页眉+标题+draftnote+modhead+改一改) 各元素高度
+    const sheetStyle=getComputedStyle(sheet);
+    const sheetInner=sheet.clientHeight - parseFloat(sheetStyle.paddingTop) - parseFloat(sheetStyle.paddingBottom);
+    let used=0;
+    ['.brandbar','.titlewrap','.draftnote','.mod-marks'].forEach(sel=>{
+      const el=sheet.querySelector(sel); if(el) used+=el.getBoundingClientRect().height;
+    });
+    const mod2head=sheet.querySelector('.mod .modhead');
+    if(mod2head) used+=mod2head.getBoundingClientRect().height;
+    used += 110; // 各元素 margin 余量
+    const avail=sheetInner - used;
+    let rows=Math.max(5, Math.floor(avail/cellSize));
+
+    function renderRows(n){
+      grid.innerHTML='';
+      for(let i=0;i<cols*n;i++){const c=document.createElement('div');c.className='cell';grid.appendChild(c);}
+      // 刻度：每行18字，标在累计字数最接近100/200/300…的行末
+      scale.innerHTML='';
+      const border=1.5;
+      const maxHundred=Math.floor(n*cols/100)*100;
+      for(let h=100;h<=maxHundred;h+=100){
+        let bestRow=Math.round(h/cols);
+        if(bestRow<1)bestRow=1; if(bestRow>n)bestRow=n;
+        const y=border+bestRow*cellSize;
+        const line=document.createElement('div');line.className='tickline';line.style.top=y+'px';
+        const tick=document.createElement('div');tick.className='tick';tick.style.top=y+'px';tick.textContent=h+'字';
+        scale.appendChild(line);scale.appendChild(tick);
+      }
+    }
+
+    renderRows(rows);
+    // 收敛环：估算余量不够精确时（导语/起笔提示行数因课而异），实测超一页高就减行重排
+    const A4_H=1123; // 297mm @96dpi
+    while(rows>5 && sheet.offsetHeight>A4_H){ rows--; renderRows(rows); }
+  }
+
+  /* 课后练笔小稿纸：固定 18×6 */
+  function buildHwGrid(){
+    const grid=document.getElementById('hw-grid');
+    const cols=18, rows=6;
+    grid.innerHTML='';
+    for(let i=0;i<cols*rows;i++){const c=document.createElement('div');c.className='cell';grid.appendChild(c);}
+  }
+
+  window.addEventListener('load',()=>{
+    fill();
+    setTimeout(()=>{
+      buildGrid();
+      buildHwGrid();
+      document.body.dataset.rendered='1';
+    },150);
+  });
+</script>
+</body>
+</html>

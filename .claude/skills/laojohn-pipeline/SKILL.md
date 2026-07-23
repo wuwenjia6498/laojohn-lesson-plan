@@ -10,9 +10,9 @@ description: 给定一本已完成「课案详案 + 书籍档案」的书，一�
 ## 适用前提
 
 上游已就绪（本技能**不生成**它们）：
-- `课案输出\<书名>-课案详案.md`（由 laojohn-lesson-plan 产出）
-- `书籍档案\<书名>书籍档案.md`（由 laojohn-book-profile 产出，**机读块基本信息已尽量填全**）
-- `书籍封面\<书名>.<ext>`（jpg/png/webp，书名不带书名号）
+- `读书会详案输出\<书名>-课案详案.md`（由 laojohn-lesson-plan 产出）
+- `读书会书籍档案\<书名>书籍档案.md`（由 laojohn-book-profile 产出，**机读块基本信息已尽量填全**）
+- `读书会书籍封面\<书名>.<ext>`（jpg/png/webp，书名不带书名号）
 
 ## 第 1 步 · 前置检查（硬闸，缺则停）
 
@@ -51,16 +51,16 @@ PYTHONUTF8=1 python <脚本> ...
 
 | 序 | 物料 | 委托 skill | 输出目录 | 形态 |
 |----|------|-----------|----------|------|
-| (可选 0) | 投屏 PPT | laojohn-ppt-draft → laojohn-ppt | `课件中间稿输出\` / `课件PPT输出\` | 中间稿.md+讲稿.md → .pptx |
-| 1 | 书目卡 | laojohn-book-card | `书目卡输出\` | JPG+HTML+JSON |
-| 2 | 招生海报 | laojohn-course-poster | `课程海报输出\` | JPG+HTML+JSON |
-| 3 | 阅读指南 | laojohn-reading-guide | `阅读指南输出\` | PDF+HTML+JSON |
-| 4 | 抢先看导图 | laojohn-lesson-mindmap | `抢先看思维导图\` | PDF+HTML+JSON |
-| 5 | 教学导图 | laojohn-teaching-mindmap | `教学思维导图\` | PDF+HTML+JSON |
-| 6 | 反馈话术 | laojohn-course-feedback | `课程反馈话术输出\` | docx+md+content.json |
+| (可选 0) | 投屏 PPT | laojohn-ppt-draft → laojohn-ppt | `读书会课件中间稿输出\` / `读书会课件PPT输出\` | 中间稿.md+讲稿.md → .pptx |
+| 1 | 书目卡 | laojohn-book-card | `读书会配套输出\<书名>\` | JPG+HTML+JSON |
+| 2 | 招生海报 | laojohn-course-poster | `读书会配套输出\<书名>\` | JPG+HTML+JSON |
+| 3 | 阅读指南 | laojohn-reading-guide | `读书会配套输出\<书名>\` | PDF+HTML+JSON |
+| 4 | 抢先看导图 | laojohn-lesson-mindmap | `读书会配套输出\<书名>\` | PDF+HTML+JSON |
+| 5 | 教学导图 | laojohn-teaching-mindmap | `读书会配套输出\<书名>\` | PDF+HTML+JSON |
+| 6 | 反馈话术 | laojohn-course-feedback | `读书会配套输出\<书名>\` | docx+md+content.json |
 
 - **PPT 链是可选前置**（较重、自成两步）；用户没特别要就先跳过，默认只跑 1–6。
-- **封面**：书目卡/海报渲染脚本走 `--covers 书籍封面`；阅读指南需把封面转 base64 注入 JSON 的 `cover_image`（自包含 HTML）。
+- **封面**：书目卡/海报渲染脚本走 `--covers 读书会书籍封面`；阅读指南需把封面转 base64 注入 JSON 的 `cover_image`（自包含 HTML）。
 - **口径一致**：同一本书的字数/出版社/作者等在各物料间须一致（都来自档案机读块，天然一致；若手动改过要回头对齐）。
 
 ## 第 5 步 · 失败隔离

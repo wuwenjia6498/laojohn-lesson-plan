@@ -4,13 +4,13 @@ r"""
 
 把一本书散落在各输出目录里的成品，复制归集进一个交付文件夹：
 
-    课程打包输出\<书名>\
-    ├── 课件PPT\            ← 课件PPT输出\<书名>\*.pptx
-    ├── 课件下游物料\        ← 书目卡/海报/阅读指南/抢先看导图/教学导图/反馈话术
-    ├── 阅读单\             ← 阅读单输出\<书名>\<书名>-阅读单-全套.pdf + <书名>-阅读单.pptx
-    ├── 逐页讲稿\           ← 课件讲稿输出\<书名>\*.docx（md 是源，默认不收）
-    ├── <书名>-课案详案.docx  ← 课案输出\（放根目录）
-    └── <书名>_阅读测评.docx  ← 测评输出\（放根目录）
+    读书会课程打包输出\<书名>\
+    ├── 课件PPT\            ← 读书会课件PPT输出\<书名>\*.pptx
+    ├── 课件下游物料\        ← 读书会配套输出\<书名>\（书目卡/海报/阅读指南/抢先看导图/教学导图/反馈话术）
+    ├── 阅读单\             ← 读书会阅读单输出\<书名>\<书名>-阅读单-全套.pdf + <书名>-阅读单.pptx
+    ├── 逐页讲稿\           ← 读书会课件讲稿输出\<书名>\*.docx（md 是源，默认不收）
+    ├── <书名>-课案详案.docx  ← 读书会详案输出\（放根目录）
+    └── <书名>_阅读测评.docx  ← 读书会配套输出\<书名>\（放根目录）
 
 约定：
 - 复制不移动——各原始输出目录是单一事实源，绝不破坏。
@@ -34,45 +34,45 @@ CATEGORIES = [
     {
         "label": "课案详案",
         "dest": "",
-        "globs": ["课案输出/{book}-课案详案.*"],
+        "globs": ["读书会详案输出/{book}-课案详案.*"],
         "primary": {".docx"},
     },
     {
         "label": "阅读测评",
         "dest": "",
-        "globs": ["测评输出/{book}_阅读测评.*"],
+        "globs": ["读书会配套输出/{book}/{book}_阅读测评.*"],
         "primary": {".docx"},
     },
     {
         "label": "投屏PPT",
         "dest": "课件PPT",
-        "globs": ["课件PPT输出/{book}/*"],
+        "globs": ["读书会课件PPT输出/{book}/*"],
         "primary": {".pptx"},
     },
     {
         "label": "逐页讲稿",
         "dest": "逐页讲稿",
-        "globs": ["课件讲稿输出/{book}/*"],
+        "globs": ["读书会课件讲稿输出/{book}/*"],
         "primary": {".docx"},  # 只收 docx 打印件；md 视为源（默认跳过，--with-sources 才收）
     },
     {
         "label": "学生阅读单",
         "dest": "阅读单",
         # 只收全套合订 PDF + 可编辑 PPTX；散张单页（单张 pdf/png/html）不进交付包
-        "globs": ["阅读单输出/{book}/{book}-阅读单-全套.pdf", "阅读单输出/{book}/{book}-阅读单.pptx"],
+        "globs": ["读书会阅读单输出/{book}/{book}-阅读单-全套.pdf", "读书会阅读单输出/{book}/{book}-阅读单.pptx"],
         "primary": {".pdf", ".pptx"},
     },
     {
         "label": "下游配套物料",
         "dest": "课件下游物料",
         "globs": [
-            "书目卡输出/{book}_书目卡.*",
-            "课程海报输出/{book}_海报.*",
-            "阅读指南输出/{book}_阅读指南.*",
-            "抢先看思维导图/{book}_抢先看.*",
-            "教学思维导图/{book}_教学导图.*",
-            "课程反馈话术输出/《{book}》_课程反馈话术.*",
-            "课程反馈话术输出/{book}_课程反馈话术*.*",  # *_content.json 变体
+            "读书会配套输出/{book}/{book}_书目卡.*",
+            "读书会配套输出/{book}/{book}_海报.*",
+            "读书会配套输出/{book}/{book}_阅读指南.*",
+            "读书会配套输出/{book}/{book}_抢先看.*",
+            "读书会配套输出/{book}/{book}_教学导图.*",
+            "读书会配套输出/{book}/《{book}》_课程反馈话术.*",
+            "读书会配套输出/{book}/{book}_课程反馈话术*.*",  # *_content.json 变体
         ],
         "primary": {".jpg", ".jpeg", ".png", ".pdf", ".docx"},
     },
@@ -109,7 +109,7 @@ def main():
     ap.add_argument("book", help="书名（不带书名号），如：洞")
     ap.add_argument("--root", default=None, help="项目根目录（默认当前工作目录）")
     ap.add_argument("--out", default=None,
-                    help="打包输出顶层目录名（默认：课程打包输出）")
+                    help="打包输出顶层目录名（默认：读书会课程打包输出）")
     ap.add_argument("--dest", default=None, help="直接指定打包目标文件夹（覆盖 --out/<书名>）")
     ap.add_argument("--with-sources", action="store_true", help="连可编辑源文件(md/json/html)一起打包")
     ap.add_argument("--dry-run", action="store_true", help="只打印计划，不实际复制")
@@ -117,7 +117,7 @@ def main():
 
     book = args.book.strip().strip("《》").strip()
     root = Path(args.root).resolve() if args.root else Path.cwd()
-    out_top = args.out or "课程打包输出"
+    out_top = args.out or "读书会课程打包输出"
     dest_root = Path(args.dest).resolve() if args.dest else (root / out_top / book)
 
     if not root.exists():

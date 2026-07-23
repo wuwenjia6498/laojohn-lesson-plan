@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>家长合订</title>
+<style>
+  /* ===== 设计令牌（固定骨架，勿改）===== */
+  :root{
+    --brand-red:#C8352B;--ink:#3A3A38;--ink-soft:#7A7568;--paper:#FFFFFF;
+    --brown-head:#A89B8A;--brown-deep:#7D7468;--brown-cell:#EFEBE3;--brown-line:#C9C0B0;--zebra:#F7F5F0;
+    --blue-head:#5B7A99;--blue-soft:#E7EEF3;--blue-line:#AEC2D2;--blue-deep:#3E5A73;
+    --warm-bg:#FBF3EC;--warm-line:#D8B99C;--warm-ink:#9A6A44;
+    --green:#3E7D5A;--green-bg:#E8F2EC;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{background:#EDEAE3;}
+  @media print{ html,body{background:#fff;} .sheet{box-shadow:none!important;margin:0!important;min-height:auto!important;} }
+  .page-break{ page-break-before:always; }
+  body{font-family:"PingFang SC","Microsoft YaHei","Source Han Sans SC","Noto Sans CJK SC",sans-serif;
+    color:var(--ink);line-height:1.55;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .sheet{width:210mm;min-height:297mm;margin:14px auto;background:var(--paper);
+    padding:15mm 15mm 12mm;box-shadow:0 2px 18px rgba(0,0,0,.12);position:relative;}
+
+  /* ===== 品牌页眉：左侧用途标签 + 右侧真 logo（品牌资产\logo.png 注入）===== */
+  .brandbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4mm;}
+  .toptag{font-size:10px;color:var(--ink-soft);font-weight:600;letter-spacing:1px;margin-top:6px;}
+  .logo-img{height:42px;width:auto;display:block;}
+
+  .titlewrap{border-bottom:2.5px solid var(--brown-head);padding-bottom:3mm;margin-bottom:4mm;}
+  .kicker{font-size:10.5px;color:var(--blue-deep);font-weight:700;letter-spacing:2px;margin-bottom:2px;}
+  h1{font-size:21px;font-weight:800;color:var(--ink);}
+  h1 .light{color:var(--ink-soft);font-weight:600;font-size:15px;}
+
+  .sech{font-size:12.5px;font-weight:800;color:var(--blue-deep);margin:0 0 2.5mm;
+    display:flex;align-items:center;gap:6px;}
+  .sech::before{content:"";width:4px;height:15px;background:var(--blue-head);border-radius:2px;}
+
+  /* ===== 成长反馈页：学生信息条 ===== */
+  .infobar{display:flex;gap:6mm;background:var(--zebra);border-radius:5px;padding:3mm 5mm;margin-bottom:4mm;
+    font-size:11px;color:var(--ink);}
+  .infobar .f{display:flex;align-items:baseline;gap:4px;}
+  .infobar .f .lb{color:var(--ink-soft);}
+  .infobar .f .un{border-bottom:1px solid var(--brown-line);min-width:60px;display:inline-block;}
+
+  /* ===== 成长反馈页：作品展示区（留白待老师填真实作品，禁生成内容）===== */
+  .workbox{border:1.5px solid var(--brown-line);border-radius:5px;background:#FEFDFB;
+    padding:4mm 5mm;margin-bottom:4mm;min-height:52mm;position:relative;}
+  .workbox .ph{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;
+    color:var(--ink-soft);font-size:10.5px;line-height:1.7;}
+  .workbox .ph b{display:block;font-size:11.5px;color:var(--brown-deep);margin-bottom:1.5mm;}
+
+  /* ===== 成长反馈页：这次的进步 ===== */
+  .progress{background:var(--warm-bg);border:1px solid var(--warm-line);border-radius:5px;
+    padding:4mm 5mm;margin-bottom:4mm;}
+  .progress .ph{font-size:12px;font-weight:800;color:var(--warm-ink);margin-bottom:3mm;}
+  .abilities{display:flex;flex-direction:column;gap:2mm;margin-bottom:3mm;}
+  .ab{display:flex;align-items:flex-start;gap:7px;font-size:11px;line-height:1.4;}
+  .ab .star{color:var(--warm-line);font-size:12px;flex-shrink:0;line-height:1.2;}
+  .ab .txt{color:var(--ink);}
+  .ab .txt b{color:var(--warm-ink);}
+  .comment{border-top:1px dashed var(--warm-line);padding-top:3mm;}
+  .comment .cl{font-size:10.5px;color:var(--ink-soft);margin-bottom:2mm;}
+  .comment .wline{border-bottom:1px solid var(--warm-line);height:6mm;}
+
+  /* ===== 成长反馈页：下次关注 + 寄语 ===== */
+  .bottomrow{display:flex;gap:5mm;}
+  .nextfocus{flex:1;background:var(--blue-soft);border-radius:5px;padding:4mm 5mm;}
+  .nextfocus .nh{font-size:11.5px;font-weight:800;color:var(--blue-deep);margin-bottom:2mm;}
+  .nextfocus .nl{border-bottom:1px solid var(--blue-line);height:6mm;margin-bottom:2mm;}
+  .encourage{flex:1;border:1.5px dashed var(--brown-line);border-radius:5px;padding:4mm 5mm;}
+  .encourage .eh{font-size:11.5px;font-weight:800;color:var(--brown-deep);margin-bottom:3mm;}
+  .encourage .el{border-bottom:1px solid var(--brown-line);height:6mm;margin-bottom:2mm;}
+  .encourage .sign{font-size:10px;color:var(--ink-soft);text-align:right;margin-top:2mm;}
+
+  .teachernote{font-size:9.5px;color:var(--ink-soft);margin-top:4mm;padding-top:2.5mm;
+    border-top:1px solid var(--brown-line);line-height:1.5;}
+  .teachernote b{color:var(--brown-deep);}
+
+  /* ===== 家长一页纸 ===== */
+  .pg-op{line-height:1.6;}
+  .pg-op .titlewrap{margin-bottom:5mm;}
+  .pg-op .sech{font-size:13px;margin-bottom:3mm;}
+  .pg-op .sech::before{height:16px;}
+
+  .learned{background:var(--blue-soft);border-radius:6px;padding:4mm 5mm;margin-bottom:6mm;}
+  .learned p{font-size:12px;line-height:1.75;color:var(--ink);}
+  .learned b{color:var(--blue-deep);}
+  .learned .oneline{font-size:13px;font-weight:800;color:var(--blue-deep);margin-bottom:2mm;}
+
+  .compare{display:flex;gap:5mm;margin-bottom:6mm;}
+  .col{flex:1;border-radius:6px;padding:4mm 5mm;}
+  .col.bad{background:var(--zebra);border:1px solid var(--brown-line);}
+  .col.good{background:var(--green-bg);border:1px solid #A9CDB6;}
+  .col .ch{font-size:11px;font-weight:800;margin-bottom:2mm;}
+  .col.bad .ch{color:var(--ink-soft);}
+  .col.good .ch{color:var(--green);}
+  .col .ex{font-size:11px;line-height:1.6;color:var(--ink);}
+  .col.good .ex b{color:var(--green);}
+
+  .task{background:var(--warm-bg);border:1px solid var(--warm-line);border-radius:6px;padding:4mm 5mm;margin-bottom:5mm;}
+  .task .th{font-size:12.5px;font-weight:800;color:var(--warm-ink);margin-bottom:2.5mm;
+    display:flex;align-items:center;gap:6px;}
+  .task .th::before{content:"🏠";}
+  .task .step{font-size:11.5px;line-height:1.7;color:var(--ink);margin-bottom:1.5mm;padding-left:16px;position:relative;}
+  .task .step .n{position:absolute;left:0;color:var(--warm-ink);font-weight:800;}
+  .task .step b{color:var(--warm-ink);}
+  .task .tip{font-size:10.5px;color:var(--ink-soft);margin-top:2mm;font-style:italic;}
+
+  .dont{border:1.5px dashed var(--brown-line);border-radius:5px;padding:3.5mm 5mm;}
+  .dont .dh{font-size:11px;font-weight:800;color:var(--brown-deep);margin-bottom:2mm;}
+  .dont p{font-size:11px;color:var(--ink-soft);line-height:1.6;}
+  .dont b{color:var(--brown-deep);}
+</style>
+</head>
+<body>
+
+<!-- ============ 第 1 页：习作成长反馈（结构件：作品/评语留白待老师手填） ============ -->
+<div class="sheet pg-fb">
+
+  <div class="brandbar">
+    <div class="toptag">习作成长反馈 · 请家长收阅</div>
+    <img class="logo-img" src="__LOGO_SRC__" alt="老约翰深度阅读" onerror="this.style.display='none'">
+  </div>
+
+  <div class="titlewrap">
+    <div class="kicker" id="fb-kicker"></div>
+    <h1>孩子这一篇，写得怎么样 <span class="light" id="fb-topic"></span></h1>
+  </div>
+
+  <div class="infobar">
+    <div class="f"><span class="lb">姓名</span><span class="un"></span></div>
+    <div class="f"><span class="lb">日期</span><span class="un"></span></div>
+    <div class="f"><span class="lb">本次习作</span><span class="un" style="min-width:90px" id="fb-book"></span></div>
+  </div>
+
+  <div class="sech">这次写的（节选）</div>
+  <div class="workbox">
+    <div class="ph"><b>誊入 / 粘贴孩子这一篇最出彩的一段</b>把老师标出的好句子一并留着，让家长看见具体写了什么</div>
+  </div>
+
+  <div class="sech">这次，在这里迈了一步</div>
+  <div class="progress">
+    <div class="ph">本课要练的能力，孩子做到了哪几样（勾出并举例）：</div>
+    <div class="abilities" id="fb-abilities"><!-- 能力勾选项由 JS 注入 --></div>
+    <div class="comment">
+      <div class="cl">老师想对你说（具体到那一句）：</div>
+      <div class="wline"></div>
+    </div>
+  </div>
+
+  <div class="bottomrow">
+    <div class="nextfocus">
+      <div class="nh">下次，可以再往前一点</div>
+      <div class="nl"></div>
+      <div class="nl"></div>
+    </div>
+    <div class="encourage">
+      <div class="eh">给孩子的一句话</div>
+      <div class="el"></div>
+      <div class="sign">指导老师：＿＿＿＿</div>
+    </div>
+  </div>
+
+  <div class="teachernote">
+    <b>填写提示（给老师）：</b>反馈要<b>具体到孩子写的那一句</b>，不写“写得不错/继续加油”这类空话；
+    “迈了一步”只勾真做到的，宁少勿虚；作品节选用孩子<b>真实作品</b>，不代笔、不美化。下次关注点只提<b>一条</b>，别一次列一堆。
+  </div>
+
+</div>
+
+<!-- ============ 第 2 页：家长一页纸 ============ -->
+<div class="sheet page-break pg-op">
+
+  <div class="brandbar">
+    <div class="toptag">家长一页纸 · 陪孩子把课堂延伸到家里</div>
+    <img class="logo-img" src="__LOGO_SRC__" alt="老约翰深度阅读" onerror="this.style.display='none'">
+  </div>
+
+  <div class="titlewrap">
+    <div class="kicker" id="op-kicker"></div>
+    <h1>这节课，孩子学了什么 <span class="light" id="op-topic"></span></h1>
+  </div>
+
+  <div class="sech">一句话说清</div>
+  <div class="learned">
+    <div class="oneline" id="op-oneline"></div>
+    <p id="op-para"></p>
+  </div>
+
+  <div class="sech">一眼看懂差别</div>
+  <div class="compare">
+    <div class="col bad">
+      <div class="ch">课上要改掉的写法</div>
+      <div class="ex" id="op-bad"></div>
+    </div>
+    <div class="col good">
+      <div class="ch">课上要学的写法</div>
+      <div class="ex" id="op-good"></div>
+    </div>
+  </div>
+
+  <div class="task">
+    <div class="th" id="op-task-title"></div>
+    <div id="op-task-steps"><!-- 步骤由 JS 注入 --></div>
+    <div class="tip" id="op-task-tip"></div>
+  </div>
+
+  <div class="dont">
+    <div class="dh">帮忙时，请避开这两件</div>
+    <p id="op-dont"></p>
+  </div>
+
+</div>
+
+<script>
+  const DATA = /*__DATA__*/ null;
+
+  function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  // 富文本标记：{b}…{/b} → 加粗（各区块有各自强调色）
+  function rich(s){return esc(s).replace(/\{b\}/g,'<b>').replace(/\{\/b\}/g,'</b>');}
+
+  const CIRCLED='①②③④⑤⑥⑦⑧⑨⑩';
+
+  function fill(){
+    const d=DATA, m=d.meta;
+    document.title='家长合订 · '+m.topic;
+
+    /* ---- 第 1 页：成长反馈 ---- */
+    document.getElementById('fb-kicker').textContent=m.kicker;
+    document.getElementById('fb-topic').textContent='· '+m.topic;
+    document.getElementById('fb-book').textContent='《'+m.topic+'》';
+    const abox=document.getElementById('fb-abilities');
+    d.feedback.abilities.forEach(t=>{
+      const div=document.createElement('div'); div.className='ab';
+      div.innerHTML='<span class="star">★</span><span class="txt">'+rich(t)+'</span>';
+      abox.appendChild(div);
+    });
+
+    /* ---- 第 2 页：家长一页纸 ---- */
+    const o=d.onepager;
+    document.getElementById('op-kicker').textContent=m.kicker;
+    document.getElementById('op-topic').textContent='· '+m.topic;
+    document.getElementById('op-oneline').textContent=o.oneline;
+    document.getElementById('op-para').innerHTML=rich(o.para);
+    document.getElementById('op-bad').innerHTML=rich(o.compare.bad.quote)+'<br><br>——'+rich(o.compare.bad.note);
+    document.getElementById('op-good').innerHTML=rich(o.compare.good.quote)+'<br><br>——'+rich(o.compare.good.note);
+    document.getElementById('op-task-title').textContent=o.task.title;
+    const sbox=document.getElementById('op-task-steps');
+    o.task.steps.forEach((t,i)=>{
+      const div=document.createElement('div'); div.className='step';
+      div.innerHTML='<span class="n">'+(i+1)+'.</span>'+rich(t);
+      sbox.appendChild(div);
+    });
+    document.getElementById('op-task-tip').textContent=o.task.tip;
+    document.getElementById('op-dont').innerHTML=
+      o.dont.map((t,i)=>(CIRCLED[i]||(i+1)+'.')+' '+rich(t)).join('<br>');
+  }
+
+  window.addEventListener('load',()=>{
+    fill();
+    setTimeout(()=>{ document.body.dataset.rendered='1'; },100);
+  });
+</script>
+</body>
+</html>

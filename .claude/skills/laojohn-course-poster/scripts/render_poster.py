@@ -146,7 +146,7 @@ if __name__ == "__main__":
     ap.add_argument(
         "--covers",
         default=None,
-        help="封面图目录路径(默认: assets/covers/)。项目级共用封面目录传入 <项目根目录>\\书籍封面",
+        help="封面图目录路径(默认: assets/covers/)。项目级共用封面目录传入 <项目根目录>\\读书会书籍封面",
     )
     ap.add_argument(
         "--qr",

@@ -90,7 +90,7 @@ manifest 存到输出目录(它是内容源头，日后改字段重渲即可)。
 
 ### 5. 渲染
 ```bash
-PYTHONUTF8=1 python scripts/render.py <manifest.json> "<项目根目录>\阅读单输出\<书名>"
+PYTHONUTF8=1 python scripts/render.py <manifest.json> "<项目根目录>\读书会阅读单输出\<书名>"
 # 自检视觉时加 --png 顺带出预览图；--no-bundle 关掉「全套合册」
 ```
 引擎逐张出 `<名>.pdf` + `<名>.html`(自包含)，logo 自动注入，A4 竖版、高度自适应。
@@ -98,7 +98,7 @@ PYTHONUTF8=1 python scripts/render.py <manifest.json> "<项目根目录>\阅读�
 
 **原生可编辑 PPTX（默认同批出，2026-07-14 用户拍板由可选转标配）**——渲完 PDF 后紧接着跑平行引擎 `render_pptx.py`(读**同一份 manifest**，不必改 data)，不必等用户点名：
 ```bash
-PYTHONUTF8=1 python scripts/render_pptx.py <manifest.json> "<项目根目录>\阅读单输出\<书名>"
+PYTHONUTF8=1 python scripts/render_pptx.py <manifest.json> "<项目根目录>\读书会阅读单输出\<书名>"
 ```
 出 `<书名>-阅读单.pptx`：一张单子一页、按 manifest(=教学先后)次序排，每张重建成 PPT 原生表格/文本框/线条/形状，可直接改字/加行/挪元素。`-示范` 同样自动跳过。**几何类(venn/ladder/logic/voyage/story_mountain/fishbone/timeline/bubble/relation/facets/lanes/stance/deduce)为近似还原、与 PDF 有视觉差异**；其中 **timeline / story_mountain 原是横版，PPTX 里缩放横铺进竖版页(唯一已知近似点)**——交付时要显式提示用户「这两张如需精确横版以 PDF 为准」。内容超过一页的流式单子(如 4 分支 voyage)会自动纵向压缩入页、字号不变。不出 zip。
 
@@ -112,7 +112,7 @@ PYTHONUTF8=1 python scripts/render_pptx.py <manifest.json> "<项目根目录>\�
 ## 固定输出目录
 
 ```
-<项目根目录>\阅读单输出\<书名>\
+<项目根目录>\读书会阅读单输出\<书名>\
 ```
 - `<书名>` 纯书名、不带书名号。一本书的所有阅读单 + manifest 都落这个子目录(一本书十几个文件，按书分文件夹)。
 - 文件命名：`<阅读单名>-空.pdf/.html`（或无后缀单版）、`<书名>-manifest.json`；合册 `<书名>-阅读单-全套.pdf`；可编辑 PPTX `<书名>-阅读单.pptx`(一份多页)。

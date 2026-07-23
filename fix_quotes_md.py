@@ -9,9 +9,9 @@ import os
 import re
 
 FILES = [
-    r'e:\laojohn-lesson-plan\课案输出\洞-课案详案.md',
-    r'e:\laojohn-lesson-plan\课案输出\俗世奇人-课案详案.md',
-    r'e:\laojohn-lesson-plan\课案输出\手斧男孩-课案详案.md',
+    r'e:\laojohn-lesson-plan\读书会详案输出\洞-课案详案.md',
+    r'e:\laojohn-lesson-plan\读书会详案输出\俗世奇人-课案详案.md',
+    r'e:\laojohn-lesson-plan\读书会详案输出\手斧男孩-课案详案.md',
 ]
 
 
