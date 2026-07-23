@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 r"""批次横审 · 跨篇重复字串粗筛(n-gram)
 
-用途:每完成一个生产批次(约 12-16 篇写作课详案),扫 写作课输出\*.md,
+用途:每完成一个生产批次(约 12-16 篇写作课详案),扫 写作课详案输出\*.md,
 找出「出现在 >=2 篇里的重复字串」,供冷审 agent/人工判别哪些是真句癖、
 应补进 variation-pools.md「禁止逐字复用」清单。
 
@@ -10,7 +10,7 @@ r"""批次横审 · 跨篇重复字串粗筛(n-gram)
 
 用法(项目根目录下):
     PYTHONUTF8=1 python .claude/skills/laojohn-writing-lesson/assets/batch_ngram_scan.py
-    可选参数: --dir 写作课输出  --n 10  --min-len 12  --min-files 2  --top 200  --out 报告.txt
+    可选参数: --dir 写作课详案输出  --n 10  --min-len 12  --min-files 2  --top 200  --out 报告.txt
 """
 import argparse
 import glob
@@ -132,7 +132,7 @@ def scan(files, n, min_len, min_files):
 
 def main():
     ap = argparse.ArgumentParser(description="跨篇重复字串粗筛")
-    ap.add_argument("--dir", default="写作课输出", help="详案目录(默认 写作课输出)")
+    ap.add_argument("--dir", default="写作课详案输出", help="详案目录(默认 写作课详案输出)")
     ap.add_argument("--n", type=int, default=10, help="n-gram 长度(默认 10 字)")
     ap.add_argument("--min-len", type=int, default=12, help="报告的最短片段长(默认 12 字)")
     ap.add_argument("--min-files", type=int, default=2, help="至少出现的篇数(默认 2)")

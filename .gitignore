@@ -38,10 +38,10 @@ desktop.ini
 
 # md 是源、docx 是渲染产物
 读书会详案输出/*.docx
-写作课输出/*.docx
+写作课详案输出/*.docx
 读书会课件讲稿输出/**/*.docx
 写作课件讲稿输出/**/*.docx
-看图写话输出/**/*.docx
+看图写话详案输出/**/*.docx
 
 # 读书会配套（按书分夹）：json/md 是源，jpg/html/pdf/docx 是渲染产物
 读书会配套输出/**/*.jpg
