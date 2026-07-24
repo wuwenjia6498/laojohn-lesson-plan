@@ -24,8 +24,20 @@ def out_base(data_path):
     return base[: -len("_data")] if base.endswith("_data") else base
 
 
-def inject(template_path, data_path):
-    """data.json + 品牌 logo 注入模板，返回完整 HTML 字符串"""
+def _img_data_uri(path):
+    """本地图片转 data: URI（按扩展名定 MIME），供 base64 内联；失败返回空串"""
+    p = pathlib.Path(path)
+    if not p.exists():
+        return ""
+    ext = p.suffix.lower().lstrip(".")
+    mime = "jpeg" if ext in ("jpg", "jpeg") else ext or "png"
+    return f"data:image/{mime};base64," + base64.b64encode(p.read_bytes()).decode()
+
+
+def inject(template_path, data_path, extra_images=None):
+    """data.json + 品牌 logo 注入模板，返回完整 HTML 字符串。
+    extra_images: 可选 {占位符token: 图片路径}——logo 之外再内联命名图（如稿纸锚图）；
+    路径缺失则该 token 置空串（不伪造），由模板 onerror 兜底。"""
     data = json.loads(pathlib.Path(data_path).read_text(encoding="utf-8"))
     tpl = pathlib.Path(template_path).read_text(encoding="utf-8")
     html = tpl.replace("/*__DATA__*/ null", json.dumps(data, ensure_ascii=False))
@@ -36,6 +48,12 @@ def inject(template_path, data_path):
     else:
         print(f"!! 未找到品牌 logo: {LOGO_PATH}，页眉将留空（不伪造）")
         html = html.replace("__LOGO_SRC__", "")
+    # 额外命名图（可选，向后兼容）：如稿纸锚图 __ANCHOR_SRC__
+    for token, img_path in (extra_images or {}).items():
+        uri = _img_data_uri(img_path)
+        if not uri:
+            print(f"!! 未找到图 {img_path}，占位符 {token} 留空（模板 onerror 兜底）")
+        html = html.replace(token, uri)
     return html
 
 
@@ -78,14 +96,15 @@ def check_pages(pdf_out, expected):
         print("(未装 pypdf，跳过页数核验；pip install pypdf)")
 
 
-def render(data_path, out_dir, template_path, expected_pages, page_checks=None):
+def render(data_path, out_dir, template_path, expected_pages, page_checks=None, extra_images=None):
     """通用渲染流程：注入 -> 写 HTML -> Playwright 渲 PDF -> 自检。
-    page_checks: 可选回调 fn(page)，在出 PDF 前跑物料特有的自检（如格子数）。"""
+    page_checks: 可选回调 fn(page)，在出 PDF 前跑物料特有的自检（如格子数）。
+    extra_images: 可选 {token: 图片路径}，透传给 inject（如稿纸锚图内联）。"""
     data_path = pathlib.Path(data_path)
     out_dir = pathlib.Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    html = inject(template_path, data_path)
+    html = inject(template_path, data_path, extra_images=extra_images)
     base = out_base(data_path)
     html_out = out_dir / f"{base}.html"
     html_out.write_text(html, encoding="utf-8")

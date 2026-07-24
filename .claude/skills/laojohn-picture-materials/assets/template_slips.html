@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>兜底纸条</title>
+<style>
+  /* ===== 设计令牌（对齐同步写作配套，固定骨架勿改）===== */
+  :root{
+    --brand-red:#C8352B;--ink:#3A3A38;--ink-soft:#7A7568;--paper:#FFFFFF;
+    --brown-head:#A89B8A;--brown-deep:#7D7468;--brown-line:#C9C0B0;
+    --blue-deep:#3E5A73;
+    --red-soft:#FBEDE8;--red-line:#C8352B;--red-ink:#7A2018;
+    --cut:#B7B7B7;--fill-line:#999;
+  }
+  @page{ size:A4; margin:0; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{background:#EDEAE3;}
+  @media print{ html,body{background:#fff;} .sheet{box-shadow:none!important;margin:0!important;min-height:auto!important;} }
+  body{font-family:"PingFang SC","Microsoft YaHei","Source Han Sans SC","Noto Sans CJK SC",sans-serif;
+    color:var(--ink);-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .sheet{width:210mm;min-height:297mm;margin:14px auto;background:var(--paper);
+    padding:10mm 14mm 10mm;box-shadow:0 2px 18px rgba(0,0,0,.12);position:relative;}
+
+  /* ===== 品牌页眉 ===== */
+  .brandbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2.5mm;}
+  .toptag{font-size:10px;color:var(--ink-soft);font-weight:600;letter-spacing:1px;margin-top:4px;}
+  .logo-img{height:36px;width:auto;display:block;}
+
+  .page-head{font-size:11.5px;color:var(--ink-soft);line-height:1.5;margin:0 0 3.5mm;
+    border-bottom:2px solid var(--brown-head);padding-bottom:2.5mm;}
+  .page-head b{color:var(--blue-deep);font-weight:700;}
+  .page-head .note{color:var(--red-ink);}
+
+  /* ===== 纸条：竖排，沿虚线横裁 ===== */
+  .slip{border:1.2px dashed var(--cut);border-radius:5px;padding:2.8mm 6mm;margin-bottom:2mm;}
+  .slip-tag{display:inline-block;font-size:10px;color:var(--red-ink);background:var(--red-soft);
+    border:1px solid var(--red-line);border-radius:4px;padding:1px 7px;margin-bottom:2mm;}
+  .line{font-size:12.5px;line-height:1.6;}
+  .line b{color:var(--blue-deep);font-weight:700;margin-right:5px;}
+  .fill{display:inline-block;min-width:18mm;border-bottom:1px solid var(--fill-line);
+    height:1em;vertical-align:bottom;margin:0 2px;}
+</style>
+</head>
+<body>
+
+<div class="sheet">
+  <div class="brandbar">
+    <div class="toptag" id="toptag"></div>
+    <img class="logo-img" src="__LOGO_SRC__" alt="老约翰·看图写话" onerror="this.style.display='none'">
+  </div>
+  <p class="page-head" id="page-head"></p>
+  <div id="slips"></div>
+</div>
+
+<script>
+  const DATA = /*__DATA__*/ null;
+
+  function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  // 句式模板里 ＿＿＿（全角下划线，≥3 个连续）→ 可写填空线；其余原样转义
+  function tmpl(s){return esc(s).replace(/＿{2,}/g,'<span class="fill"></span>');}
+
+  function slipHTML(d){
+    const lines=d.lines.map(l=>
+      '<div class="line"><b>'+esc(l.label)+'</b>'+tmpl(l.template)+'</div>'
+    ).join('');
+    return '<div class="slip"><span class="slip-tag">'+esc(d.tag)+'</span>'+lines+'</div>';
+  }
+
+  function fill(){
+    const d=DATA, m=d.meta;
+    document.title='兜底纸条 · '+m.topic;
+    document.getElementById('toptag').textContent='兜底纸条 · 只发写不动的孩子 · 沿虚线裁开';
+    document.getElementById('page-head').innerHTML=
+      '<b>'+esc(m.kicker)+'</b> — '+esc(d.head)+'<br><span class="note">'+esc(d.note)+'</span>';
+    const box=document.getElementById('slips');
+    const rep=d.repeat||7;
+    for(let i=0;i<rep;i++){ box.insertAdjacentHTML('beforeend', slipHTML(d)); }
+  }
+
+  window.addEventListener('load',()=>{
+    fill();
+    setTimeout(()=>{ document.body.dataset.rendered='1'; },100);
+  });
+</script>
+</body>
+</html>

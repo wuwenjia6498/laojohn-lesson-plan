@@ -48,6 +48,7 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 | docx 首页版式化 | `.claude\skills\laojohn-lesson-plan\assets\style_front_page.py` | picture-writing、writing-lesson 两线共用（2026-07-22 由 picture-writing\scripts\ 迁入）。把共享引擎产的朴素首页重排为**分区提纲页定稿版式**（2026-07-22 两线统一：居中两行标题区《课名》─分隔线─副题、无品牌行；一张两列表按 `**N、区名 —— 副题**` 灰底区头分区；语义灰阶＋纯黑强调、无红色）——picture＝三区（《新_课案提纲页.docx》），writing＝两区（《新－同步习作_课案提纲页.docx》）；**课型差异全收敛在脚本顶部 `PROFILES` 表（H1 判型／副标题来源／表宽／值列渲染规则），禁 fork、禁往渲染原语里塞课型分支**；改它须同时回归两条线 |
 | PPT 渲染原语 | `.claude\skills\laojohn-ppt\scripts\helpers.py`（文本框/表格/字体/点击动画/渐变/占位等底层件）+ `parser.py`（中间稿解析） | laojohn-ppt 读书会与写作课两 profile 共用；有 bug 史的横切层（字体槽顺序、表格自适应等修一处即重烘焙全部），**永不 fork、禁 `doc_kind`/课型分支** |
 | 学习单渲染引擎 | `.claude\skills\laojohn-reading-sheet\scripts\render.py`（PDF/HTML）+ `render_pptx.py`（可编辑 PPTX）+ `templates\`（模板库） | reading-sheet（整本书阅读单）专用；`render.py` 的 `--templates-dir`/`--bundle-label` 是课型无关的可选参数（reading-sheet 自用，`--bundle-label` 默认「阅读单」），保留不删 |
+| 配套物料 HTML→PDF 渲染引擎 | `.claude\skills\laojohn-writing-materials\scripts\_shared.py`（`inject`/`render`/`safe_pdf`/`check_pages`/`out_base`，Playwright 出 A4 PDF + logo base64 内联 + pypdf 页数核验） | writing-materials（同步习作配套）与 picture-materials（看图写话配套）两线共享单一源。picture-materials 的 `scripts\_shared.py` 是薄 shim（importlib 按路径载入本引擎，零逻辑），**禁复制**；`inject`/`render` 的可选 `extra_images={token:图路径}`（稿纸锚图注入用）是课型无关参数，改签名/删该参数须同时回归两线 |
 
 > 现存物理副本（`laojohn-ppt\assets\logo\`、`laojohn-course-poster\assets\qrcode.png` / `assets\covers\`）属历史遗留；以根目录单一源为准，勿据副本做新决策。
 

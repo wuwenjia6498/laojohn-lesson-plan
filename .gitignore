@@ -58,3 +58,7 @@ desktop.ini
 # 写作配套：_data.json 是数据源，html/pdf 是渲染产物
 写作配套输出/**/*.pdf
 写作配套输出/**/*.html
+
+# 看图写话配套：_data.json 是数据源，html/pdf 是渲染产物
+看图写话配套输出/**/*.pdf
+看图写话配套输出/**/*.html

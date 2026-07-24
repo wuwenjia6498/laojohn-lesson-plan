@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>支架小卡</title>
+<style>
+  /* ===== 设计令牌（对齐同步写作配套，固定骨架勿改）===== */
+  :root{
+    --brand-red:#C8352B;--ink:#3A3A38;--ink-soft:#7A7568;--paper:#FFFFFF;
+    --brown-head:#A89B8A;--brown-deep:#7D7468;--brown-cell:#EFEBE3;--brown-line:#C9C0B0;
+    --blue-head:#5B7A99;--blue-soft:#E7EEF3;--blue-line:#AEC2D2;--blue-deep:#3E5A73;
+    --red-soft:#FBEDE8;--red-line:#D89478;--red-ink:#A85434;
+    --cut:#B7B7B7;
+  }
+  @page{ size:A4; margin:0; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{background:#EDEAE3;}
+  @media print{ html,body{background:#fff;} .sheet{box-shadow:none!important;margin:0!important;min-height:auto!important;} }
+  .page-break{ page-break-before:always; }
+  body{font-family:"PingFang SC","Microsoft YaHei","Source Han Sans SC","Noto Sans CJK SC",sans-serif;
+    color:var(--ink);-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .sheet{width:210mm;min-height:297mm;margin:14px auto;background:var(--paper);
+    padding:12mm 12mm 12mm;box-shadow:0 2px 18px rgba(0,0,0,.12);position:relative;}
+
+  /* ===== 品牌页眉：左用途标签 + 右真 logo（品牌资产\logo.png 注入）===== */
+  .brandbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3mm;}
+  .toptag{font-size:10px;color:var(--ink-soft);font-weight:600;letter-spacing:1px;margin-top:5px;}
+  .logo-img{height:40px;width:auto;display:block;}
+
+  .page-head{font-size:12px;color:var(--ink-soft);line-height:1.55;margin:0 0 5mm;
+    border-bottom:2px solid var(--brown-head);padding-bottom:3mm;}
+  .page-head b{color:var(--blue-deep);font-weight:700;}
+  .page-head .note{color:var(--red-ink);}
+
+  /* ===== 卡片网格：2 列，沿虚线裁开 ===== */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:4mm;}
+  .card{border:1.2px dashed var(--cut);border-radius:6px;padding:6mm 6mm 5mm;
+    height:56mm;display:flex;flex-direction:column;}
+  .card-title{font-size:15px;font-weight:800;color:var(--blue-deep);text-align:center;letter-spacing:.5px;}
+  .card-sub{font-size:10.5px;color:var(--ink-soft);text-align:center;margin-top:3px;}
+  .divider{height:1px;background:var(--brown-line);opacity:.5;margin:4mm 0;}
+
+  /* 结构条：chips + 箭头 */
+  .chips{display:flex;align-items:center;justify-content:center;gap:3mm;flex:1;flex-wrap:wrap;}
+  .chip{background:var(--blue-soft);border:1px solid var(--blue-line);color:var(--blue-deep);
+    border-radius:6px;font-size:15px;font-weight:700;padding:5mm 3mm;min-width:19mm;text-align:center;}
+  .arrow{color:var(--blue-head);font-size:15px;font-weight:800;}
+  .hint{font-size:10px;color:var(--ink-soft);text-align:center;margin-top:4mm;line-height:1.4;}
+
+  /* 四方向：2×2 盒 */
+  .quad{display:grid;grid-template-columns:1fr 1fr;gap:3mm;flex:1;align-content:center;}
+  .qbox{background:var(--red-soft);border:1px solid var(--red-line);color:var(--red-ink);
+    border-radius:6px;font-size:13.5px;font-weight:700;text-align:center;padding:3.5mm 2mm;
+    display:flex;flex-direction:column;justify-content:center;}
+  .qbox small{display:block;font-size:9.5px;color:#a06056;font-weight:400;margin-top:2px;}
+</style>
+</head>
+<body>
+
+<div class="sheet">
+  <div class="brandbar">
+    <div class="toptag" id="toptag"></div>
+    <img class="logo-img" src="__LOGO_SRC__" alt="老约翰·看图写话" onerror="this.style.display='none'">
+  </div>
+  <p class="page-head" id="page-head"></p>
+  <div class="grid" id="grid"></div>
+</div>
+
+<script>
+  const DATA = /*__DATA__*/ null;
+
+  function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+  function cardHTML(c){
+    let body='';
+    if(c.type==='chips'){
+      const chips=(c.chips||[]).map(t=>'<span class="chip">'+esc(t)+'</span>')
+        .join('<span class="arrow">→</span>');
+      body='<div class="chips">'+chips+'</div>';
+      if(c.hint) body+='<div class="hint">'+esc(c.hint)+'</div>';
+    }else{ // quad
+      const boxes=(c.boxes||[]).map(b=>
+        '<div class="qbox">'+esc(b.main)+(b.small?'<small>'+esc(b.small)+'</small>':'')+'</div>'
+      ).join('');
+      body='<div class="quad">'+boxes+'</div>';
+    }
+    return '<div class="card"><div class="card-title">'+esc(c.title)+'</div>'+
+           (c.sub?'<div class="card-sub">'+esc(c.sub)+'</div>':'')+
+           '<div class="divider"></div>'+body+'</div>';
+  }
+
+  function fill(){
+    const d=DATA, m=d.meta;
+    document.title='支架小卡 · '+m.topic;
+    document.getElementById('toptag').textContent='支架小卡 · 每人一张随身 · 沿虚线裁开';
+    document.getElementById('page-head').innerHTML=
+      '<b>'+esc(m.kicker)+'</b> — '+esc(d.head)+'<br><span class="note">'+esc(d.note)+'</span>';
+    const grid=document.getElementById('grid');
+    const per=d.per_page||8;
+    for(let i=0;i<per;i++){ grid.insertAdjacentHTML('beforeend', cardHTML(d.card)); }
+  }
+
+  window.addEventListener('load',()=>{
+    fill();
+    setTimeout(()=>{ document.body.dataset.rendered='1'; },100);
+  });
+</script>
+</body>
+</html>
