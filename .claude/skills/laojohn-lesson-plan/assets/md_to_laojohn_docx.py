@@ -847,9 +847,13 @@ def convert(md_path, docx_path, header_left=None, header_right=None):
                 book_name = m_book.group(1).strip()
             # 紧跟的非空非标记行当副标题:与主标题同段、软回车分行(见 render_doc_title)
             subtitle = None
-            if i + 1 < n and raw[i+1].strip() and not raw[i+1].strip().startswith('#') \
-               and not raw[i+1].strip().startswith('师') and not is_table_line(raw[i+1]):
-                subtitle = raw[i+1].strip()
+            _nxt = raw[i+1].strip() if i + 1 < n else ''
+            if _nxt.startswith('###### '):
+                # 六级标题紧跟 H1 = 文档副标题（看图写话「期次副标」体例，2026-07-25）
+                subtitle = _nxt[7:].strip()
+            elif _nxt and not _nxt.startswith('#') \
+               and not _nxt.startswith('师') and not is_table_line(raw[i+1]):
+                subtitle = _nxt
             render_doc_title(doc, title, subtitle=subtitle)
             seen_doc_title = True
             i += 2 if subtitle else 1

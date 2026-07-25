@@ -11,7 +11,7 @@ description: 把一份「老约翰」看图写话课详案(.md)转成配套课�
 
 | 物料 | 页数 | 内容 | 模板 / 入口 |
 |------|------|------|------------|
-| **支架小卡** | 1 页（8 张/页，2×4 裁切） | 本课支架卡（三素句结构条 `chips` / 细节四方向等提示卡 `quad`），每人一张随身 | `template_cards.html` / `render_cards.py` |
+| **支架小卡** | 1 页（8 张/页，2×4 裁切） | 本课支架卡（三素句结构条 `chips` / 细节四问等提示卡 `quad`），每人一张随身 | `template_cards.html` / `render_cards.py` |
 | **兜底纸条** | 1 页（7 条/页，竖排裁切） | 只发写不动孩子的填空续写条（开头＋加细节句式） | `template_slips.html` / `render_slips.py` |
 | **看图写话稿纸** | 1 页 | 本课锚图 + 格子稿纸（18 列动态行）+ 写话格式小提醒 | `template_sheet.html` / `render_sheet.py` |
 | **教师家长页** | 2 页 | P1 教师速览（时间轴 / 过关判定 / 评价三级 / 下水例文 / 物料清单）；P2 家长一页纸（一句话说清 / 好坏对照 / 好句本亲子任务 / 避开两件） | `template_teacher_parent.html` / `render_teacher_parent.py` |

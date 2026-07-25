@@ -5,7 +5,7 @@
   - picture（看图写话）＝《新_课案提纲页.docx》：三区（本课定位／本课要点／与校内的关系）。
   - writing（同步习作）＝《新－同步习作_课案提纲页.docx》：两区（本课定位／本课要点）。
 共同版式：居中两行标题区（《课名》20pt ─ 分隔线 ─ 副题 13pt 灰，**无品牌行**）→ 一张
-两列表、`**N、区名 —— 副题**` 灰底区头行分区；语义灰阶（#222222/#333333/#5A5A5A）＋
+两列表、`**N、区名**` 灰底区头行分区；语义灰阶（#222222/#333333/#5A5A5A）＋
 纯黑强调、无红色、无节标题、无底部提示框。
 
 用法：
@@ -40,8 +40,8 @@ FONT = "宋体"
 SEP = "　│　"         # 全角分隔
 P_INK = "222222"      # 主色（标题/标签/要点强调）
 P_TXT = "333333"      # 正文色
-P_MUT = "5A5A5A"      # 弱化灰（副题/区头副题/线名/括注/分隔符/尾注）
-P_EMPH = "000000"     # 纯黑强调（课型/本课名/增量词）——无红色
+P_MUT = "5A5A5A"      # 弱化灰（副题/线名/括注/分隔符/尾注）
+P_EMPH = "000000"     # 纯黑强调（课型/本课名/提升点类型）——无红色
 P_BORDER = "9A9A9A"   # 表格边框 / 标题区分隔线
 P_ZONE_BG = "EDEDED"  # 区头行底纹（标签列无底纹）
 
@@ -50,26 +50,32 @@ P_ZONE_BG = "EDEDED"  # 区头行底纹（标签列无底纹）
 # 字段说明：
 #   h1        H1 正则，group(1)=H1 标题（展示标题只取其中《…》段）
 #   subtitle  副标题来源：('row', 行名, 取前 N 段) | ('line', H1 下一非空行)
+#             | ('h6', 期次副标正则, 0)——取该正则的 group(1)
+#   detect    判型正则（可选，缺省用 h1）
 #   zones_anchor  `## 教案提纲表` 锚正则，其后逐个 `**N、…**` 区头+两列表
+#             （区头只写区名；`—— 副题` 已于 2026-07-25 去掉，zone_row 的 dash 分支保留作向后兼容）
 #   tbl       (表总宽 dxa, 标签列宽 dxa)
 #   rules     行名 → 值列渲染规则名（p_* 系，见 _render_value）；未列出的行走 'plain'
 PROFILES = {
     "picture": {
-        "h1": r"^#\s+(.+?)\s*·\s*看图写话详案\s*$",
-        "subtitle": ("row", "课次·课型", 2),
+        # 2026-07-25 标题体例改版：H1＝课程主题式总标题（无台账字眼、无《》），
+        # 台账信息移到紧跟的六级标题「期次副标」，判型与副题都取那一行。
+        "detect": r"^######\s*.+?·\s*看图写话详案\s*$",
+        "h1": r"^#\s+(?!#)(.+?)\s*$",
+        "subtitle": ("h6", r"^######\s*(.+?)\s*·\s*看图写话详案\s*$", 0),
         "zones_anchor": r"^##\s*教案提纲表",
-        "tbl": (9072, 1636),
+        "tbl": (9072, 1900),
         "rules": {
             "课次·课型": "p_course",
             "学期主题": "p_dash",
             "能力线": "p_ability",
-            "教什么": "p_body_em",
-            "学生带走": "p_body_em",
-            "用什么": "p_body_em",
-            "对齐锚点": "p_tail_note",
-            "校内基线": "p_text",
-            "本课增量": "p_delta",
-            "本课不讲": "p_dash_mut",
+            "教学内容": "p_body_em",
+            "学习目标": "p_body_em",
+            "教学准备": "p_body_em",
+            "对应教材": "p_tail_note",
+            "校内学情起点": "p_text",
+            "本课提升点": "p_delta",
+            "教学边界": "p_dash_mut",
         },
     },
     "writing": {
@@ -84,7 +90,7 @@ PROFILES = {
             "核心能力点": "p_src_dash",
             "核心技法": "p_ink",
             "怎么落地": "p_body_em",
-            "学生带走": "p_body_em",
+            "学习目标": "p_body_em",
         },
     },
 }
@@ -92,7 +98,7 @@ PROFILES = {
 
 def detect_profile(text: str) -> str:
     for name, prof in PROFILES.items():
-        if re.search(prof["h1"], text, re.M):
+        if re.search(prof.get("detect", prof["h1"]), text, re.M):
             return name
     raise SystemExit("无法判型：H1 既不匹配「· 看图写话详案」也不匹配「· 写作课教学设计」")
 
@@ -111,6 +117,11 @@ def parse_md(md_path: Path, profile: str = None):
 
     def subtitle_from(rows_all):
         kind, key, n = prof["subtitle"]
+        if kind == "h6":
+            m6 = re.search(key, text, re.M)
+            if not m6:
+                raise SystemExit("未找到期次副标行（`###### … · 看图写话详案`）")
+            return m6.group(1).strip()
         if kind == "row":
             kv = dict(rows_all)
             raw = kv.get(key, "")
@@ -309,6 +320,10 @@ def _render_value(cell, label, value, current_key, rules, space=3):
         else:
             rest = value
         key = current_key or ""
+        if not key:  # H1 无《》时（看图写话新体例）：按「（本课）」标记定位本课方法名
+            m_cur = re.search(r"([^→\s、，,：]+（本课）)", rest)
+            if m_cur:
+                key = m_cur.group(1)
         if key and key not in rest and "：" in key:
             key = key.split("：", 1)[1]
         if key and key + "（本课）" in rest:
@@ -361,7 +376,7 @@ def _render_value(cell, label, value, current_key, rules, space=3):
 def build_front(doc, data):
     """分区提纲页（两线共用；样张见文件头）：
     居中两行标题区（《课名》20pt ─ 分隔线 ─ 副题 13pt 灰）
-    → 一张两列表（宽度按 profile），`**N、区名 —— 副题**` 灰底区头行分区 + 数据行。
+    → 一张两列表（宽度按 profile），`**N、区名**` 灰底区头行分区 + 数据行。
     无品牌行、无节标题、无底部提示框、无红色。"""
     profile, title, subtitle, zones = data
     prof = PROFILES[profile]
