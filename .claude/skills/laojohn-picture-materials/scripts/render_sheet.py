@@ -27,7 +27,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("data")
     ap.add_argument("out_dir")
-    ap.add_argument("--anchor", default=None, help="本课主图 png 路径；覆盖 data.json 的 sheet.anchor_img")
+    ap.add_argument("--anchor", default=None,
+                    help="稿纸该印的图 png 路径（应为本课练笔图 练-01.png；回落 主-01/旧稿 锚-01）；"
+                         "覆盖 data.json 的 sheet.anchor_img")
     ap.add_argument("--template", default=str(DEFAULT_TEMPLATE))
     a = ap.parse_args()
 

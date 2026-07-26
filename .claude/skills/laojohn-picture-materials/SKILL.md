@@ -13,7 +13,7 @@ description: 把一份「老约翰」看图写话课详案(.md)转成配套课�
 |------|------|------|------------|
 | **支架小卡** | 1 页（8 张/页，2×4 裁切） | 本课支架卡（三素句结构条 `chips` / 细节四问等提示卡 `quad`），每人一张随身 | `template_cards.html` / `render_cards.py` |
 | **兜底纸条** | 1 页（7 条/页，竖排裁切） | 只发写不动孩子的填空续写条（开头＋加细节句式） | `template_slips.html` / `render_slips.py` |
-| **看图写话稿纸** | 1 页 | 本课主图 + 格子稿纸（18 列动态行）+ 写话格式小提醒 | `template_sheet.html` / `render_sheet.py` |
+| **看图写话稿纸** | 1 页 | **本课练笔图**（＝学生当堂写作那张，不是主图）+ 格子稿纸（18 列动态行）+ 写话格式小提醒 | `template_sheet.html` / `render_sheet.py` |
 | **教师家长页** | 2 页 | P1 教师速览（时间轴 / 过关判定 / 评价三级 / 示范例文 / 物料清单）；P2 家长一页纸（一句话说清 / 好坏对照 / 好句本亲子任务 / 避开两件） | `template_teacher_parent.html` / `render_teacher_parent.py` |
 
 > **纯口头课（免"写"）**：如一上会看课，无当堂写作 → **只出支架小卡 + 教师家长页**，不出兜底纸条、不出稿纸（无写作环节，纸条/稿纸无落点）。有当堂写作的课四件全出。
@@ -25,7 +25,8 @@ description: 把一份「老约翰」看图写话课详案(.md)转成配套课�
 - **输入**：`<项目根>\看图写话详案输出\<年级册>（<季>）第 N 次 · <课型>.md`
 - **输出目录**：`<项目根>\看图写话配套输出\<详案stem>\`（stem = 详案文件名去 `.md`，如 `二上（秋）第 1 次 · 方法课`）
 - **命名**：`<详案stem>-<物料名>_data.json` → 同名 `.html` / `.pdf`（产物基名由 `_shared.out_base()` 去 `_data` 尾缀得出）。物料名 = `支架小卡` / `兜底纸条` / `看图写话稿纸` / `教师家长页`。
-- **主图**：稿纸内联的本课主图取 `看图写话详案输出\<详案stem>\图位\锚-01.png`（详案生图产物）；缺则稿纸留"老师另发/贴图"占位框。
+- **稿纸内联图＝练笔图**（2026-07-26 三图位定案）：取 `看图写话详案输出\<详案stem>\图位\练-01.png`（详案生图产物）；**找不到才回落 `主-01.png`，再回落旧稿的 `锚-01.png`**；都缺则留"老师另发/贴图"占位框。**印在稿纸上的必须是学生真要写的那张图**——详案里教师示范例文写主图、学生当堂写作用练笔图（`laojohn-picture-writing/references/image-spec.md` §三），稿纸印成主图＝让学生照着刚才集体说过的那张抄。据此，稿纸上的 `lead`／`draftnote` 只能回溯**练笔图**的「必须可见元素清单」。
+  > 参数名不改：渲染入口仍是 `--anchor`、数据字段仍是 `sheet.anchor_img`（对外机器接口，改名会断掉存量 data.json）；它们现在指的是「稿纸该印哪张图」，按上面的优先级填值。
 
 ## 本机渲染环境（踩中静默失败或乱码）
 
@@ -44,10 +45,10 @@ description: 把一份「老约翰」看图写话课详案(.md)转成配套课�
    ```bash
    PYTHONUTF8=1 python scripts/render_cards.py           <data.json> <out_dir>
    PYTHONUTF8=1 python scripts/render_slips.py           <data.json> <out_dir>
-   PYTHONUTF8=1 python scripts/render_sheet.py           <data.json> <out_dir> [--anchor <锚-01.png>]
+   PYTHONUTF8=1 python scripts/render_sheet.py           <data.json> <out_dir> [--anchor <练-01.png>]
    PYTHONUTF8=1 python scripts/render_teacher_parent.py  <data.json> <out_dir>
    ```
-   稿纸主图优先 `--anchor`，否则取 data.json 的 `sheet.anchor_img`（相对路径按 CWD 解析，从项目根跑即可）。
+   稿纸内联图优先 `--anchor`，否则取 data.json 的 `sheet.anchor_img`（相对路径按 CWD 解析，从项目根跑即可）；**填的应是本课练笔图 `练-01.png`**（回落顺序见上节）。
 5. **自检**：看渲染日志——`页数核验` 是否 OK（卡/条/稿纸=1 页，教师家长页=2 页）、有无 `sheet 超一页高` 溢出告警；溢出就压数据层文本或减重复份数重渲。目检 PDF：品牌壳一致、无 ASCII 直引号泄漏、主图咬合正文。
 
 ## 红线（继承 CLAUDE.md §4 + 看图写话既有纪律）

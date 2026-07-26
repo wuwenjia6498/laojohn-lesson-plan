@@ -23,7 +23,9 @@ _ENGINE = os.path.normpath(os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     '..', '..', 'laojohn-lesson-plan', 'assets', 'md_to_laojohn_docx.py'))
 
-_PLACE_RE = re.compile(r'【图位[：:]\s*([锚例格]-\d+)[^】]*】')
+# 编号前缀字符集与 imgspec_parser 的 _PLACEHOLDER_RE / _CODE_RE 同一口径（主/练/备/格＝现行，
+# 锚/例＝旧稿兼容位）。三处正则改一处必须同步，否则回插会静默插 0 张。
+_PLACE_RE = re.compile(r'【图位[：:]\s*([主练备格锚例]-\d+)[^】]*】')
 
 # 看图写话的 docx 页眉（覆盖引擎默认的「老约翰深度阅读 / 阅读·思辨·表达」）。
 # 右侧标语＝本课程三阶主张，与六阶总轴第一/二阶对应。

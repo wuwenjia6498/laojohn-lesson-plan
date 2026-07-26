@@ -3,6 +3,9 @@
 imgspec_parser —— 解析「看图写话详案」文末「生图工单」里的 imgspec 规格块，
 并扫描正文里的 `【图位:编号】` 占位标记。纯标准库、无网络、无第三方依赖。
 
+图位口径（2026-07-26 三图位定案）：主-0N 主图 ／ 练-0N 练笔图 ／ 备-0N 备选图 ／ 格-0N 格式图；
+旧前缀 锚-／例- 保留兼容位。自测输出含「三图位齐备」与「意外点项」两项机检。
+
 被 generate_images.py / insert_images_docx.py 复用；也可单独跑做解析自测：
     PYTHONUTF8=1 python imgspec_parser.py <详案.md>
 """
@@ -16,20 +19,29 @@ KNOWN_FIELDS = {
     '编号', '角色', '环节', '承担训练点',
     '生图提示词', '必须可见元素清单', '允许但不强制', '风格/比例',
     '支持句式', '一句话画面', '验收', '时间线索', '引用资产', '说明',
+    '同族关系',            # 练笔图必填：与主图的「同族异时」关系（同角色同场景·下一时刻）
+    '验收附加',            # 可选：该图专属的验收附加要求（人数、画面干净度等），缺省见 generate_images
 }
 
-# 角色枚举。2026-07-26 术语统一：人读文字一律「主图／备选图」，旧稿的「锚图／例库图」
-# 经下面的别名表继续认（编号前缀 锚-0N/例-0N 与 png 文件名保持不变，不在此次改名范围内）。
-ROLE_ANCHOR = '主图'
-ROLE_LIBRARY = '备选图'
+# 角色枚举（2026-07-26 晚：一课三图位定案，见 references/image-spec.md §一课三图位）。
+# 编号前缀同步改名：主-0N（主图）／练-0N（练笔图）／备-0N（备选图）／格-0N（格式图）；
+# 旧前缀 锚-0N／例-0N 与旧角色名「锚图／例库图」由下面的别名与正则兼容位继续认（旧稿不报错）。
+ROLE_MAIN = '主图'
+ROLE_PRACTICE = '练笔图'
+ROLE_ALT = '备选图'
 ROLE_FORMAT = '格式图'
-_ROLE_ALIASES = {'锚图': ROLE_ANCHOR, '例库图': ROLE_LIBRARY}
+_ROLE_ALIASES = {
+    '锚图': ROLE_MAIN, '例库图': ROLE_ALT,
+    '备用图': ROLE_ALT,          # 规则文用「备用图」，仓内口径统一为「备选图」
+    '练习图': ROLE_PRACTICE, '练笔用图': ROLE_PRACTICE,
+}
 
 # —— 全局画风令牌（运行时事实源在这里；人读文档见 references/style-tokens.md，两处必须一字一致）——
 # 收成全局两档的原因：风格若散在每张图的「生图提示词」里各写各的，只会漂到模型默认的
-# 塑料感儿童插画档。主图定调、备选图靠图生图跟随，所以真正要拉起来的是主图这一张。
+# 塑料感儿童插画档。主图定调、其余靠图生图跟随，所以真正要拉起来的是主图这一张。
 # 主图档收在「可读」——学生要数要素、圈画面，可读性优先于美观（硬红线）。
-ANCHOR_STYLE_TOKEN = (
+# **练笔图与主图同走 clean 档**：学生当堂写作要对着它数细节、回溯任务提示，可读性同样是硬要求。
+MAIN_STYLE_TOKEN = (
     '画风：柔和的水彩淡彩叠加彩色铅笔质感的手绘插画，看得见纸张纹理与自然笔触，'
     '不要矢量扁平风、不要塑料光泽、不要均匀渐变；线条轻盈、粗细有变化，'
     '不要每个物体都描一圈同样粗细的黑色轮廓；配色低饱和、以柔和的暖色系为主，'
@@ -39,7 +51,7 @@ ANCHOR_STYLE_TOKEN = (
     '孩子要能一眼看清、数得出、圈得住，氛围一律服从可读。'
 )
 # 备选图档基调与主图同源（否则图生图跟随会打架），只在收尾放开氛围。
-LIBRARY_STYLE_TOKEN = (
+ALT_STYLE_TOKEN = (
     '画风：柔和的水彩淡彩叠加彩色铅笔质感的手绘插画，看得见纸张纹理与自然笔触，'
     '不要矢量扁平风、不要塑料光泽、不要均匀渐变；线条轻盈、粗细有变化，'
     '不要每个物体都描一圈同样粗细的黑色轮廓；配色低饱和、以柔和的暖色系为主，'
@@ -50,8 +62,12 @@ LIBRARY_STYLE_TOKEN = (
 
 _FENCE_RE = re.compile(r'```imgspec\s*\n(.*?)```', re.S)
 _FIELD_RE = re.compile(r'^[ \t]*([^\s:：][^:：]*?)[：:][ \t]*(.*)$')
-_PLACEHOLDER_RE = re.compile(r'【图位[：:]\s*([锚例格]-\d+)')
-_CODE_RE = re.compile(r'^\s*([锚例格]-\d+)\s*$')
+# 编号前缀字符集：主/练/备/格 为现行口径，锚/例 为旧稿兼容位（勿删，存量详案未迁完）。
+# 三处正则同一口径：本文件两条 + insert_images_docx.py 的 _PLACE_RE，改一处必须同步。
+_PLACEHOLDER_RE = re.compile(r'【图位[：:]\s*([主练备格锚例]-\d+)')
+_CODE_RE = re.compile(r'^\s*([主练备格锚例]-\d+)\s*$')
+# 「意外点」项的识别前缀：清单项写成 `□ 意外点＝…` 才能被机检认出（判有没有写，不判画得对不对）。
+_SURPRISE_RE = re.compile(r'^意外点\s*[＝=：:]')
 
 
 def _norm_label(label):
@@ -106,20 +122,52 @@ class ImgSpec:
         return self.fields.get('验收', '').strip()
 
     @property
-    def is_anchor(self):
-        return self.role == ROLE_ANCHOR
+    def extra_rule(self):
+        """该图专属的「验收附加:」要求。曾把「画面只能有一个小孩」硬编码在 generate_images 里，
+        与「两个孩子有互动（语言有对象）」这类规格直接打架，故改为规格驱动、缺省不含人数约束。"""
+        return self.fields.get('验收附加', '').strip()
 
     @property
-    def is_library(self):
-        return self.role == ROLE_LIBRARY
+    def kinship(self):
+        """练笔图「同族关系:」——与主图的同族异时说明（同角色同场景·下一时刻）。"""
+        return self.fields.get('同族关系', '').strip()
+
+    @property
+    def surprise(self):
+        """清单里的「意外点＝…」项（四问类主图的一票否决项）；没写则为 ''。
+
+        清单项常带 Markdown 强调（`□ **意外点＝…**`），故比对前先剥掉行首的 * 与空白——
+        否则加粗写法会被判成「没写意外点」。"""
+        for it in self.must_see:
+            if _SURPRISE_RE.match(it.strip().lstrip('*').strip()):
+                return it.strip()
+        return ''
+
+    @property
+    def is_main(self):
+        return self.role == ROLE_MAIN
+
+    @property
+    def is_practice(self):
+        return self.role == ROLE_PRACTICE
+
+    @property
+    def is_alt(self):
+        return self.role == ROLE_ALT
 
     @property
     def is_format(self):
         return self.role == ROLE_FORMAT
 
+    @property
+    def is_strict(self):
+        """严格验收通道＝主图 + 练笔图。练笔图承担学生当堂写作，其清单要撑住任务提示与
+        过关判定例句，宽规格不够，故与主图同档逐项核查。"""
+        return self.is_main or self.is_practice
+
     def build_prompt(self, enforce_must_see=False):
-        """组装喂生图工具的最终提示词：提示词 + 风格/比例（+ 主图可选把必须可见清单逐条拼入）
-        + 按角色自动追加全局画风令牌（主图 clean 档 / 备选图 atmos 档）。
+        """组装喂生图工具的最终提示词：提示词 + 风格/比例（+ 严格档可选把必须可见清单逐条拼入）
+        + 按角色自动追加全局画风令牌（主图/练笔图 clean 档 / 备选图 atmos 档）。
 
         画风令牌统一在这里注入，规格里不再逐图写风格形容词——见 references/style-tokens.md。
         `风格/比例` 字段保留原样拼接（它管的是比例/横版，与令牌不冲突）。"""
@@ -130,10 +178,10 @@ class ImgSpec:
             parts.append('风格与比例：' + self.style)
         if enforce_must_see and self.must_see:
             parts.append('画面必须同时清晰包含以下全部元素：' + '；'.join(self.must_see) + '。')
-        if self.is_anchor:
-            parts.append(ANCHOR_STYLE_TOKEN)
-        elif self.is_library:
-            parts.append(LIBRARY_STYLE_TOKEN)
+        if self.is_strict:
+            parts.append(MAIN_STYLE_TOKEN)
+        elif self.is_alt:
+            parts.append(ALT_STYLE_TOKEN)
         return '\n'.join(parts).strip()
 
     def __repr__(self):
@@ -217,16 +265,26 @@ def _selfcheck(md_path):
     specs, placeholders, _ = load(md_path)
     print(f'== 解析 {os.path.basename(md_path)} ==')
     print(f'工单规格块：{len(specs)} 个')
-    anchors = [s for s in specs if s.is_anchor]
-    libs = [s for s in specs if s.is_library]
+    mains = [s for s in specs if s.is_main]
+    pracs = [s for s in specs if s.is_practice]
+    alts = [s for s in specs if s.is_alt]
     fmts = [s for s in specs if s.is_format]
-    print(f'  主图 {len(anchors)}：{[s.code for s in anchors]}')
-    print(f'  备选图 {len(libs)}：{[s.code for s in libs]}')
+    print(f'  主图 {len(mains)}：{[s.code for s in mains]}')
+    print(f'  练笔图 {len(pracs)}：{[s.code for s in pracs]}')
+    print(f'  备选图 {len(alts)}：{[s.code for s in alts]}')
     print(f'  格式图 {len(fmts)}：{[s.code for s in fmts]}')
-    for s in anchors:
-        print(f'  · {s.code} 必须可见清单 {len(s.must_see)} 项：')
+    for s in mains + pracs:
+        print(f'  · {s.code}（{s.role}）必须可见清单 {len(s.must_see)} 项：')
         for it in s.must_see:
             print(f'      - {it}')
+    # —— 三图位齐备（image-spec.md §一课三图位硬门）——
+    lack = [name for name, got in (('主图', mains), ('练笔图', pracs), ('备选图', alts)) if not got]
+    print(f'三图位齐备：{"齐" if not lack else "缺 " + "、".join(lack)}')
+    for s in pracs:
+        print(f'  练笔图 {s.code} 同族关系：{s.kinship or "**未写（须补：同角色同场景·下一时刻）**"}')
+    # —— 意外点（四问类主图的一票否决项；机检只判「清单里有没有写」）——
+    for s in mains:
+        print(f'  主图 {s.code} 意外点项：{s.surprise or "无（四问类课必须有，其余课型不强制）"}')
     used = [c for c, _ in placeholders]
     print(f'正文【图位:】占位：{len(placeholders)} 处，去重 {sorted(set(used))}')
     spec_codes = {s.code for s in specs}
