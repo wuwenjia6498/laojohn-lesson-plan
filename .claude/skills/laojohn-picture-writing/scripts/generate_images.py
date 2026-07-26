@@ -2,7 +2,7 @@
 """
 generate_images —— 看图写话「自动生图闭环」驱动。
 
-读详案 .md 文末生图工单 → 对每个主图/练笔图/备选图（跳过格式图）：
+读详案 .md 文末生图工单 → 对每个主图/练笔图/备选图（跳过格式图与留白格「状态: 留白」）：
   ① 调 AiHubMix（OpenAI 兼容）文生图，存 <详案stem>/图位/<编号>.png
   ② 调多模态视觉模型，对照「必须可见元素清单」逐项验收
   ③ 主图与练笔图（严格档）缺项 → 强调缺项改写提示词重生（≤max_retries）；仍缺则标「需人工」
@@ -527,15 +527,25 @@ def main():
         print(f'共 {len(targets)} 图待生成（主图/练笔图严格验收+重生，备选图轻量）…')
     records = []
     for s in targets:
+        if s.is_blank:
+            # 缺图补全课的留白格（image-spec §组图）：不生图、不验收，由学生想象补出
+            log(f'  [{s.code}] 留白格（状态: 留白）——跳过生图与验收。')
+            records.append({'code': s.code, 'role': s.role, 'passed': True, 'attempts': 0,
+                            'items': ['留白格：不生图（学生想象补出）'], 'present': [], 'missing': [],
+                            'issues': [], 'png': '', 'manual': False})
+            continue
         try:
             if args.verify_only:
                 records.append(verify_only(client, cfg, args.md_path, s, log))
             elif s.is_main:
-                records.append(process_strict(client, cfg, args.md_path, s, log))
-                # 主图刚落盘：后续练笔图/备选图的参考图就位（原先只认已存在的旧图）
-                cand = ip.image_path(args.md_path, s.code)
-                if os.path.isfile(cand):
-                    anchor_png = cand
+                # 组图（多个主图格）：主-02 起带主-01 作参考图，锁全组画风与角色
+                # （首格 anchor_png 为 None、行为同单图课；process_strict 内部有 style_ref != out 保护）
+                records.append(process_strict(client, cfg, args.md_path, s, log, style_ref=anchor_png))
+                # 首格刚落盘：后续各格/练笔图/备选图的参考图就位（基准固定为第一格，不随后续格漂移）
+                if anchor_png is None:
+                    cand = ip.image_path(args.md_path, s.code)
+                    if os.path.isfile(cand):
+                        anchor_png = cand
             elif s.is_practice:
                 records.append(process_strict(client, cfg, args.md_path, s, log, style_ref=anchor_png))
             else:

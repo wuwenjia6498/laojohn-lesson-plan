@@ -21,6 +21,9 @@ KNOWN_FIELDS = {
     '支持句式', '一句话画面', '验收', '时间线索', '引用资产', '说明',
     '同族关系',            # 练笔图必填：与主图的「同族异时」关系（同角色同场景·下一时刻）
     '验收附加',            # 可选：该图专属的验收附加要求（人数、画面干净度等），缺省见 generate_images
+    '组序',                # 组图（多图课平级编号 主-01/主-02…）：第N格·起因/经过/结果（image-spec §组图）
+    '格间变化',            # 组图：本格相对上一格新增/改变了什么（首格写「组首格」）
+    '状态',                # 缺图补全课留白格：`状态: 留白（不生图，由学生想象补出）`，生图脚本跳过
 }
 
 # 角色枚举（2026-07-26 晚：一课三图位定案，见 references/image-spec.md §一课三图位）。
@@ -131,6 +134,16 @@ class ImgSpec:
     def kinship(self):
         """练笔图「同族关系:」——与主图的同族异时说明（同角色同场景·下一时刻）。"""
         return self.fields.get('同族关系', '').strip()
+
+    @property
+    def group_seq(self):
+        """组图「组序:」——多图课主图组（平级编号 主-01/主-02…）的格序与叙事位。"""
+        return self.fields.get('组序', '').strip()
+
+    @property
+    def is_blank(self):
+        """缺图补全课的留白格（`状态:` 含「留白」）——不生图，由学生想象补出；生图脚本跳过。"""
+        return '留白' in self.fields.get('状态', '')
 
     @property
     def surprise(self):
@@ -280,6 +293,9 @@ def _selfcheck(md_path):
     # —— 三图位齐备（image-spec.md §一课三图位硬门）——
     lack = [name for name, got in (('主图', mains), ('练笔图', pracs), ('备选图', alts)) if not got]
     print(f'三图位齐备：{"齐" if not lack else "缺 " + "、".join(lack)}')
+    blanks = [s.code for s in specs if s.is_blank]
+    if blanks:
+        print(f'留白格（不生图，缺图补全课）：{blanks}')
     for s in pracs:
         print(f'  练笔图 {s.code} 同族关系：{s.kinship or "**未写（须补：同角色同场景·下一时刻）**"}')
     # —— 意外点（四问类主图的一票否决项；机检只判「清单里有没有写」）——
