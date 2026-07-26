@@ -11,5 +11,5 @@
   "max_retries": 2,
   "width_cm": 12.0,
   "_备注_后端": "AiHubMix 图像分两条路（脚本按 image_model 自动选）：① gemini-*-image-preview（如 gemini-3-pro-image-preview，即 Nano Banana Pro）走原生 google-genai 客户端、base_url=gemini_base_url，用 aspect_ratio(1:1/4:3/16:9 等)+image_size(1K/2K/4K)，无 images.generate；② FLUX.1-Kontext-pro 等走 OpenAI 兼容 images.generate(/v1)，用 size。验收 vision_model 始终走 /v1 chat（gpt-4o 即可）。",
-  "_备注_成本": "max_retries 控成本：锚图缺项时最多重生次数。模型清单/计费见 AiHubMix 控制台。"
+  "_备注_成本": "max_retries 控成本：主图缺项时最多重生次数。模型清单/计费见 AiHubMix 控制台。"
 }

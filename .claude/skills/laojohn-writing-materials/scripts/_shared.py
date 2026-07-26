@@ -36,7 +36,7 @@ def _img_data_uri(path):
 
 def inject(template_path, data_path, extra_images=None):
     """data.json + 品牌 logo 注入模板，返回完整 HTML 字符串。
-    extra_images: 可选 {占位符token: 图片路径}——logo 之外再内联命名图（如稿纸锚图）；
+    extra_images: 可选 {占位符token: 图片路径}——logo 之外再内联命名图（如稿纸主图）；
     路径缺失则该 token 置空串（不伪造），由模板 onerror 兜底。"""
     data = json.loads(pathlib.Path(data_path).read_text(encoding="utf-8"))
     tpl = pathlib.Path(template_path).read_text(encoding="utf-8")
@@ -48,7 +48,7 @@ def inject(template_path, data_path, extra_images=None):
     else:
         print(f"!! 未找到品牌 logo: {LOGO_PATH}，页眉将留空（不伪造）")
         html = html.replace("__LOGO_SRC__", "")
-    # 额外命名图（可选，向后兼容）：如稿纸锚图 __ANCHOR_SRC__
+    # 额外命名图（可选，向后兼容）：如稿纸主图 __ANCHOR_SRC__
     for token, img_path in (extra_images or {}).items():
         uri = _img_data_uri(img_path)
         if not uri:
@@ -99,7 +99,7 @@ def check_pages(pdf_out, expected):
 def render(data_path, out_dir, template_path, expected_pages, page_checks=None, extra_images=None):
     """通用渲染流程：注入 -> 写 HTML -> Playwright 渲 PDF -> 自检。
     page_checks: 可选回调 fn(page)，在出 PDF 前跑物料特有的自检（如格子数）。
-    extra_images: 可选 {token: 图片路径}，透传给 inject（如稿纸锚图内联）。"""
+    extra_images: 可选 {token: 图片路径}，透传给 inject（如稿纸主图内联）。"""
     data_path = pathlib.Path(data_path)
     out_dir = pathlib.Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """看图写话配套 · 看图写话稿纸渲染入口。
-用法：PYTHONUTF8=1 python scripts/render_sheet.py <data.json> <out_dir> [--anchor <锚图png>] [--template <path>]
+用法：PYTHONUTF8=1 python scripts/render_sheet.py <data.json> <out_dir> [--anchor <主图png>] [--template <path>]
 本课图位框 + 写话格子稿纸（18 列动态行）+ 写话格式小提醒。
-锚图：优先 --anchor；否则取 data.json 的 sheet.anchor_img（相对路径按 CWD 解析）；缺则留占位框。"""
+主图：优先 --anchor；否则取 data.json 的 sheet.anchor_img（相对路径按 CWD 解析）；缺则留占位框。"""
 import sys
 import json
 import pathlib
@@ -27,7 +27,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("data")
     ap.add_argument("out_dir")
-    ap.add_argument("--anchor", default=None, help="本课锚图 png 路径；覆盖 data.json 的 sheet.anchor_img")
+    ap.add_argument("--anchor", default=None, help="本课主图 png 路径；覆盖 data.json 的 sheet.anchor_img")
     ap.add_argument("--template", default=str(DEFAULT_TEMPLATE))
     a = ap.parse_args()
 

@@ -18,15 +18,17 @@ KNOWN_FIELDS = {
     '支持句式', '一句话画面', '验收', '时间线索', '引用资产', '说明',
 }
 
-# 角色枚举
-ROLE_ANCHOR = '锚图'
-ROLE_LIBRARY = '例库图'
+# 角色枚举。2026-07-26 术语统一：人读文字一律「主图／备选图」，旧稿的「锚图／例库图」
+# 经下面的别名表继续认（编号前缀 锚-0N/例-0N 与 png 文件名保持不变，不在此次改名范围内）。
+ROLE_ANCHOR = '主图'
+ROLE_LIBRARY = '备选图'
 ROLE_FORMAT = '格式图'
+_ROLE_ALIASES = {'锚图': ROLE_ANCHOR, '例库图': ROLE_LIBRARY}
 
 # —— 全局画风令牌（运行时事实源在这里；人读文档见 references/style-tokens.md，两处必须一字一致）——
 # 收成全局两档的原因：风格若散在每张图的「生图提示词」里各写各的，只会漂到模型默认的
-# 塑料感儿童插画档。锚图定调、例库图靠图生图跟随，所以真正要拉起来的是锚图这一张。
-# 锚图档收在「可读」——学生要数要素、圈画面，可读性优先于美观（硬红线）。
+# 塑料感儿童插画档。主图定调、备选图靠图生图跟随，所以真正要拉起来的是主图这一张。
+# 主图档收在「可读」——学生要数要素、圈画面，可读性优先于美观（硬红线）。
 ANCHOR_STYLE_TOKEN = (
     '画风：柔和的水彩淡彩叠加彩色铅笔质感的手绘插画，看得见纸张纹理与自然笔触，'
     '不要矢量扁平风、不要塑料光泽、不要均匀渐变；线条轻盈、粗细有变化，'
@@ -36,14 +38,14 @@ ANCHOR_STYLE_TOKEN = (
     '同时保证可读：主角与每一个要素都清晰、边缘可辨，构图干净、留白充足，'
     '孩子要能一眼看清、数得出、圈得住，氛围一律服从可读。'
 )
-# 例库图档基调与锚图同源（否则图生图跟随会打架），只在收尾放开氛围。
+# 备选图档基调与主图同源（否则图生图跟随会打架），只在收尾放开氛围。
 LIBRARY_STYLE_TOKEN = (
     '画风：柔和的水彩淡彩叠加彩色铅笔质感的手绘插画，看得见纸张纹理与自然笔触，'
     '不要矢量扁平风、不要塑料光泽、不要均匀渐变；线条轻盈、粗细有变化，'
     '不要每个物体都描一圈同样粗细的黑色轮廓；配色低饱和、以柔和的暖色系为主，'
     '只保留一处克制的强调色，不要糖果色、荧光色、不要整体高饱和拉满；'
     '光线是柔和的自然方向光，带轻微的环境光与柔和投影，光影可以更丰富、'
-    '氛围可以更浓一些，但仍要看起来与本课锚图出自同一位插画师、同一套绘本。'
+    '氛围可以更浓一些，但仍要看起来与本课主图出自同一位插画师、同一套绘本。'
 )
 
 _FENCE_RE = re.compile(r'```imgspec\s*\n(.*?)```', re.S)
@@ -74,7 +76,8 @@ class ImgSpec:
 
     @property
     def role(self):
-        return self.fields.get('角色', '').strip()
+        raw = self.fields.get('角色', '').strip()
+        return _ROLE_ALIASES.get(raw, raw)
 
     @property
     def prompt(self):
@@ -98,7 +101,7 @@ class ImgSpec:
 
     @property
     def accept(self):
-        """例库图「验收:」条款。曾长期只解析不使用（验收项只取支持句式/一句话画面），
+        """备选图「验收:」条款。曾长期只解析不使用（验收项只取支持句式/一句话画面），
         导致规格里收紧的条款从未被机器验过——例-02 的动作与地点失配正是这样漏过去的。"""
         return self.fields.get('验收', '').strip()
 
@@ -115,8 +118,8 @@ class ImgSpec:
         return self.role == ROLE_FORMAT
 
     def build_prompt(self, enforce_must_see=False):
-        """组装喂生图工具的最终提示词：提示词 + 风格/比例（+ 锚图可选把必须可见清单逐条拼入）
-        + 按角色自动追加全局画风令牌（锚图 clean 档 / 例库图 atmos 档）。
+        """组装喂生图工具的最终提示词：提示词 + 风格/比例（+ 主图可选把必须可见清单逐条拼入）
+        + 按角色自动追加全局画风令牌（主图 clean 档 / 备选图 atmos 档）。
 
         画风令牌统一在这里注入，规格里不再逐图写风格形容词——见 references/style-tokens.md。
         `风格/比例` 字段保留原样拼接（它管的是比例/横版，与令牌不冲突）。"""
@@ -217,8 +220,8 @@ def _selfcheck(md_path):
     anchors = [s for s in specs if s.is_anchor]
     libs = [s for s in specs if s.is_library]
     fmts = [s for s in specs if s.is_format]
-    print(f'  锚图 {len(anchors)}：{[s.code for s in anchors]}')
-    print(f'  例库图 {len(libs)}：{[s.code for s in libs]}')
+    print(f'  主图 {len(anchors)}：{[s.code for s in anchors]}')
+    print(f'  备选图 {len(libs)}：{[s.code for s in libs]}')
     print(f'  格式图 {len(fmts)}：{[s.code for s in fmts]}')
     for s in anchors:
         print(f'  · {s.code} 必须可见清单 {len(s.must_see)} 项：')

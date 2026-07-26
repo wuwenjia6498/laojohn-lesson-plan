@@ -2,11 +2,11 @@
 """
 generate_images —— 看图写话「自动生图闭环」驱动。
 
-读详案 .md 文末生图工单 → 对每个锚图/例库图（跳过格式图）：
+读详案 .md 文末生图工单 → 对每个主图/备选图（跳过格式图）：
   ① 调 AiHubMix（OpenAI 兼容）文生图，存 <详案stem>/图位/<编号>.png
   ② 调多模态视觉模型，对照「必须可见元素清单」逐项验收
-  ③ 锚图缺项 → 强调缺项改写提示词重生（≤max_retries）；仍缺则标「需人工」
-     例库图宽松（只验能否撑句式/时间线索），缺项告警不强制重生
+  ③ 主图缺项 → 强调缺项改写提示词重生（≤max_retries）；仍缺则标「需人工」
+     备选图宽松（只验能否撑句式/时间线索），缺项告警不强制重生
 最后写 <详案stem>/图位/_验收报告.md，并打印汇总。
 
 用法（需先设密钥）：
@@ -38,7 +38,7 @@ DEFAULTS = {
     'aspect_ratio': '4:3',                             # gemini/flux 横版
     'image_size': '2K',                                # gemini 专用：1K/2K/4K
     'size': '1536x1024',                               # 仅 openai-images 通道(flux 忽略)
-    'max_retries': 2,                                  # 锚图缺项最多重生次数
+    'max_retries': 2,                                  # 主图缺项最多重生次数
     'width_cm': 12.0,                                  # 回插用，generate 阶段仅透传记录
 }
 _CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'imggen.config.json')
@@ -148,7 +148,7 @@ def _gemini_image_bytes(resp):
 
 
 _STYLE_REF_INSTR = (
-    '\n\n【画风参考】随附的参考图是本课的锚图。请**严格沿用参考图的绘画风格**——'
+    '\n\n【画风参考】随附的参考图是本课的主图。请**严格沿用参考图的绘画风格**——'
     '线条粗细与颜色、上色方式与笔触质感、色彩饱和度与明暗、人物造型比例与脸部画法、背景留白处理，都要与参考图看起来出自同一位插画师、同一套绘本。'
     '**只改变画面内容**（人物、场景、动作按上面的描述画），不要改变画风。'
     '参考图应有的质感：水彩淡彩叠彩铅的手绘感、看得见纸纹与笔触、线条粗细有变化、'
@@ -162,7 +162,7 @@ def _gen_gemini(cfg, prompt, out_png, style_ref=None):
     from google.genai import types
     client = _genai_client(cfg)
     # 画风靠参考图锁定：纯文字描述控不住画风（同一句"绘本插画风"在不同题材上会漂成
-    # 水彩晕染或粗描边矢量卡通），故例库图一律带锚图作参考图生成。
+    # 水彩晕染或粗描边矢量卡通），故备选图一律带主图作参考图生成。
     contents = prompt
     if style_ref and os.path.isfile(style_ref):
         with open(style_ref, 'rb') as f:
@@ -205,7 +205,7 @@ def _gen_openai_images(client, cfg, prompt, out_png):
 def generate_one(client, cfg, prompt, out_png, style_ref=None):
     """按 image_model 选后端生成并落盘。client 为 OpenAI 兼容客户端（gemini 通道不用它）。
 
-    style_ref：画风参考图（本课锚图）。仅 gemini 通道支持；给了就走图生图锁画风。
+    style_ref：画风参考图（本课主图）。仅 gemini 通道支持；给了就走图生图锁画风。
     """
     if is_gemini(cfg['image_model']):
         img = _gen_gemini(cfg, prompt, out_png, style_ref)
@@ -309,7 +309,7 @@ def process_anchor(client, cfg, md_path, spec, log):
 
 
 def process_library(client, cfg, md_path, spec, log, style_ref=None):
-    # 例库图轻量：验「能否支撑该句式 / 时间线索」，缺则告警不强制重生
+    # 备选图轻量：验「能否支撑该句式 / 时间线索」，缺则告警不强制重生
     items = []
     if spec.support_pattern:
         items.append(f'画面能支撑句式「{spec.support_pattern}」所述场景')
@@ -323,13 +323,13 @@ def process_library(client, cfg, md_path, spec, log, style_ref=None):
         items = ['画面内容与生图提示词一致']
     out = ip.image_path(md_path, spec.code)
     ref = style_ref if (style_ref and style_ref != out) else None
-    log(f'  [{spec.code}] 生图{"（沿用锚图画风）" if ref else ""}…')
+    log(f'  [{spec.code}] 生图{"（沿用主图画风）" if ref else ""}…')
     generate_one(client, cfg, spec.build_prompt(), out, style_ref=ref)
     result = verify_image(client, cfg, out, items)
     passed = not result['missing']
     return {'code': spec.code, 'role': spec.role, 'passed': passed, 'attempts': 1,
             'items': items, 'present': result['present'], 'missing': result['missing'],
-            'issues': result['issues'], 'png': out, 'manual': False}  # 例库图不拦交付
+            'issues': result['issues'], 'png': out, 'manual': False}  # 备选图不拦交付
 
 
 def verify_only(client, cfg, md_path, spec, log):
@@ -415,10 +415,10 @@ def main():
         want = {x.strip() for x in args.only.split(',') if x.strip()}
         targets = [s for s in targets if s.code in want]
     if not targets:
-        print('没有可生成的锚图/例库图（格式图跳过）。')
+        print('没有可生成的主图/备选图（格式图跳过）。')
         return
 
-    # 本课锚图＝全课画风基准；例库图带它做图生图，保证五张图一套画风
+    # 本课主图＝全课画风基准；备选图带它做图生图，保证五张图一套画风
     anchor_png = None
     for s in specs:
         if s.is_anchor:
@@ -432,7 +432,7 @@ def main():
     if args.verify_only:
         print(f'共 {len(targets)} 图待验收（只验收模式：按现行规格核对已有的图，不重生、不覆盖）…')
     else:
-        print(f'共 {len(targets)} 图待生成（锚图严格验收+重生，例库图轻量）…')
+        print(f'共 {len(targets)} 图待生成（主图严格验收+重生，备选图轻量）…')
     records = []
     for s in targets:
         try:
