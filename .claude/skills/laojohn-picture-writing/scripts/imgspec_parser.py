@@ -8,6 +8,10 @@ imgspec_parser —— 解析「看图写话详案」文末「生图工单」里�
 
 被 generate_images.py / insert_images_docx.py 复用；也可单独跑做解析自测：
     PYTHONUTF8=1 python imgspec_parser.py <详案.md>
+加 --export 导出明文提示词（2026-07-27，因工单区包 <!-- --> 注释、Markdown 预览里不可见）：
+    PYTHONUTF8=1 python imgspec_parser.py <详案.md> --export
+生成 `<详案同目录>/<详案stem>-生图提示词.txt`——每图一段拼装后完整提示词（与实际喂模型
+一致：含清单拼入与画风令牌）＋必须可见元素清单，双击即看、可直接复制喂外部生图工具。
 """
 import re
 import sys
@@ -312,8 +316,59 @@ def _selfcheck(md_path):
     return specs, placeholders
 
 
+def export_prompts(md_path):
+    """把工单导出成明文 txt（`<详案stem>-生图提示词.txt`，与 md 并排）。
+
+    每图一段＝与实际喂模型一致的拼装结果（复用 build_prompt：主图/练笔图
+    enforce_must_see=True＋clean 档令牌，同 generate_images.process_strict；
+    备选图纯提示词＋atmos 档令牌）＋必须可见元素清单。格式图跳过、留白格只标注。
+    """
+    specs, _, _ = load(md_path)
+    d = os.path.dirname(os.path.abspath(md_path))
+    stem = os.path.splitext(os.path.basename(md_path))[0]
+    out_path = os.path.join(d, stem + '-生图提示词.txt')
+    order = {'主图': 0, '练笔图': 1, '备选图': 2}
+    targets = sorted([s for s in specs if s.is_strict or s.is_alt],
+                     key=lambda s: order.get(s.role, 9))
+    blocks = [
+        f'{stem} · 生图提示词（自动导出，勿手改——本文件由详案 md 文末「生图工单」导出，',
+        '改提示词须回改详案工单再重导，工单才是唯一事实源。导出命令：',
+        f'  PYTHONUTF8=1 python scripts/imgspec_parser.py "<详案.md>" --export',
+        '＝' * 30,
+    ]
+    for s in targets:
+        head = f'【{s.code} · {s.role}' + (f' · {s.fields.get("环节", "").strip()}】' if s.fields.get('环节') else '】')
+        blocks.append('')
+        blocks.append(head)
+        if s.is_blank:
+            blocks.append('（留白格：不生图，由学生想象补出——见规格「状态」字段与前后格约束。）')
+            blocks.append('－' * 30)
+            continue
+        if s.is_practice:
+            blocks.append('※ 手工出图注意：须带本课主图作参考图（图生图），并要求「只改画面内容、'
+                          '严格沿用参考图画风与同一角色」——同族异时的脸型/发型靠参考图锁，文字锁不住。')
+        elif s.is_alt:
+            blocks.append('※ 手工出图注意：须带本课主图作参考图（图生图），并要求沿用参考图画风。')
+        blocks.append('——完整提示词（与自动生图实际喂模型的一致，直接整段复制）——')
+        blocks.append(s.build_prompt(enforce_must_see=s.is_strict))
+        if s.must_see:
+            blocks.append('')
+            blocks.append('——回图验收：必须可见元素清单（缺一即不合格）——')
+            for it in s.must_see:
+                blocks.append('□ ' + it)
+        blocks.append('－' * 30)
+    with open(out_path, 'w', encoding='utf-8') as f:
+        f.write('\n'.join(blocks) + '\n')
+    print(f'已导出 {len(targets)} 个图位 → {out_path}')
+    return out_path
+
+
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print('用法: python imgspec_parser.py <详案.md>')
+    args = [a for a in sys.argv[1:] if a != '--export']
+    if not args:
+        print('用法: python imgspec_parser.py <详案.md> [--export]')
         sys.exit(1)
-    _selfcheck(sys.argv[1])
+    if '--export' in sys.argv[1:]:
+        export_prompts(args[0])
+    else:
+        _selfcheck(args[0])

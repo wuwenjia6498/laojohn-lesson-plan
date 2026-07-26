@@ -42,6 +42,8 @@ desktop.ini
 读书会课件讲稿输出/**/*.docx
 写作课件讲稿输出/**/*.docx
 看图写话详案输出/**/*.docx
+# 生图提示词 txt 是 imgspec_parser --export 从 md 工单重导的产物，不入库
+看图写话详案输出/**/*-生图提示词.txt
 
 # 读书会配套（按书分夹）：json/md 是源，jpg/html/pdf/docx 是渲染产物
 读书会配套输出/**/*.jpg
