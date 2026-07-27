@@ -22,7 +22,7 @@ description: 把一份「老约翰深度阅读」课程详案(.md)转成一张�
 2. 运行渲染脚本,得到 PDF 和 HTML。
 
 ```bash
-python3 scripts/render_pdf.py <data.json> <输出文件名不含扩展名>
+python scripts/render_pdf.py <data.json> <输出文件名不含扩展名>
 ```
 
 ---
@@ -78,7 +78,7 @@ python3 scripts/render_pdf.py <data.json> <输出文件名不含扩展名>
 
 ### 固定输出目录
 
-> ⚠ 本项目位于移动硬盘，盘符可能随挂载变动。执行前请通过 Cursor 工作区路径或 `(Get-Location).Path` 确认实际项目根目录，下方 `<项目根目录>` 代表该路径。
+> ⚠ 路径与本机环境约定见根 `CLAUDE.md` §1：执行前用 `(Get-Location).Path` 确认实际项目根目录，下文 `<项目根目录>` 代表该路径，禁止硬编码盘符。
 
 **所有产物统一保存到该书专属文件夹（读书会各配套物料共用一夹，目录不存在则先创建）：**
 
@@ -94,7 +94,7 @@ python3 scripts/render_pdf.py <data.json> <输出文件名不含扩展名>
 
 ```bash
 # 数据与产物都落在固定输出目录
-python3 scripts/render_pdf.py "<项目根目录>\读书会配套输出\书名\书名_抢先看.json" "<项目根目录>\读书会配套输出\书名\书名_抢先看"
+python scripts/render_pdf.py "<项目根目录>\读书会配套输出\书名\书名_抢先看.json" "<项目根目录>\读书会配套输出\书名\书名_抢先看"
 ```
 
 脚本会:

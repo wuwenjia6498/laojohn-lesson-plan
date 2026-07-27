@@ -68,7 +68,7 @@
 3. 写出 `content.json`(结构见 `feedback_to_docx.py` 顶部 docstring)。
 4. 运行渲染:
    ```bash
-   python3 feedback_to_docx.py content.json "《书名》_课程反馈话术.docx"
+   python feedback_to_docx.py content.json "《书名》_课程反馈话术.docx"
    ```
 5. 同步写出 `《书名》_课程反馈话术.md`(三段纯文本,段间空行 + 标语)。
 6. 用 present_files 交付两份文件。

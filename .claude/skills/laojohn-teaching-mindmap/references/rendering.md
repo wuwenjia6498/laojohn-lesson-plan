@@ -35,8 +35,8 @@
 
 ## 环境依赖
 
-- `playwright`(Python 包)+ Chromium。本环境 Chromium 在 `/opt/pw-browsers`,脚本已通过环境变量 `PLAYWRIGHT_BROWSERS_PATH` 指向它。
-- 若换环境,先 `pip install playwright --break-system-packages` 再 `python3 -m playwright install chromium`。
+- `playwright`(Python 包)+ Chromium。本机 Chromium 在 `C:/Users/69491/AppData/Local/ms-playwright`,环境变量 `PLAYWRIGHT_BROWSERS_PATH` 约定见根 CLAUDE.md §1。
+- 若换环境,先 `pip install playwright` 再 `python -m playwright install chromium`。
 - 检查 PDF 时可用 `pdf2image`(依赖系统 `poppler-utils`)把 PDF 转 PNG 肉眼核对。
 
 ## 排版常见问题

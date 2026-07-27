@@ -1,6 +1,6 @@
 ---
 name: laojohn-pipeline
-description: 给定一本已完成「课案详案 + 书籍档案」的书，一次性按序生成它的全套下游配套物料（书目卡 / 招生海报 / 阅读指南 / 抢先看思维导图 / 教学思维导图 / 课程反馈话术），可选含投屏 PPT 链。当用户要求「出全套物料 / 一键生成所有配套 / 跑下游流水线 / 把这本书的物料都做了 / 生成全部周边」，或在课案/档案就绪后说「接着把配套都出了」时使用本技能。本技能是编排层：自己不生成内容，只做前置检查、按序委托各下游 skill、失败隔离、统一汇总；不生成课案详案(laojohn-lesson-plan)、不建书籍档案(laojohn-book-profile)。
+description: 给定一本已完成「课案详案+书籍档案」的书，一次性按序生成全套下游配套物料（书目卡/海报/阅读指南/两种导图/反馈话术，可选 PPT 链）。当用户要求出全套物料/一键生成所有配套/跑下游流水线，或课案档案就绪后说「接着把配套都出了」时使用。本技能是编排层：只做前置检查、按序委托各下游 skill、失败隔离；不生成课案详案(laojohn-lesson-plan)、不建档(laojohn-book-profile)。
 ---
 
 # 老约翰 · 下游物料一键编排
@@ -28,12 +28,11 @@ description: 给定一本已完成「课案详案 + 书籍档案」的书，一�
 本机有三个坑，踩中会静默失败或乱码：
 
 - **用 `python`，不要用 `python3`**——`python3` 是 Microsoft Store 占位别名，会以 exit 49 直接退出。
-- **跑任何渲染脚本前先设浏览器路径**：`export PLAYWRIGHT_BROWSERS_PATH="C:/Users/69491/AppData/Local/ms-playwright"`。否则 Playwright 去找不存在的 `/opt/pw-browsers` 报 "Executable doesn't exist"。
+- **Playwright 浏览器路径一般无需手动设**：各渲染脚本已内置本机默认回退（2026-07-27 根治，见根 CLAUDE.md §1）；路径异常时再 `export PLAYWRIGHT_BROWSERS_PATH=…` 覆盖。
 - **所有 python 命令加 `PYTHONUTF8=1`**（脚本里有 ✓ 等字符，GBK 终端会 `UnicodeEncodeError`；中文路径输出也会乱码）。
 
 渲染类命令的标准前缀：
 ```bash
-export PLAYWRIGHT_BROWSERS_PATH="C:/Users/69491/AppData/Local/ms-playwright"
 PYTHONUTF8=1 python <脚本> ...
 ```
 

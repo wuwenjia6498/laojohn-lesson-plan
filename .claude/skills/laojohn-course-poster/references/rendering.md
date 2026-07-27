@@ -48,8 +48,8 @@
 
 ## 环境依赖
 
-- `playwright`(Python 包)+ Chromium。本环境 Chromium 在 `/opt/pw-browsers`,脚本已通过环境变量指向。
-- 换环境:`pip install playwright --break-system-packages` 再 `python3 -m playwright install chromium`。
+- `playwright`(Python 包)+ Chromium。本机 Chromium 在 `C:/Users/69491/AppData/Local/ms-playwright`,环境变量 `PLAYWRIGHT_BROWSERS_PATH` 约定见根 CLAUDE.md §1。
+- 换环境:`pip install playwright` 再 `python -m playwright install chromium`。
 - 生成占位封面/占位二维码用到 `Pillow`(PIL)。
 
 ## 资产清单(assets/)
