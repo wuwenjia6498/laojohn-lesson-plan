@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <style>
+  /* 微软雅黑把弯引号“”‘’画成半角窄字形，这里单独让引号码位落到宋体（全角字形），其余文字不受影响 */
+  @font-face{
+    font-family:"CJK Quotes";
+    src:local("SimSun"),local("宋体");
+    unicode-range:U+2018-2019,U+201C-201D;
+  }
   :root{
     --brand:#E8553A;
     --card-bg:#ffffff;
@@ -15,7 +21,7 @@
     --placeholder-ink:#000000;
     --page-w:1242px;
     --pad:64px;
-    --font: "Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei",sans-serif;
+    --font: "CJK Quotes","Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei",sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   html,body{background:#ffffff;}
