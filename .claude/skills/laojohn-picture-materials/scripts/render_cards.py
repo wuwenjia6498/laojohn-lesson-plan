@@ -14,7 +14,7 @@ DEFAULT_TEMPLATE = HERE.parent / "assets" / "template_cards.html"
 
 
 def card_checks(page):
-    """卡片总数须为偶数（2 列成对裁切）且 ≥ 1"""
+    """卡片总数须为偶数（2 列成对裁切）且 ≥ 1；卡内内容不得溢出虚线裁切框"""
     n = page.evaluate("() => document.querySelectorAll('.grid .card').length")
     if n < 1:
         print(f"!! 支架小卡：卡片数 {n}，应至少 1 张")
@@ -22,6 +22,16 @@ def card_checks(page):
         print(f"!! 支架小卡：卡片数 {n} 为奇数，2 列裁切建议用偶数张")
     else:
         print(f"卡片核验：{n} 张 OK")
+    # 卡是固定高度的裁切框：内容一超高就会压出虚线（曾在四问卡实发），机检兜住
+    overflow = page.evaluate(
+        "() => [...document.querySelectorAll('.grid .card')]"
+        ".filter(c => c.scrollHeight > c.clientHeight + 1).length"
+    )
+    if overflow:
+        print(f"!! 支架小卡：{overflow} 张卡内容超出虚线框（会印到裁切线外），"
+              "请压缩卡内文本或模板间距后重渲")
+    else:
+        print("卡内溢出核验：0 张超框 OK")
 
 
 def main():
