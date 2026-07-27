@@ -28,7 +28,11 @@ HEADER = os.path.join(ASSETS, "header.jpg")    # 固定头部图(整宽页眉)
 LOGO = os.path.join(ASSETS, "logo.png")        # 可选,目前用文字 logo
 DEFAULT_QR = os.path.join(ASSETS, "qrcode.png")  # 默认二维码;可通过 --qr 指定项目级共用资产
 
-os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", "/opt/pw-browsers")
+# Playwright 浏览器路径（未设环境变量时回退到本机默认 ms-playwright）
+os.environ.setdefault(
+    "PLAYWRIGHT_BROWSERS_PATH",
+    os.path.join(os.path.expanduser("~"), "AppData", "Local", "ms-playwright"),
+)
 
 
 def norm(name):

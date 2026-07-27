@@ -19,8 +19,11 @@ import argparse
 HERE = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_TEMPLATE = os.path.join(HERE, "..", "assets", "template.html")
 
-# Playwright 在本环境的浏览器目录
-os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", "/opt/pw-browsers")
+# Playwright 浏览器路径（未设环境变量时回退到本机默认 ms-playwright）
+os.environ.setdefault(
+    "PLAYWRIGHT_BROWSERS_PATH",
+    os.path.join(os.path.expanduser("~"), "AppData", "Local", "ms-playwright"),
+)
 
 
 def build_html(data, template_path):
