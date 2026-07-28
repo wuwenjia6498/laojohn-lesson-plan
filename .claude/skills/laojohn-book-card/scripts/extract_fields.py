@@ -12,10 +12,24 @@ laojohn-book-card 字段萃取脚本
 
     脚本绝不从课案正文口语里猜测 B 类字段，绝不联网补全，绝不凭记忆编造。
 """
+import argparse
+import importlib.util
 import json
+import pathlib
 import re
 import sys
-import argparse
+
+# 机读块解析＝单一源 laojohn-book-profile/scripts/profile_meta.py
+# (CLAUDE.md §3 已登记,禁在本文件复制其逻辑;scripts -> laojohn-book-card -> skills)
+_REAL = (
+    pathlib.Path(__file__).parents[2]
+    / "laojohn-book-profile" / "scripts" / "profile_meta.py"
+)
+_spec = importlib.util.spec_from_file_location("profile_meta_real", _REAL)
+_pm = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_pm)
+
+read = _pm.read
 
 
 # ─── 缺失留空 ────────────────────────────────────────────────────────────────
@@ -33,17 +47,7 @@ C_SUMMARY_TODO = "【内容简介待 AI 提炼：100–200 字，只压缩课案
 
 # ─── 工具函数 ─────────────────────────────────────────────────────────────────
 
-def read(path):
-    with open(path, "r", encoding="utf-8") as f:
-        return f.read()
-
-
-def _is_blank(val):
-    """值为空或各类占位标记时视为缺失。"""
-    stripped = val.strip() if val else ""
-    return not stripped or stripped in (
-        "（待补充）", "(待补充)", "待补充", "—", "-", "教案未涵盖", "未涵盖"
-    )
+# read / is_blank / meta_section / simple_field 均来自 _pm(见文件头)
 
 
 # ─── A 类：从课案抽取 ─────────────────────────────────────────────────────────
@@ -61,21 +65,6 @@ def extract_level(md):
 
 
 # ─── B 类：从书籍档案抽取 ─────────────────────────────────────────────────────
-
-def _parse_meta_section(profile_md):
-    """返回书籍档案 '## 海报/指南元数据' 块的原文，找不到返回 ''。"""
-    m = re.search(r"##\s*海报/指南元数据[^\n]*\n(.*?)(?=\n##|\Z)", profile_md, re.S)
-    return m.group(1) if m else ""
-
-
-def _parse_simple_field(section, label):
-    """从元数据块取 '- label：value' 的单行值，缺失/占位返回 None。"""
-    m = re.search(r"^-\s*" + re.escape(label) + r"[：:](.*)$", section, re.M)
-    if m:
-        val = m.group(1).strip()
-        return None if _is_blank(val) else val
-    return None
-
 
 def parse_author_from_archive(profile_md):
     """
@@ -96,18 +85,18 @@ def parse_author_from_archive(profile_md):
     raw = m.group(1).strip()
     # 复合写法：取第一个"/"之前的部分
     first = raw.split("/")[0].strip()
-    return None if _is_blank(first) else first
+    return None if _pm.is_blank(first) else first
 
 
 def parse_book_meta(profile_md):
     """从书籍档案的 '## 海报/指南元数据' 块抽取等级/作者/出版社/字数/页数。"""
-    section = _parse_meta_section(profile_md)
+    section = _pm.meta_section(profile_md)
     return {
-        "level":      _parse_simple_field(section, "等级"),
-        "author":     _parse_simple_field(section, "作者"),
-        "publisher":  _parse_simple_field(section, "出版社"),
-        "word_count": _parse_simple_field(section, "字数"),
-        "page_count": _parse_simple_field(section, "页数"),
+        "level":      _pm.simple_field(section, "等级"),
+        "author":     _pm.simple_field(section, "作者"),
+        "publisher":  _pm.simple_field(section, "出版社"),
+        "word_count": _pm.simple_field(section, "字数"),
+        "page_count": _pm.simple_field(section, "页数"),
     }
 
 

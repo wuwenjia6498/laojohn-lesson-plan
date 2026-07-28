@@ -1,24 +1,26 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
-laojohn-book-card 渲染器
+laojohn-book-card 渲染器 —— 只解析本物料的资产,渲染骨架在同目录 `_jpg_render.py`
+(书目卡/海报两家共享单一源,见 CLAUDE.md §3,禁在此复制渲染逻辑)。
+
 用法:
-    python3 render_card.py <data.json> <output_basename>
-                           [--covers <封面图目录>]
+    python render_card.py <data.json> <output_basename>
+                          [--covers <封面图目录>] [--logo <logo 路径>]
 
 输出:
     <basename>.jpg   —— 书目卡图片（900px 宽，高度随内容自适应，2× 高清）
     <basename>.html  —— 可编辑源文件（数据已内联，可独立打开）
 
 封面匹配:
-    按 data.json 的 title 去 covers_dir 找 <书名>.jpg（去书名号/空格容错）。
-    匹配不到则用占位文字，并在 stderr 提示用户补图。
+    按 data.json 的 title 去 covers_dir 找 <书名>.jpg（去书名号/空格/括号容错）。
+    匹配不到则封面区留空，并在 stderr 提示用户补图。
 """
+import argparse
 import json
 import os
 import sys
-import re
-import base64
-import argparse
+
+from _jpg_render import data_uri, find_cover, shoot
 
 HERE        = os.path.dirname(os.path.abspath(__file__))
 ASSETS      = os.path.join(HERE, "..", "assets")
@@ -26,42 +28,27 @@ TEMPLATE    = os.path.join(ASSETS, "template.html")
 # 脚本自身目录内的封面目录（兼容旧路径），通常被 --covers 覆盖
 DEFAULT_COVERS = os.path.join(ASSETS, "covers")
 
-# 不强制覆盖 PLAYWRIGHT_BROWSERS_PATH，让 playwright 使用系统默认安装路径
+# 书目卡口径：900px 宽、quality 93、书名归一化连圆括号一并去掉
+WIDTH, QUALITY, VIEWPORT_H, SETTLE_MS = 900, 93, 800, 200
 
 
-def norm(name):
-    """书名归一化：去书名号、空格、标点，便于容错匹配。"""
-    return re.sub(r"[《》\s「」·、,，。.\-_（）()]", "", name).lower()
+def find_logo(data_path):
+    """未传 --logo 时，从 JSON 所在目录逐级向上找品牌资产目录。
 
-
-def find_cover(title, covers_dir):
+    典型路径：<root>/读书会配套输出/<书名>/xxx.json → <root>/品牌资产/logo.png，
+    层级不定故向上搜。找不到时返回兜底值用于报错提示。
     """
-    在 covers_dir 里按书名匹配封面图（jpg/png/webp）。
-    返回 (路径, 是否匹配成功)。
-    """
-    if not os.path.isdir(covers_dir):
-        return None, False
-    target = norm(title)
-    for fn in sorted(os.listdir(covers_dir)):
-        if fn.startswith("_"):
-            continue
-        stem, ext = os.path.splitext(fn)
-        if ext.lower() not in (".jpg", ".jpeg", ".png", ".webp"):
-            continue
-        if norm(stem) == target:
-            return os.path.join(covers_dir, fn), True
-    return None, False
-
-
-def data_uri(path):
-    """把图片转成 data URI，使 HTML 自包含（不依赖本地路径）。"""
-    if not path or not os.path.exists(path):
-        return ""
-    ext = os.path.splitext(path)[1].lower().lstrip(".")
-    mime = {"jpg": "jpeg", "jpeg": "jpeg", "png": "png", "webp": "webp"}.get(ext, "png")
-    with open(path, "rb") as f:
-        b64 = base64.b64encode(f.read()).decode()
-    return f"data:image/{mime};base64,{b64}"
+    cur = os.path.dirname(os.path.abspath(data_path))
+    fallback = os.path.join(cur, "品牌资产", "logo.png")
+    for _ in range(6):
+        candidate = os.path.join(cur, "品牌资产", "logo.png")
+        if os.path.isfile(candidate):
+            return candidate
+        parent = os.path.dirname(cur)
+        if parent == cur:
+            break
+        cur = parent
+    return fallback
 
 
 def render(data_path, out_base, covers_dir=None, logo_path=None):
@@ -72,7 +59,9 @@ def render(data_path, out_base, covers_dir=None, logo_path=None):
 
     # ── 封面 ──────────────────────────────────────────────────────────────────
     effective_covers = covers_dir or DEFAULT_COVERS
-    cover_path, cover_ok = find_cover(title, effective_covers)
+    cover_path, cover_ok = find_cover(
+        title, effective_covers, fallback=None, strip_parens=True
+    )
     if not cover_ok:
         sys.stderr.write(
             f"[WARN] Cover not found for '{title}' in {effective_covers}\n"
@@ -81,21 +70,7 @@ def render(data_path, out_base, covers_dir=None, logo_path=None):
     cover_data_uri = data_uri(cover_path) if cover_ok else ""
 
     # ── Logo ──────────────────────────────────────────────────────────────────
-    # 优先用 --logo 传入的路径；未传则从 JSON 所在目录逐级向上找品牌资产目录
-    # （典型路径：<root>/读书会配套输出/<书名>/xxx.json → <root>/品牌资产/logo.png，层级不定故向上搜）
-    if not logo_path:
-        cur = os.path.dirname(os.path.abspath(data_path))
-        logo_path = os.path.join(cur, "品牌资产", "logo.png")  # 兜底值（找不到时用于报错提示）
-        for _ in range(6):
-            candidate = os.path.join(cur, "品牌资产", "logo.png")
-            if os.path.isfile(candidate):
-                logo_path = candidate
-                break
-            parent = os.path.dirname(cur)
-            if parent == cur:
-                break
-            cur = parent
-
+    logo_path = logo_path or find_logo(data_path)
     logo_data_uri = data_uri(logo_path)
     if not logo_data_uri:
         sys.stderr.write(
@@ -103,39 +78,13 @@ def render(data_path, out_base, covers_dir=None, logo_path=None):
             f"       Pass --logo <path> to specify the logo file.\n"
         )
 
-    with open(TEMPLATE, "r", encoding="utf-8") as f:
-        tpl = f.read()
-
-    # 模板里有两处 /*__LOGO__*/（img src 和 JS 判断），需同时替换
-    html = (tpl
-            .replace("/*__DATA__*/ null",  json.dumps(data, ensure_ascii=False))
-            .replace("/*__COVER__*/",      cover_data_uri)
-            .replace("/*__LOGO__*/",       logo_data_uri)
+    # 模板里有两处 /*__LOGO__*/（img src 和 JS 判断），shoot 会全部替换
+    jpg_out, html_out = shoot(
+        TEMPLATE, out_base, data,
+        {"/*__COVER__*/": cover_data_uri, "/*__LOGO__*/": logo_data_uri},
+        width=WIDTH, quality=QUALITY,
+        viewport_height=VIEWPORT_H, settle_ms=SETTLE_MS,
     )
-
-    html_out = out_base + ".html"
-    with open(html_out, "w", encoding="utf-8") as f:
-        f.write(html)
-
-    # ── Playwright 截图 ──────────────────────────────────────────────────────
-    from playwright.sync_api import sync_playwright
-
-    jpg_out  = out_base + ".jpg"
-    file_url = "file://" + os.path.abspath(html_out)
-
-    with sync_playwright() as p:
-        browser = p.chromium.launch(args=["--no-sandbox"], channel="chromium")
-        # 宽 900px，高度由内容撑开（full_page / element 截图）
-        page = browser.new_page(
-            viewport={"width": 900, "height": 800},
-            device_scale_factor=2,
-        )
-        page.goto(file_url, wait_until="networkidle")
-        page.wait_for_selector("body[data-rendered='1']", timeout=15000)
-        page.wait_for_timeout(200)
-        el = page.query_selector("#page")
-        el.screenshot(path=jpg_out, type="jpeg", quality=93)
-        browser.close()
 
     print(f"JPG : {jpg_out}")
     print(f"HTML: {html_out}")

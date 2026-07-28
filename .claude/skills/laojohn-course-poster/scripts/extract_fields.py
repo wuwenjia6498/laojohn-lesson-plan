@@ -14,10 +14,24 @@ laojohn-course-poster 萃取脚手架
     用其中已填写的字段替换原来的 B 类占位(出版社/字数/页数/类型/主题/获奖)。
     '（待补充）' 视为缺失,仍保留占位框。
 """
+import argparse
+import importlib.util
 import json
+import pathlib
 import re
 import sys
-import argparse
+
+# 机读块解析＝单一源 laojohn-book-profile/scripts/profile_meta.py
+# (CLAUDE.md §3 已登记,禁在本文件复制其逻辑;scripts -> laojohn-course-poster -> skills)
+_REAL = (
+    pathlib.Path(__file__).parents[2]
+    / "laojohn-book-profile" / "scripts" / "profile_meta.py"
+)
+_spec = importlib.util.spec_from_file_location("profile_meta_real", _REAL)
+_pm = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_pm)
+
+read = _pm.read
 
 # ---- B 类基本信息缺失时输出空字符串 ----
 # 最终物料里栏位保留、值留空白，不写"待补充/请回填"、不画占位框；绝不从正文猜、绝不编。
@@ -40,63 +54,25 @@ C_GAINS_TODO = [
 ]
 
 
-def read(path):
-    with open(path, "r", encoding="utf-8") as f:
-        return f.read()
-
-
 # ---- 书籍档案元数据解析 ----
-
-def _is_blank(val):
-    """值为空或「待补充」占位时视为缺失。"""
-    stripped = val.strip() if val else ""
-    return not stripped or stripped in ("（待补充）", "(待补充)", "待补充", "—", "-", "教案未涵盖")
-
-
-def _parse_simple_field(section, label):
-    """从元数据块中按 '- label：value' 格式取单行值。"""
-    m = re.search(r"^-\s*" + re.escape(label) + r"[：:](.*)$", section, re.M)
-    if m:
-        val = m.group(1).strip()
-        return None if _is_blank(val) else val
-    return None
-
-
-def _parse_award_list(section):
-    """从元数据块中取获奖列表（- 获奖：后的子列表项，或同行写法）。"""
-    # 多行子列表写法：
-    #   - 获奖：
-    #     - 纽伯瑞儿童文学奖
-    m = re.search(r"^-\s*获奖[：:]\s*\n((?:[ \t]+-\s*.+\n?)*)", section, re.M)
-    if m:
-        items = re.findall(r"^[ \t]+-\s*(.+)$", m.group(1), re.M)
-        cleaned = [i.strip() for i in items if not _is_blank(i)]
-        return cleaned if cleaned else None
-    # 同行写法：- 获奖：xxx
-    m = re.search(r"^-\s*获奖[：:](.+)$", section, re.M)
-    if m:
-        val = m.group(1).strip()
-        return [val] if not _is_blank(val) else None
-    return None
-
+# read / is_blank / meta_section / simple_field / award_list 均来自 _pm(见文件头)
 
 def parse_profile_metadata(profile_text):
     """从书籍档案的 '## 海报/指南元数据' 块中抽取结构化字段。
     返回 dict；字段缺失或为占位时对应 value 为 None。
     """
-    sec_m = re.search(r"##\s*海报/指南元数据[^\n]*\n(.*?)(?=\n##|\Z)", profile_text, re.S)
-    if not sec_m:
+    section = _pm.meta_section(profile_text)
+    if not section:
         return {}
-    section = sec_m.group(1)
     return {
-        "level":     _parse_simple_field(section, "等级"),
-        "author":    _parse_simple_field(section, "作者"),
-        "publisher": _parse_simple_field(section, "出版社"),
-        "word_count": _parse_simple_field(section, "字数"),
-        "page_count": _parse_simple_field(section, "页数"),
-        "book_type": _parse_simple_field(section, "类型"),
-        "theme":     _parse_simple_field(section, "主题"),
-        "award":     _parse_award_list(section),
+        "level":     _pm.simple_field(section, "等级"),
+        "author":    _pm.simple_field(section, "作者"),
+        "publisher": _pm.simple_field(section, "出版社"),
+        "word_count": _pm.simple_field(section, "字数"),
+        "page_count": _pm.simple_field(section, "页数"),
+        "book_type": _pm.simple_field(section, "类型"),
+        "theme":     _pm.simple_field(section, "主题"),
+        "award":     _pm.award_list(section),
     }
 
 

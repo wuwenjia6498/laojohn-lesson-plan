@@ -48,7 +48,10 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 | docx 首页版式化 | `.claude\skills\laojohn-lesson-plan\assets\style_front_page.py` | picture-writing、writing-lesson 两线共用。把共享引擎产的朴素首页重排为**分区提纲页定稿版式**（picture＝三区、writing＝两区，版式细节见脚本头注释与两线各自 `lesson-structure.md`）；**课型差异全收敛在脚本顶部 `PROFILES` 表，禁 fork、禁往渲染原语里塞课型分支**；改它须同时回归两条线 |
 | PPT 渲染原语 | `.claude\skills\laojohn-ppt\scripts\helpers.py`（文本框/表格/字体/点击动画/渐变/占位等底层件）+ `parser.py`（中间稿解析） | laojohn-ppt 读书会与写作课两 profile 共用；有 bug 史的横切层（字体槽顺序、表格自适应等修一处即重烘焙全部），**永不 fork、禁 `doc_kind`/课型分支** |
 | 学习单渲染引擎 | `.claude\skills\laojohn-reading-sheet\scripts\render.py`（PDF/HTML）+ `render_pptx.py`（可编辑 PPTX）+ `templates\`（模板库） | reading-sheet（整本书阅读单）专用；`render.py` 的 `--templates-dir`/`--bundle-label` 是课型无关的可选参数（reading-sheet 自用，`--bundle-label` 默认「阅读单」），保留不删 |
-| 配套物料 HTML→PDF 渲染引擎 | `.claude\skills\laojohn-writing-materials\scripts\_shared.py`（`inject`/`render`/`safe_pdf`/`check_pages`/`out_base`，Playwright 出 A4 PDF + logo base64 内联 + pypdf 页数核验） | writing-materials（同步习作配套）与 picture-materials（看图写话配套）两线共享单一源。picture-materials 的 `scripts\_shared.py` 是薄 shim（importlib 按路径载入本引擎，零逻辑），**禁复制**；`inject`/`render` 的可选 `extra_images={token:图路径}`（稿纸主图注入用）是课型无关参数，改签名/删该参数须同时回归两线 |
+| 配套物料 HTML→PDF 渲染引擎 | `.claude\skills\laojohn-writing-materials\scripts\_shared.py`（`inject`/`render`/`safe_pdf`/`check_pages`/`out_base`，Playwright 出 A4 PDF + logo base64 内联 + pypdf 页数核验） | writing-materials（同步习作配套）与 picture-materials（看图写话配套）两线共享单一源。picture-materials 的 `scripts\_shared.py` 是薄 shim（importlib 按路径载入本引擎，零逻辑），**禁复制**；`inject`/`render` 的可选 `extra_images={token:图路径}`（稿纸主图注入用）是课型无关参数，改签名/删该参数须同时回归两线。⚠ 与下面三件**不是同一个引擎**：本件出固定 A4 多页（210mm×297mm），下游物料出单页动态高，两种输出模型不可互相塞分支 |
+| 书籍档案机读块解析 | `.claude\skills\laojohn-book-profile\scripts\profile_meta.py`（`read`/`is_blank`/`meta_section`/`simple_field`/`award_list`） | book-card、course-poster 的 `extract_fields.py`（各以 importlib 载入，**禁复制正则**）。归 book-profile 是因为机读块格式由它定义（键名见其 `assets\book-profile-template.md`）——谁定义格式谁给解析器。`BLANK_MARKERS` 是两线并集，改它同时影响两个物料的"缺失留空"判定 |
+| 读书会 JPG 长图渲染引擎 | `.claude\skills\laojohn-book-card\scripts\_jpg_render.py`（`norm`/`find_cover`/`data_uri`/`shoot`，定宽 viewport + 2× 截 `#page`） | book-card（书目卡 900px/q93）与 course-poster（海报 1242px/q92）。**两家历史口径差异全部参数化**：`strip_parens`（书名归一化是否去圆括号，卡 True／海报 False）、`fallback`（封面匹配不到时，卡留空／海报占位图）——**不要为了"统一"而改默认值，会改变既有产物** |
+| 读书会 A4 单页 PDF 渲染引擎 | `.claude\skills\laojohn-reading-guide\scripts\_a4_render.py`（`build_html`/`render`/`main`，宽 794px、高 `max(1123, #page.scrollHeight)` 单页动态高不分页） | reading-guide、lesson-mindmap、teaching-mindmap 三家，后两家 `render_pdf.py` 是 importlib 薄壳。**`recenter_on_overflow`：两种导图传 True**（居中放射版式，超页需重设 min-height），**阅读指南保持 False**（文档流版式，打开会推开版式） |
 
 > 现存物理副本（`laojohn-ppt\assets\logo\`、`laojohn-course-poster\assets\qrcode.png` / `assets\covers\`）属历史遗留；以根目录单一源为准，勿据副本做新决策。
 
@@ -86,6 +89,13 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 **写作技法解锁口（lesson-plan 专属 · 防滥用）**：读书会详案对写作的基线态度仍是「用而不教」——写作只作读后迁移/应用活动出现（见 §2 数据流外的教学定位）。但当**用户明确提出要结合写作技法**时，允许在详案里正面讲解，受三条边界约束：① **触发须显式**——用户没点名就不主动讲，默认稿与解锁前完全一致（向后兼容，存量详案不受影响）；② **落点唯一**——技法只能挂在**已有的读后写作应用任务**上（L3–L6 第4课时的创编/续编/专题写作，或 L1–L2 收尾的创意写作环节），即「要动笔写之前先点拨写法」，**不得侵入导读课/交流课的文本分析主体**，更不得把读书会改写成写作课的两节连排结构；③ **真实性红线不豁免**——技法范例若要引书中原文做示范，仍走 §4 占位规则，禁止用仿写句冒充原文。需要系统化、独立成课地教写作，仍走 `laojohn-writing-lesson`，不在本技能膨胀。
 
 **依赖声明**：`writing-lesson` 单向复用 `lesson-plan` 的资源——docx 引擎、`assets\课案Markdown约定规范.md`、`references\visualization-tools.md`、`references\grade-structure.md`（L1–L6 人设）。**改动这些文件的路径或契约前，必须同步检查 writing-lesson 是否受影响**（它没有自己的副本，会静默失效）。
+
+**读书会下游物料的跨 skill 依赖（2026-07-28 抽共享层后新增）**：六个下游物料不再各自 fork 脚本，三条链路都是「真源 + importlib 薄壳」（三件真源见 §3 表）——
+- `book-card\scripts\extract_fields.py`、`course-poster\scripts\extract_fields.py` → `book-profile\scripts\profile_meta.py`
+- `course-poster\scripts\render_poster.py` → `book-card\scripts\_jpg_render.py`
+- `lesson-mindmap`、`teaching-mindmap` 的 `render_pdf.py` → `reading-guide\scripts\_a4_render.py`
+
+薄壳按**相对路径**（`pathlib.Path(__file__).parents[2]`）定位真源，所以**改 skill 目录名或挪 scripts 目录会静默断链**；改三件真源中任何一件，必须把其"谁在用"栏里的物料全部重渲回归（回归基准数据：`读书会配套输出\俗世奇人\` 下五份 json）。
 
 ## 7. 命名口径
 
