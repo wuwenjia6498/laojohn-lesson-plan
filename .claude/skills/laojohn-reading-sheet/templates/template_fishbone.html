@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<!-- 鱼骨图：横向主干 + 斜向支骨，每骨一事件框（上下交替）。头/尾=终点/起点。支骨数自适应。 -->
+<!-- 鱼骨图：横向主干 + 斜向支骨，每骨一事件框（上下交替）。头/尾=终点/起点。支骨数自适应，框宽随支骨间距自适应。
+     纸面=竖版 A4 794×1123（可与其余阅读单同叠打印），内容按横版 1123×794 排好后整体旋转 90° 铺满整页；
+     学生把纸顺时针转 90° 即为正常横版视图。改几何只动 #canvas 内的坐标，旋转层不必动。 -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -7,26 +9,31 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
     -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  /* 纸=竖版 A4；内容画布=横版，逆时针转 90° 后恰好铺满整页（1123→纵向、794→横向） */
   #page { width: 794px; height: 1123px; background: #FFFFFF; position: relative; overflow: hidden; }
-  .brand-logo { position: absolute; top: 32px; right: 42px; height: 48px; }
-  .variant-tag { position: absolute; top: 36px; left: 46px; font-size: 13px; color: #B3A98F; letter-spacing: 1px; }
-  .l-title { position: absolute; top: 110px; left: 0; width: 100%; text-align: center;
-    font-size: 23px; font-weight: 700; color: #333; padding: 0 56px; line-height: 1.4; }
-  .l-sub { position: absolute; top: 154px; left: 0; width: 100%; text-align: center; font-size: 15px; color: #8A8268; }
-  .l-foot { position: absolute; bottom: 28px; left: 0; width: 100%; text-align: left; font-size: 14px; color: #9A937F; padding: 0 40px; }
-  .hd { font-size: 13px; font-weight: 700; fill: #FFFFFF; }
-  .endlab { font-size: 16px; font-weight: 700; fill: #5A5048; }
-  .ftxt { font-size: 13px; fill: #3A3A33; }
+  #canvas { position: absolute; top: 164.5px; left: -164.5px; width: 1123px; height: 794px;
+    transform: rotate(-90deg); transform-origin: 50% 50%; }
+  .brand-logo { position: absolute; top: 30px; right: 48px; height: 48px; }
+  .variant-tag { position: absolute; top: 34px; left: 52px; font-size: 13px; color: #B3A98F; letter-spacing: 1px; }
+  .l-title { position: absolute; top: 52px; left: 0; width: 100%; text-align: center;
+    font-size: 24px; font-weight: 700; color: #333; padding: 0 90px; line-height: 1.4; }
+  .l-sub { position: absolute; top: 92px; left: 0; width: 100%; text-align: center; font-size: 15px; color: #8A8268; padding: 0 90px; }
+  .l-foot { position: absolute; bottom: 26px; left: 0; width: 100%; text-align: left; font-size: 14px; color: #9A937F; padding: 0 60px; }
+  .hd { font-size: 15px; font-weight: 700; fill: #FFFFFF; }
+  .endlab { font-size: 18px; font-weight: 700; fill: #5A5048; }
+  .ftxt { font-size: 15px; fill: #3A3A33; }
 </style>
 </head>
 <body>
 <div id="page">
-  <img class="brand-logo" id="logo">
-  <div class="variant-tag" id="variantTag"></div>
-  <div class="l-title" id="title"></div>
-  <div class="l-sub" id="subtitle"></div>
-  <svg id="svg" width="794" height="950" style="position:absolute; top:150px; left:0;"></svg>
-  <div class="l-foot" id="foot"></div>
+  <div id="canvas">
+    <img class="brand-logo" id="logo">
+    <div class="variant-tag" id="variantTag"></div>
+    <div class="l-title" id="title"></div>
+    <div class="l-sub" id="subtitle"></div>
+    <svg id="svg" width="1123" height="620" style="position:absolute; top:122px; left:0;"></svg>
+    <div class="l-foot" id="foot"></div>
+  </div>
 </div>
 <script>
 const DATA = /*__DATA__*/ null;
@@ -52,7 +59,10 @@ function wrap(s,max){
 }
 const PALETTE = ["#5B8C7B","#C18A3A","#7A8C3A","#5B7FA6","#A8634F","#8268A0"];
 
-const SPINE_Y = 470, X_TAIL = 150, X_HEAD = 596, BOX_W = 150, BOX_H = 80;
+// 横版几何：主干贯穿整页宽，支骨框放到最大（同侧相邻框间距 = 2×根点步长）
+const PAGE_W = 1123, SVG_H = 620;
+const SPINE_Y = 310, X_TAIL_MIN = 160, X_HEAD_MAX = 880;
+const RIB_DX = 78, RIB_DY = 96, BOX_H = 206;
 function render(){
   const d = DATA;
   document.getElementById('logo').src = d.logo;
@@ -65,37 +75,48 @@ function render(){
   const ribs = d.ribs || [];
   const n = ribs.length;
 
-  // 主干 + 鱼头(右,三角) + 鱼尾(左,双叉)
-  svg.appendChild(el("line",{x1:X_TAIL, y1:SPINE_Y, x2:X_HEAD, y2:SPINE_Y, stroke:"#C9A24A", "stroke-width":5, "stroke-linecap":"round"}));
-  svg.appendChild(el("polygon",{points:`${X_HEAD},${SPINE_Y-44} ${X_HEAD+84},${SPINE_Y} ${X_HEAD},${SPINE_Y+44}`, fill:"#E7C46A"}));
-  svg.appendChild(el("polygon",{points:`${X_TAIL},${SPINE_Y} ${X_TAIL-58},${SPINE_Y-40} ${X_TAIL-40},${SPINE_Y} ${X_TAIL-58},${SPINE_Y+40}`, fill:"#E7C46A"}));
-  // 头/尾文字
-  const hl = el("text",{x:X_HEAD+90, y:SPINE_Y+5, class:"endlab", "text-anchor":"start"}); hl.textContent = d.head_label || ''; svg.appendChild(hl);
-  const tl = el("text",{x:X_TAIL-66, y:SPINE_Y+5, class:"endlab", "text-anchor":"end"}); tl.textContent = d.tail_label || ''; svg.appendChild(tl);
+  // 头/尾文字先落地量宽——主干两端按实际标签宽度让位（标签短则主干更长、事件框更大）
+  const hl = el("text",{class:"endlab", "text-anchor":"start"}); hl.textContent = d.head_label || ''; svg.appendChild(hl);
+  const tl = el("text",{class:"endlab", "text-anchor":"end"}); tl.textContent = d.tail_label || ''; svg.appendChild(tl);
+  const wH = hl.getComputedTextLength(), wT = tl.getComputedTextLength();
+  const X_TAIL = Math.max(X_TAIL_MIN, Math.round(10 + wT + 76));
+  const X_HEAD = Math.max(X_TAIL + 400, Math.min(X_HEAD_MAX, Math.round(PAGE_W - 10 - wH - 104)));
+  hl.setAttribute("x", X_HEAD + 104); hl.setAttribute("y", SPINE_Y + 6);
+  tl.setAttribute("x", X_TAIL - 76);  tl.setAttribute("y", SPINE_Y + 6);
 
-  // 支骨：沿主干等距，上下交替
-  const segL = X_TAIL + 30, segR = X_HEAD - 20;
+  // 主干 + 鱼头(右,三角) + 鱼尾(左,双叉)
+  svg.appendChild(el("line",{x1:X_TAIL, y1:SPINE_Y, x2:X_HEAD, y2:SPINE_Y, stroke:"#C9A24A", "stroke-width":6, "stroke-linecap":"round"}));
+  svg.appendChild(el("polygon",{points:`${X_HEAD},${SPINE_Y-50} ${X_HEAD+92},${SPINE_Y} ${X_HEAD},${SPINE_Y+50}`, fill:"#E7C46A"}));
+  svg.appendChild(el("polygon",{points:`${X_TAIL},${SPINE_Y} ${X_TAIL-64},${SPINE_Y-46} ${X_TAIL-44},${SPINE_Y} ${X_TAIL-64},${SPINE_Y+46}`, fill:"#E7C46A"}));
+
+  // 支骨：沿主干等距，上下交替；框宽 = 同侧间距留 24px 空隙（支骨越多框越窄，不重叠）
+  const segL = X_TAIL + 40, segR = X_HEAD - 30;
+  const step = n > 1 ? (segR - segL) / (n - 1) : 0;
+  const BOX_W = n > 1 ? Math.max(120, Math.min(300, Math.round(2 * step - 24))) : 300;
+  const MAXCH = Math.max(6, Math.floor((BOX_W - 24) / 15));
+  const MAXLN = Math.floor((BOX_H - 44) / 24);
   ribs.forEach((rb,i)=>{
     const t = n>1 ? i/(n-1) : 0.5;
     const sx = Math.round(segL + (segR - segL) * t);          // 骨在主干上的根点
     const up = (rb.side ? rb.side === 'up' : (i % 2 === 0));   // 默认偶数在上
     const color = PALETTE[i % PALETTE.length];
     const dir = up ? -1 : 1;
-    const ex = sx + 66, ey = SPINE_Y + dir * 150;              // 斜骨外端（朝鱼头方向上扬）
+    const ex = sx + RIB_DX, ey = SPINE_Y + dir * RIB_DY;       // 斜骨外端（朝鱼头方向上扬）
     svg.appendChild(el("line",{x1:sx, y1:SPINE_Y, x2:ex, y2:ey, stroke:"#B7AE9C", "stroke-width":2}));
     // 事件框（外端）
-    const bx = Math.max(6, Math.min(794-6-BOX_W, ex - BOX_W/2));
+    const bx = Math.max(8, Math.min(PAGE_W-8-BOX_W, ex - BOX_W/2));
     const by = up ? ey - BOX_H : ey;
-    svg.appendChild(el("rect",{x:bx, y:by, width:BOX_W, height:BOX_H, rx:8, fill:"#FFFFFF", stroke:color, "stroke-width":1.6}));
-    svg.appendChild(el("rect",{x:bx, y:by, width:BOX_W, height:22, rx:8, fill:color}));
-    svg.appendChild(el("rect",{x:bx, y:by+12, width:BOX_W, height:10, fill:color}));
-    const hd = el("text",{x:bx+10, y:by+15, class:"hd"}); hd.textContent = rb.header || ('第'+(i+1)+'件'); svg.appendChild(hd);
+    svg.appendChild(el("rect",{x:bx, y:by, width:BOX_W, height:BOX_H, rx:10, fill:"#FFFFFF", stroke:color, "stroke-width":1.8}));
+    svg.appendChild(el("rect",{x:bx, y:by, width:BOX_W, height:28, rx:10, fill:color}));
+    svg.appendChild(el("rect",{x:bx, y:by+14, width:BOX_W, height:14, fill:color}));
+    const hd = el("text",{x:bx+12, y:by+20, class:"hd"}); hd.textContent = rb.header || ('第'+(i+1)+'件'); svg.appendChild(hd);
     if(rb.text && rb.text.trim() !== ''){
-      const lines = wrap(String(rb.text), 11).slice(0,2);
-      lines.forEach((ln,li)=>{ const t2=el("text",{x:bx+10, y:by+42+li*18, class:"ftxt"}); t2.textContent=ln; svg.appendChild(t2); });
+      const lines = wrap(String(rb.text), MAXCH).slice(0, MAXLN);
+      lines.forEach((ln,li)=>{ const t2=el("text",{x:bx+12, y:by+54+li*24, class:"ftxt"}); t2.textContent=ln; svg.appendChild(t2); });
     } else {
-      svg.appendChild(el("line",{x1:bx+10, y1:by+44, x2:bx+BOX_W-10, y2:by+44, stroke:"#CFC8BA", "stroke-width":1.2}));
-      svg.appendChild(el("line",{x1:bx+10, y1:by+66, x2:bx+BOX_W-10, y2:by+66, stroke:"#CFC8BA", "stroke-width":1.2}));
+      for(let ly = by + 66; ly <= by + BOX_H - 12; ly += 32){
+        svg.appendChild(el("line",{x1:bx+12, y1:ly, x2:bx+BOX_W-12, y2:ly, stroke:"#CFC8BA", "stroke-width":1.2}));
+      }
     }
   });
   document.body.dataset.rendered = '1';

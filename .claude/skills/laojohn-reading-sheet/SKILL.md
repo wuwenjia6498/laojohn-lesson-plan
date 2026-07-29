@@ -34,12 +34,12 @@ description: 把「老约翰深度阅读」课程详案(.md)里学生要动手�
 | 模板键 | 模板文件 | 用于哪类阅读单 | 命中详案信号 |
 |--------|----------|----------------|--------------|
 | `table` | template_table.html | **万能表格单**：预测单、计划表、对比表、找重复、思辨单、KWL、人物表…… | 详案出现 Markdown 表格的填空页；任何"列项填写/分栏对照" |
-| `venn` | template_venn.html | 维恩图(双圈异同对比) | 「维恩图」「两个圆圈交叠」「相同/不同」 |
+| `venn` | template_venn.html | 维恩图(双长椭圆异同对比) | 「维恩图」「两个圆圈交叠」「相同/不同」 |
 | `ladder` | template_ladder.html | 阶梯图(N 阶递进/态度变化) | 「阶梯图」「一阶一阶」「逐级」「梦想/态度进阶」 |
 | `logic` | template_logic.html | 讽刺逻辑图(三层：表层→中层→内核) | 「讽刺逻辑图」「三层」「表层/中层/内核」 |
 | `voyage` | template_voyage.html | 思维导图·中心+并列分支(每支多字段) | 「思维导图」「以…为中心向外挂分支」「四次远航/N 次冒险」 |
 | `story_mountain` | template_story_mountain.html | 故事山形图(情节起伏：起始→上升→高潮→下降→结局，节点数自适应) | 「故事山」「山形图」「情节曲线/起伏」「高潮」 |
-| `fishbone` | template_fishbone.html | 鱼骨图/因果图(多事件汇向一个结果，头=结果·尾=起点) | 「鱼骨图」「因果图」「多件事影响…」 |
+| `fishbone` | template_fishbone.html | 鱼骨图/因果图(多事件汇向一个结果，头=结果·尾=起点；内容横排、**整页旋转 90° 印在竖版 A4** 上，可与其余单子同叠打印) | 「鱼骨图」「因果图」「多件事影响…」 |
 | `timeline` | template_timeline.html | 横排时间轴(**横向 A4**，若干时间点/站点依次排开，节点数自适应·≤7 较佳) | 「时间轴」「时间线」「依次经历」「N 个星球/站点」 |
 | `bubble` | template_bubble.html | 气泡/放射图(中心一物向外发散若干气泡，气泡数自适应) | 「气泡图」「放射」「中心+发散」「列举每一次…」 |
 | `facets` | template_facets.html | N 面卡片墙(一个话题拆成若干「面」，每面一张卡：面名彩条 + 该面问题 + 书写线；典型=六面体讨论图) | 「六面体讨论图」「从六个角度想」「多角度讨论一个话题」 |
@@ -100,7 +100,7 @@ PYTHONUTF8=1 python scripts/render.py <manifest.json> "<项目根目录>\读书�
 ```bash
 PYTHONUTF8=1 python scripts/render_pptx.py <manifest.json> "<项目根目录>\读书会阅读单输出\<书名>"
 ```
-出 `<书名>-阅读单.pptx`：一张单子一页、按 manifest(=教学先后)次序排，每张重建成 PPT 原生表格/文本框/线条/形状，可直接改字/加行/挪元素。`-示范` 同样自动跳过。**几何类(venn/ladder/logic/voyage/story_mountain/fishbone/timeline/bubble/relation/facets/lanes/stance/deduce)为近似还原、与 PDF 有视觉差异**；其中 **timeline / story_mountain 原是横版，PPTX 里缩放横铺进竖版页(唯一已知近似点)**——交付时要显式提示用户「这两张如需精确横版以 PDF 为准」。内容超过一页的流式单子(如 4 分支 voyage)会自动纵向压缩入页、字号不变。不出 zip。
+出 `<书名>-阅读单.pptx`：一张单子一页、按 manifest(=教学先后)次序排，每张重建成 PPT 原生表格/文本框/线条/形状，可直接改字/加行/挪元素。`-示范` 同样自动跳过。**几何类(venn/ladder/logic/voyage/story_mountain/fishbone/timeline/bubble/relation/facets/lanes/stance/deduce)为近似还原、与 PDF 有视觉差异**；其中 **timeline / fishbone / story_mountain 内容原是横排，PPTX 里缩放横铺进竖版页(唯一已知近似点)**——交付时要显式提示用户「这三张如需精确版式以 PDF 为准」(timeline 的 PDF 是横向纸；fishbone 的 PDF 是竖向纸+内容旋转 90°)。内容超过一页的流式单子(如 4 分支 voyage)会自动纵向压缩入页、字号不变。不出 zip。
 
 ### 6. 自检 + 交付
 - 对照 `generation-rules.md` 末尾的**自检清单**逐条过(格子大小、书写空间、留白充分、真实性、品牌统一)。

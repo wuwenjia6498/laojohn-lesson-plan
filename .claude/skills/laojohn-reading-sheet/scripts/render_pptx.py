@@ -395,33 +395,71 @@ def render_table(slide, d):
 
 
 def render_venn(slide, d):
-    header(slide, d, title_px=72, title_size=26, sub_px=120, title_color="4A4A42")
-    OFF = 170                                       # svg top:170
-    CX1, CX2, CY, R = 272, 522, 440, 212
-    add_oval(slide, CX1 - R, CY - R + OFF, 2 * R, 2 * R, fill="7FA86A", alpha=28,
+    # 几何与书写线布局须与 templates/template_venn.html 保持一致（改一处改两处）
+    header(slide, d, title_px=66, title_size=26, sub_px=110, title_color="4A4A42")
+    OFF = 186                                       # svg top:186
+    CX1, CX2, CY, RX, RY = 266, 528, 466, 244, 400
+    GAP_LINE, GAP_ROW, L_SIDE, L_CENTER = 48, 94, 3, 2
+    MARKS = ["①", "②", "③", "④", "⑤", "⑥"]
+    add_oval(slide, CX1 - RX, CY - RY + OFF, 2 * RX, 2 * RY, fill="7FA86A", alpha=26,
              line="6E9457", line_w=1.5)
-    add_oval(slide, CX2 - R, CY - R + OFF, 2 * R, 2 * R, fill="D8B24E", alpha=26,
+    add_oval(slide, CX2 - RX, CY - RY + OFF, 2 * RX, 2 * RY, fill="D8B24E", alpha=24,
              line="C29A38", line_w=1.5)
-    labY = CY - R - 34 + OFF
-    add_text(slide, CX1 - 40 - 80, labY - 18, 160, 30, d.get("left_label", ""),
-             size=22, bold=True, color="5C7A47", align="center")
-    add_text(slide, 397 - 80, labY - 18, 160, 30, d.get("center_label", "共同"),
-             size=22, bold=True, color="7A6B3A", align="center")
-    add_text(slide, CX2 + 40 - 80, labY - 18, 160, 30, d.get("right_label", ""),
-             size=22, bold=True, color="A07E2A", align="center")
-    slots = {"left": (188, [368, 448, 528], "6E9457", 158),
-             "center": (397, [410, 490], "9A8A4A", 120),
-             "right": (606, [368, 448, 528], "C29A38", 158)}
-    for key in ("left", "center", "right"):
-        x, ys, color, lw = slots[key]
-        items = d.get(key, [])
-        for i, yy in enumerate(ys):
-            txt = items[i] if i < len(items) else ""
+    labY = CY - RY - 22 + OFF
+    mid = (CX1 + CX2) / 2
+    for lx, key, dflt, col in ((mid - RX, "left_label", "", "5C7A47"),
+                               (mid, "center_label", "共同", "7A6B3A"),
+                               (mid + RX, "right_label", "", "A07E2A")):
+        add_text(slide, lx - 90, labY - 20, 180, 30, d.get(key, dflt),
+                 size=22, bold=True, color=col, align="center")
+
+    def span_at(slot, y):
+        t = (y - CY) / RY
+        v = 1 - t * t
+        w = RX * (math.sqrt(v) if v > 0 else 0.0)
+        if slot == "left":
+            return CX1 - w, CX2 - w
+        if slot == "right":
+            return CX1 + w, CX2 + w
+        return CX2 - w, CX1 + w                     # center：透镜形交叠区
+
+    left, center, right = d.get("left", []), d.get("center", []), d.get("right", [])
+    n_rows = max(len(left), len(center), len(right), 1)
+    step = (max(L_SIDE, L_CENTER) - 1) * GAP_LINE + GAP_ROW
+    rows_y = [CY + (i - (n_rows - 1) / 2) * step for i in range(n_rows)]
+    show_marks = bool(d.get("row_marks")) and n_rows > 1
+
+    for slot, items, color, mcol in (("left", left, "6E9457", "5C7A47"),
+                                     ("center", center, "9A8A4A", "7A6B3A"),
+                                     ("right", right, "C29A38", "A07E2A")):
+        n_line = L_CENTER if slot == "center" else L_SIDE
+        inset = 12 if slot == "center" else 14
+        for r, txt in enumerate(items):
+            if r >= n_rows:
+                break
+            rc = rows_y[r]
+            segs = []
+            for j in range(n_line):
+                yy = rc + (j - (n_line - 1) / 2) * GAP_LINE
+                s0, s1 = span_at(slot, yy)
+                segs.append((yy, s0 + inset, s1 - inset))
+            if show_marks:
+                # 序号挂在「维度块」上沿，三区同一 y，不占用书写线起始位置
+                my = rc - (max(L_SIDE, L_CENTER) - 1) / 2 * GAP_LINE - 22
+                s0, _ = span_at(slot, my)
+                add_text(slide, s0 + inset, my - 16 + OFF, 26, 22,
+                         MARKS[r] if r < len(MARKS) else "%d." % (r + 1),
+                         size=15, bold=True, color=mcol)
             if isinstance(txt, str) and txt.strip():
-                add_text(slide, x - 90, yy - 12 + OFF, 180, 40, txt, size=16,
-                         color="3A3A33", align="center")
+                # 文本框取各行的公共可写区间，保证整块字不越出椭圆边缘
+                x0 = max(s[1] for s in segs)
+                x1 = min(s[2] for s in segs)
+                add_text(slide, x0, segs[0][0] - 22 + OFF, max(60, x1 - x0),
+                         n_line * GAP_LINE, txt.strip(), size=16, color="3A3A33",
+                         line_spacing=1.5)
             else:
-                add_line(slide, x - lw / 2, yy + OFF, x + lw / 2, yy + OFF, color, 1.5)
+                for yy, sx0, sx1 in segs:
+                    add_line(slide, sx0, yy + OFF, sx1, yy + OFF, color, 1.4)
     footer(slide, d, key="footer")
 
 
@@ -622,44 +660,53 @@ def render_story_mountain(slide, d):
 
 
 def render_fishbone(slide, d):
-    header(slide, d, title_px=74, title_size=23, sub_px=116)
-    OFF = 150
+    # 横版内容（HTML 模板 1123×794）：缩放横铺进竖版页（近似）。标题/页脚竖版正常排。
+    header(slide, d, title_px=64, title_size=24, sub_px=98)
     ribs = d.get("ribs", [])
     n = len(ribs)
     PALETTE = ["#5B8C7B", "#C18A3A", "#7A8C3A", "#5B7FA6", "#A8634F", "#8268A0"]
-    SPINE_Y, X_TAIL, X_HEAD, BOX_W, BOX_H = 470, 150, 596, 150, 80
+    SPINE_Y = 310
+    RIB_DX, RIB_DY, BOX_H = 78, 96, 206
+    # 两端按标签宽度让位（HTML 侧量 getComputedTextLength，此处按 18px/字 估算）
+    wT, wH = len(str(d.get("tail_label", ""))) * 18, len(str(d.get("head_label", ""))) * 18
+    X_TAIL = max(160, round(10 + wT + 76))
+    X_HEAD = max(X_TAIL + 400, min(880, round(1123 - 10 - wH - 104)))
+    k = (PAGE_W_PX - 24) / 1123.0
+    tf = TF(sx=k, sy=k, tx=12, ty=625 - k * SPINE_Y)   # 内容纵向居中于正文区
     # 主干 + 鱼头/鱼尾(三角近似)
-    add_line(slide, X_TAIL, SPINE_Y + OFF, X_HEAD, SPINE_Y + OFF, "C9A24A", 5)
-    add_triangle(slide, X_HEAD, SPINE_Y - 44 + OFF, 84, 88, "E7C46A", rotation=90)
-    add_triangle(slide, X_TAIL - 58, SPINE_Y - 40 + OFF, 40, 80, "E7C46A", rotation=270)
-    add_text(slide, X_HEAD + 90, SPINE_Y - 12 + OFF, 150, 30, d.get("head_label", ""),
-             size=16, bold=True, color="5A5048")
-    add_text(slide, X_TAIL - 216, SPINE_Y - 12 + OFF, 150, 30, d.get("tail_label", ""),
-             size=16, bold=True, color="5A5048", align="right")
-    segL, segR = X_TAIL + 30, X_HEAD - 20
+    add_line(slide, X_TAIL, SPINE_Y, X_HEAD, SPINE_Y, "C9A24A", 6, tf=tf)
+    add_triangle(slide, X_HEAD, SPINE_Y - 50, 92, 100, "E7C46A", rotation=90, tf=tf)
+    add_triangle(slide, X_TAIL - 64, SPINE_Y - 46, 44, 92, "E7C46A", rotation=270, tf=tf)
+    add_text(slide, X_HEAD + 104, SPINE_Y - 14, 180, 32, d.get("head_label", ""),
+             size=18, bold=True, color="5A5048", tf=tf)
+    add_text(slide, X_TAIL - 256, SPINE_Y - 14, 180, 32, d.get("tail_label", ""),
+             size=18, bold=True, color="5A5048", align="right", tf=tf)
+    segL, segR = X_TAIL + 40, X_HEAD - 30
+    step = (segR - segL) / (n - 1) if n > 1 else 0
+    BOX_W = max(120, min(300, round(2 * step - 24))) if n > 1 else 300
     for i, rb in enumerate(ribs):
         t = i / (n - 1) if n > 1 else 0.5
         sx = round(segL + (segR - segL) * t)
         up = (rb["side"] == "up") if rb.get("side") else (i % 2 == 0)
         color = PALETTE[i % len(PALETTE)]
-        ex, ey = sx + 66, SPINE_Y + (-150 if up else 150)
-        add_line(slide, sx, SPINE_Y + OFF, ex, ey + OFF, "B7AE9C", 2)
-        bx = max(6, min(794 - 6 - BOX_W, ex - BOX_W / 2))
+        ex, ey = sx + RIB_DX, SPINE_Y + (-RIB_DY if up else RIB_DY)
+        add_line(slide, sx, SPINE_Y, ex, ey, "B7AE9C", 2, tf=tf)
+        bx = max(8, min(1123 - 8 - BOX_W, ex - BOX_W / 2))
         by = (ey - BOX_H) if up else ey
-        add_round_rect(slide, bx, by + OFF, BOX_W, BOX_H, radius=0.08, fill="FFFFFF",
-                       line=color, line_w=1.6)
-        add_rect(slide, bx, by + OFF, BOX_W, 22, fill=color)
-        add_text(slide, bx + 10, by + 3 + OFF, BOX_W - 16, 18,
-                 rb.get("header", f"第{i+1}件"), size=13, bold=True, color="FFFFFF")
+        add_round_rect(slide, bx, by, BOX_W, BOX_H, radius=0.06, fill="FFFFFF",
+                       line=color, line_w=1.8, tf=tf)
+        add_rect(slide, bx, by, BOX_W, 28, fill=color, tf=tf)
+        add_text(slide, bx + 12, by + 5, BOX_W - 20, 22,
+                 rb.get("header", f"第{i+1}件"), size=15, bold=True, color="FFFFFF", tf=tf)
         txt = rb.get("text", "")
         if isinstance(txt, str) and txt.strip():
-            add_text(slide, bx + 10, by + 30 + OFF, BOX_W - 18, BOX_H - 30, txt,
-                     size=13, color="3A3A33", line_spacing=1.3)
+            add_text(slide, bx + 12, by + 38, BOX_W - 24, BOX_H - 44, txt,
+                     size=15, color="3A3A33", line_spacing=1.3, tf=tf)
         else:
-            add_line(slide, bx + 10, by + 44 + OFF, bx + BOX_W - 10, by + 44 + OFF,
-                     "CFC8BA", 1.2)
-            add_line(slide, bx + 10, by + 66 + OFF, bx + BOX_W - 10, by + 66 + OFF,
-                     "CFC8BA", 1.2)
+            ly = by + 66
+            while ly <= by + BOX_H - 12:
+                add_line(slide, bx + 12, ly, bx + BOX_W - 12, ly, "CFC8BA", 1.2, tf=tf)
+                ly += 32
     footer(slide, d, key="footer", y=1080)
 
 

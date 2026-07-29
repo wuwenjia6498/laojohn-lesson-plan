@@ -14,14 +14,16 @@
   }
   .brand-logo { position: absolute; top: 34px; right: 42px; height: 50px; }
   .variant-tag { position: absolute; top: 38px; left: 46px; font-size: 13px; color: #B3A98F; letter-spacing: 1px; }
-  .v-title { position: absolute; top: 110px; left: 0; width: 100%; text-align: center;
+  .v-title { position: absolute; top: 104px; left: 0; width: 100%; text-align: center;
     font-size: 26px; font-weight: 700; color: #4A4A42; padding: 0 40px; line-height: 1.4; }
-  .v-sub { position: absolute; top: 158px; left: 0; width: 100%; text-align: center;
-    font-size: 16px; color: #8A8268; padding: 0 48px; line-height: 1.5; }
-  svg { position: absolute; top: 170px; left: 0; }
-  .lbl { font-family: "Microsoft YaHei", sans-serif; font-weight: 700; font-size: 24px; }
+  .v-sub { position: absolute; top: 148px; left: 0; width: 100%; text-align: center;
+    font-size: 15px; color: #8A8268; padding: 0 40px; line-height: 1.6;
+    white-space: pre-line; }
+  svg { position: absolute; top: 186px; left: 0; }
+  .lbl { font-family: "Microsoft YaHei", sans-serif; font-weight: 700; font-size: 23px; }
   .item { font-family: "Microsoft YaHei", sans-serif; font-size: 16px; fill: #3A3A33; }
-  .v-foot { position: absolute; bottom: 36px; left: 0; width: 100%; text-align: left;
+  .rowmark { font-family: "Microsoft YaHei", sans-serif; font-weight: 700; font-size: 15px; }
+  .v-foot { position: absolute; bottom: 30px; left: 0; width: 100%; text-align: left;
     font-size: 14px; color: #9A937F; }
 </style>
 </head>
@@ -31,7 +33,7 @@
   <div class="variant-tag" id="variantTag"></div>
   <div class="v-title" id="title"></div>
   <div class="v-sub" id="subtitle"></div>
-  <svg id="svg" width="794" height="900" viewBox="0 0 794 900" data-content></svg>
+  <svg id="svg" width="794" height="880" viewBox="0 0 794 880" data-content></svg>
   <div class="v-foot" id="foot"></div>
 </div>
 <script>
@@ -42,35 +44,78 @@ function el(tag, attrs){ const e=document.createElementNS(SVGNS,tag); for(const 
 let __AO = 0;
 function mark(e){ e.setAttribute('data-answer','1'); e.setAttribute('data-order', __AO++); return e; }
 
-// 圆圈与写入区锚点（竖版）
-const CX1=272, CX2=522, CY=440, R=212;
-const SLOTS = {
-  left:   { x: 188, ys: [368, 448, 528] },
-  center: { x: 397, ys: [410, 490] },
-  right:  { x: 606, ys: [368, 448, 528] },
-};
+// 长椭圆几何（竖版）：两枚等大竖向长椭圆左右交叠。
+// 左/右「独有区」在任一高度上的水平宽度恒为 CX2-CX1，所以书写线可随椭圆边缘平移、
+// 始终保持满宽——这是把书写空间做大的关键（旧版正圆 + 固定 x 只能取最窄处）。
+const CX1=266, CX2=528, CY=466, RX=244, RY=400;
+const GAP_LINE = 48;      // 同一维度内两条书写线的行距
+const GAP_ROW  = 94;      // 维度与维度之间的留白
+const L_SIDE   = 3;       // 左/右独有区每个维度给几条书写线
+const L_CENTER = 2;       // 交叠区每个维度给几条书写线
+const MARKS = ["①","②","③","④","⑤","⑥"];
 
-function drawItems(svg, slot, items, color){
-  const conf = SLOTS[slot];
-  items.forEach((txt, i) => {
-    if (i >= conf.ys.length) return;
-    const y = conf.ys[i];
-    if (txt && txt.trim() !== ""){
-      const words = String(txt);
-      const t = el("text", {x: conf.x, y: y, "text-anchor":"middle", class:"item"});
-      const max = 11;
-      let lines = [];
-      for (let p=0; p<words.length; p+=max) lines.push(words.slice(p, p+max));
-      lines.forEach((ln, li) => {
-        const ts = el("tspan", {x: conf.x, dy: li===0?0:20});
+function kAt(y){ const t=(y-CY)/RY; const v=1-t*t; return v>0 ? Math.sqrt(v) : 0; }
+// 各区在高度 y 上的可写水平区间
+function spanAt(slot, y){
+  const w = RX * kAt(y);
+  if (slot === "left")   return [CX1 - w, CX2 - w];
+  if (slot === "right")  return [CX1 + w, CX2 + w];
+  return [CX2 - w, CX1 + w];                       // center：透镜形交叠区
+}
+
+// 维度行的中心 y：三区共用，保证「同一维度」横向对齐
+function rowCenters(n){
+  const step = (Math.max(L_SIDE, L_CENTER) - 1) * GAP_LINE + GAP_ROW;
+  const out = [];
+  for (let i = 0; i < n; i++) out.push(CY + (i - (n - 1) / 2) * step);
+  return out;
+}
+
+function wrap(text, caps){
+  // 按每行可容字数逐行切；末行装不下的余量并入末行（宁可略挤，不丢字）
+  const s = String(text); const out = []; let p = 0;
+  for (let i = 0; i < caps.length; i++){
+    if (p >= s.length) { out.push(""); continue; }
+    const n = (i === caps.length - 1) ? (s.length - p) : caps[i];
+    out.push(s.slice(p, p + n)); p += n;
+  }
+  return out;
+}
+
+function drawRegion(svg, slot, items, color, markColor, rowsY, showMarks){
+  const nLine = (slot === "center") ? L_CENTER : L_SIDE;
+  const inset = (slot === "center") ? 12 : 14;
+  items.forEach((txt, r) => {
+    if (r >= rowsY.length) return;
+    const rc = rowsY[r];
+    const ys = [];
+    for (let j = 0; j < nLine; j++) ys.push(rc + (j - (nLine - 1) / 2) * GAP_LINE);
+    const segs = ys.map(y => { const sp = spanAt(slot, y); return {y: y, x0: sp[0] + inset, x1: sp[1] - inset}; });
+    if (showMarks){
+      // 序号统一挂在「维度块」上沿：三区同一 y，读者一眼看到三个 ① 齐平；
+      // 且不占用书写线的起始位置（旧版首行缩进 24px，窄的交叠区只剩 100px 可写）。
+      const my = rc - (Math.max(L_SIDE, L_CENTER) - 1) / 2 * GAP_LINE - 22;
+      const sp = spanAt(slot, my);
+      const m = el("text", {x: sp[0] + inset, y: my, class: "rowmark", fill: markColor});
+      m.textContent = MARKS[r] || (r + 1) + ".";
+      svg.appendChild(m);
+    }
+    const filled = txt && String(txt).trim() !== "";
+    if (filled){
+      const caps = segs.map(s => Math.max(1, Math.floor((s.x1 - s.x0) / 16)));
+      const lines = wrap(String(txt).trim(), caps);
+      const t = el("text", {x: segs[0].x0, y: segs[0].y - 6, class: "item"});
+      lines.forEach((ln, j) => {
+        const ts = el("tspan", {x: segs[j].x0, y: segs[j].y - 6});
         ts.textContent = ln; t.appendChild(ts);
       });
       mark(t);
       svg.appendChild(t);
     } else {
-      const w = slot==="center" ? 120 : 158;
-      svg.appendChild(el("line", {x1: conf.x - w/2, y1: y, x2: conf.x + w/2, y2: y,
-        stroke: color, "stroke-width": 1.5, "stroke-linecap":"round"}));
+      segs.forEach(s => {
+        svg.appendChild(el("line", {x1: s.x0, y1: s.y, x2: s.x1, y2: s.y,
+          stroke: color, "stroke-width": 1.4, "stroke-linecap": "round", "stroke-opacity": 0.75}));
+      });
     }
   });
 }
@@ -88,15 +133,21 @@ function render(){
   if (d.footer) foot.textContent = d.footer; else foot.style.display='none';
 
   const svg = document.getElementById('svg');
-  svg.appendChild(el("circle",{cx:CX1,cy:CY,r:R,fill:"#7FA86A","fill-opacity":0.28,stroke:"#6E9457","stroke-width":2}));
-  svg.appendChild(el("circle",{cx:CX2,cy:CY,r:R,fill:"#D8B24E","fill-opacity":0.26,stroke:"#C29A38","stroke-width":2}));
-  const labY = CY - R - 34;
-  const L = el("text",{x:CX1-40,y:labY,"text-anchor":"middle",class:"lbl",fill:"#5C7A47"}); L.textContent=d.left_label||""; svg.appendChild(L);
-  const C = el("text",{x:397,y:labY,"text-anchor":"middle",class:"lbl",fill:"#7A6B3A"}); C.textContent=d.center_label||"共同"; svg.appendChild(C);
-  const R2 = el("text",{x:CX2+40,y:labY,"text-anchor":"middle",class:"lbl",fill:"#A07E2A"}); R2.textContent=d.right_label||""; svg.appendChild(R2);
-  drawItems(svg, "left", d.left || [], "#6E9457");
-  drawItems(svg, "center", d.center || [], "#9A8A4A");
-  drawItems(svg, "right", d.right || [], "#C29A38");
+  svg.appendChild(el("ellipse",{cx:CX1,cy:CY,rx:RX,ry:RY,fill:"#7FA86A","fill-opacity":0.26,stroke:"#6E9457","stroke-width":2}));
+  svg.appendChild(el("ellipse",{cx:CX2,cy:CY,rx:RX,ry:RY,fill:"#D8B24E","fill-opacity":0.24,stroke:"#C29A38","stroke-width":2}));
+
+  const labY = CY - RY - 22;
+  const L = el("text",{x:(CX1+CX2)/2 - RX,y:labY,"text-anchor":"middle",class:"lbl",fill:"#5C7A47"}); L.textContent=d.left_label||""; svg.appendChild(L);
+  const C = el("text",{x:(CX1+CX2)/2,y:labY,"text-anchor":"middle",class:"lbl",fill:"#7A6B3A"}); C.textContent=d.center_label||"共同"; svg.appendChild(C);
+  const R2 = el("text",{x:(CX1+CX2)/2 + RX,y:labY,"text-anchor":"middle",class:"lbl",fill:"#A07E2A"}); R2.textContent=d.right_label||""; svg.appendChild(R2);
+
+  const left = d.left || [], center = d.center || [], right = d.right || [];
+  const nRows = Math.max(left.length, center.length, right.length, 1);
+  const rowsY = rowCenters(nRows);
+  const showMarks = !!d.row_marks && nRows > 1;
+  drawRegion(svg, "left",   left,   "#6E9457", "#5C7A47", rowsY, showMarks);
+  drawRegion(svg, "center", center, "#9A8A4A", "#7A6B3A", rowsY, showMarks);
+  drawRegion(svg, "right",  right,  "#C29A38", "#A07E2A", rowsY, showMarks);
 
   document.body.dataset.rendered='1';
 }
