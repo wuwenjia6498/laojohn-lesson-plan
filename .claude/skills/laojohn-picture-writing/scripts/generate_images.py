@@ -183,6 +183,27 @@ _ANCHOR_REF_INSTR = (
 )
 
 
+# —— 定妆图角色参照指令（B 级 · 2026-07-30 新增，第四条指令，与上两条语境不同勿混用）——
+# _STYLE_REF_INSTR＝跟随「本课主图」（练笔图/备选图用，连比例一起带）；
+# _ANCHOR_REF_INSTR＝只锁画风、明拒角色（A 级，0728 已停用）；
+# 这一条＝跟随「角色定妆图」（assets/角色册/妆-0N）：锁画风 + 锁角色身份，**比例明确不跟随参考图**。
+# 措辞主干为 0729 小试二已验版本（带妆-01，实测占比 35.8% / 2.79 头身，见
+# docs/handoff/小试结论_头身比收口-0729.md）。一处适配：小试里指令在比例行上方、写「按下方文字
+# 为准」；脚本里指令拼在 prompt 之后，方向词改为「画面描述里的【比例】行」——此偏差由首张真图
+# 验收回验（交接说明 §四判据）。
+# ⚠ imgspec【比例】行的写入值（如 25%）是控制输入、不是画面描述：写 25% 实出 ~35.8%。
+#   不要为「文档自洽」把写入值改成实测值——会滑回 2.5 头身（定妆图档）。
+_CHAR_REF_PREFIX = '\n\n【角色参照】'   # process_strict 日志 tag 判据（格式化后的串没法 is 比较）
+_CHAR_REF_INSTR_TMPL = (
+    _CHAR_REF_PREFIX +
+    '随附的参考图是「{name}」的角色定妆图。请沿用参考图的画风，'
+    '与这个角色的身份特征——脸型、发型、主色、{anchor}。'
+    '身体比例不要跟随参考图，按画面描述里的【比例】行为准。'
+    '**严禁回弹到默认卡通档**：不要塑料光泽、不要均匀矢量渐变、不要全图均质黑描边、'
+    '不要糖果色或高饱和拉满、不要多重生硬高光。'
+)
+
+
 def anchor_ref(cfg):
     """全期风格锚图路径（配置了且文件存在才返回；否则 None＝不启用，行为同阶段一）。
 
@@ -198,6 +219,92 @@ def anchor_ref(cfg):
         return p
     print(f'[告警] 配置的全期风格锚图不存在，本次按未启用处理：{p}')
     return None
+
+
+# —— B 级参考图链：角色定妆图（2026-07-30 接线）——
+# 角色册格式由 assets/角色册/角色设定.md 定义（谁定义格式谁给解析器——此处仅按其稳定模式抽取：
+# `## N、<角色名>（…）` 标题 + 紧随裸代码块里的【辨识锚】段）。角色册与根目录 -0728.md 的
+# 双副本问题（交接说明挂账 5.2）不在此解，脚本读 assets 落盘件。
+_CHAR_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                         'assets', '角色册')
+_CHAR_SHEET = os.path.join(_CHAR_DIR, '角色设定.md')
+_CHAR_FEED_DIR = os.path.join(_CHAR_DIR, '_喂图副本')   # 可再生产物，已 gitignore
+_CHAR_FEED_LONG = 1500
+_CHAR_REG = {}
+
+
+def _load_char_registry():
+    """角色名 → {'png': 定妆图母版路径, 'anchor': 辨识锚文本}。解析失败只降级不中断。"""
+    if _CHAR_REG:
+        return _CHAR_REG
+    import glob
+    for p in sorted(glob.glob(os.path.join(_CHAR_DIR, '妆-*_*.png'))):
+        m = re.match(r'妆-\d+_(.+)\.png$', os.path.basename(p))
+        if m:
+            _CHAR_REG[m.group(1)] = {'png': p, 'anchor': ''}
+    try:
+        with open(_CHAR_SHEET, encoding='utf-8') as f:
+            text = f.read()
+        for name, info in _CHAR_REG.items():
+            hm = re.search(r'^##\s*[^\n]*、' + re.escape(name) + r'（[^\n]*$', text, re.M)
+            if not hm:
+                continue
+            block = re.search(r'```\n(.*?)```', text[hm.end():], re.S)
+            if not block:
+                continue
+            am = re.search(r'【辨识锚】(.*?)(?=\n\s*【|\Z)', block.group(1), re.S)
+            if am:
+                info['anchor'] = ' '.join(am.group(1).split()).rstrip('。')
+    except Exception as e:
+        print(f'[告警] 解析角色册失败（定妆参考将降级为不带参考图）：{e}')
+    return _CHAR_REG
+
+
+def _feed_copy(master):
+    """定妆图喂图副本：长边缩至 1500 + 转 RGB（交接说明 §3.3 无损衍生规格，不含内容修改）。
+
+    母版一个字节不动；副本缺失或母版 mtime 更新时懒生成。母版单张 6~7MB、base64 后约 9MB，
+    每张场景图都要带参考图，不缩会白烧带宽。"""
+    _ensure_pkg('pillow', 'PIL')
+    from PIL import Image
+    stem = os.path.splitext(os.path.basename(master))[0]
+    out = os.path.join(_CHAR_FEED_DIR, f'{stem}_1500.png')
+    try:
+        if (not os.path.isfile(out)) or os.path.getmtime(out) < os.path.getmtime(master):
+            os.makedirs(_CHAR_FEED_DIR, exist_ok=True)
+            im = Image.open(master)
+            r = _CHAR_FEED_LONG / max(im.size)
+            if r < 1:
+                im = im.resize((round(im.width * r), round(im.height * r)), Image.LANCZOS)
+            im.convert('RGB').save(out)
+        return out
+    except Exception as e:
+        print(f'[告警] 喂图副本生成失败（本图降级为不带参考图）：{e}')
+        return None
+
+
+def char_ref(spec):
+    """B 级：主图规格 `定妆参考: <角色名>` → (喂图副本路径, 已填辨识锚的指令)；不可用 → (None, None)。
+
+    任何一环失败（角色名不在角色册/辨识锚解析不到/副本生成失败）都打告警并降级为不带参考图，
+    不中断跑批——但绝不静默：A 级曾因空串静默停用、日志无异常被误判在工作（排查结论 0729 §一）。"""
+    name = (spec.char_ref or '').strip()
+    if not name or name == '无':
+        return None, None
+    reg = _load_char_registry()
+    if name not in reg:
+        print(f'  [告警] [{spec.code}] 定妆参考「{name}」在 assets/角色册/ 找不到定妆图，'
+              '本图降级为不带参考图。')
+        return None, None
+    info = reg[name]
+    if not info['anchor']:
+        print(f'  [告警] [{spec.code}] 角色「{name}」的【辨识锚】未能从角色设定.md 解析，'
+              '本图降级为不带参考图。')
+        return None, None
+    feed = _feed_copy(info['png'])
+    if not feed:
+        return None, None
+    return feed, _CHAR_REF_INSTR_TMPL.format(name=name, anchor=info['anchor'])
 
 
 def _gen_gemini(cfg, prompt, out_png, style_ref=None, ref_instr=None):
@@ -767,6 +874,8 @@ def process_strict(client, cfg, md_path, spec, log, style_ref=None, ref_instr=No
         tag = ''
     elif ref_instr is _ANCHOR_REF_INSTR:
         tag = '（沿用全期锚图画风）'
+    elif ref_instr and ref_instr.startswith(_CHAR_REF_PREFIX):
+        tag = '（沿用定妆图角色与画风）'
     else:
         tag = '（沿用主图画风与角色）'
 
@@ -1035,7 +1144,14 @@ def main():
                 if anchor_png and anchor_png != ip.image_path(args.md_path, s.code):
                     ref, instr = anchor_png, None
                 else:
-                    ref, instr = global_anchor, (_ANCHOR_REF_INSTR if global_anchor else None)
+                    # B 级（2026-07-30）：规格写了 `定妆参考: <角色名>` 就带其定妆图（喂图副本）
+                    # + _CHAR_REF_INSTR（锁画风锁角色、比例不跟图）；否则退 A 级全期锚图
+                    # （0728 已停用，配置留空即不启用）；再退无参考图（与字段出现前行为一致）。
+                    ref, instr = char_ref(s)
+                    if ref:
+                        log(f'  [{s.code}] 定妆参考已启用：{s.char_ref} ← {os.path.basename(ref)}')
+                    else:
+                        ref, instr = global_anchor, (_ANCHOR_REF_INSTR if global_anchor else None)
                 records.append(process_strict(client, cfg, args.md_path, s, log,
                                               style_ref=ref, ref_instr=instr))
                 # 首格刚落盘：后续各格/练笔图/备选图的参考图就位（基准固定为第一格，不随后续格漂移）

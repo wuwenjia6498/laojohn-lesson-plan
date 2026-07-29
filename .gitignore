@@ -65,3 +65,8 @@ desktop.ini
 # 看图写话配套：_data.json 是数据源，html/pdf 是渲染产物
 看图写话配套输出/**/*.pdf
 看图写话配套输出/**/*.html
+
+# 定妆图喂图副本（generate_images._feed_copy 从母版懒生成：长边1500+RGB，可再生）
+.claude/skills/laojohn-picture-writing/assets/角色册/_喂图副本/
+# 测试件跑图产物（md 是源、图可重生；标注 jpg 存档不在此列）
+.claude/skills/laojohn-picture-writing/assets/测试件/*/
