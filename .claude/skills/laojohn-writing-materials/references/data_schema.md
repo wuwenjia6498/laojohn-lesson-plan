@@ -70,8 +70,8 @@ JSON 字符串内禁塞原始 HTML；引用词语一律弯引号“”，禁「�
 
 | 详案锚点 | 供给字段 |
 |----------|----------|
-| 提纲表区头 `**一、本课定位**` 表的 `课题·课时` 行 | `meta.kicker`（年级册）、`meta.topic` |
-| 提纲表区头 `**二、本课要点**` 表的 `核心技法` 行 | `worksheet.skills`、`homework` 各派生项的依据 |
+| 提纲表 `课题·课时` 行 | `meta.kicker`（年级册）、`meta.topic` |
+| 提纲表 `核心技法` 行 | `worksheet.skills`、`homework` 各派生项的依据 |
 | `### 四、借助构思表…` 环节内 `\| 项目 \| 关键词 \|` 表 | `worksheet.plan_rows`（行名逐字取） |
 | 第2课时起笔引导（`### 一、聚焦一处…`） | `worksheet.draftnote` |
 | `> 【教师示范文】` blockquote | `essay.title` + `essay.paragraphs`（一字不改） |
