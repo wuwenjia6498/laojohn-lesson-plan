@@ -28,6 +28,7 @@ KNOWN_FIELDS = {
     '组序',                # 组图（多图课平级编号 主-01/主-02…）：第N格·起因/经过/结果（image-spec §组图）
     '格间变化',            # 组图：本格相对上一格新增/改变了什么（首格写「组首格」）
     '状态',                # 缺图补全课留白格：`状态: 留白（不生图，由学生想象补出）`，生图脚本跳过
+    '色域',                # 可选：本图的大色域切分与跳色落点（style-tokens §色域）；缺省不拼、无默认值
 }
 
 # 角色枚举（2026-07-26 晚：一课三图位定案，见 references/image-spec.md §一课三图位）。
@@ -57,7 +58,7 @@ MAIN_STYLE_TOKEN = (
     '同时保证可读：主角与每一个要素都清晰、边缘可辨，构图干净、留白充足，'
     '孩子要能一眼看清、数得出、圈得住，氛围一律服从可读。'
 )
-# 备选图档基调与主图同源（否则图生图跟随会打架），只在收尾放开氛围。
+# 备选图档与主图逐字同源（媒介/定形/色域/光线基调不同源，图生图跟随会打架），只改收尾句放开氛围。
 ALT_STYLE_TOKEN = (
     '画风：柔和的水彩淡彩叠加彩色铅笔质感的手绘插画，看得见纸张纹理与自然笔触，'
     '不要矢量扁平风、不要塑料光泽、不要均匀渐变；线条轻盈、粗细有变化，'
@@ -145,6 +146,12 @@ class ImgSpec:
         return self.fields.get('组序', '').strip()
 
     @property
+    def color_field(self):
+        """可选「色域:」——本图的大色域切分与跳色落点（每图变量，令牌只管通用规则）。
+        缺省为 ''、build_prompt 不拼、不给默认值——令牌里的通用色域规则仍然成立。"""
+        return self.fields.get('色域', '').strip()
+
+    @property
     def is_blank(self):
         """缺图补全课的留白格（`状态:` 含「留白」）——不生图，由学生想象补出；生图脚本跳过。"""
         return '留白' in self.fields.get('状态', '')
@@ -191,10 +198,17 @@ class ImgSpec:
         parts = []
         if self.prompt:
             parts.append(self.prompt)
+        if self.color_field:
+            parts.append('本图色域：' + self.color_field)
         if self.style:
             parts.append('风格与比例：' + self.style)
         if enforce_must_see and self.must_see:
-            parts.append('画面必须同时清晰包含以下全部元素：' + '；'.join(self.must_see) + '。')
+            parts.append(
+                '【近景教学层｜此层内不许遮挡、不许虚化，孩子要在这一层里数得出、圈得住】'
+                + '；'.join(self.must_see) + '。'
+                '画面其余部分（远景、天空、地面、背景物）按上文的色域与光线处理，'
+                '允许虚化、允许被遮挡、允许只留剪影或纯色块，不必把所有细节平铺展开。'
+            )
         if self.is_strict:
             parts.append(MAIN_STYLE_TOKEN)
         elif self.is_alt:
