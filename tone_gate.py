@@ -12,8 +12,12 @@ tone_gate —— 详案「AI 腔／语言肌理」机检门（两线共用，仓
          冷审只标不判、争议归用户（见两线 review-rubric 对应条）。
 
 判据唯一源仍是各 skill 的 checklist / lesson-structure / SKILL / variation-pools / terminology——
-本脚本只改「谁来执行」；改判据须同步本脚本。凡能从规则文件运行时解析的清单
-（writing「禁止逐字复用」、picture terminology 硬替换表）一律解析、不在此双写。
+本脚本只改「谁来执行」；改判据须同步本脚本。凡能从规则文件运行时解析的**结构化清单**
+（writing「禁止逐字复用」/池6 发令词/池7 替换池/红线第六条禁用词、picture terminology 硬替换表）
+一律解析、不在此双写。**判断标准＝解析目标是不是一个结构化清单**（bullet 列表、替换池、带
+固定标记的枚举行）：是就解析；散文句里嵌的词**不解析**——规则文件改一个字，词表就悄悄变空
+且不报错，比双写更危险，那类保持硬编码 ＋ 注释注明双写位置（如 PRAISE_WORDS）。
+解析一律带回落常量，规则文件缺节/改版时降级而不崩。
 
 预处理：剔除 <!-- --> 注释块（生图工单/真实性自检/指纹块）与 ``` 代码围栏后才检正文；
 picture/writing 的 `*` 在 `## 教案提纲表` 节内豁免（首页版式化脚本的解析锚）。
@@ -235,10 +239,30 @@ def check_picture(lines, in_outline, rep):
 # ---------- writing 档 ----------
 
 WRT_BLACKLIST = ['宛如', '犹如', '交织', '无形中', '诉说着']
-POOL6_WORDS = ['先别急', '谁愿意', '谁先来', '还没写完也没关系']
-POOL7_WORDS = ['立起来', '站在眼前', '活生生', '干巴巴', '流水账', '怦怦直跳']
+# 池6/池7/红线第六条禁用词均运行时解析规则文件（见 load_pool6/7_words、load_redline_ban_words）；
+# 下列常量仅作**解析失败时的回落值**，不是判据源，别在此增删词——增删词一律改规则文件。
+POOL6_FALLBACK = ['先别急', '谁愿意', '谁先来', '还没写完也没关系']
+POOL7_FALLBACK = {'A': ['立起来', '站在眼前', '活生生'],
+                  'B': ['干巴巴', '流水账'], 'C': ['怦怦直跳']}
+REDLINE_BAN_FALLBACK = ['真真切切', '浮现在眼前', '闪闪发光', '愿你们', '往后的日子里',
+                        '被吸引着想', '留在了纸上', '有了眉目', '真切地感受到']
+# 池7 形态变体：只对**确有形态变化的词族**逐族施加，不做通用模糊匹配（那会误伤）。
+# (族内成员词, 正则, 显示名)；成员词会被从逐词计数里吸收，由族统一计一次，避免重复报数。
+POOL7_FAMILIES = [
+    (('立起来', '立不起'), r'立[得不]?起(?:来)?', '立起来/立不起'),  # 立起了一个人/立得起/立不起来
+]
+POOL7_PER_ITEM_CAP = 2   # pools 池7 硬规则：单篇同一说法至多两次
+# PRAISE_WORDS 有意保留硬编码：pools 池6 硬规则里它嵌在散文句「空夸词(说得好/太妙了/太棒了)
+# 单篇最多出现一次」中，不是结构化清单，抠词解析脆弱（改一字即静默变空）。
+# ⚠ 双写位置＝variation-pools.md 池6「### 硬规则」第 2 条，改那里须同步这里。
 PRAISE_WORDS = ['说得好', '太妙了', '太棒了']
+PRAISE_CAP = 1
 MECH_WORDS = ['A 档', 'A档', '降压', '兜底', '锚点', '指纹', '台账', '零件']
+# 池8 技法口令：口令因课而异、无法预置词表，改动态检测全篇 ≥N 次的中文短语。
+# 阈值 6 是四篇存量实测定的（≥4 每篇报 10–14 条、噪声六成；≥6 每篇 2–4 条）。
+# ⚠ 它**不是**池8 配额（配额＝同一短语 ≤4 次，见 pools 池8），4~5 次的漏网归人工判。
+JARGON_MIN_COUNT = 6
+JARGON_NGRAM = (4, 12)
 
 
 def _norm(s):
@@ -285,6 +309,116 @@ def load_forbidden_phrases():
     return needles
 
 
+def _pools_text():
+    path = os.path.join(SKILLS, 'laojohn-writing-lesson', 'references', 'variation-pools.md')
+    try:
+        return open(path, encoding='utf-8').read()
+    except OSError:
+        return ''
+
+
+def _section(text, title_re):
+    """取 `## X` 一节全文（止于下一个同级 ##）。"""
+    m = re.search(title_re + r'.*?(?=\n## (?!#)|\Z)', text, re.S)
+    return m.group(0) if m else ''
+
+
+def load_pool7_words():
+    """解析 pools 池7 替换池 A/B/C 三类的**原词行**（`原词 · 原词 →轮换：` 那一行，
+    `·` 与 `/` 分隔）。旧硬编码只有 6 词、漏了池内的 立不起/写活了/空话/空喊/心里咯噔/心软，
+    实测漏检「空话 ×4」；解析后与 pools 同步为 12 词。解析不到回落。"""
+    sec = _section(_pools_text(), r'## 池 7[:：]')
+    out = {}
+    for m in re.finditer(r'^\*\*([ABC])[.．][^\n]*\*\*\s*\n([^\n]+?)\s*→\s*轮换', sec, re.M):
+        words = [w.strip() for w in re.split(r'[·・/／]', m.group(2)) if w.strip()]
+        if words:
+            out[m.group(1)] = words
+    return out or {k: list(v) for k, v in POOL7_FALLBACK.items()}
+
+
+def load_pool6_words():
+    """解析 pools 池6 发令词变体池 ①②③ 的「原高频」词。
+    **④ 有意不取**——pools 池6 硬规则明写「④ 反馈语不进轮换、进具体化红线」，
+    由 PRAISE_WORDS 单管；两边都取会把 说得好/太妙了 重复报两遍。
+    ③ 的原高频是整句（21 字），按标点切首片段——整句当计数词表抓不到任何变体。"""
+    sec = _section(_pools_text(), r'## 池 6[:：]')
+    out = []
+    for m in re.finditer(r'^\*\*[①②③][^\n]*?[（(]原高频[:：]([^\n]*?)[)）]\*\*', sec, re.M):
+        for w in re.findall(r'「(.+?)」', m.group(1)):
+            frag = re.split(r'[，,。；;、]', w)[0].strip()
+            if frag:
+                out.append(frag)
+    return out or list(POOL6_FALLBACK)
+
+
+def load_redline_ban_words():
+    """解析 lesson-structure §三「语言风格红线」第六条①的禁用词枚举行（顿号分隔、句号收尾）。
+    ⚠ 体例锚＝`**禁用词(出现即改)**：…。`，改红线第六条的写法须同步本正则。"""
+    path = os.path.join(SKILLS, 'laojohn-writing-lesson', 'references', 'lesson-structure.md')
+    try:
+        text = open(path, encoding='utf-8').read()
+    except OSError:
+        return list(REDLINE_BAN_FALLBACK)
+    m = re.search(r'\*\*禁用词[（(][^）)]*[)）]\*\*[:：]([^。\n]+)', text)
+    if not m:
+        return list(REDLINE_BAN_FALLBACK)
+    words = [w.strip() for w in re.split(r'[、,，/／]', m.group(1)) if w.strip()]
+    return words or list(REDLINE_BAN_FALLBACK)
+
+
+JARGON_SKELETON = re.compile(r'学生(?:互动分享|自由分享|动笔写作|动笔写)|（教师总结）|（本课总结）')
+
+
+def scan_jargon(lines):
+    """池8 技法口令的动态检测：统计正文中出现 ≥JARGON_MIN_COUNT 次的中文短语，返回 [(短语, 次数)]。
+    口令因课而异、无法预置词表，故只报密度、不判合规——命中里必然混着课题名、材料指代、
+    教学内容词等噪声，由人工剔除后再对 pools 池8 配额。
+    排除：表格行/示范文引块/标题/`[…]` 舞台提示/`〔…〕` 话轮位标签/《…》/H1 课题名/固定话术骨架。"""
+    title = ''
+    for ln in lines:
+        m = re.match(r'#\s*《(.+?)》', ln.strip())
+        if m:
+            title = m.group(1)
+            break
+    body = []
+    for ln in lines:
+        s = ln.strip()
+        if not s or s.startswith(('|', '>', '#', '[', '〔')):
+            continue
+        s = re.sub(r'〔[^〕]*〕|\[[^\]]*\]|《[^》]*》', '', s)
+        s = re.sub(r'^(?:师|参考)：', '', s)
+        s = JARGON_SKELETON.sub('', s)
+        if title:
+            s = s.replace(title, '')
+        body.append(s)
+    lo, hi = JARGON_NGRAM
+    cnt = {}
+    for s in body:
+        for seg in re.findall(r'[一-鿿]+', s):
+            for n in range(lo, hi + 1):
+                for i in range(len(seg) - n + 1):
+                    g = seg[i:i + n]
+                    cnt[g] = cnt.get(g, 0) + 1
+    hits = {g: c for g, c in cnt.items() if c >= JARGON_MIN_COUNT}
+    # 重叠归并：短语若是另一条更长命中的子串、且长者次数 ≥ 短者六成，只留长的（去 n-gram 碎片）
+    out = [(g, c) for g, c in sorted(hits.items(), key=lambda x: (-len(x[0]), -x[1]))
+           if not any(g != h and g in h and hits[h] >= c * 0.6 for h in hits)]
+    return sorted(out, key=lambda x: -x[1])
+
+
+def _pool7_line(cls, word, count, extra=''):
+    """池7 的 INFO 行须把**判定结论**写出来、不只报数——上一次漏放就是因为只报数，
+    读的人扫一眼就过去了（checklist E 组池7条据此要求超标项逐条处置或写明为何保留）。
+    仍是 INFO、仍不 fail：配额型软规则永不升红灯（见本文件 docstring 的裁决序）。"""
+    tail = f'（{extra}）' if extra else ''
+    if count > POOL7_PER_ITEM_CAP:
+        return (f'池7-{cls}「{word}」×{count}{tail} ⚠ 超单篇上限 {POOL7_PER_ITEM_CAP}，须改'
+                f'（出路见 pools 池7 替换池；贴切>生造，优先改成具体说法而非换同义词）')
+    if count == POOL7_PER_ITEM_CAP:
+        return f'池7-{cls}「{word}」×{count}{tail}（上限 {POOL7_PER_ITEM_CAP}，达线）'
+    return f'池7-{cls}「{word}」×{count}{tail}（上限 {POOL7_PER_ITEM_CAP}）'
+
+
 def check_writing(lines, in_outline, rep):
     check_common(lines, in_outline, rep, 'writing')
     rep.fail('词级黑名单（宛如/犹如/交织/无形中/诉说着）',
@@ -308,6 +442,31 @@ def check_writing(lines, in_outline, rep):
     hits = [(i + 1, ln) for i, ln in enumerate(lines)
             if ln.strip().startswith(('师：', '参考：')) and mech.search(ln)]
     rep.fail('内部机制名漏进师话/参考（A 档/降压/兜底/锚点/指纹/台账/零件）', hits)
+    # 师话书面抒情禁用词（lesson-structure §三 红线第六条①）——**只扫 `师：` 行**：不扫 `参考：`，
+    # 更不像 WRT_BLACKLIST 那样全文 grep——示范文里写「浮现」「留在纸上」可能正是正当的描写示范，
+    # 全文扫会直接误伤环节④的示范文（红线第六条明写「适用范围只限师话层，不得反向误伤」）。
+    ban_re = re.compile('|'.join(map(re.escape, load_redline_ban_words())))
+    rep.fail('师话书面抒情禁用词（红线第六条①；只扫 师： 行，示范文/表格/提示段不扫）',
+             [(i + 1, f'{ln.strip()[:44]}… ←命中「{"／".join(dict.fromkeys(ban_re.findall(ln)))}」')
+              for i, ln in enumerate(lines)
+              if ln.strip().startswith('师：') and ban_re.search(ln)])
+    # 教师掌握块的口语转述义务（§三「参考：标签纪律」⑥.1 悬空师话 / ⑥.4 括注缺失）——
+    # 这是体例/结构检查、不是配额，故进 FAIL 级。
+    dangling, no_note = [], []
+    for i, ln in enumerate(lines):
+        s = ln.strip()
+        if not re.search(r'〔[^〕]*教师掌握[^〕]*〕', s):
+            continue
+        if '不必念给学生' not in s:
+            no_note.append((i + 1, s))
+        j = i - 1
+        while j >= 0 and not lines[j].strip():
+            j -= 1
+        prev = lines[j].strip() if j >= 0 else ''
+        if prev.startswith('师：') and re.search(r'[：:—]$', prev):
+            dangling.append((i + 1, f'{s[:26]} ←上文师话止于「{prev[-18:]}」'))
+    rep.fail('悬空师话：〔…教师掌握〕上方师话以 ：/—— 收尾（⑥.1；预告了就须在师话里讲完）', dangling)
+    rep.fail('〔…教师掌握〕标题缺括注「不必念给学生」（⑥.4）', no_note)
     # 行首全角（ 的行级提示（（教师总结）豁免）
     rep.fail('行首全角（ 的行级提示（应改半角方括号 […] 体例）',
              grep(lines, re.compile(r'^（(?!教师总结）)'),
@@ -333,20 +492,42 @@ def check_writing(lines, in_outline, rep):
     dash = sum(ln.count('——') for ln in lines)
     rep.info(f'「——」正文共 {dash} 处（筛查线索，逐处按 pools「破折号套式」判断；冷审只标不判）', [])
     det = []
-    for w in POOL6_WORDS:
+    for w in load_pool6_words():
         c = sum(ln.count(w) for ln in lines)
         if c:
             det.append(f'池6 发令词「{w}」×{c}（跨篇同款须查台账，本脚本只报数）')
-    for w in POOL7_WORDS:
-        c = sum(ln.count(w) for ln in lines)
+    pool7 = load_pool7_words()
+    fam_members = {w for members, _, _ in POOL7_FAMILIES for w in members}
+    for cls in ('A', 'B', 'C'):
+        for w in pool7.get(cls, []):
+            if w in fam_members:
+                continue        # 同族词由下面的族正则统一计一次，避免「立起来」「立不起」重复报
+            c = sum(ln.count(w) for ln in lines)
+            if c:
+                det.append(_pool7_line(cls, w, c))
+    for members, pat, label in POOL7_FAMILIES:
+        cls = next((k for k, v in pool7.items() if set(members) & set(v)), 'A')
+        rx = re.compile(pat)
+        c = sum(len(rx.findall(ln)) for ln in lines)
         if c:
-            det.append(f'池7 讲评/心理词「{w}」×{c}（单篇同一说法至多两次，人工判）')
+            forms = sorted({m.group(0) for ln in lines for m in rx.finditer(ln)})
+            det.append(_pool7_line(cls, label, c, extra='实际形态：' + '／'.join(forms)))
     for w in PRAISE_WORDS:
         c = sum(ln.count(w) for ln in lines)
-        if c > 1:
-            det.append(f'空夸词「{w}」×{c}（单篇至多一次，超出须落到具体句子）')
+        if c > PRAISE_CAP:
+            det.append(f'空夸词「{w}」×{c} ⚠ 超单篇上限 {PRAISE_CAP}，须改'
+                       f'（其余改成「复述+点一句」，落到学生的具体句子上）')
     if det:
-        rep.info('池6/池7/空夸词计数', det)
+        rep.info('池6/池7/空夸词计数（池7 已带超标结论；⚠ 项须逐条处置或写明为何保留，不得只看不动）',
+                 det)
+    # 池8 技法口令密度（动态检测，无预置词表）
+    jargon = scan_jargon(lines)
+    if jargon:
+        cells = [f'「{g}」×{c}' for g, c in jargon]
+        rows = ['  '.join(cells[i:i + 5]) for i in range(0, len(cells), 5)]
+        rep.info(f'技法口令高密度项（脚本只报全篇 ≥{JARGON_MIN_COUNT} 次；规则配额为同一短语 ≤4 次'
+                 f'——4~5 次的漏网须人工判，机检全绿 ≠ 本条合规。'
+                 f'下列含课题名/材料指代等噪声，先剔除再对 pools 池8 配额）', rows)
 
 
 # ---------- main ----------
