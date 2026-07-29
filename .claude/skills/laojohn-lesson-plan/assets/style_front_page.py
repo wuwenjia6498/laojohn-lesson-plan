@@ -6,9 +6,12 @@
   - writing（同步习作）＝**无区头单表 6 行**（2026-07-29 用户按《三上-猜猜他是谁》首页定稿，
     替代 2026-07-22 的两区版；区头解析仍保留，存量两区稿重渲不退化）。
 共同版式：居中两行标题区（《课名》20pt ─ 分隔线 ─ 副题 13pt 灰，**无品牌行**）→ 一张
-两列表、`**N、区名**` 灰底区头行分区（区头可缺省，缺省即整节一张表）；无底部提示框。
+两列表、`**N、区名**` 底纹区头行分区（底纹色按 profile 的 `palette["zone_bg"]`，缺省
+灰 #EDEDED；区头可缺省，缺省即整节一张表）；无底部提示框。
 配色按 profile 色板（`PROFILES[*]["palette"]`，课型差异唯一收敛处）：
-  - picture＝语义灰阶（#222222/#333333/#5A5A5A）＋纯黑强调、白底标签列、无红。
+  - picture＝语义灰阶（#222222/#333333/#5A5A5A）＋纯黑强调、白底标签列、无红；
+    三个区头行米黄底 #F5E6C6、**值列不加粗**（`palette["value_bold"]`）——两项均
+    2026-07-29 用户定版（此前区头灰 #EDEDED、值列加粗）。
   - writing＝标题/副题/抬头/标签/值列一律深灰 #3F3F3F，**只有「（本课）」那一个箭头
     节点标红 #C00000**；标签列米黄底 #F5E6C6（字仍深灰、加粗），**值列不加粗**
     （`palette["value_bold"]`）；表上方另起左对齐抬头「教学提纲」（2026-07-29 用户定版）。
@@ -48,7 +51,7 @@ P_TXT = "333333"      # 正文色
 P_MUT = "5A5A5A"      # 弱化灰（副题/线名/括注/分隔符/尾注）
 P_EMPH = "000000"     # 纯黑次强调（课型/本课名/提升点类型）
 P_BORDER = "9A9A9A"   # 表格边框 / 标题区分隔线
-P_ZONE_BG = "EDEDED"  # 区头行底纹（标签列无底纹）
+P_ZONE_BG = "EDEDED"  # 区头行底纹缺省值（palette 未给 zone_bg 时回落；标签列无底纹）
 P_RED = "C00000"      # 本课红标（writing 档 2026-07-29 起用；picture 档仍无红）
 P_LABEL_BG = "F5E6C6" # 标签列米黄底（writing 档）
 P_GREY = "3F3F3F"     # writing 档通用深灰（标题/副题/标签/值列，除本课红标外全用它）
@@ -78,7 +81,7 @@ PROFILES = {
         # 色板：ink 主色 / txt 正文 / mut 弱化 / key 次强调（课型·文体段）/ emph 本课标记
         "palette": {"ink": P_INK, "txt": P_TXT, "mut": P_MUT, "key": P_EMPH,
                     "emph": P_EMPH, "label_bg": "FFFFFF", "label_fg": P_INK,
-                    "value_bold": True},
+                    "value_bold": False, "zone_bg": P_LABEL_BG},
         "caption": None,          # 表上方左对齐抬头；None＝不出
         "rules": {
             "课次·课型": "p_course",
@@ -455,7 +458,7 @@ def build_front(doc, data):
         row = tbl.rows[ri]
         row.cells[0].merge(row.cells[1])
         cell = row.cells[0]
-        _cell_bg(cell, P_ZONE_BG)
+        _cell_bg(cell, pal.get("zone_bg", P_ZONE_BG))
         p = cell.paragraphs[0]
         p.paragraph_format.space_before = Pt(3)
         p.paragraph_format.space_after = Pt(3)
