@@ -68,5 +68,20 @@ desktop.ini
 
 # 定妆图喂图副本（generate_images._feed_copy 从母版懒生成：长边1500+RGB，可再生）
 .claude/skills/laojohn-picture-writing/assets/角色册/_喂图副本/
+# 定妆图旧母版归档（0730 换缩头版时移入）：每张 6~7MB，且旧版本来就在 git 历史里，
+# 要取回从历史 checkout 即可，不必再存一份副本
+.claude/skills/laojohn-picture-writing/assets/角色册/_历史/
+# 缩头版的 JPG 中间件（0730 PS 导出）：已无损转成 妆-0N_*.png 母版入库，JPG 版纯冗余
+.claude/skills/laojohn-picture-writing/assets/角色册/定妆图-JPG/
 # 测试件跑图产物（md 是源、图可重生；标注 jpg 存档不在此列）
 .claude/skills/laojohn-picture-writing/assets/测试件/*/
+
+# 原书插图（原书扫描件＝版权材料，永不入库；各书 _图单.md 是元数据，照常入库）
+# 与 读书会书籍封面/（全 tracked）刻意不同：封面是可公开的书目图，这里是整页扫描。
+读书会原书插图/**/*.png
+读书会原书插图/**/*.jpg
+读书会原书插图/**/*.jpeg
+读书会原书插图/**/*.webp
+读书会原书插图/**/*.tif
+读书会原书插图/**/*.tiff
+读书会原书插图/**/*.pdf
