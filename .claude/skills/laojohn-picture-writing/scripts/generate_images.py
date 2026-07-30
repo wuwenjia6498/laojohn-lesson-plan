@@ -43,12 +43,6 @@ DEFAULTS = {
     'size': '1536x1024',                               # 仅 openai-images 通道(flux 忽略)
     'max_retries': 2,                                  # 主图缺项最多重生次数
     'width_cm': 12.0,                                  # 回插用，generate 阶段仅透传记录
-    # 全期风格锚图（阶段二，2026-07-27 启用）：一张人工定稿的 png，
-    # 链路 全期锚图 → 每课主图 → 本课练笔图/备选图。主图带它做图生图，指令走
-    # _ANCHOR_REF_INSTR（只锁画风、不锁角色）。**风格控制的主责在这张图上，不在文字令牌**——
-    # 四轮措辞迭代每次按下葫芦起瓢，已证实文字撑不住风格（见 references/style-tokens.md）。
-    # 相对路径按 skill 目录解析（见 anchor_ref）；置空＝退回阶段一各课主图自行定调。
-    'style_anchor': '',   # 2026-07-28 停用：厚涂平面档改造终止，见 references/style-tokens.md
 }
 _CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'imggen.config.json')
 
@@ -167,58 +161,28 @@ _STYLE_REF_INSTR = (
 )  # 负面清单与 references/style-tokens.md 一致：模型在图生图时最容易漂回默认儿童插画档，这一路要再钉一次。
 
 
-# —— 全期风格锚图指令（阶段二 · 与 _STYLE_REF_INSTR 是两个语境，勿混用）——
-# _STYLE_REF_INSTR＝跟随「本课主图」：锁画风 + 锁角色（同族异时要同一个人）。
-# 这一条＝跟随「全期锚图」：只锁画风与媒介，锚图与本图内容无关，角色场景一律不许沿用。
-# 用于每课主图生成，把 24 课的画风钉在同一张人工定稿的锚图上（文字令牌撑不住风格，
-# 三轮措辞迭代按下葫芦起瓢已证实——见 references/style-tokens.md 与 image-spec.md）。
-_ANCHOR_REF_INSTR = (
-    '\n\n【画风参照·内容无关】随附的参考图是本课程的**全期风格锚图**，'
-    '**它与本图要画的内容毫无关系**——请**只从中提取绘画风格**：媒介质感与颗粒、'
-    '色块的铺法与边缘、配色的饱和度与浊度倾向、平面化程度、光的表达方式、'
-    '角色的外形处理与五官画法。'
-    '**不要沿用参考图中的角色、场景、构图、道具或任何画面内容**，画面内容一律按上面的描述画。'
-    '**严禁回弹到默认卡通档**：不要塑料光泽、不要均匀矢量渐变、不要全图均质黑描边、'
-    '不要糖果色或高饱和拉满、不要多重生硬高光。'
-)
-
-
-# —— 定妆图角色参照指令（B 级 · 2026-07-30 新增，第四条指令，与上两条语境不同勿混用）——
+# —— 定妆图角色参照指令（B 级 · 2026-07-30 新增，与 _STYLE_REF_INSTR 语境不同勿混用）——
 # _STYLE_REF_INSTR＝跟随「本课主图」（练笔图/备选图用，连比例一起带）；
-# _ANCHOR_REF_INSTR＝只锁画风、明拒角色（A 级，0728 已停用）；
 # 这一条＝跟随「角色定妆图」（assets/角色册/妆-0N）：锁画风 + 锁角色身份，**比例明确不跟随参考图**。
+# （曾有第三条 _ANCHOR_REF_INSTR＝A 级全期锚图链，只锁画风明拒角色：0728 停用、0730 摘除。
+#  措辞正文仍在定妆图手工出图使用，落在 assets/角色册/角色设定.md §八·0「只锁画风措辞」。）
 # 措辞主干为 0729 小试二已验版本（带妆-01，实测占比 35.8% / 2.79 头身，见
-# docs/handoff/小试结论_头身比收口-0729.md）。一处适配：小试里指令在比例行上方、写「按下方文字
-# 为准」；脚本里指令拼在 prompt 之后，方向词改为「画面描述里的【比例】行」——此偏差由首张真图
-# 验收回验（交接说明 §四判据）。
-# ⚠ imgspec【比例】行的写入值（如 25%）是控制输入、不是画面描述：写 25% 实出 ~35.8%。
-#   不要为「文档自洽」把写入值改成实测值——会滑回 2.5 头身（定妆图档）。
+# docs/handoff/小试结论_头身比收口-0729.md）。两处适配：① 小试里指令在比例行上方、写「按下方
+# 文字为准」，脚本里指令拼在 prompt 之后故改为回指画面描述（首张真图已回验）；② 0730 场景图侧
+# 撤掉了【比例】数值行（改定性句，见 references/image-spec.md），故回指对象由「【比例】行」改为
+# 「关于年龄与体型的说明」——两种写法都能指到，缺【比例】行时不再悬空。
+# ⚠ 这句只是**拒绝跟随参考图比例**，不是要求某个数值：定妆图是 ≈2.5 头身，不拦就会整档带过来。
+#   若规格里确实写了加固用的写入值（25%），那是控制输入、不是画面实测（写 25% 实出 ~35.8%），
+#   不要为「文档自洽」把它改成实测值——会滑回 2.5 头身。
 _CHAR_REF_PREFIX = '\n\n【角色参照】'   # process_strict 日志 tag 判据（格式化后的串没法 is 比较）
 _CHAR_REF_INSTR_TMPL = (
     _CHAR_REF_PREFIX +
     '随附的参考图是「{name}」的角色定妆图。请沿用参考图的画风，'
     '与这个角色的身份特征——脸型、发型、主色、{anchor}。'
-    '身体比例不要跟随参考图，按画面描述里的【比例】行为准。'
+    '身体比例不要跟随参考图，按画面描述里关于这个孩子年龄与体型的说明为准。'
     '**严禁回弹到默认卡通档**：不要塑料光泽、不要均匀矢量渐变、不要全图均质黑描边、'
     '不要糖果色或高饱和拉满、不要多重生硬高光。'
 )
-
-
-def anchor_ref(cfg):
-    """全期风格锚图路径（配置了且文件存在才返回；否则 None＝不启用，行为同阶段一）。
-
-    相对路径按 skill 目录解析（如 `assets/style-anchor.png`）——项目在移动硬盘上、盘符随挂载
-    变动（CLAUDE.md §1），写绝对路径换台机器就失效。"""
-    p = (cfg.get('style_anchor') or '').strip()
-    if not p:
-        return None
-    if not os.path.isabs(p):
-        skill_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        p = os.path.normpath(os.path.join(skill_dir, p))
-    if os.path.isfile(p):
-        return p
-    print(f'[告警] 配置的全期风格锚图不存在，本次按未启用处理：{p}')
-    return None
 
 
 # —— B 级参考图链：角色定妆图（2026-07-30 接线）——
@@ -863,8 +827,8 @@ def process_strict(client, cfg, md_path, spec, log, style_ref=None, ref_instr=No
     """严格档（主图 + 练笔图）：逐项验收 + 缺项重生。
 
     style_ref：练笔图带本课主图——「同族异时」要求同一个角色、同一场景的下一时刻，靠图生图
-    锁角色与画风，纯文字描述锁不住。主图在阶段一不带参考图（它就是本课基准）；启用全期风格
-    锚图（阶段二）后主图带锚图，此时须一并传 ref_instr=_ANCHOR_REF_INSTR（只锁画风、不锁角色）。
+    锁角色与画风，纯文字描述锁不住。主图缺省不带参考图（它就是本课基准）；规格写了
+    `定妆参考:` 时主图带定妆图，此时须一并传 ref_instr=_CHAR_REF_INSTR_TMPL 的填充结果。
     ref_instr：缺省 None＝走 generate_one 的 _STYLE_REF_INSTR（换内容·锁画风+锁角色）。"""
     items = spec.must_see
     extra = strict_extra(spec)
@@ -872,8 +836,6 @@ def process_strict(client, cfg, md_path, spec, log, style_ref=None, ref_instr=No
     ref = style_ref if (style_ref and style_ref != out) else None
     if not ref:
         tag = ''
-    elif ref_instr is _ANCHOR_REF_INSTR:
-        tag = '（沿用全期锚图画风）'
     elif ref_instr and ref_instr.startswith(_CHAR_REF_PREFIX):
         tag = '（沿用定妆图角色与画风）'
     else:
@@ -1084,12 +1046,6 @@ def main():
     if lack:
         print(f'[告警] 工单缺图位：{"、".join(lack)}——一课三图位是交付硬门，请确认是分批出图还是漏写规格。')
 
-    # 全期风格锚图（阶段二）：配置了才启用；主图带它做图生图、只锁画风不锁角色，
-    # 把跨课画风钉在同一张人工定稿的图上。留空＝不启用，行为与阶段一完全一致。
-    global_anchor = anchor_ref(cfg)
-    if global_anchor:
-        print(f'全期风格锚图已启用（主图将跟随其画风）：{global_anchor}')
-
     # 本课主图＝全课画风基准；练笔图与备选图都带它做图生图，保证全课一套画风
     # （练笔图还要靠它锁住「同一个角色」）
     anchor_png = None
@@ -1136,22 +1092,18 @@ def main():
                 records.append(verify_only(client, cfg, args.md_path, s, log))
             elif s.is_main:
                 # 组图（多个主图格）：主-02 起带主-01 作参考图，锁全组画风与角色。
-                # 首格没有本课主图可跟：启用了全期锚图就跟锚图（只锁画风），否则不带参考图
-                # （行为同阶段一；process_strict 内部有 style_ref != out 保护）。
-                # anchor_png 可能就是本格自己（重跑已存在的主图时预置的），那不算「组内首格」，
-                # 必须落到全期锚图分支——否则 process_strict 的 ref != out 保护会把它置空，
-                # 锚图链路对单主图课静默失效。
+                # 组内首格落 B 级：规格写了 `定妆参考: <角色名>` 就带其定妆图（喂图副本）
+                # + _CHAR_REF_INSTR（锁画风锁角色、比例不跟图）；没写就不带参考图（与该字段
+                # 出现前行为一致）。char_ref 任一环失败已返回 (None, None)，无需再退化。
+                # ⚠ anchor_png 可能就是本格自己（重跑已存在的主图时预置的），那不算「组内首格」，
+                # 必须走下面的 else——否则 process_strict 的 ref != out 保护会把它置空，
+                # 参考图链对单主图课静默失效。
                 if anchor_png and anchor_png != ip.image_path(args.md_path, s.code):
                     ref, instr = anchor_png, None
                 else:
-                    # B 级（2026-07-30）：规格写了 `定妆参考: <角色名>` 就带其定妆图（喂图副本）
-                    # + _CHAR_REF_INSTR（锁画风锁角色、比例不跟图）；否则退 A 级全期锚图
-                    # （0728 已停用，配置留空即不启用）；再退无参考图（与字段出现前行为一致）。
                     ref, instr = char_ref(s)
                     if ref:
                         log(f'  [{s.code}] 定妆参考已启用：{s.char_ref} ← {os.path.basename(ref)}')
-                    else:
-                        ref, instr = global_anchor, (_ANCHOR_REF_INSTR if global_anchor else None)
                 records.append(process_strict(client, cfg, args.md_path, s, log,
                                               style_ref=ref, ref_instr=instr))
                 # 首格刚落盘：后续各格/练笔图/备选图的参考图就位（基准固定为第一格，不随后续格漂移）
