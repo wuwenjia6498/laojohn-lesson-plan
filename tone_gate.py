@@ -19,6 +19,8 @@ tone_gate —— 详案「AI 腔／语言肌理」机检门（两线共用，仓
 且不报错，比双写更危险，那类保持硬编码 ＋ 注释注明双写位置（如 PRAISE_WORDS）。
 解析一律带回落常量，规则文件缺节/改版时降级而不崩。
 
+writing 档另有一条**全文扫**的体例项：正文机制词「占位」（讲评括注须直接写动作指令）。
+
 预处理：剔除 <!-- --> 注释块（生图工单/真实性自检/指纹块）与 ``` 代码围栏后才检正文；
 picture/writing 的 `*` 在 `## 教案提纲表` 节内豁免（首页版式化脚本的解析锚）。
 """
@@ -234,6 +236,13 @@ def check_picture(lines, in_outline, rep):
                  for i, ln in ref_lines if len(ln.strip()) - 3 > 40 and '／' not in ln and '；' not in ln]
     if long_refs:
         rep.info('参考：单行 >40 字且无并列分隔（提示查追问链；事实罗列/多人集合豁免，人工判）', long_refs)
+    # 师话短句占比：本档**只报数、不画线**（理由与实测数据见 SHORT_RATIO_HINT_PICTURE 处注释）
+    n_short, n_all, ratio, _ = scan_short_sentence_ratio(lines)
+    if n_all:
+        rep.info(f'师话短句占比 {ratio:.1%}（{n_short}/{n_all} 句 ≤{SHORT_SENT_MAX} 字）'
+                 f'——**本档不画筛查线**：实测改过与未改的四篇完全不可分（低年级短应答受 §13.6'
+                 f'「不补」清单保护、数量压过病征）。此数**只供同一篇改动前后自比**，'
+                 f'不判合规、不跨篇比优劣；判据是 prose-style-benchmark.md §二的成对判据', [])
 
 
 # ---------- writing 档 ----------
@@ -368,6 +377,51 @@ def load_redline_ban_words():
 
 JARGON_SKELETON = re.compile(r'学生(?:互动分享|自由分享|动笔写作|动笔写)|（教师总结）|（本课总结）')
 
+# 师话短句占比（电报体密度筛查 · 2026-08-04 立）。红线第 7 条「禁电报体压缩」是判断项、
+# 不入机检，全线唯一的「加法」规则因此没有任何执行力——2026-08-04 用户逐句改稿四篇后指出
+# AI 痕迹依然偏重，根因之一即此。本项**只报数、永不 fail**：短句占比高也可能是这一课确实
+# 指令密集（当堂写作课时的分步问写），判合规仍归人工按 prose-style-benchmark.md 五类改法看。
+# ⚠ 阈值 13% 是 2026-08-04 对全部 11 篇写作课详案实测定的，不是拍脑袋：
+#   用户改过／已按基准调过的 5 篇 7.0–12.2%（推荐一个好地方 7.0、小小动物园 9.7、
+#   写观察日记 10.0、猜猜他是谁 10.6、我和＿＿过一天 12.2）；
+#   未经人工修订的存量 5 篇 13.7–19.2%（续写故事 13.7、这儿真美 15.9、我来编童话 16.1、
+#   身边那些有特点的人 17.2、漫画的启示 19.2）。两组不重叠，分界恰好落在「有没有被人工改过」。
+# ⚠ 曾试过的两条路都被实测否掉，别再走：① 方言/缩略词黑名单——「头一句/头一回」在基准篇
+#   自己命中 9 次（「同一个人说，头一回人家没动」是用户保留的自然口语）；② 「末了/法子/
+#   没得比」词表——残留全在教具说明、示范表格、指纹块等豁免区，正文零命中。这类病征依赖
+#   语境，做不成词表，只有密度指标能分开两组。
+SHORT_SENT_MAX = 7        # 句长 ≤ 该值计为短句（<8 字）
+SHORT_RATIO_HINT = 0.13   # writing 档：超过即提示复看（不 fail）
+# ⚠ picture 档**不画线**（2026-08-04 实测结论，别再去补一个阈值）：
+#   四篇实测 <8 字占比——一上第3次（已按 prose-style-benchmark 整改）17.4%、一上第1次 18.0%、
+#   二上第1次 18.1%、二上第2次 16.8%。**改过的那篇正落在三篇未改稿中间，两组完全不可分**；
+#   均句长（17.4/17.0/18.8/19.5）与 <5 字占比（7.0/5.6/5.3/4.0，改过的反而最高）同样不可分。
+#   根因：低年级师话的短句大半是「好」「对」「不着急」这类被 lesson-structure §13.6「不补」
+#   清单明文保护的短应答，数量压过病征本身的增减；写作线能画线是因为那条线以讲解为主、
+#   短应答占比低。故 picture 档只报数供同篇改动前后自比，**不得当合规门、不得跨篇比优劣**。
+SHORT_RATIO_HINT_PICTURE = None
+
+
+def scan_short_sentence_ratio(lines):
+    """返回 (短句数, 总句数, 占比, [超短样例])；只统计 `师：` 行——`参考：` 是学生话轮，
+    粗糙短口语是设计要求（红线第 7 条反向约束④），扫它会把设计当病征。
+    行内 〔…〕[…]（…） 三类括注先剥掉：那是给老师读/做的提示，不是讲出口的话。"""
+    sents = []
+    for ln in lines:
+        s = ln.strip()
+        if not s.startswith('师：'):
+            continue
+        s = re.sub(r'^师：', '', s)
+        s = re.sub(r'〔[^〕]*〕|\[[^\]]*\]|（[^）]*）', '', s)
+        for part in re.split(r'[。！？；]', s):
+            part = part.strip()
+            if part:
+                sents.append(part)
+    if not sents:
+        return 0, 0, 0.0, []
+    short = [x for x in sents if len(x) <= SHORT_SENT_MAX]
+    return len(short), len(sents), len(short) / len(sents), short
+
 
 def scan_jargon(lines):
     """池8 技法口令的动态检测：统计正文中出现 ≥JARGON_MIN_COUNT 次的中文短语，返回 [(短语, 次数)]。
@@ -442,6 +496,16 @@ def check_writing(lines, in_outline, rep):
     hits = [(i + 1, ln) for i, ln in enumerate(lines)
             if ln.strip().startswith(('师：', '参考：')) and mech.search(ln)]
     rep.fail('内部机制名漏进师话/参考（A 档/降压/兜底/锚点/指纹/台账/零件）', hits)
+    # 讲评括注禁机制词「占位」（lesson-structure §三「填空横线写法」，2026-07-31 用户拍板；
+    # 同步定义在 checklist B 组附讲评条、workflow-engine 讲评模块）：横线旁的括注**直接写
+    # 动作指令**（`＿＿＿（念该生最传神的一两句）`），「占位」是生成侧机制词、印进 docx 对
+    # 上课老师是噪声，故正文检索应为零。上面那条 MECH_WORDS 只扫 师：/参考： 行，而「占位」
+    # 也出现在选稿列表与 blockquote 提示里，故本条**全文扫**。误伤已核：指纹/生图工单等
+    # <!-- --> 块已由 load_body 清空；`【图位:编号】` 与示范文数据占位的规范写法
+    # 「（此处数据以…为准）」都不含「占位」二字。2026-08-01 补：此前三道关（机检无规则、
+    # checklist 埋在超长复合条中段、rubric 无判据）全漏，四篇存量带前缀交付。
+    rep.fail('正文出现机制词「占位」（讲评括注应直接写动作指令，见 §三「填空横线写法」）',
+             grep(lines, re.compile('占位')))
     # 师话书面抒情禁用词（lesson-structure §三 红线第六条①）——**只扫 `师：` 行**：不扫 `参考：`，
     # 更不像 WRT_BLACKLIST 那样全文 grep——示范文里写「浮现」「留在纸上」可能正是正当的描写示范，
     # 全文扫会直接误伤环节④的示范文（红线第六条明写「适用范围只限师话层，不得反向误伤」）。
@@ -472,8 +536,13 @@ def check_writing(lines, in_outline, rep):
              grep(lines, re.compile(r'^（(?!教师总结）)'),
                   exempt=lambda i, ln: ln.strip().startswith('（教师总结）')))
     # 半角标点（中文语境；数字范围 – 箭头 → 斜杠 / 已非半角组；纯 ASCII 记号行豁免）
+    # 另豁免 `【图位:编号｜图注】` 占位内部的半角冒号：那是 insert_images_docx 的跨技能
+    # 契约写法（读书会/看图写话/写作课三线同款），不是中文行文里的标点。只剥占位本身——
+    # 同一行占位之外若还有半角标点，照报不误。
     def _punct_exempt(i, ln):
-        return not has_cjk(ln)
+        if not has_cjk(ln):
+            return True
+        return not re.search(r'[,:?!;()]', re.sub(r'【图位[：:][^】]*】', '', ln))
     rep.fail('中文语境半角标点 ,:?!;()',
              grep(lines, re.compile(r'[,:?!;()]'), exempt=_punct_exempt))
     # 禁止逐字复用清单（运行时解析 variation-pools）
@@ -520,6 +589,15 @@ def check_writing(lines, in_outline, rep):
     if det:
         rep.info('池6/池7/空夸词计数（池7 已带超标结论；⚠ 项须逐条处置或写明为何保留，不得只看不动）',
                  det)
+    # 师话短句占比（电报体密度筛查，见常量处的实测校准与两条已否掉的路子）
+    n_short, n_all, ratio, samples = scan_short_sentence_ratio(lines)
+    if n_all:
+        verdict = ('⚠ 高于筛查线，按 prose-style-benchmark.md §二五类改法逐处复看'
+                   if ratio > SHORT_RATIO_HINT else '在基准区间内')
+        rep.info(f'师话短句占比 {ratio:.1%}（{n_short}/{n_all} 句 ≤{SHORT_SENT_MAX} 字）'
+                 f'——筛查线 {SHORT_RATIO_HINT:.0%}，{verdict}。'
+                 f'只报数不判：指令密集的课时天然偏高，判据仍是「读出声像不像真老师顺嘴讲」',
+                 [f'最短的几句：' + '／'.join(sorted(set(samples), key=len)[:8])] if samples else [])
     # 池8 技法口令密度（动态检测，无预置词表）
     jargon = scan_jargon(lines)
     if jargon:
