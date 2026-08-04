@@ -1,18 +1,132 @@
 ---
 name: laojohn-ppt
-description: 把"老约翰深度阅读读书会"风格的课件中间稿 (.md) 编译为老师投屏用 .pptx。当用户要求"把课件中间稿做成 PPT""根据中间稿生成幻灯片""烘焙投屏课件"或基于 laojohn-ppt-draft 的产物制作 PPT 时使用本技能。需要先有一份符合契约的中间稿 .md 才能调用。
+description: 把"老约翰深度阅读读书会"风格的课件中间稿 (.md) 编译为老师投屏用 .pptx；另承载写作课「外部 PPT 后处理链」（认领归位→注入点击动画→详案页标回注）。当用户要求"把课件中间稿做成 PPT""烘焙投屏课件"，或说"PPT 放好了""外部 PPT 处理一下""新做的课件处理一下""这份 PPT 是外面做的，加下动画"时使用本技能。
 ---
 
-# laojohn-ppt — 中间稿 → 投屏 PPT 编译器
+# laojohn-ppt — 投屏 PPT 编译器 + 外部 PPT 后处理链
 
-把一份"课件中间稿 markdown"编译为投屏专用 `.pptx`（16:9，微软雅黑 + 宋体，零依赖）。
-本技能只做"渲染"，不做内容生成；上游中间稿由 `laojohn-ppt-draft` 或人工撰写产生。
+两条用途，**按线走、别混用**：
+
+| 线 | 走法 | 目录 |
+|---|---|---|
+| 读书会 | **编译**：中间稿 `.md` → `.pptx`（16:9，微软雅黑 + 宋体，零依赖） | `读书会课件PPT输出\` |
+| 写作课（2026-08-03 起） | **后处理链**：外部平台生成 pptx，本仓做归位/动画/页标 | `写作课件PPT输出\` |
 
 ## 何时使用
 
-- 用户说"把中间稿做成 PPT""根据中间稿生成投屏 PPT""把这份 md 烘焙成 pptx"
-- 用户上传一份带 `## P\d+ | 页型:xx` 分页的 md 并希望产出 pptx
-- 上游 `laojohn-ppt-draft` 已输出中间稿，需要继续编译
+- "把中间稿做成 PPT""烘焙投屏课件"，或上游 `laojohn-ppt-draft` 刚出中间稿 → **编译**（见下方契约速览）
+- **"PPT 放好了""外部 PPT 处理一下""新做的课件处理一下""外面做的，加下动画"** → **后处理链**
+
+---
+
+## 外部 PPT 后处理链（写作课线）
+
+所有命令都**从项目根执行**（`(Get-Location).Path` 确认盘符，移动硬盘会变）。
+
+用户的动作是：外部平台出好 PPT → 丢进 `写作课件PPT输出\` **根目录** → 说一句"处理一下"。
+接到这句话就跑下面**三步**，别只做动画就收工（页标漏了，老师对着详案找不到讲到第几页）。
+
+> 两件**不属于本链**的事：**打包**交付时另跑 `laojohn-writing-package`，由用户决定时机；**逐页讲稿写作课线已停产**（2026-08-03，`写作课件讲稿输出\` 目录已撤），不要再产。
+
+### 第 1 步 · 认领归位
+
+```bash
+PYTHONUTF8=1 python .claude\skills\laojohn-ppt\scripts\place_pptx.py --dry-run   # 先看计划
+PYTHONUTF8=1 python .claude\skills\laojohn-ppt\scripts\place_pptx.py             # 再执行
+```
+
+把根目录的散件按文件名认领到课次，移进 `写作课件PPT输出\<年级册>-第N单元-<题目>\`，按内容定名（两节合一→`<题目>-全课.pptx`）。
+
+- **散在根目录的件打包收不到**（`package_writing.py` 只 glob 课次子目录），这一步不能跳。
+- 认领不唯一时脚本会列候选**让你选，绝不猜**——照它给的清单问用户。
+- 脚本会报告子目录里已有的其它 pptx：**作废的旧烘焙件要删**，否则打包一并收走（踩过）。
+
+### 第 2 步 · 注入点击动画
+
+```bash
+PYTHONUTF8=1 python .claude\skills\laojohn-ppt\scripts\inspect_pptx.py "<课次目录>\<题目>-全课.pptx"   # ① 勘查出建议分组
+#                                     ② 用 regroup_anim.py 重建分组（见下，不能省）
+PYTHONUTF8=1 python .claude\skills\laojohn-ppt\scripts\animate_pptx.py "<同上>.pptx" "<同上>-anim.json" --in-place   # ③ 注入
+```
+
+**第 ② 步不能省，且不要手改 JSON**：分组是教学判断，几何启发式只给得出「组的构成」，给不出教学顺序，实测还会跨条目错位（把上一条的正文和下一条的序号绑成一组）。用 `regroup_anim.py` 按版式模式重建——
+
+```python
+import sys; sys.path.insert(0, r"<项目根>\.claude\skills\laojohn-ppt\scripts")
+from regroup_anim import dump_shapes, run, audit
+dump_shapes(PPTX, [4, 8])            # 先打印 位置索引→shape_id→几何→文字 对照表
+PLAN = {3: ("row", 0.5),             # 自上而下逐条：单列条目页、表格逐行页
+        5: ("grid", 0.8),            # 先分行、行内再分格：2×2 网格页
+        7: ("col", None),            # 自左向右逐栏：并列卡片页
+        4: ("explicit", [[7,8],[17],[10,11]])}   # 顺序与版面不一致时显式写位置索引
+run(PPTX, PLAN); audit(PPTX)         # 落盘 -anim.json，并自检装饰认领
+```
+
+**分组顺序一律以详案为准**（2026-08-04 用户拍板）：点击次序跟着详案师话走，哪怕屏幕上要从底部跳回顶部。老师照详案讲、点到哪句屏上亮哪句，不会脱节。实测有四页存在详案顺序与版面上下位置打架，全部以详案为准。
+
+**四个坑**（细节与实测现象见 `regroup_anim.py` 文件头）：
+
+1. **工作单里的数字是 `shape_id`，不是 `slide.shapes` 的位置索引。** 两套编号数值范围重叠（实测 `shape_id = 索引 + 2`），第 ③ 步那道「id 是否存在于本页」的校验拦不住——曾整份 19 页全部绑错、标题被当正文藏起来，靠投屏才发现。`animate_pptx.py` 现已加防呆（页顶元素或整页背景被卷入即报错退出，`--allow-header` 可放行）。
+2. 装饰的吸附目标只能是文字形状，否则一串小圆点会互相吸引、全聚到第一组。
+3. 判断「装饰罩住了谁」必须二维；判断「是不是页顶装饰」看它整体是否在正文之上，别拿固定线卡（大底纹的 top 常压着标题区）。
+4. 认领小装饰用边缘间隙，不是中心距离（圆点会被同行一个高大标签抢走）。
+
+- 动画 XML **一律走 `helpers.add_click_reveal`**，禁在新脚本里复制那段时间树——`helpers.py` 是两条线共用、有 bug 史的横切层，必须单一源。
+- 注入前先清该页已有 `<p:timing>`，**幂等可反复跑**；已带动画的件也能重新分组再注入。
+- 自动标 skip：封面、末页、课时分隔页（眉标纯数字或含 END）、可分组数不足、整页只有一张表。其余靠人判断。
+- **pptx 被 PowerPoint/WPS 打开时注入会 PermissionError**，让用户关掉再跑。
+
+### 第 3 步 · 详案页标回注（委托 `laojohn-ppt-draft`）
+
+```bash
+# ① 从 pptx 生成待填骨架（page/kicker/title 自动填好，anchor 留空）
+PYTHONUTF8=1 python .claude\skills\laojohn-ppt-draft\scripts\pageback_annotate.py "<详案.md>" \
+    --from-pptx "<同上>.pptx" -o "写作课件中间稿输出\<课次>\<题目>-页标映射.json"
+# ② 人工填每条 anchor＝详案里该页取材处的行首原文
+# ③ 回注（幂等：先清旧标再重插）
+PYTHONUTF8=1 python .claude\skills\laojohn-ppt-draft\scripts\pageback_annotate.py "<详案.md>" "<映射.json>"
+```
+
+- **锚点按「翻页发生在开始讲这段时」定位**——锚到那句师话，别等到表格或引文才标。
+- 映射表存 `写作课件中间稿输出\<课次>\`（该目录入库；PPT 输出目录整个被 gitignore，放那儿会丢）。人工填的锚点是判断成果，值得留存复用。
+- 锚点不存在/不唯一/留空/页序倒挂，脚本一律**报错退出且不改详案**——照报错改映射表即可。
+- **回注改动了详案 `.md`，必须重渲 docx——两步，缺一不可**：
+
+```bash
+PYTHONUTF8=1 python .claude\skills\laojohn-lesson-plan\assets\md_to_laojohn_docx.py "<详案.md>" \
+    --header-left "老约翰·同步习作" --header-right "写清楚·写生动·有章法"
+PYTHONUTF8=1 python .claude\skills\laojohn-lesson-plan\assets\style_front_page.py "<详案.md>" "<详案.docx>"
+```
+漏传页眉参数会**静默回落**成读书会页眉。**漏跑第二步 `style_front_page.py` 同样静默**——首页掉回共享引擎的朴素版式（提纲表变成表头整行铺底的原始 md 表格，而非定稿的左侧栏铺底单表），2026-08-03 已因此返工一次。docx 被 WPS 占用会报 PermissionError，请用户关掉再跑。
+
+### 收尾核验
+
+- **动画绑定必须从 pptx 的时间树反查实证**，别只信注入器那句「回读核验通过」——它只对得上「点击条数」，对不上「绑到了哪个形状」，坑 1 就是这么漏过去的：
+
+```python
+import json, re, zipfile
+from pptx import Presentation
+from pptx.util import Emu
+prs, z = Presentation(P), zipfile.ZipFile(P)
+doc = json.load(open(P.replace(".pptx", "-anim.json"), encoding="utf-8"))
+for pg, sl in enumerate(prs.slides, 1):
+    v = doc["slides"].get(str(pg))
+    xml = z.read(f"ppt/slides/slide{pg}.xml").decode("utf-8", "ignore")
+    tgt = {int(x) for x in re.findall(r'spTgt spid="(\d+)"', xml)}
+    if not v or v.get("skip"):
+        assert not xml.count('nodeType="clickEffect"'), f"P{pg} 应跳过却有动画"
+        continue
+    assert xml.count('nodeType="clickEffect"') == len(v["groups"])
+    assert tgt == {s for g in v["groups"] for s in g}
+    assert not [sh for sh in sl.shapes if sh.shape_id in tgt      # 标题不得被卷入
+                and sh.has_text_frame and sh.text_frame.text.strip()
+                and Emu(sh.top).inches < Emu(prs.slide_height).inches * 0.22]
+```
+
+- 课次目录里 pptx 只剩该留的那份（作废件已删）
+- 详案页标数 == pptx 页数 − 封面 − END，页码连续
+- 详案 docx 已重渲
+- **投屏前须核 ASCII 直引号**：外部平台产的文本常带直引号，与全仓弯引号铁律冲突（样本 25 页里 92 处）。这属于内容问题，动画工具不修——发现了告诉用户。
 
 ## 文件加载策略（先读这里）
 
@@ -41,10 +155,10 @@ description: 把"老约翰深度阅读读书会"风格的课件中间稿 (.md) �
 
 ```
 读书会（文体缺省） → <项目根目录>\读书会课件PPT输出\<书名>\
-写作课（文体：写作） → <项目根目录>\写作课件PPT输出\<年级册>-<题目>\
+写作课（文体：写作） → <项目根目录>\写作课件PPT输出\<年级册>-第N单元-<题目>\
 ```
 
-例：`<项目根目录>\读书会课件PPT输出\俗世奇人\俗世奇人-导读课.pptx`、`<项目根目录>\写作课件PPT输出\三上-这儿真美\这儿真美-写作指导课.pptx`
+例：`<项目根目录>\读书会课件PPT输出\俗世奇人\俗世奇人-导读课.pptx`、`<项目根目录>\写作课件PPT输出\三上-第六单元-这儿真美\这儿真美-写作指导课.pptx`
 
 ```bash
 cd .claude/skills/laojohn-ppt/scripts
@@ -79,7 +193,12 @@ python build_ppt.py --input "<项目根目录>\读书会课件中间稿输出\<�
 │   ├── layouts_writing.py  写作课页型渲染 RENDERERS_WRITING
 │   ├── theme.py            字号/颜色/坐标常量（读书会默认）
 │   ├── theme_writing.py    写作课视觉变体常量
-│   └── helpers.py          文本框/占位框/表格工具 + 点击动画注入（共享·课型无关）
+│   ├── helpers.py          文本框/占位框/表格工具 + 点击动画注入（共享·课型无关）
+│   │                       ——外部 PPT 后处理链（写作课线）——
+│   ├── place_pptx.py       第1步 认领归位：根目录散件 → 课次子目录 + 规范命名
+│   ├── inspect_pptx.py     第2步① 勘查形状、按卡片聚簇出「建议」分组工作单
+│   ├── regroup_anim.py     第2步② 按版式模式重建分组＋装饰认领（四个坑写在文件头）
+│   └── animate_pptx.py     第2步③ 按工作单注入点击动画（import helpers，幂等，回读核验＋绑定防呆）
 ├── assets/    logo/ · reference-ppt/ · decorations/
 ├── examples/  mini-test.md（最小端到端样例）+ mini-test.pptx
 └── tools/     parse_slide.py（开发期 XML 侦察）
