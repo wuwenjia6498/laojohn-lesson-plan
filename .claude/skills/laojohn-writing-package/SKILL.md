@@ -1,6 +1,6 @@
 ---
 name: laojohn-writing-package
-description: 把一节写作课散落各输出目录的全部成品（详案/两节PPT/讲稿/三侧配套物料）一键复制归集进交付文件夹「写作课整套文件打包输出\<年级册>-<题目>\」。当用户要求打包写作课/归集写作课成品/把《XX》习作课物料收到一起/写作课整套打包时使用。只做文件归集（复制不移动），不生成内容；读书会书目的打包走 laojohn-course-package。
+description: 把一节写作课散落各输出目录的全部成品（详案/PPT/三侧配套物料）一键复制归集进交付文件夹「写作课整套文件打包输出\<年级册>-第N单元-<题目>\」。当用户要求打包写作课/归集写作课成品/把《XX》习作课物料收到一起/写作课整套打包时使用。只做文件归集（复制不移动），不生成内容；读书会书目的打包走 laojohn-course-package。
 ---
 
 # 老约翰 · 写作课整套文件打包（成品归集）
@@ -10,11 +10,10 @@ description: 把一节写作课散落各输出目录的全部成品（详案/两
 ## 产出结构（固定 · 与读书会打包同构）
 
 ```
-写作课整套文件打包输出\<年级册>-<题目>\
-├── 课件PPT\               ← 写作课件PPT输出\<年级册>-<题目>\*.pptx（两节：写作指导课 + 当堂写作与评改课）
-├── 逐页讲稿\              ← 写作课件讲稿输出\<年级册>-<题目>\*.docx（md 是源，默认不收）
-├── 配套物料\              ← 写作配套输出\<年级册>-<题目>\*.pdf（学生合订 / 教师合订 / 家长合订）
-└── <年级册>-<题目>-写作课详案.docx  ← 写作课详案输出\（放打包根目录，主交付件一眼可见）
+写作课整套文件打包输出\<年级册>-第N单元-<题目>\
+├── 课件PPT\               ← 写作课件PPT输出\<年级册>-第N单元-<题目>\*.pptx（外部平台生成、本仓做完动画的成品；两节合一时是 1 份 `<题目>-全课.pptx`，分节出则 2 份）
+├── 配套物料\              ← 写作配套输出\<年级册>-第N单元-<题目>\*.pdf（学生合订 / 教师合订 / 家长合订）
+└── <年级册>-第N单元-<题目>-写作课详案.docx  ← 写作课详案输出\（放打包根目录，主交付件一眼可见）
 ```
 
 ## 收哪些文件（默认：仅对外成品）
@@ -23,7 +22,6 @@ description: 把一节写作课散落各输出目录的全部成品（详案/两
 |------|--------|------------|
 | 写作课详案 | （根目录） | `.docx` |
 | 投屏PPT | `课件PPT\` | `.pptx` |
-| 逐页讲稿 | `逐页讲稿\` | `.docx`（讲稿专用版式打印件）；`.md` 是源，默认不收（`--with-sources` 才收） |
 | 配套物料 | `配套物料\` | 三侧合订 `.pdf`；`.html` / `_data.json` 是源，默认不收 |
 
 - **默认过滤掉中间稿与可编辑源**（md/json/html），交付包保持干净；`--with-sources` 时一并打包。
@@ -35,23 +33,23 @@ description: 把一节写作课散落各输出目录的全部成品（详案/两
 
 ```bash
 # 本机用 python（不是 python3）；脚本里有 ✓ 等字符，务必带 PYTHONUTF8=1
-PYTHONUTF8=1 python ".claude/skills/laojohn-writing-package/assets/package_writing.py" <年级册>-<题目>
+PYTHONUTF8=1 python ".claude/skills/laojohn-writing-package/assets/package_writing.py" <年级册>-第N单元-<题目>
 ```
 
 常用参数：
 
 ```bash
 # 先演练看清单、不实际复制（推荐第一步先 dry-run 核对哪些缺料）
-PYTHONUTF8=1 python ".claude/.../package_writing.py" 三上-这儿真美 --dry-run
+PYTHONUTF8=1 python ".claude/.../package_writing.py" 三上-第六单元-这儿真美 --dry-run
 
 # 连可编辑源文件(md/json/html)一起打包
-PYTHONUTF8=1 python ".claude/.../package_writing.py" 三上-这儿真美 --with-sources
+PYTHONUTF8=1 python ".claude/.../package_writing.py" 三上-第六单元-这儿真美 --with-sources
 
-# 直接打包到桌面/指定路径（覆盖默认 写作课整套文件打包输出\<年级册>-<题目>）
-PYTHONUTF8=1 python ".claude/.../package_writing.py" 三上-这儿真美 --dest "C:/Users/xx/Desktop/这儿真美"
+# 直接打包到桌面/指定路径（覆盖默认 写作课整套文件打包输出\<年级册>-第N单元-<题目>）
+PYTHONUTF8=1 python ".claude/.../package_writing.py" 三上-第六单元-这儿真美 --dest "C:/Users/xx/Desktop/这儿真美"
 ```
 
-- 课次标识用 **`<年级册>-<题目>`**（如 `三上-这儿真美`），与 `写作课详案输出\`、`写作配套输出\`、`写作课件*输出\` 的目录/文件命名口径一致；PPT/讲稿**文件名**内是纯题目（如 `这儿真美-写作指导课.pptx`），按子目录匹配、不受影响。
+- 课次标识用 **`<年级册>-第N单元-<题目>`**（如 `三上-第六单元-这儿真美`），与 `写作课详案输出\`、`写作配套输出\`、`写作课件*输出\` 的目录/文件命名口径一致；PPT **文件名**内是纯题目（如 `这儿真美-全课.pptx`），按子目录匹配、不受影响。**写作课线已无逐页讲稿**（2026-08-03 停产）。
 - **复制不移动**：各原始输出目录是单一事实源，归集后原目录原封不动。
 - 目标已存在则**覆盖同名文件**（重跑即刷新；不会删掉目标里你手动加的别的文件）。
 
@@ -65,6 +63,6 @@ PYTHONUTF8=1 python ".claude/.../package_writing.py" 三上-这儿真美 --dest 
 
 ## 边界（不做）
 
-- **不生成任何内容**：缺哪份物料就去对应 skill 生成（详案→laojohn-writing-lesson、PPT 链→laojohn-ppt-draft/laojohn-ppt、配套→laojohn-writing-materials），再回来重跑打包。
+- **不生成任何内容**：缺哪份物料就去对应 skill 生成（详案→laojohn-writing-lesson、PPT→外部平台出件后由 laojohn-ppt 做后处理、配套→laojohn-writing-materials），再回来重跑打包。
 - 不改、不删、不移动原始输出目录里的文件（只读取并复制出去）。
 - 读书会书目的打包不归本技能，走 laojohn-course-package（`读书会整套文件打包输出\<书名>\`）。

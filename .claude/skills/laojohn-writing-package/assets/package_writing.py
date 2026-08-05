@@ -4,22 +4,24 @@ r"""
 
 把一节写作课（同步习作）散落在各输出目录里的成品，复制归集进一个交付文件夹：
 
-    写作课整套文件打包输出\<年级册>-<题目>\
-    ├── 课件PPT\            ← 写作课件PPT输出\<年级册>-<题目>\*.pptx
-    ├── 逐页讲稿\           ← 写作课件讲稿输出\<年级册>-<题目>\*.docx（md 是源，默认不收）
-    ├── 配套物料\           ← 写作配套输出\<年级册>-<题目>\*.pdf（学生/教师/家长三侧合订）
-    └── <年级册>-<题目>-写作课详案.docx  ← 写作课详案输出\（放根目录）
+    写作课整套文件打包输出\<年级册>-第N单元-<题目>\
+    ├── 课件PPT\            ← 写作课件PPT输出\<年级册>-第N单元-<题目>\*.pptx
+    │                          （2026-08-03 起：外部平台生成 + 本仓注入动画的成品。
+    │                           两节合一时是 1 份 <题目>-全课.pptx；务必确保该目录里
+    │                           没有作废的旧烘焙件，否则会一起被收进交付包）
+    ├── 配套物料\           ← 写作配套输出\<年级册>-第N单元-<题目>\*.pdf（学生/教师/家长三侧合订）
+    └── <年级册>-第N单元-<题目>-写作课详案.docx  ← 写作课详案输出\（放根目录）
 
 约定：
 - 复制不移动——各原始输出目录是单一事实源，绝不破坏。
-- 默认只收对外成品（pptx/pdf/docx；逐页讲稿只收 docx）；
-  --with-sources 时额外把可编辑源文件（md/json/html）一并打包。
+- 默认只收对外成品（pptx/pdf/docx）；--with-sources 时额外把可编辑源文件（md/json/html）一并打包。
+- **写作课线不再有逐页讲稿**（2026-08-03 停产，目录已撤）；读书会线的讲稿由 laojohn-course-package 收，与本脚本无关。
 - 缺料不报错、不阻断：跳过并在汇总里标「缺」，让用户知道哪些物料还没生成。
 
 用法：
-    PYTHONUTF8=1 python package_writing.py 三上-这儿真美
-    PYTHONUTF8=1 python package_writing.py 三上-这儿真美 --with-sources
-    PYTHONUTF8=1 python package_writing.py 三上-这儿真美 --dest "C:/Users/xx/Desktop/这儿真美"
+    PYTHONUTF8=1 python package_writing.py 三上-第六单元-这儿真美
+    PYTHONUTF8=1 python package_writing.py 三上-第六单元-这儿真美 --with-sources
+    PYTHONUTF8=1 python package_writing.py 三上-第六单元-这儿真美 --dest "C:/Users/xx/Desktop/这儿真美"
 """
 import argparse
 import shutil
@@ -40,12 +42,6 @@ CATEGORIES = [
         "dest": "课件PPT",
         "globs": ["写作课件PPT输出/{unit}/*"],
         "primary": {".pptx"},
-    },
-    {
-        "label": "逐页讲稿",
-        "dest": "逐页讲稿",
-        "globs": ["写作课件讲稿输出/{unit}/*"],
-        "primary": {".docx"},  # 只收 docx 打印件；md 视为源（默认跳过，--with-sources 才收）
     },
     {
         "label": "配套物料",
@@ -84,7 +80,7 @@ def gather(root: Path, unit: str, with_sources: bool):
 
 def main():
     ap = argparse.ArgumentParser(description="把一节写作课的全部成品归集进一个交付文件夹")
-    ap.add_argument("unit", help="课次标识 <年级册>-<题目>，如：三上-这儿真美")
+    ap.add_argument("unit", help="课次标识 <年级册>-第N单元-<题目>，如：三上-第六单元-这儿真美")
     ap.add_argument("--root", default=None, help="项目根目录（默认当前工作目录）")
     ap.add_argument("--out", default=None,
                     help="打包输出顶层目录名（默认：写作课整套文件打包输出）")
