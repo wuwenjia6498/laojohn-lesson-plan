@@ -99,6 +99,15 @@ PYTHONUTF8=1 python .claude\skills\laojohn-lesson-plan\assets\style_front_page.p
 ```
 漏传页眉参数会**静默回落**成读书会页眉。**漏跑第二步 `style_front_page.py` 同样静默**——首页掉回共享引擎的朴素版式（提纲表变成表头整行铺底的原始 md 表格，而非定稿的左侧栏铺底单表），2026-08-03 已因此返工一次。docx 被 WPS 占用会报 PermissionError，请用户关掉再跑。
 
+- **该课若有配图版（详案正文含 `【图位:…】`），配图版必须一并重出**——老师实际用的是配图版（教材图全在那儿），只重渲无图版等于把没页标的那份交出去。2026-08-04 已漏过一次：页标回注后只重渲无图版，续写故事的配图版停在两天前、不含 21 个页标。**必须在上面两步之后跑，且必须传 `--base-docx`**：
+
+```bash
+PYTHONUTF8=1 python .claude\skills\laojohn-lesson-plan\assets\insert_images_docx.py "<详案.md>" \
+    --profile writing --base-docx "<详案.docx>"
+```
+
+不传 `--base-docx` 的话，回插件会自己现调引擎另出一份基础 docx——那份**没跑 `style_front_page.py`**，首页会掉回朴素版式。传入刚重渲好的无图版，配图版才同时继承页标与首页版式。取图目录由 `writing` 档的 `name_from: stem` 按详案文件名解析到 `写作课教材插图\<年级册>-第N单元-<题目>\`，不用给 `--images-dir`。
+
 ### 收尾核验
 
 - **动画绑定必须从 pptx 的时间树反查实证**，别只信注入器那句「回读核验通过」——它只对得上「点击条数」，对不上「绑到了哪个形状」，坑 1 就是这么漏过去的：
@@ -121,6 +130,25 @@ for pg, sl in enumerate(prs.slides, 1):
     assert not [sh for sh in sl.shapes if sh.shape_id in tgt      # 标题不得被卷入
                 and sh.has_text_frame and sh.text_frame.text.strip()
                 and Emu(sh.top).inches < Emu(prs.slide_height).inches * 0.22]
+```
+
+- **pptx 在页标回注之后又改动过的话，须比对页数与每页眉标·标题**——变了就重跑第 3 步。改动只涉及页内文字/顺序（本次三份都是）则页标仍然有效，不必重来；一旦增删页，页标会整体错位且同样是静默的。比对时注意两类假阳性：眉标形如 `附 · 习作讲评` 的，页标只留后半段；标题里 ` · ` 两侧的空格在页标中会被压掉。
+
+```python
+import io, re
+from pptx import Presentation
+from pptx.util import Emu
+norm = lambda s: re.sub(r"\s+", "", s or "").replace("·", "")
+tags = {int(m.group(1)): m.group(2) for m in
+        re.finditer(r"〖PPT 第(\d+)页 · ([^〗]*)〗", io.open(MD, encoding="utf-8").read())}
+for pg, sl in enumerate(Presentation(PPTX).slides, 1):
+    if pg not in tags:
+        continue
+    tops = sorted([s for s in sl.shapes if s.has_text_frame and s.text_frame.text.strip()],
+                  key=lambda s: Emu(s.top).inches)
+    got = norm("".join(t.text_frame.text for t in tops[:2]))
+    want = norm(tags[pg]).replace("课时分隔", "")
+    assert not want or want in got or got in want, f"P{pg} 页标与 pptx 对不上"
 ```
 
 - 课次目录里 pptx 只剩该留的那份（作废件已删）
