@@ -35,47 +35,6 @@
     display:flex;align-items:center;gap:6px;}
   .sech::before{content:"";width:4px;height:15px;background:var(--blue-head);border-radius:2px;}
 
-  /* ===== 成长反馈页：学生信息条 ===== */
-  .infobar{display:flex;gap:6mm;background:var(--zebra);border-radius:5px;padding:3mm 5mm;margin-bottom:4mm;
-    font-size:11px;color:var(--ink);}
-  .infobar .f{display:flex;align-items:baseline;gap:4px;}
-  .infobar .f .lb{color:var(--ink-soft);}
-  .infobar .f .un{border-bottom:1px solid var(--brown-line);min-width:60px;display:inline-block;}
-
-  /* ===== 成长反馈页：作品展示区（留白待老师填真实作品，禁生成内容）===== */
-  .workbox{border:1.5px solid var(--brown-line);border-radius:5px;background:#FEFDFB;
-    padding:4mm 5mm;margin-bottom:4mm;min-height:52mm;position:relative;}
-  .workbox .ph{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;
-    color:var(--ink-soft);font-size:10.5px;line-height:1.7;}
-  .workbox .ph b{display:block;font-size:11.5px;color:var(--brown-deep);margin-bottom:1.5mm;}
-
-  /* ===== 成长反馈页：这次的进步 ===== */
-  .progress{background:var(--warm-bg);border:1px solid var(--warm-line);border-radius:5px;
-    padding:4mm 5mm;margin-bottom:4mm;}
-  .progress .ph{font-size:12px;font-weight:800;color:var(--warm-ink);margin-bottom:3mm;}
-  .abilities{display:flex;flex-direction:column;gap:2mm;margin-bottom:3mm;}
-  .ab{display:flex;align-items:flex-start;gap:7px;font-size:11px;line-height:1.4;}
-  .ab .star{color:var(--warm-line);font-size:12px;flex-shrink:0;line-height:1.2;}
-  .ab .txt{color:var(--ink);}
-  .ab .txt b{color:var(--warm-ink);}
-  .comment{border-top:1px dashed var(--warm-line);padding-top:3mm;}
-  .comment .cl{font-size:10.5px;color:var(--ink-soft);margin-bottom:2mm;}
-  .comment .wline{border-bottom:1px solid var(--warm-line);height:6mm;}
-
-  /* ===== 成长反馈页：下次关注 + 寄语 ===== */
-  .bottomrow{display:flex;gap:5mm;}
-  .nextfocus{flex:1;background:var(--blue-soft);border-radius:5px;padding:4mm 5mm;}
-  .nextfocus .nh{font-size:11.5px;font-weight:800;color:var(--blue-deep);margin-bottom:2mm;}
-  .nextfocus .nl{border-bottom:1px solid var(--blue-line);height:6mm;margin-bottom:2mm;}
-  .encourage{flex:1;border:1.5px dashed var(--brown-line);border-radius:5px;padding:4mm 5mm;}
-  .encourage .eh{font-size:11.5px;font-weight:800;color:var(--brown-deep);margin-bottom:3mm;}
-  .encourage .el{border-bottom:1px solid var(--brown-line);height:6mm;margin-bottom:2mm;}
-  .encourage .sign{font-size:10px;color:var(--ink-soft);text-align:right;margin-top:2mm;}
-
-  .teachernote{font-size:9.5px;color:var(--ink-soft);margin-top:4mm;padding-top:2.5mm;
-    border-top:1px solid var(--brown-line);line-height:1.5;}
-  .teachernote b{color:var(--brown-deep);}
-
   /* ===== 家长一页纸 ===== */
   .pg-op{line-height:1.6;}
   .pg-op .titlewrap{margin-bottom:5mm;}
@@ -114,65 +73,11 @@
 </head>
 <body>
 
-<!-- ============ 第 1 页：习作成长反馈（结构件：作品/评语留白待老师手填） ============ -->
-<div class="sheet pg-fb">
+<!-- ============ 家长一页纸（本侧唯一一页） ============ -->
+<div class="sheet pg-op">
 
   <div class="brandbar">
-    <div class="toptag">习作成长反馈 · 请家长收阅</div>
-    <img class="logo-img" src="__LOGO_SRC__" alt="老约翰深度阅读" onerror="this.style.display='none'">
-  </div>
-
-  <div class="titlewrap">
-    <div class="kicker" id="fb-kicker"></div>
-    <h1>孩子这一篇，写得怎么样 <span class="light" id="fb-topic"></span></h1>
-  </div>
-
-  <div class="infobar">
-    <div class="f"><span class="lb">姓名</span><span class="un"></span></div>
-    <div class="f"><span class="lb">日期</span><span class="un"></span></div>
-    <div class="f"><span class="lb">本次习作</span><span class="un" style="min-width:90px" id="fb-book"></span></div>
-  </div>
-
-  <div class="sech">这次写的（节选）</div>
-  <div class="workbox">
-    <div class="ph"><b>誊入 / 粘贴孩子这一篇最出彩的一段</b>把老师标出的好句子一并留着，让家长看见具体写了什么</div>
-  </div>
-
-  <div class="sech">这次，在这里迈了一步</div>
-  <div class="progress">
-    <div class="ph">本课要练的能力，孩子做到了哪几样（勾出并举例）：</div>
-    <div class="abilities" id="fb-abilities"><!-- 能力勾选项由 JS 注入 --></div>
-    <div class="comment">
-      <div class="cl">老师想对你说（具体到那一句）：</div>
-      <div class="wline"></div>
-    </div>
-  </div>
-
-  <div class="bottomrow">
-    <div class="nextfocus">
-      <div class="nh">下次，可以再往前一点</div>
-      <div class="nl"></div>
-      <div class="nl"></div>
-    </div>
-    <div class="encourage">
-      <div class="eh">给孩子的一句话</div>
-      <div class="el"></div>
-      <div class="sign">指导老师：＿＿＿＿</div>
-    </div>
-  </div>
-
-  <div class="teachernote">
-    <b>填写提示（给老师）：</b>反馈要<b>具体到孩子写的那一句</b>，不写“写得不错/继续加油”这类空话；
-    “迈了一步”只勾真做到的，宁少勿虚；作品节选用孩子<b>真实作品</b>，不代笔、不美化。下次关注点只提<b>一条</b>，别一次列一堆。
-  </div>
-
-</div>
-
-<!-- ============ 第 2 页：家长一页纸 ============ -->
-<div class="sheet page-break pg-op">
-
-  <div class="brandbar">
-    <div class="toptag">家长一页纸 · 陪孩子把课堂延伸到家里</div>
+    <div class="toptag">家长页</div>
     <img class="logo-img" src="__LOGO_SRC__" alt="老约翰深度阅读" onerror="this.style.display='none'">
   </div>
 
@@ -187,7 +92,7 @@
     <p id="op-para"></p>
   </div>
 
-  <div class="sech">一眼看懂差别</div>
+  <div class="sech">两种写法，比一比</div>
   <div class="compare">
     <div class="col bad">
       <div class="ch">课上要改掉的写法</div>
@@ -206,7 +111,7 @@
   </div>
 
   <div class="dont">
-    <div class="dh">帮忙时，请避开这两件</div>
+    <div class="dh">在家陪的时候，别做这两件事</div>
     <p id="op-dont"></p>
   </div>
 
@@ -225,18 +130,7 @@
     const d=DATA, m=d.meta;
     document.title='家长合订 · '+m.topic;
 
-    /* ---- 第 1 页：成长反馈 ---- */
-    document.getElementById('fb-kicker').textContent=m.kicker;
-    document.getElementById('fb-topic').textContent='· '+m.topic;
-    document.getElementById('fb-book').textContent='《'+m.topic+'》';
-    const abox=document.getElementById('fb-abilities');
-    d.feedback.abilities.forEach(t=>{
-      const div=document.createElement('div'); div.className='ab';
-      div.innerHTML='<span class="star">★</span><span class="txt">'+rich(t)+'</span>';
-      abox.appendChild(div);
-    });
-
-    /* ---- 第 2 页：家长一页纸 ---- */
+    /* ---- 家长一页纸 ---- */
     const o=d.onepager;
     document.getElementById('op-kicker').textContent=m.kicker;
     document.getElementById('op-topic').textContent='· '+m.topic;

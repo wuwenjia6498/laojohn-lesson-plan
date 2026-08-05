@@ -19,7 +19,7 @@ EXPECTED_PAGES = 2  # 速览页1 + 怎么讲活1
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("data", help="教师合订 data.json 路径")
-    ap.add_argument("out_dir", help="输出目录（写作配套输出\\<年级册>-<题目>\\）")
+    ap.add_argument("out_dir", help="输出目录（写作配套输出\\<年级册>-第N单元-<题目>\\）")
     ap.add_argument("--template", default=None)
     args = ap.parse_args()
     template = args.template or ASSETS / "template_teacher.html"
