@@ -325,6 +325,40 @@ _TRIM_STD = 8           # 行/列判空白带：灰度标准差上限（均匀�
 _TRIM_MAX_RATIO = 0.15  # 四边裁量合计超过任一边的 15% 判异常：不裁、告警（防整幅浅色图被误吃）
 
 
+_PNG_SIG = b'\x89PNG\r\n\x1a\n'
+
+
+def ensure_real_png(png_path):
+    """确保落盘文件真的是 PNG——模型常返回 JPEG 字节，直接写成 .png 会做出「披着 .png 外衣的 JPEG」。
+
+    ★ 2026-08-04 实测得出：Gemini 通道这一批里，**主-01 是真 PNG、练-01 与备-01 是 JPEG**。
+      差别不在模型，而在 `trim_border`——它只有真的裁到白边时才 `img.crop(...).save(png_path)`，
+      那一次 PIL 重存按扩展名编码成 PNG，等于**碰巧**把格式修正了；`cut_x == cut_y == 0` 时直接
+      return，原始 JPEG 字节就原样留在 .png 文件里。所以「哪张是真 PNG」取决于有没有白边可裁，
+      纯属偶然。
+
+    后果两条（都静默）：
+      ① **Photoshop 等按扩展名派发解析模块的软件打不开**（用 PNG 模块读 JPEG 数据，报
+         「文件格式模块不能解析该文件」）；预览、PIL、python-docx 按内容嗅探，反而看不出问题，
+         所以能一路混到交付。
+      ② 文件名与内容不符，后续凡按扩展名判格式的环节都会踩。
+
+    **不能改成把文件重命名为 .jpg**：`<编号>.png` 是取图契约（`imgspec_parser.image_dir` 与
+    `insert_images_docx.py` 都按它定位），改名等于断链。正确做法是把内容转成真 PNG。
+    转换本身不再损失画质——模型给的就是 JPEG，那已是原件，转 PNG 只是让容器与扩展名一致。
+    """
+    _ensure_pkg('pillow', 'PIL')
+    from PIL import Image
+    with open(png_path, 'rb') as f:
+        if f.read(8) == _PNG_SIG:
+            return png_path
+    img = Image.open(png_path)
+    fmt = img.format
+    img.convert('RGB').save(png_path, format='PNG')
+    print(f'    [ensure_real_png] 落盘字节实为 {fmt}，已转存为真 PNG：{os.path.basename(png_path)}')
+    return png_path
+
+
 def trim_border(png_path):
     """裁掉图像四边的白色/纸底空白带，再以中心为基准裁回 4:3；原地覆写，只裁不缩放（绝不拉伸）。
 
@@ -414,6 +448,7 @@ def generate_one(client, cfg, prompt, out_png, style_ref=None, ref_instr=None):
     os.makedirs(os.path.dirname(out_png), exist_ok=True)
     with open(out_png, 'wb') as f:
         f.write(img)
+    ensure_real_png(out_png)
     trim_border(out_png)
     return out_png
 
