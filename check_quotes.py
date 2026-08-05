@@ -5,7 +5,7 @@ files = [
     r'e:\laojohn-lesson-plan\读书会详案输出\洞-课案详案.md',
     r'e:\laojohn-lesson-plan\读书会详案输出\俗世奇人-课案详案.md',
     r'e:\laojohn-lesson-plan\读书会详案输出\手斧男孩-课案详案.md',
-    r'e:\laojohn-lesson-plan\写作课详案输出\三下-身边那些有特点的人-写作课详案.md',
+    r'e:\laojohn-lesson-plan\写作课详案输出\三下-第六单元-身边那些有特点的人-写作课详案.md',
 ]
 
 for f in files:

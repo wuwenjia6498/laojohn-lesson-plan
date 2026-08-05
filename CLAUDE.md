@@ -43,9 +43,11 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 |------|--------|--------|
 | 品牌 logo / 二维码 | `品牌资产\logo.png`、`品牌资产\qrcode.png` | book-card、course-poster |
 | 书籍封面 | `读书会书籍封面\<书名>.jpg/png`（书名不带书名号） | poster、book-card、reading-guide |
+| 原书插图 | `读书会原书插图\<书名>\插-01.png`（书名不带书名号，编号全书连号、半角连字符）+ 同目录 `_图单.md` | lesson-plan 配图版详案（后续可接 PPT 上屏/阅读单）。**扫描件＝版权材料，已 gitignore、永不入库**；`_图单.md` 入库，是唯一可追溯凭据。**书籍封面绝不挪进此目录**——引擎找不到封面是静默跳过，一挪就丢封面页且不报错 |
 | 书籍档案 | `读书会书籍档案\<书名>书籍档案.md` | lesson-plan 及所有消费档案的下游 |
 | docx 排版引擎 | `.claude\skills\laojohn-lesson-plan\assets\md_to_laojohn_docx.py` | lesson-plan、writing-lesson、reading-assessment（跨技能复用同一条流水线；assessment 用法见 §2 末条）。**页眉经课型无关的可选参数 `--header-left/--header-right` 传入**：读书会缺省「老约翰深度阅读／阅读·思辨·表达」，看图写话「老约翰·看图写话／从看懂一幅图，到写成一个故事」，同步习作「老约翰·同步习作／写清楚·写生动·有章法」——各 SKILL 导出时必带，漏传即回落读书会页眉 |
 | docx 首页版式化 | `.claude\skills\laojohn-lesson-plan\assets\style_front_page.py` | picture-writing、writing-lesson 两线共用。把共享引擎产的朴素首页重排为**提纲页定稿版式**（picture＝三区分区表、writing＝无区头单表 6 行，版式细节见脚本头注释与两线各自 `lesson-structure.md`）；**课型差异全收敛在脚本顶部 `PROFILES` 表，禁 fork、禁往渲染原语里塞课型分支**；改它须同时回归两条线 |
+| docx 正文图回插 | `.claude\skills\laojohn-lesson-plan\assets\insert_images_docx.py` | picture-writing（`scripts\insert_images_docx.py` 是 importlib 薄 shim，只注入 `imgspec_parser.image_dir` 取图口径）、lesson-plan（读书会原书插图配图版）、writing-lesson（`writing` 档 · 统编教材习作页原图，2026-07-31 接通）。**二段式后处理**：先调共享引擎出基础 docx（占位原样印为文字），再用 python-docx 把 `【图位:编号】` 换真图——**故引擎侧不新增 `![](…)` 解析分支**（那会牵动全部 5 个消费者回归）。**课型差异全收敛在顶部 `PROFILES` 表，禁 fork、禁往渲染原语塞课型分支**；改它须同时回归看图写话三课次与读书会配图版。**取图目录名的取法也是 `PROFILES` 数据（`name_from`）**：读书会取 H1 里的《书名》，写作课取文件名去尾缀（写作课 H1 是《题目》、不含年级册，而目录名是 `<年级册>-第N单元-<题目>`，取标题必错）。⚠ **凡 `PROFILES` 里有的字段，CLI 与上游脚本默认值一律 `None`**——给硬默认会永久盖住课型档且完全静默（docx 打开只是图偏大，无任何报错）。共享件**绝不 import `imgspec_parser`**（那是 picture-writing 私有模块，反向依赖会让读书会线故障依赖看图写话文件树） |
 | PPT 渲染原语 | `.claude\skills\laojohn-ppt\scripts\helpers.py`（文本框/表格/字体/点击动画/渐变/占位等底层件）+ `parser.py`（中间稿解析） | laojohn-ppt 读书会与写作课两 profile 共用；有 bug 史的横切层（字体槽顺序、表格自适应等修一处即重烘焙全部），**永不 fork、禁 `doc_kind`/课型分支** |
 | 学习单渲染引擎 | `.claude\skills\laojohn-reading-sheet\scripts\render.py`（PDF/HTML）+ `render_pptx.py`（可编辑 PPTX）+ `templates\`（模板库） | reading-sheet（整本书阅读单）专用；`render.py` 的 `--templates-dir`/`--bundle-label` 是课型无关的可选参数（reading-sheet 自用，`--bundle-label` 默认「阅读单」），保留不删 |
 | 配套物料 HTML→PDF 渲染引擎 | `.claude\skills\laojohn-writing-materials\scripts\_shared.py`（`inject`/`render`/`safe_pdf`/`check_pages`/`out_base`，Playwright 出 A4 PDF + logo base64 内联 + pypdf 页数核验） | writing-materials（同步习作配套）与 picture-materials（看图写话配套）两线共享单一源。picture-materials 的 `scripts\_shared.py` 是薄 shim（importlib 按路径载入本引擎，零逻辑），**禁复制**；`inject`/`render` 的可选 `extra_images={token:图路径}`（稿纸主图注入用）是课型无关参数，改签名/删该参数须同时回归两线。⚠ 与下面三件**不是同一个引擎**：本件出固定 A4 多页（210mm×297mm），下游物料出单页动态高，两种输出模型不可互相塞分支 |
@@ -56,6 +58,8 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 > 现存物理副本（`laojohn-ppt\assets\logo\`、`laojohn-course-poster\assets\qrcode.png` / `assets\covers\`）属历史遗留；以根目录单一源为准，勿据副本做新决策。
 
 **PPT 引擎按课型分 profile（接缝原则）**：`laojohn-ppt` 分两层——共享层 `helpers.py`/`parser.py`/`build_ppt.py` 课型无关、单一源；呈现层按 profile 分模块（`layouts_common.py`/`layouts_reading.py`/`layouts_writing.py`/`theme_writing.py`），按中间稿元信息 `文体：写作` 选 profile（缺省=读书会）。**新增写作课视觉/页型时只动 writing 模块 + theme_writing，绝不往 reading renderer 或 helpers 里塞课型分支**——否则共享引擎退化成条件分支堆。页型在某 profile 下是否有效按其 `RENDERERS_<profile>` 字典裁决（读书会 6 种；写作课自成一套，弃用 引导问题/要点小结）。页型清单、写作专属页型视觉、v8 版式选择器等实现细节见 `laojohn-ppt/references/architecture.md`；写作页型字段写法的唯一源 = `laojohn-ppt-draft/references/writing-mode.md` §2/§2.5/§2.6/§2.7。
+
+**写作课 PPT 已改「外部生成 + 本仓动画后处理」（2026-08-03 立 · 仅写作课线）**：写作课的 .pptx **不再由本仓 `build_ppt.py` 烘焙**，改由外部平台生成后复制进 `写作课件PPT输出\<年级册>-第N单元-<题目>\`，本仓只做动画处理。两段式工具（均在 `laojohn-ppt/scripts/`）：`inspect_pptx.py` 勘查形状、按卡片聚簇出**建议**分组工作单 JSON → 人工校正顺序与取舍 → `animate_pptx.py` 注入逐条点击淡入。**分组是教学判断，几何启发式只给构成、给不出教学顺序**（实测样本里页面最底部那句结论是第 3 次点击而非最后一次），故必须人工过一遍。动画 XML 一律走 `helpers.add_click_reveal`，**禁在新脚本里复制那段时间树**。完整后处理链＝**归位 → 动画 → 详案页标回注**（一句话入口「<题目> 的 PPT 放好了，处理一下」，手册在 `laojohn-ppt/SKILL.md`）。三条连带口径：① 外部件可能**两节合一**，此时 pptx 命名用 `<题目>-全课.pptx`，「每节课独立 PPT 不合并」对写作课线不再是硬线；② **写作课线的逐页讲稿已停产**（2026-08-03，`写作课件讲稿输出\` 目录已撤、存量已删、打包档已撤；读书会线照旧），中间稿降级为外部平台的生成依据（详见 `laojohn-ppt-draft/SKILL.md`）；③ 外部平台产的文本常带 ASCII 直引号，与全仓弯引号铁律冲突，**投屏前须核**。**读书会线不适用**——`读书会课件PPT输出\` 仍由 `build_ppt.py` 正式烘焙，两套口径不得混用。
 
 ## 4. 详案类两核心共用的不变量（lesson-plan / writing-lesson）
 
@@ -68,6 +72,7 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 - **首页形态（writing-lesson / picture-writing 两线已分形态，勿互抄）**：两线书级头部都在 `## 教案提纲表` 下写两列表，docx 侧由共享的 `style_front_page.py` 重排（见 §3）——**picture-writing＝三区**（各区以整行加粗区头 `**N、区名**` 起头，只写区名、不带 `—— 副题`）；**writing-lesson＝无区头单表 6 行**（2026-07-29 用户定稿，区头与「怎么落地」行一并删除，课时信息回到「课题·课时」行末段）。行名口径＝教研通用词。三条不可推断的硬线：① **行名是 `style_front_page.py` `PROFILES[*]["rules"]` 的键，改 md 必同步改脚本**，否则该行掉回 `plain` 样式；② 线名行在本课名后打「（本课）」标记；要点区值内可用成对 `**…**` 强调（writing 全文 `*` 禁令在提纲表节内放行）；③ **行名与事实源各自不同、不得互抄**——picture-writing 取 `picture-writing/references/course-map.md`（24 方法·四学期 64 课次），writing-lesson 取 `writing-lesson/references/course-map.md`（六阶轴 + 63 任务全表）。具体区划与行名清单以脚本 `PROFILES` 表＋两线各自 `lesson-structure.md` 为准。lesson-plan（读书会）不适用此形态。
 - **收尾**：每课时末 `本课完。`，全文末 `全课完。`。
 - **交付双道工序**：先逐项 `checklist.md` 自检（合规），再独立复盘 `review-rubric.md`（质量）。**第二道复盘已独立为冷启动执行**：由 `laojohn-detail-review` 承载，正常**派一个全新（fresh，非 fork）子 agent**或在新会话里跑，**不在生成会话里自审**（顺接自审会为自己的设计辩护，沦为走过场；无法另起时才降级为同会话「显式封存生成过程后自审」）。各 skill 的 `review-rubric.md` 是各自五维与审稿人协议的唯一源——detail-review 按文档类型加载、不复制内容，改 rubric 即同时改了冷审依据；现有三份 rubric（lesson-plan/writing-lesson/picture-writing）与 detail-review 判型表一一对应，**新增课型须同时补 rubric 与判型行**，否则冷审加载不到判据、空转。
+- **上课场景现实约束（三条详案线通用 · 2026-07-31 立）**：老约翰是**校外机构课**，不是校内课堂。哪怕课型定位写着「校内同步习作」，那指的也只是**跟着校内教材进度走**，上课场景仍在机构——**学生手边没有课本/教科书，也没有校内作息**。故详案禁写「翻开课本」「书上第 X 页」「照课本上说的做」「找个晨读的时间」「课间」「班主任」这类假设；教材图、教材题面一律**投屏出示**，凡要学生看图看字的地方须确认投屏清晰。同族既有约束：教室无黑板白板、禁写板书，学生动手一律走学习单。**「校内同步」四个字最容易诱发这类误设，写作课线尤其要防。**
 - **真实性红线**：伪摘录禁令——无可逐字核对的真实原文，禁止输出带引号的"原文"或"——节选自…"，一律占位；事实/页码/情节只来自档案，不得凭模型记忆补写（越是名作越易记错）。
 
 ## 5. 其它跨技能红线
@@ -103,11 +108,13 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 |------|------|
 | 书籍档案 | `<书名>书籍档案.md`（**无连字符、不带书名号**——下游脚本按此路径查档案，带横杠会查不到） |
 | 课案详案 | `<书名>-课案详案.md` / `.docx` |
-| 写作课详案 | `<年级册>-<题目>-写作课详案.md` / `.docx`。**文内标题与环节命名体例的唯一源＝`writing-lesson/references/title-naming.md`**（2026-07-26 定稿；看图写话那套 `｜` 分隔与 `######` 副标**不适用**本线）。改体例须同时改其 `lesson-structure.md` §三与 `checklist.md`——三处曾自相矛盾 |
-| 看图写话详案 | `<年级册>（<季>）第 N 次 · <课型>.md` / `.docx`（如 `二上（秋）第 1 次 · 方法课.md`；**不带主题、不带「看图写话详案」尾缀**，课次/课型按 picture-writing `course-map.md` §四 64 课次表取）。标题体例＝三行（唯一源 `picture-writing/references/title-naming.md`），其中 `######` 期次副标**承载文件名口径、`style_front_page.py` 靠它判型，不可省**；期号仅为内部方法编号，禁入对外产物 |
+| 写作课详案 | `<年级册>-第N单元-<题目>-写作课详案.md` / `.docx`（如 `三上-第一单元-猜猜他是谁-写作课详案.md`）。**「第N单元」是写作课线全部产物的统一课次标识段**（2026-08-02 立）：单元号用**中文数字**、取 `writing-lesson/references/course-map.md` §三全表的「单元」列，年级册与单元、单元与题目之间均用半角连字符；配套物料/PPT/讲稿/中间稿/打包的**子目录名与文件名前缀**一律同此口径（`<年级册>-第N单元-<题目>`），PPT/讲稿**文件名内**仍是纯题目、不带年级单元。**不在教材单元序列的自拟主题省略单元段**（`三年级-写秋天的公园-写作课详案.md`）。**文内标题与环节命名体例的唯一源＝`writing-lesson/references/title-naming.md`**（2026-07-26 定稿；看图写话那套 `｜` 分隔与 `######` 副标**不适用**本线）。改体例须同时改其 `lesson-structure.md` §三与 `checklist.md`——三处曾自相矛盾 |
+| 看图写话详案 | `<年级册>（<季>）第 N 次 · <课型>.md` / `.docx`（如 `二上（秋）第 1 次 · 方法课.md`；**不带主题、不带「看图写话详案」尾缀**，课次/课型按 picture-writing `course-map.md` §四 64 课次表取）。**一课次一目录**（2026-08-03 立）：md/docx/配图 docx/生图提示词 txt 四件与 `图位\` 同住 `看图写话详案输出\<课次>\`，目录名＝文件 stem，顶层不再平铺任何详案文件——`图位\` 的完整路径未变，故存量取图口径（配套稿纸 `anchor_img`、打包 glob、冷审核图）不受影响。标题体例＝三行（唯一源 `picture-writing/references/title-naming.md`），其中 `######` 期次副标**承载文件名口径、`style_front_page.py` 靠它判型，不可省**；期号仅为内部方法编号，禁入对外产物 |
 
 各物料的输出目录与文件命名权威表见 `README.md`「SKILL 与输出目录对照」（此处不重列，避免双写漂移）。
 
 ## 8. 产物不进 git（提交纪律）
 
 各输出目录的**渲染产物**（docx/pptx/pdf/jpg/渲染 html/png，及 `读书会整套文件打包输出\`、`读书会课件PPT输出\`、`写作课件PPT输出\` 整目录）已 gitignore——它们都能从 md/json 源 + 引擎脚本重渲，只存本地不进仓库。**只提交 md/json 源与输入资产**（书籍档案、中间稿/讲稿 md、各 `_content.json`/`-manifest.json`、书籍封面、品牌资产、skill 参考件、看图写话图位 png）。提交前 `git status` 里不该出现产物文件；若出现，说明有人改了 `.gitignore` 或新增了未纳规则的输出目录——新输出目录要同步补 ignore 规则，**严禁用 `git add -f` 把产物强加回来**。
+
+**唯一的例外类别：`读书会原书插图\` 里的图不入库，但它不是产物、也重渲不出来**——那是原书扫描件（版权材料），刻意 gitignore（与 `读书会书籍封面\` 全 tracked 相反：封面是可公开的书目图，这里是整页扫描）。所以换机器/新克隆后配图版详案必然报「缺图待补」，这是预期行为，不是链路坏了；补图凭据是各书同目录的 `_图单.md`（**它入库**）。**别为了「让 git 完整」把扫描件强加进来。**
