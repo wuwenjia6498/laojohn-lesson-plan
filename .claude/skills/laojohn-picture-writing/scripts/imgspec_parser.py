@@ -71,10 +71,12 @@ ALT_STYLE_TOKEN = (
 
 _FENCE_RE = re.compile(r'```imgspec\s*\n(.*?)```', re.S)
 _FIELD_RE = re.compile(r'^[ \t]*([^\s:：][^:：]*?)[：:][ \t]*(.*)$')
-# 编号前缀字符集：主/练/备/格 为现行口径，锚/例 为旧稿兼容位（勿删，存量详案未迁完）。
-# 三处正则同一口径：本文件两条 + insert_images_docx.py 的 _PLACE_RE，改一处必须同步。
-_PLACEHOLDER_RE = re.compile(r'【图位[：:]\s*([主练备格锚例]-\d+)')
-_CODE_RE = re.compile(r'^\s*([主练备格锚例]-\d+)\s*$')
+# 编号前缀字符集（本线唯一源）：主/练/备/格 为现行口径，锚/例 为旧稿兼容位
+# （勿删，存量详案未迁完）。下面两条正则由它拼装，回插件也从这里取（shim 传给
+# 共享件 laojohn-lesson-plan/assets/insert_images_docx.py），故只此一处需要维护。
+CODE_PREFIXES = '主练备格锚例'
+_PLACEHOLDER_RE = re.compile(r'【图位[：:]\s*([' + CODE_PREFIXES + r']-\d+)')
+_CODE_RE = re.compile(r'^\s*([' + CODE_PREFIXES + r']-\d+)\s*$')
 # 「意外点」项的识别前缀：清单项写成 `□ 意外点＝…` 才能被机检认出（判有没有写，不判画得对不对）。
 _SURPRISE_RE = re.compile(r'^意外点\s*[＝=：:]')
 
@@ -289,10 +291,20 @@ def load(md_path):
 
 
 def image_dir(md_path):
-    """生成图的统一落点：<详案目录>/<详案stem>/图位/ ；两脚本共用此口径。"""
+    """生成图的统一落点：<详案目录>/图位/ ；两脚本共用此口径。
+
+    2026-08-03 起详案四件（md/docx/配图docx/生图提示词txt）收进同名课次夹，
+    故图位与详案 md 同级——注意从仓库根看路径没变，仍是
+    `看图写话详案输出/<课次>/图位/`，只是 md 也搬进了 <课次>/。
+    旧平铺布局（md 与同名子夹并排，如 skill 内 _临时_角色定妆/）自动回落，
+    去掉这个分支它会静默找不到图。
+    """
     d = os.path.dirname(os.path.abspath(md_path))
     stem = os.path.splitext(os.path.basename(md_path))[0]
-    return os.path.join(d, stem, '图位')
+    legacy = os.path.join(d, stem, '图位')
+    if os.path.isdir(legacy):
+        return legacy
+    return os.path.join(d, '图位')
 
 
 def image_path(md_path, code):

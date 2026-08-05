@@ -3,15 +3,16 @@
 
 样式源（按 profile 各有一份定稿样张，版式同构、行名与分区各异）：
   - picture（看图写话）＝《新_课案提纲页.docx》：三区（本课定位／本课要点／与校内的关系）。
-  - writing（同步习作）＝**无区头单表 6 行**（2026-07-29 用户按《三上-猜猜他是谁》首页定稿，
+  - writing（同步习作）＝**无区头单表 6 行**（2026-07-29 用户按《三上-第一单元-猜猜他是谁》首页定稿，
     替代 2026-07-22 的两区版；区头解析仍保留，存量两区稿重渲不退化）。
 共同版式：居中两行标题区（《课名》20pt ─ 分隔线 ─ 副题 13pt 灰，**无品牌行**）→ 一张
 两列表、`**N、区名**` 底纹区头行分区（底纹色按 profile 的 `palette["zone_bg"]`，缺省
 灰 #EDEDED；区头可缺省，缺省即整节一张表）；无底部提示框。
 配色按 profile 色板（`PROFILES[*]["palette"]`，课型差异唯一收敛处）：
-  - picture＝语义灰阶（#222222/#333333/#5A5A5A）＋纯黑强调、白底标签列、无红；
-    三个区头行米黄底 #F5E6C6、**值列不加粗**（`palette["value_bold"]`）——两项均
-    2026-07-29 用户定版（此前区头灰 #EDEDED、值列加粗）。
+  - picture＝语义灰阶（#222222/#333333/#5A5A5A）＋纯黑强调、无红，**值列不加粗**
+    （`palette["value_bold"]`，2026-07-29 定版）；底纹口径 2026-08-03 用户定版改为
+    **标签列米黄底 #F5E6C6、区头行不铺底（白）**——即由「区头整行铺色」搬成
+    「左侧标签列竖条铺色」，与 writing 档一致（此前区头米黄、标签列白）。
   - writing＝标题/副题/抬头/标签/值列一律深灰 #3F3F3F，**只有「（本课）」那一个箭头
     节点标红 #C00000**；标签列米黄底 #F5E6C6（字仍深灰、加粗），**值列不加粗**
     （`palette["value_bold"]`）；表上方另起左对齐抬头「教学提纲」（2026-07-29 用户定版）。
@@ -23,8 +24,14 @@
 职责：
   1) 从详案 .md 解析首页数据（H1 标题、`## 教案提纲表` 下的分区表）；
   2) 打开共享引擎已产出的 docx（无图版或配图版均可），删除其开头的朴素首页块
-     （H1 至第一个「第N课时」分页标题之前的全部元素）；
-  3) 重建定稿版式首页并给「第N课时」锚段补分页，首页独占一页。
+     （H1 至第一个「第N课时」分页标题之前的全部元素），但**原样保留其中的
+     `〖PPT 第N页 …〗` 页标段**——那是 ppt-draft 回注的正文标记、不属首页版式，
+     曾被整块删掉导致课时分隔页那一标静默丢失；
+  3) 重建定稿版式首页，把保留的页标段接回锚段之前，并在「第N课时」锚段（有保留
+     页标时则在第一个页标段）补分页，首页独占一页。
+
+⚠ **详案 .md 一经改动（含 ppt-draft 页标回注），重渲 docx ＝ 共享引擎 + 本脚本两步**；
+只跑共享引擎会把首页打回朴素版式（表头整行铺底那版）。
 
 只做首页重排，不碰正文、页眉、图位；不修改共享 docx 引擎。样式常量以本文件为单一源。
 
@@ -79,9 +86,10 @@ PROFILES = {
         "zones_anchor": r"^##\s*教案提纲表",
         "tbl": (9072, 1900),
         # 色板：ink 主色 / txt 正文 / mut 弱化 / key 次强调（课型·文体段）/ emph 本课标记
+        # 2026-08-03 用户定版：底纹从区头行搬到标签列（区头行改白、标签列米黄）
         "palette": {"ink": P_INK, "txt": P_TXT, "mut": P_MUT, "key": P_EMPH,
-                    "emph": P_EMPH, "label_bg": "FFFFFF", "label_fg": P_INK,
-                    "value_bold": False, "zone_bg": P_LABEL_BG},
+                    "emph": P_EMPH, "label_bg": P_LABEL_BG, "label_fg": P_INK,
+                    "value_bold": False, "zone_bg": "FFFFFF"},
         "caption": None,          # 表上方左对齐抬头；None＝不出
         "rules": {
             "课次·课型": "p_course",
@@ -488,6 +496,25 @@ def build_front(doc, data):
     return blocks
 
 
+def _para_text(el) -> str:
+    return "".join(t.text or "" for t in
+                   el.findall(qn("w:r") + "/" + qn("w:t"))).strip()
+
+
+def _set_page_break(el, on: bool):
+    ppr = el.find(qn("w:pPr"))
+    if ppr is None:
+        if not on:
+            return
+        ppr = OxmlElement("w:pPr")
+        el.insert(0, ppr)
+    pb = ppr.find(qn("w:pageBreakBefore"))
+    if on and pb is None:
+        ppr.append(OxmlElement("w:pageBreakBefore"))
+    elif not on and pb is not None:
+        ppr.remove(pb)
+
+
 def restyle(md_path: Path, docx_path: Path, profile: str = None):
     data = parse_md(md_path, profile)
     doc = Document(str(docx_path))
@@ -496,40 +523,38 @@ def restyle(md_path: Path, docx_path: Path, profile: str = None):
     # 找 anchor：第一个以「第N课时」开头的段
     anchor = None
     for child in body.iterchildren():
-        if child.tag == qn("w:p"):
-            texts = child.findall(qn("w:r") + "/" + qn("w:t"))
-            txt = "".join(t.text or "" for t in texts).strip()
-            if re.match(r"^第\s*\d+\s*课时", txt):
-                anchor = child
-                break
+        if child.tag == qn("w:p") and re.match(r"^第\s*\d+\s*课时", _para_text(child)):
+            anchor = child
+            break
     if anchor is None:
         raise SystemExit(f"{docx_path.name}: 未找到「第N课时」锚段，放弃重排")
 
-    # 删除 anchor 之前的全部块（旧首页）
-    removed = 0
+    # 删除 anchor 之前的全部块（旧首页）；其中的 `〖PPT 第N页 …〗` 页标段是 ppt-draft
+    # 回注的正文标记、不属首页版式，摘出来原样接回（否则课时分隔页那一标会被静默吞掉）
+    removed, kept = 0, []
     for child in list(body.iterchildren()):
         if child is anchor:
             break
         if child.tag in (qn("w:p"), qn("w:tbl")):
+            if child.tag == qn("w:p") and _para_text(child).startswith("〖PPT"):
+                kept.append(child)
             body.remove(child)
             removed += 1
 
-    # 构建新首页（先 append 到文末，再整体搬到 anchor 前）
+    # 构建新首页（先 append 到文末，再整体搬到 anchor 前），保留的页标段跟在其后
     blocks = build_front(doc, data)
-    for el in blocks:
+    for el in blocks + kept:
         anchor.addprevious(el)
 
-    # 首页独占一页：给「第N课时」锚段补段前分页（重排可能吞掉引擎原有的分页衔接）
-    ppr = anchor.find(qn("w:pPr"))
-    if ppr is None:
-        ppr = OxmlElement("w:pPr")
-        anchor.insert(0, ppr)
-    if ppr.find(qn("w:pageBreakBefore")) is None:
-        ppr.append(OxmlElement("w:pageBreakBefore"))
+    # 首页独占一页：分页点落在锚段（有保留页标时落在第一个页标段，免得页标掉回首页尾）
+    _set_page_break(kept[0] if kept else anchor, True)
+    if kept:
+        _set_page_break(anchor, False)
 
     doc.save(str(docx_path))
     print(f"首页版式化完成[{data[0]}]：{docx_path.name}"
-          f"（删旧块 {removed}，插新块 {len(blocks)}）")
+          f"（删旧块 {removed}，插新块 {len(blocks)}"
+          f"{'，保留页标 %d' % len(kept) if kept else ''}）")
 
 
 def main():

@@ -28,7 +28,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('md_path')
     ap.add_argument('--max-retries', default=None)
-    ap.add_argument('--width-cm', default='12')
+    # 默认 None＝不往下传，让图宽由共享回插件的 PROFILES['picture'] 裁决。
+    # 若在此写死数值，会静默盖住课型档（调了 profile 也不生效，且无任何报错）。
+    ap.add_argument('--width-cm', default=None)
     ap.add_argument('--skip-gen', action='store_true')
     args = ap.parse_args()
 
@@ -40,7 +42,10 @@ def main():
         if rc != 0:
             print('[提醒] 生图阶段非零退出，仍继续回插已生成的图。')
 
-    rc = _run('insert_images_docx.py', args.md_path, '--width-cm', str(args.width_cm))
+    insert_args = [args.md_path]
+    if args.width_cm is not None:
+        insert_args += ['--width-cm', str(args.width_cm)]
+    rc = _run('insert_images_docx.py', *insert_args)
     sys.exit(rc)
 
 

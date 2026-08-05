@@ -1,163 +1,71 @@
 # -*- coding: utf-8 -*-
 """
-insert_images_docx —— 看图写话「回插后处理」。不碰 CLAUDE.md §3 跨技能共享 docx 引擎：
-先用共享引擎把详案 .md 出基础 docx（引擎把 `【图位:编号】` 原样印为文字），
-再用 python-docx 打开，把每个 `【图位:编号】` 标记换成 图位/<编号>.png 真图。
-段内只有标记则就地换图；标记与正文（师话等）同段时**只剥标记、正文留在原段**，图另起一段——
-整段清空会把老师要念的问题句一起吞掉。缺图则留灰字「（图位 <编号> 待补）」，不抛错。
+insert_images_docx（看图写话薄 shim）——实现已上移为跨技能共享件：
+  .claude/skills/laojohn-lesson-plan/assets/insert_images_docx.py（见 CLAUDE.md §3）
+本文件只做一件事：把**看图写话专属**的取图口径（imgspec_parser.image_dir）注入共享件。
+页眉、编号前缀集、跳过前缀、图宽等课型差异，收在共享件顶部 PROFILES['picture'] 里。
+
+CLI 与 stdout 摘要与上移前逐字一致，故 build_picture_lesson.py 无需改动。
 
 用法：
   PYTHONUTF8=1 python insert_images_docx.py <详案.md> [--base-docx 已有基础.docx] [--width-cm 12]
 输出：<详案名>-配图.docx（不覆盖无图版，便于对照）。
 """
 import os
-import re
 import sys
-import tempfile
 import argparse
-import subprocess
+import importlib.util
 
 import imgspec_parser as ip
 
-_ENGINE = os.path.normpath(os.path.join(
+_SHARED = os.path.normpath(os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
-    '..', '..', 'laojohn-lesson-plan', 'assets', 'md_to_laojohn_docx.py'))
-
-# 编号前缀字符集与 imgspec_parser 的 _PLACEHOLDER_RE / _CODE_RE 同一口径（主/练/备/格＝现行，
-# 锚/例＝旧稿兼容位）。三处正则改一处必须同步，否则回插会静默插 0 张。
-_PLACE_RE = re.compile(r'【图位[：:]\s*([主练备格锚例]-\d+)[^】]*】')
-
-# 看图写话的 docx 页眉（覆盖引擎默认的「老约翰深度阅读 / 阅读·思辨·表达」）。
-# 右侧标语＝本课程三阶主张，与六阶总轴第一/二阶对应。
-HEADER_LEFT  = '老约翰·看图写话'
-HEADER_RIGHT = '从看懂一幅图，到写成一个故事'
+    '..', '..', 'laojohn-lesson-plan', 'assets', 'insert_images_docx.py'))
 
 
-def _ensure_docx():
-    try:
-        import docx  # noqa
-        return
-    except ImportError:
-        pass
-    for args in (
-        [sys.executable, '-m', 'pip', 'install', '-q', 'python-docx'],
-        [sys.executable, '-m', 'pip', 'install', '-q', '--user', 'python-docx'],
-    ):
-        try:
-            subprocess.check_call(args)
-            import docx  # noqa
-            return
-        except Exception:
-            continue
-    print('[错误] 无法自动安装 python-docx，请手动安装后重试。')
-    sys.exit(1)
-
-
-def build_base_docx(md_path):
-    """调共享引擎产基础 docx（落临时文件，绝不碰用户已导出的同名 docx）。"""
-    fd, base = tempfile.mkstemp(prefix='看图写话基础_', suffix='.docx')
-    os.close(fd)
-    subprocess.check_call([sys.executable, _ENGINE, md_path, base,
-                           '--header-left', HEADER_LEFT,
-                           '--header-right', HEADER_RIGHT])
-    return base
-
-
-def _clear_paragraph(p):
-    for r in list(p.runs):
-        r._element.getparent().remove(r._element)
-
-
-def _strip_placeholders(p):
-    """就地剥除段内占位标记，保留同段其余正文（师话等），返回剥后文本。
-
-    曾因整段清空导致与占位同段的师话被静默吞掉（老师拿到的配图版少了问题句）。
-    优先逐 run 替换以保住加粗等格式；标记被引擎拆到多个 run 时回退为纯文本重建。
-    """
-    for r in p.runs:
-        if _PLACE_RE.search(r.text):
-            r.text = _PLACE_RE.sub('', r.text)
-    if _PLACE_RE.search(p.text):  # 跨 run 拆分，逐 run 剥不掉
-        residual = _PLACE_RE.sub('', p.text)
-        _clear_paragraph(p)
-        if residual.strip():
-            p.add_run(residual.strip())
-    return p.text.strip()
-
-
-def _new_paragraph_after(p):
-    """在 p 之后插入一个同级空段落，用于承载图片。"""
-    from docx.oxml.ns import qn
-    from docx.oxml import OxmlElement
-    from docx.text.paragraph import Paragraph
-
-    new_el = OxmlElement('w:p')
-    p._element.addnext(new_el)
-    np = Paragraph(new_el, p._parent)
-    # 继承样式，避免图片段落掉回 Normal 造成间距突变
-    try:
-        np.style = p.style
-    except Exception:
-        pass
-    return np
-
-
-def insert(md_path, base_docx, width_cm):
-    from docx import Document
-    from docx.shared import Cm, RGBColor
-
-    doc = Document(base_docx)
-    inserted, missing, fmt_skipped = [], [], []
-    for p in doc.paragraphs:
-        codes = [m.group(1) for m in _PLACE_RE.finditer(p.text)]
-        if not codes:
-            continue
-        # 同段可含多个占位（如一行里连列例-02/03/04）：逐个回插，不得只取首个
-        fmt_skipped.extend(c for c in codes if c.startswith('格-'))
-        codes = [c for c in codes if not c.startswith('格-')]
-        if not codes:
-            continue
-        # 剥标记而非清整段：段内若还有正文就把正文留在原段，图另起一段
-        residual = _strip_placeholders(p)
-        target = _new_paragraph_after(p) if residual else p
-        if not residual:
-            _clear_paragraph(target)
-        p = target
-        for code in codes:
-            png = ip.image_path(md_path, code)
-            if os.path.isfile(png):
-                run = p.add_run()
-                run.add_picture(png, width=Cm(width_cm))
-                inserted.append(code)
-            else:
-                run = p.add_run(f'【图位 {code} 待补：未找到 {os.path.basename(png)}】')
-                try:
-                    run.font.color.rgb = RGBColor(0x99, 0x99, 0x99)
-                except Exception:
-                    pass
-                missing.append(code)
-        try:
-            p.alignment = 1  # 居中
-        except Exception:
-            pass
-
-    out = os.path.splitext(md_path)[0] + '-配图.docx'
-    doc.save(out)
-    return out, inserted, missing, fmt_skipped
+def _load_shared():
+    """按相对路径载共享件（同 book-card/course-poster 载 profile_meta 的成例）。
+    改 skill 目录名或挪 scripts 目录会静默断链——报错要说清。"""
+    if not os.path.isfile(_SHARED):
+        print(f'[错误] 找不到共享回插件：{_SHARED}\n'
+              f'  （CLAUDE.md §3：本文件是薄 shim，实现在 laojohn-lesson-plan/assets/）')
+        sys.exit(1)
+    spec = importlib.util.spec_from_file_location('_shared_insert_images', _SHARED)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('md_path')
     ap.add_argument('--base-docx', default='', help='已有基础 docx；不给则现调引擎生成')
-    ap.add_argument('--width-cm', type=float, default=12.0)
+    # None＝跟随共享件 PROFILES['picture']['width_cm']（勿给硬默认，见共享件注释）
+    ap.add_argument('--width-cm', type=float, default=None)
     args = ap.parse_args()
 
-    _ensure_docx()
+    sh = _load_shared()
+    prof = sh.PROFILES['picture']
+    # 前缀集以 imgspec_parser 为单一源（占位正则与取图口径都归它），共享件的
+    # profile 值只作 fallback；两者不一致时以此处为准并提醒。
+    prefixes = getattr(ip, 'CODE_PREFIXES', prof['code_prefixes'])
+    if prefixes != prof['code_prefixes']:
+        print(f'[提醒] 编号前缀集不一致：imgspec_parser={prefixes!r} '
+              f'≠ 共享件 PROFILES[picture]={prof["code_prefixes"]!r}，本次以前者为准。')
+    place_re = sh.make_place_re(prefixes)
+    width = args.width_cm if args.width_cm is not None else prof['width_cm']
+
+    sh._ensure_docx()
     temp_base = not args.base_docx
-    base = args.base_docx or build_base_docx(args.md_path)
+    base = args.base_docx or sh.build_base_docx(
+        args.md_path, prof['header_left'], prof['header_right'])
     try:
-        out, inserted, missing, fmt = insert(args.md_path, base, args.width_cm)
+        out, inserted, missing, fmt = sh.insert(
+            args.md_path, base, place_re=place_re,
+            images_dir=ip.image_dir(args.md_path),
+            width_cm=width, max_height_cm=prof['max_height_cm'],
+            skip_prefixes=prof['skip_prefixes'], caption=prof['caption'],
+            img_exts=prof['img_exts'])
     finally:
         if temp_base and os.path.exists(base):
             try:

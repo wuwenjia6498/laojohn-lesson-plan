@@ -7,7 +7,7 @@ r"""
     看图写话整套文件打包输出\<课次>\
     ├── 课堂用图\           ← 看图写话详案输出\<课次>\图位\*.png（主/练/备，投屏与打印用）
     ├── 配套物料\           ← 看图写话配套输出\<课次>\*.pdf（支架小卡/兜底纸条/稿纸/教师家长页）
-    └── <课次>-配图.docx    ← 看图写话详案输出\（放根目录，主交付件一眼可见）
+    └── <课次>-配图.docx    ← 看图写话详案输出\<课次>\（放根目录，主交付件一眼可见）
 
 约定：
 - 复制不移动——各原始输出目录是单一事实源，绝不破坏。
@@ -37,13 +37,14 @@ CATEGORIES = [
     {
         "label": "看图写话详案",
         "dest": "",
+        # 详案四件与图位同住 看图写话详案输出\<课次>\（2026-08-03 起，此前四件平铺在顶层）。
         "prefer": [
-            ("看图写话详案输出/{unit}-配图.docx", "成品·配图版"),
-            ("看图写话详案输出/{unit}.docx", "成品·无图版(⚠图未回插)"),
+            ("看图写话详案输出/{unit}/{unit}-配图.docx", "成品·配图版"),
+            ("看图写话详案输出/{unit}/{unit}.docx", "成品·无图版(⚠图未回插)"),
         ],
         "sources": [
-            "看图写话详案输出/{unit}.md",
-            "看图写话详案输出/{unit}-生图提示词.txt",
+            "看图写话详案输出/{unit}/{unit}.md",
+            "看图写话详案输出/{unit}/{unit}-生图提示词.txt",
         ],
     },
     {
@@ -114,11 +115,15 @@ def gather(root: Path, unit: str, with_sources: bool):
 
 
 def list_available(root: Path):
-    """课次名含空格与「·」，易打错；找不到时列出详案输出目录里的可选课次。"""
+    r"""课次名含空格与「·」，易打错；找不到时列出详案输出目录里的可选课次。
+
+    课次＝详案输出下装着同名 md 的子目录；`_评估\` 这类非课次目录因此自动排除。
+    """
     d = root / "看图写话详案输出"
     if not d.is_dir():
         return []
-    return sorted(p.stem for p in d.glob("*.md") if p.is_file())
+    return sorted(p.name for p in d.iterdir()
+                  if p.is_dir() and (p / f"{p.name}.md").is_file())
 
 
 def main():
@@ -199,7 +204,7 @@ def main():
         if total_copied == 0:
             avail = list_available(root)
             if avail:
-                print("  该课次一个文件都没命中，可选课次名（取自 看图写话详案输出\\*.md）：")
+                print("  该课次一个文件都没命中，可选课次名（取自 看图写话详案输出\\ 下各课次目录）：")
                 for name in avail:
                     print(f"    · {name}")
     if args.dry_run:
