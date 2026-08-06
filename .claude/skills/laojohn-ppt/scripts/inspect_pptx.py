@@ -26,7 +26,11 @@ import re
 import sys
 import zipfile
 
-from pptx import Presentation
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from pptx import Presentation                                        # noqa: E402
+
+from plan_link import PlanNotFound, digest, locate, project_root, rel  # noqa: E402
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -153,7 +157,31 @@ def main():
     ap.add_argument("pptx", help="待勘查的 .pptx")
     ap.add_argument("-o", "--out", default=None, help="工作单输出路径（默认 <同名>-anim.json）")
     ap.add_argument("--quiet", action="store_true", help="不打印人读版概览")
+    ap.add_argument("--no-lesson-plan", action="store_true",
+                    help="该课确实没有详案时显式放行（分组顺序将无据可依，交付时须讲明）")
+    ap.add_argument("--overwrite", action="store_true",
+                    help="覆盖已经过审查/人工校正的工作单（默认拒绝，免得冲掉排好的分组）")
     args = ap.parse_args()
+
+    out = args.out or os.path.splitext(args.pptx)[0] + "-anim.json"
+    if os.path.isfile(out) and not args.overwrite:
+        try:
+            with open(out, encoding="utf-8") as f:
+                old = json.load(f)
+        except Exception:
+            old = {}
+        if old.get("audit") or old.get("lesson_plan"):
+            sys.exit("%s 已经过审查/人工校正——重跑会把排好的分组冲掉（一次要重排几十页）。\n"
+                     "  只想重看概览：加 --quiet 跑 audit_against_plan.py，或直接读该 json。\n"
+                     "  确实要重来：加 --overwrite。" % out)
+
+    # 详案绑定：分组顺序以详案为准，没有详案根本排不出顺序（后处理链第 2 步）
+    md = None
+    if not args.no_lesson_plan:
+        try:
+            md = locate(args.pptx)
+        except PlanNotFound as e:
+            sys.exit(str(e))
 
     prs = Presentation(args.pptx)
     W, H = prs.slide_width, prs.slide_height
@@ -187,12 +215,22 @@ def main():
         slides[str(idx)] = entry
         rows.append((idx, kicker, title, len(groups), have.get(idx, 0), skip, tables))
 
-    out = args.out or os.path.splitext(args.pptx)[0] + "-anim.json"
+    root = project_root(args.pptx)
+    doc = {"file": os.path.basename(args.pptx),
+           "slide_count": len(prs.slides._sldIdLst),
+           "dur": 500,
+           "lesson_plan": rel(root, md) if md else None,
+           "slides": slides}
+    if md:
+        d = digest(md)
+        doc["plan_digest"] = {"md5": d["md5"],
+                              "lessons": [{"title": L["title"],
+                                           "steps": [{"title": s["title"],
+                                                      "minutes": s["minutes"]}
+                                                     for s in L["steps"]]}
+                                          for L in d["lessons"] if L.get("is_lesson")]}
     with open(out, "w", encoding="utf-8") as f:
-        json.dump({"file": os.path.basename(args.pptx),
-                   "slide_count": len(prs.slides._sldIdLst),
-                   "dur": 500,
-                   "slides": slides}, f, ensure_ascii=False, indent=1)
+        json.dump(doc, f, ensure_ascii=False, indent=1)
 
     if not args.quiet:
         print("页码 | 建议点击 | 现有点击 | 表 | 眉标 | 标题")
@@ -203,7 +241,20 @@ def main():
         total = sum(r[3] for r in rows if not r[5])
         print("-" * 78)
         print("建议点击合计 %d（现有 %d）" % (total, sum(have.values())))
+
+        if md:      # 排 PLAN 时必然看见——分组顺序按这张表跟着详案师话走
+            print("\n详案：%s" % rel(root, md))
+            for L in digest(md)["lessons"]:
+                if not L.get("is_lesson"):
+                    continue
+                print("  %s" % L["title"])
+                for s in L["steps"]:
+                    print("     %-42s %s 分钟" % (s["title"][:42], s["minutes"]))
+        else:
+            print("\n! 未绑定详案（--no-lesson-plan）：分组顺序无据可依，交付时须向用户讲明。")
     print("工作单 -> %s" % out)
+    if md:
+        print("下一步：跑 audit_against_plan.py 出机检报告（不跑的话 animate_pptx.py 会拒绝注入）")
 
 
 if __name__ == "__main__":

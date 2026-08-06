@@ -27,9 +27,51 @@ from pptx.util import Emu                          # noqa: E402
 from pptx.oxml.ns import qn                        # noqa: E402
 
 from helpers import add_click_reveal               # noqa: E402  单一源，禁复制
+from plan_link import digest, project_root         # noqa: E402
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
+
+
+def check_audit(plan, pptx, allow_no_plan):
+    """闸门：审查过没有。**守的是「做过」，不是「全绿」**——issues 非空照样放行。
+
+    2026-08-06 立。此前两个脚本都不知道详案的存在：那次搜详案的关键词不带弯引号、
+    搜不到就判「详案不存在」，整道审查被跳过，26 页里 8 页分组按版面猜错顺序、全部返工。
+    文档改成四步治不住这个——脚本照跑不误、不报一个错，所以在这里加硬拦。
+    """
+    md_rel = plan.get("lesson_plan")
+    if md_rel is None:
+        if allow_no_plan:
+            print("! 未绑定详案（--no-lesson-plan）：分组顺序无据可依，交付时须讲明。")
+            return
+        sys.exit("工作单没有绑定详案。\n"
+                 "  重跑 inspect_pptx.py 让它按课次目录名定位详案，或跑 audit_against_plan.py 补上；\n"
+                 "  该课确实没有详案，加 --no-lesson-plan 显式放行。")
+
+    audit = plan.get("audit")
+    if not audit:
+        sys.exit("工作单没有 audit 字段——审查还没跑。\n"
+                 "  先跑：PYTHONUTF8=1 python audit_against_plan.py %r\n"
+                 "  （分组顺序以详案为准，审查那一步的产出就是排 PLAN 的依据）" % pptx)
+
+    md = os.path.join(project_root(pptx), md_rel)
+    if not os.path.isfile(md):
+        sys.exit("工作单记的详案不存在：%s" % md_rel)
+    now = digest(md)["md5"]
+    if audit.get("md5") != now:
+        sys.exit("详案在审查之后改过（md5 对不上）——必须重审，否则分组可能跟着旧稿走。\n"
+                 "  重跑：PYTHONUTF8=1 python audit_against_plan.py %r" % pptx)
+
+    issues, notes = audit.get("issues") or [], audit.get("notes") or []
+    if issues:
+        print("审查记了 %d 条待办（不阻断注入，但交付前要有说法）：" % len(issues))
+        for i in issues[:6]:
+            print("   ! " + i)
+        if len(issues) > 6:
+            print("   …另有 %d 条，见工作单 audit.issues" % (len(issues) - 6))
+    else:
+        print("审查已跑，机检五类全过%s。" % ("（另有 %d 条待人判的提示）" % len(notes) if notes else ""))
 
 
 def clear_timing(slide):
@@ -98,10 +140,13 @@ def main():
     ap.add_argument("--allow-header", action="store_true",
                     help="放行「页顶元素被卷入动画」的防呆检查（默认拦截）")
     ap.add_argument("--dur", type=int, default=None, help="单个淡入时长 ms（默认取工作单的 dur，否则 500）")
+    ap.add_argument("--no-lesson-plan", action="store_true",
+                    help="该课确实没有详案时显式放行审查闸门")
     args = ap.parse_args()
 
     with open(args.plan, encoding="utf-8") as f:
         plan = json.load(f)
+    check_audit(plan, args.pptx, args.no_lesson_plan)
     dur = args.dur or plan.get("dur") or 500
 
     prs = Presentation(args.pptx)
