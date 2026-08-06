@@ -1149,7 +1149,18 @@ def main():
                     if os.path.isfile(cand):
                         anchor_png = cand
             elif s.is_practice:
-                records.append(process_strict(client, cfg, args.md_path, s, log, style_ref=anchor_png))
+                # 有主图一律带主图（定妆参考字段不参与，行为与从前完全一致）。
+                # 无主图课次（首例＝一上第 2 次：course-map 定「用上一课备用图池、不设主图」，
+                # anchor_png 恒为 None）：练笔图退回 B 级定妆图链——规格写了 `定妆参考:` 才生效，
+                # 否则维持不带参考图。角色与画风没有主图可锁时，定妆图是唯一控制点。
+                if anchor_png:
+                    p_ref, p_instr = anchor_png, None
+                else:
+                    p_ref, p_instr = char_ref(s)
+                    if p_ref:
+                        log(f'  [{s.code}] 无主图课次：定妆参考已启用：{s.char_ref} ← {os.path.basename(p_ref)}')
+                records.append(process_strict(client, cfg, args.md_path, s, log,
+                                              style_ref=p_ref, ref_instr=p_instr))
             else:
                 records.append(process_alt(client, cfg, args.md_path, s, log, style_ref=anchor_png))
         except Exception as e:
