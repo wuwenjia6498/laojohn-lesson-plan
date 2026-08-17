@@ -23,6 +23,7 @@ render = _real.render
 inject = _real.inject
 safe_pdf = _real.safe_pdf
 check_pages = _real.check_pages
+check_type3 = _real.check_type3
 check_sheet_overflow = _real.check_sheet_overflow
 out_base = _real.out_base
 A4_H_PX = _real.A4_H_PX

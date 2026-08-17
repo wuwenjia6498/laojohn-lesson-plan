@@ -107,7 +107,9 @@
   .marks{background:var(--blue-soft);border:1px solid var(--blue-line);border-radius:5px;padding:4mm 5mm;}
   .marks-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:3mm 7mm;}
   .mark{display:flex;align-items:baseline;gap:8px;font-size:11.5px;}
-  .mark .sym{font-family:"Courier New",monospace;font-weight:800;color:var(--blue-deep);
+  /* 字体栈中间必须留 Microsoft YaHei：Courier New 缺的字（∨、数据层塞进来的汉字）否则会落到
+     系统回退字体，被 Chromium 打成 Type3、PDF 编辑器拒编。勿删中间那档。 */
+  .mark .sym{font-family:"Courier New","Microsoft YaHei",monospace;font-weight:800;color:var(--blue-deep);
     font-size:14px;min-width:34px;}
   .mark .desc{color:var(--ink);}
 
@@ -133,7 +135,9 @@
   .notes{flex:1;display:flex;flex-direction:column;gap:3mm;}
   .notes-title{font-size:12px;font-weight:800;color:var(--note-ink);margin-bottom:1mm;
     display:flex;align-items:center;gap:5px;}
-  .notes-title::before{content:"✍";font-size:13px;}
+  /* 纯 CSS 色块，勿改回 emoji/符号字符：彩色 emoji 会被 Chromium 打成 Type3，PDF 编辑器拒编 */
+  .notes-title::before{content:"";width:9px;height:9px;border-radius:2px;
+    background:var(--note-ink);flex-shrink:0;}
   .note{background:var(--note-bg);border-left:3px solid var(--note-line);border-radius:0 4px 4px 0;
     padding:2.5mm 3mm;}
   .note .q{font-size:10.5px;color:var(--note-ink);font-weight:700;margin-bottom:1mm;line-height:1.4;}

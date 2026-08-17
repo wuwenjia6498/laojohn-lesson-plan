@@ -101,7 +101,9 @@
   .task{background:var(--warm-bg);border:1px solid var(--warm-line);border-radius:6px;padding:4mm 5mm;margin-bottom:5mm;}
   .task .th{font-size:12.5px;font-weight:800;color:var(--warm-ink);margin-bottom:2.5mm;
     display:flex;align-items:center;gap:6px;}
-  .task .th::before{content:"🏠";}
+  /* 纯 CSS 色块，勿改回 emoji：彩色 emoji 会被 Chromium 打成 Type3，PDF 编辑器拒编 */
+  .task .th::before{content:"";width:10px;height:10px;border-radius:3px;
+    background:var(--warm-ink);flex-shrink:0;}
   .task .stp{font-size:11.5px;line-height:1.7;color:var(--ink);margin-bottom:1.5mm;padding-left:16px;position:relative;}
   .task .stp .n{position:absolute;left:0;color:var(--warm-ink);font-weight:800;}
   .task .stp b{color:var(--warm-ink);}

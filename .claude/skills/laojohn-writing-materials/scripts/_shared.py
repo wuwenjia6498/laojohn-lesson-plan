@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """同步习作配套物料 · 渲染共享件（学生/教师/家长各入口共用，勿在入口脚本里复制这些逻辑）"""
 import os
+import re
 import json
 import base64
 import pathlib
@@ -96,6 +97,60 @@ def check_pages(pdf_out, expected):
         print("(未装 pypdf，跳过页数核验；pip install pypdf)")
 
 
+def _type3_chars(font):
+    """从 Type3 字体的 /ToUnicode 反查它承载的真实字符（拿不到就返回空串）"""
+    tu = font.get("/ToUnicode")
+    if tu is None:
+        return ""
+    try:
+        data = tu.get_object().get_data().decode("latin-1")
+    except Exception:
+        return ""
+    chars = []
+    # Chromium 造的 Type3 用 bfchar 逐字形映射；dst 是 UTF-16BE
+    for block in re.findall(r"beginbfchar(.*?)endbfchar", data, re.S):
+        for _src, dst in re.findall(r"<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>", block):
+            try:
+                s = bytes.fromhex(dst).decode("utf-16-be")
+            except Exception:
+                continue
+            for ch in s:
+                if ord(ch) > 0x20 and ch not in chars:
+                    chars.append(ch)
+    return "".join(chars)
+
+
+def check_type3(pdf_out):
+    """Type3 字体核验：出现即为缺陷，WPS/福昕/Acrobat 一律拒编这类字体。
+    成因：某字符不在模板声明的字体（Microsoft YaHei / Courier New）字表内，Chromium 打印时
+    走系统回退字体（SimSun / Segoe UI Symbol / Segoe UI Emoji），把该字形现造成一个 Type3 字体。
+    修法在源头、不在 PDF：换成雅黑覆盖内的字符，或把装饰图标改成纯 CSS 图形（勿用 emoji）。"""
+    try:
+        from pypdf import PdfReader
+    except ImportError:
+        print("(未装 pypdf，跳过 Type3 字体核验；pip install pypdf)")
+        return
+    hits = []
+    for i, page in enumerate(PdfReader(str(pdf_out)).pages, 1):
+        res = page.get("/Resources")
+        fonts = (res.get_object().get("/Font") if res is not None else None) or {}
+        for name in list(fonts):
+            try:
+                font = fonts[name].get_object()
+            except Exception:
+                continue
+            if font.get("/Subtype") == "/Type3":
+                hits.append((i, name, _type3_chars(font)))
+    if not hits:
+        print("Type3 核验: 无 Type3 字体 OK")
+        return
+    for i, name, chars in hits:
+        shown = "".join(f"'{c}'" for c in chars) or f"（字符不明，资源名 {name}）"
+        print(f"!! 第 {i} 页含 Type3 字体（PDF 编辑器不可编辑）：{shown} —— 该字符不在"
+              "微软雅黑字表内，被系统回退字体路径化。请换成雅黑覆盖内的字符，"
+              "或把装饰图标改成 CSS 图形。")
+
+
 def render(data_path, out_dir, template_path, expected_pages, page_checks=None, extra_images=None):
     """通用渲染流程：注入 -> 写 HTML -> Playwright 渲 PDF -> 自检。
     page_checks: 可选回调 fn(page)，在出 PDF 前跑物料特有的自检（如格子数）。
@@ -128,4 +183,5 @@ def render(data_path, out_dir, template_path, expected_pages, page_checks=None, 
 
     print("PDF:", pdf_out)
     check_pages(pdf_out, expected_pages)
+    check_type3(pdf_out)
     return pdf_out, html_out

@@ -102,7 +102,8 @@
     padding:3mm 4mm;margin-top:1mm;}
   .nono .nh{font-size:11px;font-weight:800;color:var(--warn-ink);margin-bottom:2mm;}
   .nono .n{font-size:10.5px;color:var(--ink);margin-bottom:1.5mm;line-height:1.45;padding-left:15px;position:relative;}
-  .nono .n::before{content:"✕";position:absolute;left:0;color:var(--warn-line);font-weight:800;font-size:10px;}
+  /* 用 × U+00D7（雅黑字表内）而非 ✕ U+2715：后者要回退到 Segoe UI Symbol，会被打成 Type3 */
+  .nono .n::before{content:"×";position:absolute;left:0;color:var(--warn-line);font-weight:800;font-size:11px;}
   .nono .n b{color:var(--warn-ink);}
 </style>
 </head>
