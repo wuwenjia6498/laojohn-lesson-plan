@@ -1,16 +1,30 @@
 # -*- coding: utf-8 -*-
 r"""批次横审 · 跨篇重复字串粗筛(n-gram)
 
-用途:每完成一个生产批次(约 12-16 篇写作课详案),扫 写作课详案输出\*.md,
+用途分两档,同一套 n-gram 引擎:
+
+【A 批次横审】每完成一个生产批次(约 12-16 篇写作课详案),扫 写作课详案输出\*.md,
 找出「出现在 >=2 篇里的重复字串」,供冷审 agent/人工判别哪些是真句癖、
 应补进 variation-pools.md「禁止逐字复用」清单。
+
+【B 单篇 vs 邻篇(--focus,2026-08-17 增设)】交付前对**一份新稿**跑,只报「本篇与邻篇
+共有」的片段。起因:「禁止逐字复用」清单只收录**已被发现**的句癖,新写的句子撞上邻篇
+但不在清单里 → 机检不报、生成侧不查,要等冷审 Pass B 逐句通读才发现(实测一篇 26 处,
+且模板来源不是行文基准篇、正是**相邻的上一篇**)。本模式把那一步人工比对变成机器捞候选。
+不给 --against 时,邻篇默认取 --dir 下除本篇外的全部。
 
 本脚本是确定性粗筛:只负责把候选捞全,不负责判断。合理固定件(骨架话术、
 格式教学语等)命中后请加进下方 WHITELIST,而不是无视报告。
 
 用法(项目根目录下):
+    # A 批次横审
     PYTHONUTF8=1 python .claude/skills/laojohn-writing-lesson/assets/batch_ngram_scan.py
+    # B 单篇 vs 指定邻篇(交付前自检,checklist E 组)
+    PYTHONUTF8=1 python .claude/skills/laojohn-writing-lesson/assets/batch_ngram_scan.py \
+        --focus "写作课详案输出/五上-第二单元-“漫画”老师-写作课详案.md" \
+        --against "写作课详案输出/五上-第一单元-我的心爱之物-写作课详案.md"
     可选参数: --dir 写作课详案输出  --n 10  --min-len 12  --min-files 2  --top 200  --out 报告.txt
+    (--against 可给多份,逗号分隔或重复给)
 """
 import argparse
 import glob
@@ -37,6 +51,33 @@ WHITELIST = [
     "开头空两格",
     "对照三档标准",
     "一篇一肯定一改处",
+    # ↓ 2026-08-17 单篇模式上线后补录:体例层固定件,按规范全线统一措辞或统一口径,
+    #   本就该每篇复现,报出来只会淹没真句癖。判据=「改了它反而破体例」。
+    # 附加讲评块的头部两句(措辞由 title-naming §四 全线统一)
+    "本环节供老师灵活取用",
+    "可在单次课课后批读学生习作后集中讲评一次，也可作系列课下一次课的开场",
+    "从本班当堂完成的稿子里挑 2–3 篇，对着本课三条技法各挑一类",
+    "不计入本课 45+45 分钟，评的是学生当堂完成的稿子，不布置新的写作任务。",
+    "讲评中凡出现 ＿＿＿ 处，务必换成本班学生习作里的真实句子，切勿虚构。",
+    "讲评时投屏或朗读，不具名、不排名次。",
+    "每篇用一句话对着技法记下它好在哪、欠在哪。",
+    # 讲评块的占位槽括注体例(lesson-structure §三:全角 ＿＿＿ + 括注直写动作指令)
+    "＿＿＿",
+    "（念该生",
+    "（念一句典型的",
+    # ⑥巡视四类处理块(提示层规范指导语:同一套分层处置口径便于另一位老师照做,
+    #   2026-08-17 用户线上裁决「有意保留、不逐篇换写法」)
+    "[教师巡视，只做正向介入，不纠错字、不改病句、不打断书写顺畅的学生。按学情分四类处理——]",
+    "[书写顺畅型：不打断，走过时轻声一句“接着写”，为其留出书写空间。]",
+    "接不下去型：写完",
+    "内容空泛型：整段都是",
+    "答出一句就让他直接写进去。",
+    "草草收尾型：",
+    "篇幅明显偏短——先肯定再推一步：",
+    # ⑦评改期的固定动作提示
+    "延迟到此刻统一处理行文与错别字",
+    "学生动笔写作（自改；教师巡视答疑）",
+    "请听众发言时有意匀开，不重复请同一批同学",
 ]
 
 MASK = "\x00"
@@ -134,27 +175,78 @@ def main():
     ap.add_argument("--min-files", type=int, default=2, help="至少出现的篇数(默认 2)")
     ap.add_argument("--top", type=int, default=200, help="最多报告条数(默认 200)")
     ap.add_argument("--out", default=None, help="报告另存路径(默认只打印)")
+    ap.add_argument(
+        "--focus",
+        default=None,
+        help="单篇模式:只报「本篇与邻篇共有」的片段(交付前自检用)",
+    )
+    ap.add_argument(
+        "--against",
+        action="append",
+        default=None,
+        help="--focus 的比对邻篇(可重复给或逗号分隔;不给则取 --dir 下其余全部)",
+    )
     args = ap.parse_args()
 
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
 
-    files = sorted(glob.glob(os.path.join(args.dir, "*.md")))
+    focus_name = None
+    if args.focus:
+        if not os.path.isfile(args.focus):
+            print(f"--focus 找不到文件: {args.focus}")
+            return 1
+        focus_name = os.path.splitext(os.path.basename(args.focus))[0]
+        if args.against:
+            others = []
+            for item in args.against:
+                others.extend(p for p in item.split(",") if p.strip())
+            missing = [p for p in others if not os.path.isfile(p)]
+            if missing:
+                print("--against 找不到文件: " + "、".join(missing))
+                return 1
+        else:
+            others = [
+                p
+                for p in sorted(glob.glob(os.path.join(args.dir, "*.md")))
+                if os.path.abspath(p) != os.path.abspath(args.focus)
+            ]
+        files = [args.focus] + others
+    else:
+        files = sorted(glob.glob(os.path.join(args.dir, "*.md")))
     if len(files) < 2:
-        print(f"目录 {args.dir} 下不足 2 份 .md,无从横向比对。")
+        print(f"不足 2 份 .md,无从横向比对。")
         return 1
 
     kept = scan(files, args.n, args.min_len, args.min_files)
+    if focus_name:
+        kept = [(span, owners) for span, owners in kept if focus_name in owners]
 
+    if focus_name:
+        head = (
+            f"单篇邻篇比对报告 · 本篇「{focus_name}」 vs 邻篇 {len(files) - 1} 篇 · "
+            f"共有片段 {len(kept)} 条(n={args.n}, 最短 {args.min_len} 字)"
+        )
+    else:
+        head = (
+            f"批次横审粗筛报告 · 扫描 {len(files)} 篇 · 重复片段 {len(kept)} 条"
+            f"(n={args.n}, 最短 {args.min_len} 字, ≥{args.min_files} 篇)"
+        )
     out_lines = [
-        f"批次横审粗筛报告 · 扫描 {len(files)} 篇 · 重复片段 {len(kept)} 条"
-        f"(n={args.n}, 最短 {args.min_len} 字, ≥{args.min_files} 篇)",
+        head,
         "判读提示:骨架话术/格式教学语等合理固定件 → 补进脚本 WHITELIST;"
         "真句癖(同款比喻/反问/口令跨篇复现) → 补进 variation-pools.md「禁止逐字复用」清单;"
         "教师导演腔(如「一下子就看见」「请不太举手的同学」) → 「导演腔套路」条;"
         "发令词/讲评用语(先别急/谁愿意/立起来/流水账/怦怦直跳) → 池6/池7 轮换,勿进 WHITELIST。",
         "",
     ]
+    if focus_name:
+        out_lines.insert(
+            1,
+            "单篇模式提示:本报告只是候选,**不是判决**——事务性师话与技法口令本就会近似,"
+            "逐条按 pools 裁决序判(说得出口 > 不重复;通行说法不受配额;宁可重复不许自造)。"
+            "命中的**教学话轮序列**(不只是措辞)属零件层、冷审改不动,须回生成侧换设计。",
+        )
     for span, owners in kept[: args.top]:
         out_lines.append(f"[{len(owners)}篇 · {len(span)}字] {span}")
         out_lines.append(f"    出现于: {'、'.join(owners)}")
