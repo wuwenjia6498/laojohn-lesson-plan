@@ -31,7 +31,7 @@ description: 把一份「老约翰」看图写话课详案(.md)转成配套课�
 ## 本机渲染环境（踩中静默失败或乱码）
 
 - 用 `python`，**不是 `python3`**（Store 占位别名，exit 49）。
-- `_shared.py` 已自动设 `PLAYWRIGHT_BROWSERS_PATH`；手动跑前也可 `export PLAYWRIGHT_BROWSERS_PATH="C:/Users/69491/AppData/Local/ms-playwright"`。
+- `_shared.py` 已自动设 `PLAYWRIGHT_BROWSERS_PATH`（按当前用户主目录解析，用户名无关）；手动跑前也可 `export PLAYWRIGHT_BROWSERS_PATH="$LOCALAPPDATA/ms-playwright"`。
 - 命令一律加 `PYTHONUTF8=1`（避免中文路径/字符 GBK 报错）。
 - 依赖：`playwright`（chromium）出 PDF、`pypdf` 核页数（缺则跳过核验，非致命）。
 

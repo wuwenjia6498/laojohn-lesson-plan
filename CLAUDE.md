@@ -13,7 +13,7 @@
 
 **本机渲染/脚本环境（跑任何 python 物料脚本都适用，踩中会静默失败或乱码）：**
 - **用 `python`，不要 `python3`**——`python3` 是 Microsoft Store 占位别名，会以 exit 49 直接退出。
-- **Playwright 浏览器路径一般无需手动 export**：各渲染脚本已在脚本内回退到本机默认 `C:/Users/69491/AppData/Local/ms-playwright`。换机器或路径异常时再 `export PLAYWRIGHT_BROWSERS_PATH=…` 覆盖（环境变量优先于脚本缺省值）。
+- **Playwright 浏览器路径一般无需手动 export**：各渲染脚本已在脚本内用 `Path.home()`／`expanduser("~")` 回退到 `%LOCALAPPDATA%\ms-playwright`（PowerShell 写法 `$env:LOCALAPPDATA\ms-playwright`）——**用户名无关，换机器自动跟随当前用户，不要往文档或脚本里写死具体用户名**。路径异常时再 `export PLAYWRIGHT_BROWSERS_PATH=…` 覆盖（环境变量优先于脚本缺省值）。
 - **python 命令一律加 `PYTHONUTF8=1`**，避免脚本里 ✓ 等字符触发 GBK `UnicodeEncodeError`、中文路径乱码。
 
 **密钥承载约定（全仓首例，仅 `laojohn-picture-writing` 自动生图闭环用）：** 文生图/视觉验收的 AiHubMix 密钥经 **环境变量 `AIHUBMIX_API_KEY`（优先）** 或 **gitignored 的 `scripts/imggen.config.json`** 注入；base_url 默认 `https://aihubmix.com/v1`、模型 id 配置化、不写死。`imggen.config.json` 已入 `.gitignore`，**禁止提交密钥**；除此技能外全仓仍保持零网络调用。
@@ -78,6 +78,10 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 ## 5. 其它跨技能红线
 
 - **「绝不联网」红线的作用域 + 看图写话生图例外口**：全仓「绝不联网、绝不凭记忆」红线**专指"事实不许凭网络或记忆补"**——书目/书封/页码/情节/人物只来自书籍档案（下游唯一事实源），不因网络搜到或模型记忆而混入。**`laojohn-picture-writing` 的自动生图闭环（按 imgspec 规格调 AiHubMix 文生图 + 多模态视觉验收）不属此禁**：方向与"从网络捞事实"相反——**规格是事实源、生成图必须服从规格**，并经「真图 vs 必须可见清单」自动验收 + 人工抽查双重把关（守门禁 4）。**铁律：生成插画不是"事实"，绝不可反过来用图去改写规格/正文的情节·数字**。此例外仅限看图写话生图；其余技能维持零网络调用。
+
+- **Anthropic 官方 `docx`/`pptx`/`xlsx`/`pdf` skill：只许读改外部文件，禁止用来新建本仓产物（2026-08-18 装 · user 级 `anthropic-agent-skills` 市场）**。作用域**仅限「读取或修改一份已经存在的外部文件」**——体检外部平台生成的 pptx、拆解第三方 docx、合并 pdf 之类。**本仓一切交付产物的生成一律走 laojohn-* 流水线**：docx 走 `md_to_laojohn_docx.py`（且必带 `--header-left/--header-right`），读书会 pptx 走 `build_ppt.py`，写作课 pptx 走「归位 → 读详案审查 → 动画 → 页标回注」四步链（含 `plan_link.py` 闸门）。用官方 skill 新建，产出既不带品牌版式、也绕过页眉参数与闸门。
+  - **须防触发词撞车**：官方 pptx 的 description 明写「凡用户提到 deck／slides／presentation 或点到 .pptx 文件名就触发，不问他接下来要干什么」，docx 亦覆盖 report／memo／letter／template；而本仓天天说 PPT、课件、docx。**凡涉及本仓产出，一律以 laojohn-* skill 为准**，官方件不得抢活。
+  - **环境事实（省得反复试错）**：本机无 node/npm、无 LibreOffice、无 pandoc、无 markitdown，故官方 docx/pptx 的「新建」（docx-js／pptxgenjs）与「读取」（pandoc／markitdown）路径本就跑不通，xlsx 亦缺 openpyxl/pandas 而整体不可用。**真正能用的只有三样**：pdf 各项操作（pypdf 已装）、docx/pptx 的 unzip→改 XML→zip 编辑路径（纯标准库）、以及 `scripts/office/validate.py` 结构校验（已补装 `defusedxml`）。不要为跑通其余路径去装 Node/LibreOffice/pandoc——那与本仓已成熟的产出链重复造轮子。
 
 - **`【PPT换页-PXX】` 已废弃**（lesson-plan、writing-lesson 详案均不再写）。分页权归 `laojohn-ppt-draft`，由它按"教学节拍"自行切页；详案只需 `## 第N课时 · 课型` 划课时、`### 一、xx` 划环节。
 - docx 引擎仍把残留换页点渲染成橙色，**仅为向后兼容旧 docx**，新稿一律不产出。
