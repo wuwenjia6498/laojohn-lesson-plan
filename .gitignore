@@ -131,3 +131,8 @@ _交接/
 作文批改工具/web/server/config.json
 # 批改工具的回归测试稿纸：由 make_test_sheets.py 随时重生成，产物不入库（脚本入库）。
 作文批改工具/web/server/_testdata/
+
+# Claude Code 本地权限白名单（2026-08-19 立）：settings.local.json 是每台机器
+# 各自的一次性授权记录（含本机用户名与会话 scratchpad 临时路径），换机器即失效，
+# 不属项目配置。团队级配置走 .claude/settings.json（该文件仍入库）。
+.claude/settings.local.json
