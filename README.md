@@ -112,14 +112,21 @@
 │                                  #   （image-spec / style-tokens / measurement-ledger 指向这里，
 │                                  #   详案正文也写「依据《小试结论》§三」），**勿当残留清理**；
 │                                  #   已完结的一次性交接件已于 2026-08-18 清空
+├── docs\协作同步说明.md           # 双人协作操作规程（给同事看的一页：两条命令 / 交球 /
+│                                  #   记忆与大件的目录联接 / 出岔子怎么办）
 ├── fix_quotes_md.py               # 辅助脚本（见文末表）
 ├── check_quotes.py
 ├── tone_gate.py
 │
 ├── CLAUDE.md                      # 跨技能硬约束（AI agent 必读）
 ├── README.md                      # 本文件
+├── 协作看板.md                     # 双人接力状态表：条目 / 状态 / 球在谁手上
+│                                  #   （唯一需两人共同维护的文件，交球前顺手改一行）
 │
 └── .claude\
+    ├── memory\                    # 项目记忆 182 份（踩坑笔记与跨课次通则）。原在 Claude Code
+    │                              #   用户目录、不随 git 走，2026-08-20 迁入仓库；各机器把用户目录
+    │                              #   那份换成指向此处的目录联接，此后随 git 自动双向同步
     └── skills\                    # AI Agent SKILL 定义
         ├── ── 上游建档 ──
         ├── laojohn-book-profile\       # 电子书 → 书籍档案（下游唯一事实来源）
@@ -328,6 +335,7 @@ PYTHONUTF8=1 python .claude/skills/laojohn-lesson-plan/assets/insert_images_docx
 - **书目卡内容简介**：由 AI 按课案「内容简介」段提炼，提炼完成后保存在 `<书名>_书目卡.json` 的 `summary` 字段，如需修改直接编辑 JSON 后重渲染。
 - **引号规范**：中文弯引号铁律见 `CLAUDE.md` §4；批量修复用根 `fix_quotes_md.py`、校验用 `check_quotes.py`（用法见下表）。⚠ `fix_quotes_md.py` 无差别替换、不认代码围栏，含命令示例的 md 跑完须回扫代码块把命令里的引号还原半角。
 - **产物不进 git**：各输出目录的渲染产物（docx/pptx/pdf/jpg/html/png）与三个打包目录已 gitignore，只提交 md/json 源与输入资产。提交前 `git status` 里不该出现产物；新增输出目录要同步补 ignore 规则，**严禁 `git add -f` 强加回来**。详见 `CLAUDE.md` §8。
+- **双人协作靠三层通道**：源文件（md/json/脚本/skill）与项目记忆走 **git**；版权插图与外部生成的 PPT 走**网盘 + 目录联接**；渲染产物**哪边都不走、各自本地重渲**——所以对方审改后你 pull 到的只有 md，最新 docx 要自己再渲一次。交球靠 commit 前缀（`[稿]`/`[审]`/`[定]`）+ 根目录 `协作看板.md`。完整操作规程见 `docs\协作同步说明.md`。
 - **`tests\` 是机检回归夹具，不是详案**：里面的 md 往往是**故意保留缺陷的改前原稿**，绝不可复制进 `写作课详案输出\`，也不要拿它当写作参考。说明见 `tests\README.md`。
 
 ---
