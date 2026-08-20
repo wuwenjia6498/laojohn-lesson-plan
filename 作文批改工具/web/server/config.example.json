@@ -1,0 +1,10 @@
+{
+  "_说明": "复制为 config.json 后填写。密钥优先读环境变量 AIHUBMIX_API_KEY，其次读本文件的 api_key。config.json 已 gitignore，禁止提交密钥。",
+  "api_key": "",
+  "base_url": "https://aihubmix.com/v1",
+  "grade_model": "gpt-4o",
+  "_备注_模型": "批改要读手写稿＋做中文长文本判断，走 OpenAI 兼容 /v1/chat/completions 多模态。gpt-4o 是已验证可用的保底值；换更强的模型只改这一行，不动代码。",
+  "rate_limit_per_hour": 120,
+  "_备注_限额": "按客户端 IP 计的每小时批改次数上限。一个班 30 份、老师一次批完＝30 次，120 够一天四个班。防的是密钥被盗刷，不是防老师。生产环境应换成按校区账号计。",
+  "max_image_mb": 8
+}

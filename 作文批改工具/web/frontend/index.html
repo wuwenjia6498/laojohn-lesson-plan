@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#C8352B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="习作批改">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="style.css">
+<title>老约翰 · 同步习作批改助手</title>
+</head>
+<body>
+
+<header class="topbar">
+  <button id="btn-back" class="back" hidden>‹</button>
+  <div class="brand"><span class="dot"></span><span id="topbar-title">同步习作批改助手</span></div>
+  <button id="btn-info" class="info">?</button>
+</header>
+
+<!-- ── 视图一 · 选课 ───────────────────────────── -->
+<main id="view-pick" class="view">
+  <p class="lead">今天批哪一课？</p>
+  <div id="lesson-list" class="lesson-list"><p class="hint">正在读课次…</p></div>
+  <div class="boundary">
+    <b>先说清楚它不做什么</b>
+    <ul>
+      <li><b>错别字、标点、卷面它一律不看</b>——照片上的字它会不自觉读通顺，这一层判不准，交给你当面看稿。</li>
+      <li>它出的是<b>草稿</b>：批语你改过再发，别直接转出去。</li>
+      <li>学生作文会上传到第三方 AI。建议<b>遮住姓名</b>，写到家里私事的那几份别传。</li>
+    </ul>
+  </div>
+</main>
+
+<!-- ── 视图二 · 批改队列 ───────────────────────── -->
+<main id="view-grade" class="view" hidden>
+  <div id="lesson-brief" class="brief"></div>
+
+  <label class="shoot">
+    <input id="file-input" type="file" accept="image/*" multiple hidden>
+    <span class="shoot-icon"></span>
+    <span class="shoot-text">拍照 / 从相册选<em>可以一次连拍或多选整个班</em></span>
+  </label>
+
+  <div id="queue" class="queue"></div>
+
+  <div id="empty-tip" class="hint center">还没有稿子。一份一张，拍全整页，四角都在画面里。</div>
+</main>
+
+<!-- ── 视图三 · 单份详情 ───────────────────────── -->
+<main id="view-detail" class="view" hidden>
+  <div id="detail-body"></div>
+</main>
+
+<!-- ── 视图四 · 班级诊断 ───────────────────────── -->
+<main id="view-class" class="view" hidden>
+  <div id="class-body"></div>
+</main>
+
+<!-- 底部固定条 -->
+<footer id="bottombar" class="bottombar" hidden>
+  <span id="bottom-stat"></span>
+  <button id="btn-class" class="primary small">班级诊断</button>
+</footer>
+
+<!-- 说明弹层 -->
+<div id="sheet-info" class="sheet" hidden>
+  <div class="sheet-card">
+    <h3>怎么用</h3>
+    <ol>
+      <li>选今天上的那一课。判据来自这一课的详案，是<b>学生当堂听过的那三条</b>——所以批语可以直接说“你没做到今天课上讲的那一招”。</li>
+      <li>连拍全班稿纸，一份一张。它一份一份批，你可以边拍边看。</li>
+      <li>每份点开可以改批语，点评卡改完生成图片，长按保存发家长群。</li>
+      <li>全批完点「班级诊断」，看这个班共性卡在哪，讲评课照着讲。</li>
+    </ol>
+    <h3>它不做的</h3>
+    <p>错别字、标点、卷面一律不看；不打分不排名；批完不留底，图和作文都不存。</p>
+    <button id="btn-close-info" class="ghost">知道了</button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

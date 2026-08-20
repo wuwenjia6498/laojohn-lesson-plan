@@ -1,0 +1,243 @@
+/* 老约翰 · 同步习作批改助手
+   色板与印刷件 template_student.html 同源，保证师端网页与手上的纸看着是一家。
+   移动端优先：单列、大点击区、底部条避开 iOS 安全区。 */
+
+:root{
+  --brand-red:#C8352B;
+  --ink:#3A3A38;
+  --ink-soft:#7A7568;
+  --paper:#FFFFFF;
+  --page:#FAF8F4;
+  --line:#E3DED4;
+  --brown-cell:#EFEBE3;
+  --blue-head:#5B7A99;
+  --blue-soft:#E7EEF3;
+  --blue-line:#AEC2D2;
+  --note-bg:#FBF3EC;
+  --note-line:#D8B99C;
+  --note-ink:#9A6A44;
+  --ok:#3F7A55;
+  --warn:#B4761F;
+  --bad:#B5453C;
+  --na:#8A857A;
+  --r:12px;
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+/* hidden 属性必须压得过下面那些 display:flex/block——否则弹层与底栏
+   看不见却仍盖在页面上，整页点不动。 */
+[hidden]{display:none !important}
+html,body{margin:0;padding:0}
+body{
+  background:var(--page); color:var(--ink);
+  font:16px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;
+  padding-bottom:calc(92px + env(safe-area-inset-bottom));
+}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+
+.topbar{
+  position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:8px;
+  padding:calc(10px + env(safe-area-inset-top)) 14px 10px;
+  background:var(--paper);border-bottom:1px solid var(--line);
+}
+.brand{flex:1;display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--brand-red);flex:none}
+.topbar .back,.topbar .info{
+  width:34px;height:34px;border-radius:50%;flex:none;
+  font-size:20px;line-height:1;color:var(--ink-soft);background:var(--page);
+}
+.topbar .back{font-size:26px;padding-bottom:3px}
+
+.view{padding:16px 14px 8px;max-width:640px;margin:0 auto}
+.lead{margin:4px 2px 12px;font-size:17px;font-weight:700}
+.hint{color:var(--ink-soft);font-size:14px;line-height:1.6}
+.center{text-align:center;padding:24px 12px}
+
+.lesson-list{display:flex;flex-direction:column;gap:10px}
+.lesson{
+  display:block;width:100%;text-align:left;padding:14px 16px;
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--r);
+}
+.lesson:active{background:var(--brown-cell)}
+.lesson .t{font-size:17px;font-weight:700}
+.lesson .s{margin-top:4px;font-size:13px;color:var(--ink-soft);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lesson .tag{
+  display:inline-block;margin-top:8px;padding:2px 8px;border-radius:20px;
+  font-size:12px;background:var(--blue-soft);color:var(--blue-head)}
+.lesson .tag.unverified{background:#FBEFEA;color:var(--brand-red)}
+
+.boundary{
+  margin:22px 0 10px;padding:14px 16px;border-radius:var(--r);
+  background:var(--note-bg);border:1px solid var(--note-line);color:var(--note-ink);font-size:14px}
+.boundary b{color:#7C5330}
+.boundary ul{margin:8px 0 0;padding-left:18px}
+.boundary li{margin:6px 0;line-height:1.6}
+
+.brief{
+  padding:12px 14px;background:var(--paper);border:1px solid var(--line);
+  border-radius:var(--r);margin-bottom:14px}
+.brief h2{margin:0 0 6px;font-size:16px}
+.brief .checks{margin:8px 0 0;padding:0;list-style:none;font-size:14px}
+.brief .checks li{padding:3px 0 3px 24px;position:relative;color:var(--ink-soft)}
+.brief .checks li span{
+  position:absolute;left:0;top:6px;width:17px;height:17px;border-radius:50%;
+  background:var(--blue-soft);color:var(--blue-head);
+  font-size:11px;font-weight:700;text-align:center;line-height:17px}
+.brief .nis{margin-top:10px;font-size:13px;color:var(--note-ink)}
+
+.shoot{
+  display:flex;align-items:center;gap:14px;padding:18px 18px;margin-bottom:14px;
+  background:var(--brand-red);color:#fff;border-radius:var(--r);
+  box-shadow:0 2px 10px rgba(200,53,43,.22)}
+.shoot:active{filter:brightness(.94)}
+.shoot-icon{
+  flex:none;width:34px;height:26px;border:2.5px solid #fff;border-radius:5px;position:relative}
+.shoot-icon::before{
+  content:"";position:absolute;left:9px;top:-8px;width:14px;height:6px;
+  border:2.5px solid #fff;border-bottom:0;border-radius:4px 4px 0 0}
+.shoot-icon::after{
+  content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:11px;height:11px;border:2.5px solid #fff;border-radius:50%}
+.shoot-text{font-size:17px;font-weight:700;line-height:1.35}
+.shoot-text em{display:block;font-style:normal;font-size:12px;font-weight:400;opacity:.85}
+
+.queue{display:flex;flex-direction:column;gap:8px}
+.card{
+  display:flex;align-items:center;gap:12px;padding:10px 12px;
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--r);
+  width:100%;text-align:left}
+.card:active{background:var(--brown-cell)}
+.thumb{flex:none;width:46px;height:60px;border-radius:6px;object-fit:cover;
+  background:var(--brown-cell);border:1px solid var(--line)}
+.card .mid{flex:1;min-width:0}
+.card .name{font-weight:700;font-size:16px}
+.card .name.anon{color:var(--ink-soft);font-weight:400}
+.card .sub{font-size:13px;color:var(--ink-soft);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .go{flex:none;color:#C4BDB0;font-size:20px}
+
+.badge{display:inline-block;padding:1px 8px;border-radius:20px;font-size:12px;font-weight:700}
+.badge.b0{background:#FBF1E3;color:var(--warn)}
+.badge.b1{background:var(--blue-soft);color:var(--blue-head)}
+.badge.b2{background:#EEF3EE;color:var(--ok)}
+.badge.wait{background:var(--brown-cell);color:var(--ink-soft)}
+.badge.err{background:#FBEAE8;color:var(--bad)}
+
+.spin{flex:none;width:18px;height:18px;border:2px solid var(--blue-line);
+  border-top-color:var(--blue-head);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+.sec{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);
+  padding:14px 16px;margin-bottom:12px}
+.sec h3{margin:0 0 10px;font-size:15px;display:flex;align-items:center;gap:8px}
+.sec h3 .aside{margin-left:auto;font-size:12px;font-weight:400;color:var(--ink-soft)}
+
+.namerow{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.namerow input{
+  flex:1;min-width:0;font-size:19px;font-weight:700;padding:8px 12px;
+  border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink)}
+
+.check{padding:11px 0;border-top:1px dashed var(--line)}
+.check:first-of-type{border-top:0;padding-top:2px}
+.check .h{display:flex;align-items:baseline;gap:8px}
+.check .no{flex:none;width:19px;height:19px;border-radius:50%;background:var(--brown-cell);
+  color:var(--ink-soft);font-size:12px;font-weight:700;text-align:center;line-height:19px}
+.check .t{font-weight:700;font-size:15px}
+.check .v{margin-left:auto;flex:none;font-size:14px;font-weight:700;white-space:nowrap}
+.v-ok{color:var(--ok)} .v-half{color:var(--warn)}
+.v-no{color:var(--bad)} .v-na{color:var(--na)}
+.check .ev{margin:6px 0 0 27px;padding:7px 11px;background:var(--blue-soft);
+  border-left:3px solid var(--blue-line);border-radius:0 7px 7px 0;font-size:14px}
+.check .cm{margin:6px 0 0 27px;font-size:14px;color:var(--ink-soft)}
+
+textarea{
+  width:100%;border:1px solid var(--line);border-radius:9px;padding:10px 12px;
+  font-size:15px;line-height:1.75;font-family:inherit;
+  color:var(--ink);background:var(--paper);resize:vertical}
+textarea:focus{outline:0;border-color:var(--blue-line)}
+.count{font-size:12px;color:var(--ink-soft);text-align:right;margin-top:4px}
+.count.over{color:var(--bad)}
+
+.row{display:flex;gap:10px;margin-top:10px}
+.row>*{flex:1}
+.primary{background:var(--brand-red);color:#fff;padding:12px;border-radius:9px;font-weight:700}
+.primary:active{filter:brightness(.94)}
+.primary.small{padding:9px 16px;flex:none;font-size:15px}
+.ghost{background:var(--paper);border:1px solid var(--line);color:var(--ink-soft);
+  padding:12px;border-radius:9px}
+.ghost:active{background:var(--brown-cell)}
+
+.unclear{background:#FBF1E3;border:1px solid #E5CFA6;color:#7C5330;
+  border-radius:9px;padding:10px 12px;font-size:14px;margin-bottom:12px}
+.unclear b{display:block;margin-bottom:4px}
+
+#cardimg{width:100%;border-radius:var(--r);border:1px solid var(--line);
+  margin-top:12px;display:block}
+.saveTip{margin-top:8px;font-size:13px;color:var(--ink-soft);text-align:center}
+
+.stats{display:flex;gap:8px;margin-bottom:12px}
+.stat{flex:1;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);
+  padding:12px 8px;text-align:center}
+.stat b{display:block;font-size:23px;line-height:1.2}
+.stat span{font-size:12px;color:var(--ink-soft)}
+.prob{padding:12px 0;border-top:1px dashed var(--line)}
+.prob:first-of-type{border-top:0;padding-top:0}
+.prob .p{font-weight:700}
+.prob .m{font-size:13px;color:var(--ink-soft);margin:2px 0 6px}
+.prob .f{font-size:14px;background:var(--blue-soft);border-radius:8px;padding:8px 11px}
+
+.bottombar{
+  position:fixed;left:0;right:0;bottom:0;z-index:20;
+  display:flex;align-items:center;gap:12px;
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+  background:var(--paper);border-top:1px solid var(--line)}
+#bottom-stat{flex:1;font-size:14px;color:var(--ink-soft)}
+
+.sheet{position:fixed;inset:0;z-index:30;background:rgba(40,36,30,.42);
+  display:flex;align-items:flex-end}
+.sheet-card{width:100%;max-height:82vh;overflow:auto;background:var(--paper);
+  border-radius:16px 16px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom))}
+.sheet-card h3{margin:14px 0 6px;font-size:15px}
+.sheet-card h3:first-child{margin-top:0}
+.sheet-card ol{margin:0;padding-left:20px;font-size:14px}
+.sheet-card li{margin:6px 0;line-height:1.65}
+.sheet-card p{font-size:14px;color:var(--ink-soft);margin:0}
+.sheet-card .ghost{width:100%;margin-top:18px}
+
+.mockbar{background:#FBF1E3;color:#7C5330;border:1px solid #E5CFA6;
+  border-radius:9px;padding:8px 12px;font-size:13px;margin-bottom:12px}
+
+/* 这一篇最值得说的：定调用，放在最上面。老师扫一眼就知道这份的要点在哪 */
+.focus{background:var(--blue-soft);border-left:4px solid var(--blue-head);
+  border-radius:0 var(--r) var(--r) 0;padding:11px 14px;margin-bottom:12px;font-size:15px}
+.focus b{display:block;font-size:12px;color:var(--blue-head);margin-bottom:3px;font-weight:700}
+
+/* 亮点＝孩子自己写得好的地方。允许一条都没有，那时显示灰字提示、不隐藏——
+   「这一篇没有亮点」本身就是给老师的信息 */
+.hl{padding:10px 0;border-top:1px dashed var(--line)}
+.hl:first-of-type{border-top:0;padding-top:0}
+.hl .q{background:#F1F6F1;border-left:3px solid #A9C6B0;border-radius:0 7px 7px 0;
+  padding:7px 11px;font-size:14px}
+.hl .w{margin-top:5px;font-size:14px;color:var(--ink-soft)}
+.hl .kind{display:inline-block;margin-right:6px;padding:1px 7px;border-radius:20px;
+  font-size:11px;font-weight:700;background:#EEF3EE;color:var(--ok)}
+
+/* 整篇三项：紧凑三行，不跟三条判据抢视觉重量（它不进档位） */
+.wp{padding:9px 0;border-top:1px dashed var(--line)}
+.wp:first-of-type{border-top:0;padding-top:0}
+.wp .h{display:flex;align-items:baseline;gap:8px}
+.wp .t{font-weight:700;font-size:14px}
+.wp .v{margin-left:auto;flex:none;font-size:14px;font-weight:700;white-space:nowrap}
+.wp .cm{margin-top:3px;font-size:13px;color:var(--ink-soft)}
+.wp .ev.sm{margin:5px 0 0;padding:5px 9px;font-size:13px}
+
+/* 共性问题分两层：判据层＝这次课教的没学会；整篇层＝更底下的地基。
+   混在一起报，老师看不出该先管哪个 */
+.layer{display:inline-block;margin-right:7px;padding:1px 7px;border-radius:20px;
+  font-size:11px;font-weight:700;vertical-align:2px}
+.layer.l1{background:var(--blue-soft);color:var(--blue-head)}
+.layer.l2{background:#FBF1E3;color:var(--warn)}
+/* 整篇三项是参考区，判出问题时才举证、且最多两行——它不该比主判据还占版面 */
+.wp .ev.sm{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
