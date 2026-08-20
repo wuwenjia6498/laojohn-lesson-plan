@@ -1,0 +1,29 @@
+---
+name: detail-review-cold-start
+description: "详案成稿复盘已从生成流程内剥离为独立冷启动 skill(laojohn-detail-review)，治\"自审走过场\""
+metadata: 
+  node_type: memory
+  type: project
+  originSessionId: a20ad025-c4aa-4507-a7c4-e17235fadcc3
+---
+
+2026-06-24 用户拍板并落地：**详案的「成稿通读复盘」从生成流程内的一步，剥离为独立·冷启动执行**，解决"AI 自己生成、自己回测自己，会为自身设计辩护、`默认有问题`空转、沦为走过场"的根因。
+
+**改了什么（A+B 都做 · 阅读课与写作课两 skill 一起改）：**
+- 新建 skill `laojohn-detail-review`（`.claude/skills/laojohn-detail-review/SKILL.md`）：输入一份 .md 详案路径 → 自动判型（`*-课案详案.md`=阅读 / `*-写作课详案.md`=写作）→ **加载对应 skill 的 `review-rubric.md` 为唯一权威，不复制五维内容** → 立审稿人协议五条 → 按五维「先摘后算」冷审 → 无争议项直改 .md、教学判断项进 B 块回呈用户 → 三件套报告。事实核对源：阅读=书籍档案，写作=`writing-lesson/references/archive/`。
+- `laojohn-lesson-plan` 第8步 / `laojohn-writing-lesson` 第6步：改为 checklist 过后**停手不自审**，**首选派 fresh（非 fork）子 agent** 跑 detail-review（子 agent prompt = "读并遵循 detail-review/SKILL.md，待审稿件=<绝对路径>"）；兜底=提示用户新会话手动调；降级=同会话「显式封存生成过程」后自审（最弱）。
+- 两份 `review-rubric.md` 顶部"形态A/B"说明改为：冷启动(子agent/新会话)为正常路径，形态B 仅降级兜底。
+- `CLAUDE.md` §4「交付双道工序」加一段同义说明。
+
+**关键设计点（勿推翻重做）：**
+- fork 会继承生成上下文 = 等于没隔离，**必须 fresh general-purpose 子 agent**。
+- rubric 五维内容仍单一源在各自 skill，detail-review 只按类型加载——改 rubric 即同时改冷审依据，无双写漂移。
+- detail-review 只审稿+直改无争议项，不生成详案、不出 docx、不碰下游配套；B 块拍板后的"按报告动手改"仍归原 skill 的「生成后的优化」段。
+
+**2026-06-24 后续 · 两条审稿透镜固化进规则**（用户实跑俗世奇人冷审时提出，证明标准 rubric 没专门覆盖）：
+- **导读课不得预设学生已读全书**（整本书阅读专属，仅 lesson-plan）：导读课是第1课、学生尚未读书，活动须自含（要分析/比较/推断的文本只能是当堂朗读或当堂阅读的样篇），严禁设计"需已读该篇/全书"才能做的环节（比较两篇/评全书人物/揭谜底）。写下两处：lesson-plan SKILL「核心约束」新增红线条 + review-rubric 维三新增「导读课红线」核查项。写作课无导读课、且已有"零预设"红线，不加。
+- **环节耗时可行性 + 充分展开优先**（通用，两 skill 都进）：标准时间维只算了"人均分享 T÷N"，没算"环节标称分钟装不装得下它串起的全部教学动作"——这正是俗世奇人导读课环节二（标称25分钟、塞了刷子李+酒婆两篇精读+对比+读法卡）险些漏网的根因。规则：逐环节把全部教学动作逐条估时累加、算进课堂摩擦，塞不下时**宁可深讲一处、其余降格快速一例或后移，不要匆匆带过五六件**。写下四处：lesson-plan/writing-lesson 各自 SKILL「核心约束」新增时间可行性条 + 两 review-rubric（lesson 维一、writing 维四）各新增「逐环节耗时累加」核查项。
+- **节内教学逻辑闭环**（通用）：倒查每个"要学生产出"的点，此前教师/支架是否真给了支撑它的东西、教师具体行为（读了文本哪部分）。写下两处：lesson 维三、writing 维二 各新增核查项。
+- 实例落定：俗世奇人详案据此改了环节二（刷子李做深锚、酒婆降格去掉其完整学生分享轮）+ 两处脚手架补口（性格奇/品性奇标签交底、泥人张结尾补述）+ B类#10 时间提示同步。
+
+关联 [[book-profile-skill-state]]、[[reading-assessment-skill-state]]（同属生成质量链路）。
