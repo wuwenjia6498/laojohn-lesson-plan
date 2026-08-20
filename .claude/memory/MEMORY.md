@@ -38,7 +38,7 @@
 ### 规则与体例
 - [教师自拟例子四条硬判据(0817)](writing-lesson-example-must-be-unique-anchor.md) — 连否四轮五次返工换来:**独一份**(嗓门大/不爱笑=通用款,会让课自相矛盾)／**夸张≠计数**(「问了八遍我们数过」不是放大)／**样板不得低于例句**／**一篇内锚点不复用**;判据在model-essay §四之四、管全篇例子不只示范文
 - [比喻类写人反刻板＋示范材料不绑老师真实生活(0802/0817)](writing-lesson-metaphor-antistereotype.md) — 解法「先想只有他家才有的画面再找动物」须做成课堂明线;**两条全线通则:①例子不落到老师家人 ②默认措辞不强断言老师当下生活事实**(课案多人复用,「这是老师每天背的包」会逼老师说假话;授课提示是补救不是解法,须给替换清单+降级兜底)
-- [0731电报体/生造词红线第7条](writing-lesson-telegraphese-and-coinage-redline.md) — 四形态自查(省主语/名词压缩/电报短语/生造词);讲评括注直写动作、「占位」已升机检
+- [电报体/生造词红线第7条(0731立·0819补第5形态)](writing-lesson-telegraphese-and-coinage-redline.md) — 五形态自查(省主语/名词压缩/电报短语/生造词/**中心宾语残缺**);补宾语有反向刹车:术语只在定义句补一次,逐处补会撞池8配额;讲评括注直写动作、「占位」已升机检
 - [师话必须接住上一轮真实产出(0803)](writing-lesson-shihua-must-follow-real-turn.md) — 假转折/假情境/假引文三变体;checklist·tone_gate·冷审三关全漏,只有通读语感抓得到
 - [学段口气全线没分级(0817)](writing-lesson-grade-tone-not-differentiated.md) — 九篇③环节同构;**判断分三层(用词/技法深度/思维层级)别混说**;判据=降两级反问,改不动即没分级;已补technique-levels口气落地动作表+checklist C组+rubric第六节
 - [新增「话轮骨架」层=池9+指纹第15字段(0817)](writing-turn-skeleton-layer-pool9.md) — 补零件层与措辞层之间的空档:③④⑦话轮序列;**冷审能打散措辞、打散不掉同构**;配 batch_ngram_scan 新增`--focus/--against`单篇邻篇机检(进checklist E组);⚠池9编号在后但属零件层
@@ -48,6 +48,7 @@
 - [参考标签纪律+术语首现权+追问链](writing-lesson-label-and-turn-discipline.md) — `参考：`只装学生话;括号按「做/读」分家族
 - [行文正样本+去AI味规则单边化根因(0804)](writing-lesson-prose-style-benchmark-0804.md) — 新建prose-style-benchmark.md(157行禁令/0段正例是根因);pools加「宁可重复不许自造」裁决序;短句占比INFO线13%;⚠方言词表已被实测否掉
 - [导演腔第三层反同质化(池6/7)](writing-lesson-director-tone-antihomogenization.md) — 根因=生成侧金句写死;四层治理已验完
+- [重建台账前先查缺指纹的篇(0819)](ledger-rebuild-drops-fingerprintless.md) — 四上两篇指纹曾被改稿顺手删掉,直接重建会静默抹掉它们那两行;先grep -L回写再重建
 - [指纹块改14字段+装置粒度门槛](writing-lesson-fingerprint-fields-revised.md) / [横向生产+反同质化四项升级](writing-lesson-antihomogenization-upgrade.md) — 指纹会回读重建台账,装置判据=当场演过一件事;距离化避让/池5篇内规则/批次横审(⚠该条12字段说法已过时)
 - [正文标点全角+方括号提示体例](writing-lesson-fullwidth-punct-bracket.md) / [语言风格红线覆盖后续改写](style-redline-covers-edits.md) / [交付前加通读语感扫](writing-lesson-naturalness-readthrough.md) — 去游戏化叫法+去形象比喻;checklist抓不到生造/别扭须纯语感通读
 - [进阶线升全覆盖63任务+填空位必须全角＿＿(0802)](writing-progression-chain-full-coverage.md) — 总地图由md反向回写(全仓唯一);归线=文体首段·分档=册次;半角`____`会被docx引擎当加粗标记静默吃掉
@@ -145,7 +146,7 @@
 - **⚠ 阅读单线 18 份 PDF 的 Type3 字体遗留未修** — [详情](pdf-type3-fonts-fixed.md)
 - 彼得·潘档案 line23/32 与机读块不一致待清理 — [详情](peterpan-book-profile-state.md)
 - 封面图缺（汉修先生 / 呼兰河传 / 骑鹅旅行记，骑鹅须补图重跑）· 快乐王子下游未做 · 快乐读书吧 6 本已建 2 本余 4 本
-- 《推荐一个好地方》两处详案↔PPT微差未拍板 · 《“漫画”老师》冷审未跑 · writing 竞品借鉴 D3–D5/N1 待做 · ppt-profile Phase3 待办
+- 《推荐一个好地方》两处详案↔PPT微差未拍板 · writing 竞品借鉴 D3–D5/N1 待做 · ppt-profile Phase3 待办
 
 ## 已交付归档（细节各见链接 · 排新课次前按需打开）
 **读书会 · 书籍**：[快乐王子L5](kuailewangzi-lesson-plan-state.md)/[建档](kuailewangzi-book-profile-state.md)（童话集9篇无主线·篇名不可换通行译名·无页码）· [独一无二的伊凡](yifan-ppt-chain-state.md)（全链路已齐·中间稿兼任ppt-draft正例）· [玛丽阿姨建档](marypoppins-book-profile-state.md)/[全链路](marypoppins-lesson-plan-state.md)（纳翰应为约翰·玛丽对奇事一律否认）· [彼得·潘建档](peterpan-book-profile-state.md)/[L4全链路](peterpan-lesson-plan-state.md)（正文与附录是两个文本不可混）· [汉修先生L3](hanxiu-lesson-plan-state.md)/[建档](hanxiu-book-profile-state.md)（书信日记体·八个转折点串主线）· [呼兰河传L6](hulanhe-lesson-plan-state.md)（群像缀连·两副面孔对照表）· [俗世奇人](suishi-qiren-lesson-plan-retested.md)（「死鸟·贺道台」是姓+官职非本名）· [骑鹅旅行记L6](qie-lvxingji-lesson-plan-state.md)
