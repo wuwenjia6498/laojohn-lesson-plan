@@ -229,7 +229,7 @@ PYTHONUTF8=1 python .claude/skills/laojohn-lesson-plan/assets/insert_images_docx
 ```
 写作课教材插图\三上-第三单元-续写故事\_教材页.jpg   # 整页翻拍，存档用
 写作课教材插图\三上-第三单元-续写故事\插-01.jpg     # 从教材页裁出的单图，编号连号
-写作课教材插图\三上-第三单元-续写故事\_图单.md      # 元数据，入库
+写作课教材插图\三上-第三单元-续写故事\_图单.md      # 元数据（图与图单均入库）
 ```
 
 - 详案里同样写 `【图位:插-01｜图注】` 占位，出配图版走同一个共享回插件 `insert_images_docx.py`（`--profile writing`）。
