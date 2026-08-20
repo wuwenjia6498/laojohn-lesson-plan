@@ -23,7 +23,7 @@
 - 每节课独立PPT不合并;中间稿不写师话(线上系统无备注栏,师话→讲稿);眉标禁写课型;字体微软雅黑+宋体+Calibri零依赖;配图=占位框手动贴
 - 换页点`【PPT换页-Pxx】`已废弃(分页权归ppt-draft;docx橙色渲染留作向后兼容)
 - reading-guide 封面图取 `读书会书籍封面\<书名>.<ext>`(不带《》,与poster/book-card共用),找不到出占位、绝不联网编造
-- **双人协作(0820立)**:项目已交接同事、两边都在产;同步分三层(源文件+记忆走git／版权插图与外部PPT走网盘／产物不同步各自重渲);**记忆已迁入仓库 `.claude\memory\`、用户目录那份是目录联接** — [详情](two-person-sync-three-channels-0820.md)
+- **双人协作(0820立)**:项目已交接同事、两边都在产;同步分三层(源文件+记忆走git／版权插图与外部PPT走网盘／产物不同步各自重渲);**记忆已迁入仓库 `.claude\memory\`、用户目录那份是目录联接** — [详情](two-person-sync-0820.md)
 - **目录口径(2026-07-23后)**:读书会线顶层目录全带「读书会」前缀;写作课件三目录+整套打包目录独立分线;旧名全部作废,详见 [bookclub-materials-dir-consolidation](bookclub-materials-dir-consolidation.md)
 
 ## 写作课（writing-lesson）
