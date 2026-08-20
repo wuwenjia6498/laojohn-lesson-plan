@@ -24,4 +24,6 @@ metadata:
 
 **联接验收要做写入穿透，且探针必须用 `.md`（0820 同事侧实测补）**：`Get-Item` 看到 `ReparsePoint`／`LinkType: Junction` 只证明联接存在，不证明写进去的东西会落到仓库——要从**用户目录那一侧**新建一个文件，再到仓库侧 `git status` 看认不认。⚠ **探针别用 `.tmp`**：`.gitignore` 里 `*.tmp` 是全局忽略的，`git status` 永远没反应，会误判成联接没通、白重建一次。两侧文件数一致（而非各算各的）是个好旁证。
 
+**大件层改用同步脚本，不是联接（0820 实测推翻原方案）**：**目录联接只能建在 NTFS 卷上**，本项目常驻 exFAT 移动硬盘（`E:` = exFAT），在项目内建 junction 直接报 `Local NTFS volumes are required`。**记忆那条联接能成立是因为它建在 C 盘、只是指向 E 盘——方向不可颠倒**，这是最容易想当然的一处。改为根 `sync_assets.ps1`：三个目录与网盘双向 `robocopy /XO` 合并（两向都只覆盖更旧的），**绝不用 `/MIR`**（按单侧内容删另一侧＝删掉对方的图）。已双向往返实测。OneDrive 侧须把共享目录设 `attrib +P`（始终保留在此设备），否则文件变仅云端占位符、渲染脚本读图会卡在下载上。项目若在 NTFS 盘可改回联接。
+
 规则落点：`CLAUDE.md` §9（跨技能硬约束）、`docs\协作同步说明.md`（给人看的操作规程）、根 `协作看板.md`（接力状态表，commit 前缀 `[稿]`/`[审]`/`[定]`）。相关：[[bash-heredoc-file-writing-pitfalls]]、[[memory-index-structure-over-size-0818]]。

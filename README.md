@@ -114,6 +114,7 @@
 │                                  #   已完结的一次性交接件已于 2026-08-18 清空
 ├── docs\协作同步说明.md           # 双人协作操作规程（给同事看的一页：两条命令 / 交球 /
 │                                  #   记忆与大件的目录联接 / 出岔子怎么办）
+├── sync_assets.ps1                # 大件资产与网盘双向同步（见文末表）
 ├── fix_quotes_md.py               # 辅助脚本（见文末表）
 ├── check_quotes.py
 ├── tone_gate.py
@@ -349,6 +350,7 @@ PYTHONUTF8=1 python .claude/skills/laojohn-lesson-plan/assets/insert_images_docx
 | `tone_gate.py` | 详案「AI 腔／语言肌理」机检门（写作课 + 看图写话两线共用）。`[FAIL]` 命中即不合规、exit 1；`[INFO]` 只报数不判（破折号计数、参考行长度、词池频次等软规则）。判据从各 skill 规则文件运行时解析，改判据须同步本脚本 | `PYTHONUTF8=1 python tone_gate.py <详案.md> --profile writing` 或 `--profile picture` |
 | `fix_quotes_md.py` | 批量把 `.md` 里的 ASCII 直引号转为中文弯引号 | `python fix_quotes_md.py`（处理内置列表）或 `python fix_quotes_md.py 某文件.md` |
 | `check_quotes.py` | 统计 `.md` 里各类引号字符数量，用于校验 | `python check_quotes.py`（处理内置列表） |
+| `sync_assets.ps1` | 大件资产（两个版权插图目录 + 外部 PPT 目录）与网盘双向合并。两向都只覆盖更旧的、**不做删除同步**。⚠ 项目在 exFAT 盘上无法用目录联接（只能建在 NTFS 卷），故用脚本；NTFS 盘可改用联接 | `.\sync_assets.ps1`／`-WhatIf` 试运行／`-CloudRoot <路径>` 指定网盘 |
 
 ### 常用 SKILL 内脚本
 
