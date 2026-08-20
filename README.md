@@ -114,7 +114,6 @@
 │                                  #   已完结的一次性交接件已于 2026-08-18 清空
 ├── docs\协作同步说明.md           # 双人协作操作规程（给同事看的一页：两条命令 / 交球 /
 │                                  #   记忆与大件的目录联接 / 出岔子怎么办）
-├── sync_assets.ps1                # 大件资产与网盘双向同步（见文末表）
 ├── fix_quotes_md.py               # 辅助脚本（见文末表）
 ├── check_quotes.py
 ├── tone_gate.py
@@ -221,7 +220,7 @@ PYTHONUTF8=1 python .claude/skills/laojohn-lesson-plan/assets/insert_images_docx
 ```
 
   加 `--check-only` 可先核对「正文占位／目录真图／`_图单.md` 登记」三方缺口。
-- **扫描件是版权材料，已 gitignore、不入库**；`_图单.md` 入库，是换机器时唯一的补图凭据。新克隆后配图版必然报「缺图待补」，这是预期行为、不是链路坏了。
+- **扫描件是版权材料，2026-08-20 起改为入库**（仓库私有、仅两人可访问；此前 gitignore 导致双人协作时对方拿不到图且不知情）。`_图单.md` 同样入库，是取图与追溯的凭据。⚠ **旧口径「新克隆后报『缺图待补』属预期行为」已作废**——现在新克隆自带全部插图，**再报缺图就是真出问题**，多半是文件名与 `_图单.md` 对不上或 `【图位:插-NN】` 编号写错。详见 `CLAUDE.md` §8。
 
 ### 教材插图（`写作课教材插图\`）
 
@@ -234,7 +233,7 @@ PYTHONUTF8=1 python .claude/skills/laojohn-lesson-plan/assets/insert_images_docx
 ```
 
 - 详案里同样写 `【图位:插-01｜图注】` 占位，出配图版走同一个共享回插件 `insert_images_docx.py`（`--profile writing`）。
-- **教材扫描/翻拍同属版权材料，按扩展名逐条 gitignore、不入库**；`_图单.md` 入库。
+- **教材扫描/翻拍同属版权材料，2026-08-20 起随原书插图一并入库**（理由同上，见 `CLAUDE.md` §8）；`_图单.md` 照常入库。
 - ⚠ 教学场景是校外机构课，学生手边没有课本——教材图一律**投屏出示**，详案禁写「翻开课本／书上第 X 页」（见 `CLAUDE.md` §4）。
 
 ### 品牌资产（`品牌资产\`）
@@ -336,7 +335,7 @@ PYTHONUTF8=1 python .claude/skills/laojohn-lesson-plan/assets/insert_images_docx
 - **书目卡内容简介**：由 AI 按课案「内容简介」段提炼，提炼完成后保存在 `<书名>_书目卡.json` 的 `summary` 字段，如需修改直接编辑 JSON 后重渲染。
 - **引号规范**：中文弯引号铁律见 `CLAUDE.md` §4；批量修复用根 `fix_quotes_md.py`、校验用 `check_quotes.py`（用法见下表）。⚠ `fix_quotes_md.py` 无差别替换、不认代码围栏，含命令示例的 md 跑完须回扫代码块把命令里的引号还原半角。
 - **产物不进 git**：各输出目录的渲染产物（docx/pptx/pdf/jpg/html/png）与三个打包目录已 gitignore，只提交 md/json 源与输入资产。提交前 `git status` 里不该出现产物；新增输出目录要同步补 ignore 规则，**严禁 `git add -f` 强加回来**。详见 `CLAUDE.md` §8。
-- **双人协作靠三层通道**：源文件（md/json/脚本/skill）与项目记忆走 **git**；版权插图与外部生成的 PPT 走**网盘 + 目录联接**；渲染产物**哪边都不走、各自本地重渲**——所以对方审改后你 pull 到的只有 md，最新 docx 要自己再渲一次。交球靠 commit 前缀（`[稿]`/`[审]`/`[定]`）+ 根目录 `协作看板.md`。完整操作规程见 `docs\协作同步说明.md`。
+- **双人协作的同步判据只有一条：引擎重渲得出来吗？** 渲得出来的（docx/pdf/pptx/jpg 等产物）**不进仓库、各自本地重渲**；渲不出来的**一律入库**——包括源文件、项目记忆 `.claude\memory\`，以及三类大件（两个版权插图目录 + 外部生成的 `写作课件PPT输出\`）。所以对方审改后你 pull 到的只有 md，**最新 docx 要自己再渲一次**。交球靠 commit 前缀（`[稿]`/`[审]`/`[定]`）+ 根目录 `协作看板.md`。完整操作规程见 `docs\协作同步说明.md`。
 - **`tests\` 是机检回归夹具，不是详案**：里面的 md 往往是**故意保留缺陷的改前原稿**，绝不可复制进 `写作课详案输出\`，也不要拿它当写作参考。说明见 `tests\README.md`。
 
 ---
@@ -350,7 +349,6 @@ PYTHONUTF8=1 python .claude/skills/laojohn-lesson-plan/assets/insert_images_docx
 | `tone_gate.py` | 详案「AI 腔／语言肌理」机检门（写作课 + 看图写话两线共用）。`[FAIL]` 命中即不合规、exit 1；`[INFO]` 只报数不判（破折号计数、参考行长度、词池频次等软规则）。判据从各 skill 规则文件运行时解析，改判据须同步本脚本 | `PYTHONUTF8=1 python tone_gate.py <详案.md> --profile writing` 或 `--profile picture` |
 | `fix_quotes_md.py` | 批量把 `.md` 里的 ASCII 直引号转为中文弯引号 | `python fix_quotes_md.py`（处理内置列表）或 `python fix_quotes_md.py 某文件.md` |
 | `check_quotes.py` | 统计 `.md` 里各类引号字符数量，用于校验 | `python check_quotes.py`（处理内置列表） |
-| `sync_assets.ps1` | 大件资产（两个版权插图目录 + 外部 PPT 目录）与网盘双向合并。两向都只覆盖更旧的、**不做删除同步**。⚠ 项目在 exFAT 盘上无法用目录联接（只能建在 NTFS 卷），故用脚本；NTFS 盘可改用联接 | `.\sync_assets.ps1`／`-WhatIf` 试运行／`-CloudRoot <路径>` 指定网盘 |
 
 ### 常用 SKILL 内脚本
 
