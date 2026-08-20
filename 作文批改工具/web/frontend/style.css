@@ -241,3 +241,27 @@ textarea:focus{outline:0;border-color:var(--blue-line)}
 .layer.l2{background:#FBF1E3;color:var(--warn)}
 /* 整篇三项是参考区，判出问题时才举证、且最多两行——它不该比主判据还占版面 */
 .wp .ev.sm{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* 引用与原文对不上：程序拿模型自己的转写比对不出来的那些。
+   这张卡是要发给家长的，引错一个字老师就再也不信这工具了——必须让他看见 */
+.ev.sus,.hl .q.sus{background:#FBEAE8;border-left-color:var(--bad)}
+.sustag{display:block;margin-top:4px;font-size:12px;font-weight:700;color:var(--bad)}
+
+/* 选课页：课次会长到 63 课 / 8 个年级册，平铺成一条流水线老师每次都要滚半天。
+   但只有两三课时又不该摆折叠面板——分组是 renderLessons 里按数量动态决定的。 */
+.search{
+  width:100%;margin-bottom:12px;padding:11px 14px;border-radius:10px;
+  border:1px solid var(--line);background:var(--paper);color:var(--ink);
+  font-size:15px;font-family:inherit;-webkit-appearance:none}
+.search:focus{outline:0;border-color:var(--blue-line)}
+
+.grouphead{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  padding:9px 4px;margin-top:6px;color:var(--ink-soft);font-size:14px;font-weight:700}
+.grouphead:first-child{margin-top:0}
+.grouphead.plain{cursor:default}
+.grouphead .gt{color:var(--ink);font-size:15px}
+.grouphead .gn{color:var(--ink-soft);font-weight:400;font-size:13px}
+.grouphead .gc{margin-left:auto;font-size:18px;color:#C4BDB0;
+  transition:transform .15s;transform:rotate(0deg)}
+.grouphead .gc.open{transform:rotate(90deg)}

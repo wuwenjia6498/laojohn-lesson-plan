@@ -65,6 +65,20 @@ $("#sheet-info").onclick = (e) => {
 };
 
 /* ── 选课 ───────────────────────────────────── */
+// 最近用过：老师批一个班是同一课，连着几天多半还是它。存本地偏好，
+// 不涉及任何学生数据（那条「不留存」的红线管的是作文原图与全文）。
+const RECENT_KEY = "lj_recent_lessons";
+
+function getRecent() {
+  try { return JSON.parse(localStorage.getItem(RECENT_KEY) || "[]"); }
+  catch (e) { return []; }
+}
+
+function pushRecent(id) {
+  const r = [id, ...getRecent().filter(x => x !== id)].slice(0, 3);
+  try { localStorage.setItem(RECENT_KEY, JSON.stringify(r)); } catch (e) { /* 隐私模式 */ }
+}
+
 async function loadLessons() {
   try {
     const h = await api("/api/health");
@@ -74,15 +88,78 @@ async function loadLessons() {
     $("#lesson-list").innerHTML = `<p class="hint">读不到课次：${esc(e.message)}</p>`;
     return;
   }
-  $("#lesson-list").innerHTML = S.lessons.map((l, i) => `
-    <button class="lesson" data-i="${i}">
+  const box = $("#lesson-search");
+  box.hidden = S.lessons.length < 8;      // 课次少时搜索框只是碍事
+  box.oninput = () => renderLessons(box.value.trim());
+  renderLessons("");
+}
+
+function lessonCard(l) {
+  return `<button class="lesson" data-id="${esc(l.lesson_id)}">
       <div class="t">${esc(l.label)}</div>
       <div class="s">${esc(l.core_technique)}</div>
       <span class="tag${l.verified ? "" : " unverified"}">${
         l.verified ? "判据已核" : "判据待人工核对"}</span>
-    </button>`).join("");
+    </button>`;
+}
+
+// 展开哪几册。第一次渲染时定：优先展开最近用过那一册，否则第一册。
+let openGrades = null;
+
+function renderLessons(kw) {
+  const all = S.lessons;
+  const list = kw
+    ? all.filter(l => (l.label + l.topic + l.core_technique).includes(kw))
+    : all;
+
+  const groups = [];
+  for (const l of list) {
+    const g = groups.find(x => x.key === l.grade_key);
+    if (g) g.items.push(l);
+    else groups.push({ key: l.grade_key, label: l.grade_label, items: [l] });
+  }
+
+  const recentIds = getRecent().filter(id => list.some(l => l.lesson_id === id));
+  if (openGrades === null) {
+    const first = recentIds.length
+      ? (all.find(l => l.lesson_id === recentIds[0]) || {}).grade_key
+      : (groups[0] || {}).key;
+    openGrades = new Set(first ? [first] : []);
+  }
+
+  // 课次少、或只有一册时不分组——两课还摆个折叠面板，是给自己加戏
+  const flat = kw || list.length <= 6 || groups.length <= 1;
+
+  let html = "";
+  if (!list.length) {
+    html = `<p class="hint">没有匹配的课次。</p>`;
+  } else if (flat) {
+    html = list.map(lessonCard).join("");
+  } else {
+    if (recentIds.length) {
+      html += `<div class="grouphead plain">最近用过</div>`
+            + recentIds.map(id => lessonCard(all.find(l => l.lesson_id === id))).join("");
+    }
+    html += groups.map(g => {
+      const open = openGrades.has(g.key);
+      return `<button class="grouphead" data-g="${esc(g.key)}">
+          <span class="gt">${esc(g.label)}</span>
+          <span class="gn">${g.items.length} 课</span>
+          <span class="gc${open ? " open" : ""}">›</span>
+        </button>` + (open ? g.items.map(lessonCard).join("") : "");
+    }).join("");
+  }
+  $("#lesson-list").innerHTML = html;
+
   $$("#lesson-list .lesson").forEach(b => {
-    b.onclick = () => pickLesson(S.lessons[+b.dataset.i]);
+    b.onclick = () => pickLesson(S.lessons.find(l => l.lesson_id === b.dataset.id));
+  });
+  $$("#lesson-list .grouphead[data-g]").forEach(b => {
+    b.onclick = () => {
+      const k = b.dataset.g;
+      openGrades.has(k) ? openGrades.delete(k) : openGrades.add(k);
+      renderLessons(kw);
+    };
   });
 }
 
@@ -90,6 +167,7 @@ function pickLesson(l) {
   S.lesson = l;
   S.items = [];
   S.seq = 0;
+  pushRecent(l.lesson_id);
   renderBrief();
   renderQueue();
   go("grade", l.topic);
@@ -226,7 +304,8 @@ function renderDetail() {
   const hls = r.highlights || [];
   const hlBody = hls.length
     ? hls.map(h => `<div class="hl">
-        <div class="q">${esc(h.quote)}</div>
+        <div class="q${h.quote_suspect ? " sus" : ""}">${esc(h.quote)}${
+          h.quote_suspect ? '<span class="sustag">与原文对不上，核一下</span>' : ""}</div>
         <div class="w">${h.kind ? `<span class="kind">${esc(h.kind)}</span>` : ""}${esc(h.why)}</div>
       </div>`).join("")
     : `<div class="hint">这一篇没有特别出彩的句子。<b>不用硬找</b>——硬夸家长看得出来。</div>`;
@@ -250,7 +329,8 @@ function renderDetail() {
         <span class="t">${esc(checkMap[c.no] || "")}</span>
         <span class="v ${VCLS[c.verdict] || ""}">${esc(c.verdict)}</span>
       </div>
-      ${c.evidence ? `<div class="ev">${esc(c.evidence)}</div>` : ""}
+      ${c.evidence ? `<div class="ev${c.evidence_suspect ? " sus" : ""}">${esc(c.evidence)}${
+        c.evidence_suspect ? '<span class="sustag">与原文对不上，核一下</span>' : ""}</div>` : ""}
       ${c.comment ? `<div class="cm">${esc(c.comment)}</div>` : ""}
     </div>`).join("");
 
@@ -287,6 +367,8 @@ function renderDetail() {
     ${showcase}
     <div class="sec">
       <h3>给家长的点评卡<span class="aside">改完再出图</span></h3>
+      ${r.quoted_sentence_suspect ? `<div class="unclear"><b>点评卡引的那句话，跟稿纸对不上</b>
+        它引的是：${esc(r.quoted_sentence || "")}<br>发出去之前请对着原稿核一遍。</div>` : ""}
       <textarea id="ta-card" rows="7">${esc(r.parent_card || "")}</textarea>
       <div class="count" id="cnt-card"></div>
       <div class="row">

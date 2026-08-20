@@ -42,6 +42,14 @@ EXPECT = {
 }
 PUNCT = re.compile(r"[\s，。、；：？！“”‘’（）《》…—·,.;:?!\"'()]")
 
+# 素材里埋的错别字，模型读稿时**必然**读成正字（这正是「错别字层不做」的原因）。
+# 比对引用前先按这张表把原文规范化，否则会把预期行为误判成编造。
+TYPO_READ = {"经长": "经常"}
+
+# 固定起手式：一个班二三十份发同一个群，起手动词一样就是一个模子。
+# 实测 gpt-4o 三篇全是「孩子写到……」，只比前 8 字漏得掉，得单独抓。
+OPENERS = ["孩子写到", "孩子写的", "同学写到", "同学笔下", "家长您好", "这篇文章", "这篇写"]
+
 
 def norm(s):
     return PUNCT.sub("", str(s or ""))
@@ -83,6 +91,8 @@ async def main():
             print(f"缺 {img.name}，先跑 make_test_sheets.py")
             return 1
         name, body = sheets.PIECES[key]
+        for wrong, right in TYPO_READ.items():      # 见 TYPO_READ 注释
+            body = body.replace(wrong, right)
         try:
             r = await grade_one(pack, img, heads)
         except Exception as e:
@@ -158,6 +168,11 @@ async def main():
         for b in results:
             if a < b and opens[a][:8] and opens[a][:8] == opens[b][:8]:
                 fails.append(f"{a}、{b} 两篇点评卡开头雷同（去掉姓名后前 8 字相同）")
+    for op in OPENERS:
+        hit = [k for k, v in results.items()
+               if norm(v.get("parent_card", "")).startswith(norm(op))]
+        if len(hit) >= 2:
+            fails.append(f"{'、'.join(hit)} 篇都用「{op}」起头——固定起手式")
     print("点评卡开头（已去姓名）：" + "　｜　".join(f"{k}「{v[:12]}…」" for k, v in opens.items()))
     # 对学生说话是实测常见毛病：点评卡是给家长看的
     for k, v in results.items():

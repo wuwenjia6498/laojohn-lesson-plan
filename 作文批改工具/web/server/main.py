@@ -67,13 +67,42 @@ BP = _load_prompt_module()
 render_pack = BP.render_pack
 
 
+_CN_NUM = "零一二三四五六"
+_LID = re.compile(r"^(\d)([ab])-u(\d+)")            # 如 3a-u1 = 三年级上册第 1 单元
+_GRADE_VOL = re.compile(r"^([一二三四五六])年级([上下])册")   # meta 兜底
+
+
+def grade_of(d):
+    """解析出 (年级, 上下册, 单元) 三个数值，用于排序与分组。
+
+    **不要拿文件名排序**——中文数字「第十单元」会排到「第二单元」前面，册次顺序
+    也不保证。两课时看不出来，课次一多就乱。lesson_id 本身就带着可排序的数值。
+    """
+    m = _LID.match(d.get("lesson_id") or "")
+    if m:
+        return int(m.group(1)), (0 if m.group(2) == "a" else 1), int(m.group(3))
+    # lesson_id 命名不合规时退回 meta.grade_volume，仍排不出就丢到最后、不打乱前面
+    m = _GRADE_VOL.match((d.get("meta") or {}).get("grade_volume", ""))
+    if m:
+        return _CN_NUM.index(m.group(1)), (0 if m.group(2) == "上" else 1), 99
+    return 99, 9, 999
+
+
+def grade_label(g, ab):
+    if g > 6:
+        return "其他"
+    return f'{_CN_NUM[g]}{"上" if ab == 0 else "下"}'
+
+
 def load_packs():
-    packs = {}
-    for f in sorted(PACK_DIR.glob("*.json")):
+    """按 (年级, 上下册, 单元) 排序装载。顺序即前端选课页的顺序。"""
+    ds = []
+    for f in PACK_DIR.glob("*.json"):
         d = json.loads(f.read_text(encoding="utf-8"))
         d["_stem"] = f.stem
-        packs[d["lesson_id"]] = d
-    return packs
+        ds.append(d)
+    ds.sort(key=grade_of)
+    return {d["lesson_id"]: d for d in ds}
 
 
 PACKS = load_packs()
@@ -83,8 +112,12 @@ def public_view(d):
     """下发给前端的精简版。加盟商侧不接触详案全文，也不需要完整标准包——
     前端只要够显示「这次判哪三条」「哪些不判」即可，其余留在服务端拼提示词。"""
     m = d["meta"]
+    g, ab, unit = grade_of(d)
     return {
         "lesson_id": d["lesson_id"],
+        "grade_key": f"{g}{'ab'[ab] if ab < 2 else 'x'}",
+        "grade_label": grade_label(g, ab),
+        "unit_label": m.get("unit", ""),
         "label": f'{m["grade_volume"]}·{m["unit"]}《{m["topic"]}》',
         "topic": m["topic"],
         "genre": m.get("genre", ""),
