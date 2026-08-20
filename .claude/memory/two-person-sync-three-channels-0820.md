@@ -26,4 +26,6 @@ metadata:
 
 **大件层改用同步脚本，不是联接（0820 实测推翻原方案）**：**目录联接只能建在 NTFS 卷上**，本项目常驻 exFAT 移动硬盘（`E:` = exFAT），在项目内建 junction 直接报 `Local NTFS volumes are required`。**记忆那条联接能成立是因为它建在 C 盘、只是指向 E 盘——方向不可颠倒**，这是最容易想当然的一处。改为根 `sync_assets.ps1`：三个目录与网盘双向 `robocopy /XO` 合并（两向都只覆盖更旧的），**绝不用 `/MIR`**（按单侧内容删另一侧＝删掉对方的图）。已双向往返实测。OneDrive 侧须把共享目录设 `attrib +P`（始终保留在此设备），否则文件变仅云端占位符、渲染脚本读图会卡在下载上。项目若在 NTFS 盘可改回联接。
 
+**网盘同步「静默不工作」的排查（0820 踩坑）**：症状＝右键没有 OneDrive 共享菜单项、文件夹图标无同步角标、**网页端看不到**；根因＝客户端六年前就掉线了（`LastSignInTime` 停在 2020-02-13），进程照跑、目录照在、文件照放，**全程零报错**。查法＝注册表 `HKCU:\Software\Microsoft\OneDrive\Accounts\Personal`，看 `LastSignInTime`（Unix 秒）与 `SignInErrorStateStartTimestamp`（有值即处于登录错误态）。**通则：网盘通道一律以「网页端看得到」验收**，「本地有文件」永远不能证明「云端有文件」。重登时两个提示别选错：文件夹位置须保持原路径（另建新目录＝已放好的内容不在同步范围）、提示合并选合并。
+
 规则落点：`CLAUDE.md` §9（跨技能硬约束）、`docs\协作同步说明.md`（给人看的操作规程）、根 `协作看板.md`（接力状态表，commit 前缀 `[稿]`/`[审]`/`[定]`）。相关：[[bash-heredoc-file-writing-pitfalls]]、[[memory-index-structure-over-size-0818]]。
