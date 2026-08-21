@@ -84,14 +84,17 @@ $("#sheet-info").onclick = (e) => {
 // 是本地偏好、常驻不过期。学生数据不进这个 key——它在下面那个 IndexedDB
 // 暂存里，24 小时自动清。两者生命周期不同，别混进同一处存储。
 const RECENT_KEY = "lj_recent_lessons";
+const RECENT_MAX = 2;   // 改这一个数就够——读和写两处都按它截
 
 function getRecent() {
-  try { return JSON.parse(localStorage.getItem(RECENT_KEY) || "[]"); }
+  // 读的时候也截一次：不然把上限调小之后，已经存了更多条的老师要等下次
+  // 选课才会被挤掉，改了看着像没生效。
+  try { return JSON.parse(localStorage.getItem(RECENT_KEY) || "[]").slice(0, RECENT_MAX); }
   catch (e) { return []; }
 }
 
 function pushRecent(id) {
-  const r = [id, ...getRecent().filter(x => x !== id)].slice(0, 3);
+  const r = [id, ...getRecent().filter(x => x !== id)].slice(0, RECENT_MAX);
   try { localStorage.setItem(RECENT_KEY, JSON.stringify(r)); } catch (e) { /* 隐私模式 */ }
 }
 
