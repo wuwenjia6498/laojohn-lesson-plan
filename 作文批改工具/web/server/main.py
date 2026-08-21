@@ -40,6 +40,7 @@ def load_config():
         "grade_model": "gpt-4o",
         "rate_limit_per_hour": 120,
         "max_image_mb": 8,
+        "trust_proxy": False,
     }
     f = HERE / "config.json"
     if f.exists():
@@ -52,6 +53,18 @@ def load_config():
 
 CFG = load_config()
 MOCK = not CFG["api_key"]
+
+# 生产环境必须显式声明 LJ_ENV=prod。
+# 无密钥时自动进 mock 在本地开发很方便，部署时却是最危险的一处：忘配密钥，
+# 服务照常起、接口照常返回**结构完整的假批语**，一声不吭——老师会把假批语
+# 当真的转给家长。所以生产模式下无密钥直接拒绝启动。
+PROD = os.environ.get("LJ_ENV", "").strip().lower() in ("prod", "production")
+if PROD and MOCK:
+    raise SystemExit(
+        "\n[启动中止] LJ_ENV=prod 但没有配密钥。\n"
+        "生产环境不允许 mock——那会给所有老师发结构完整的假批语，而且不报错。\n"
+        "请设环境变量 AIHUBMIX_API_KEY，或在 config.json 里填 api_key。\n"
+    )
 
 
 def _load_prompt_module():
@@ -130,6 +143,21 @@ def public_view(d):
 
 
 _hits = defaultdict(deque)
+
+
+def _client_ip(request):
+    """限额按谁计。
+
+    直连时用 request.client.host。**上了反向代理，那个值会变成反代自己的 IP，
+    全站共用一个桶、限额等于失效**，所以要看 X-Forwarded-For。但这个头客户端
+    可以随便伪造（伪造一下就能绕过限额），只有确知前面有反代时才可信——故用
+    trust_proxy 显式开启，默认关。开启后取最左一跳，那是最初的客户端。
+    """
+    if CFG.get("trust_proxy"):
+        first = request.headers.get("x-forwarded-for", "").split(",")[0].strip()
+        if first:
+            return first
+    return request.client.host if request.client else "?"
 
 
 def _rate_ok(ip):
@@ -534,8 +562,7 @@ async def grade(request: Request,
     pack = PACKS.get(lesson_id)
     if not pack:
         raise HTTPException(404, "没有这一课的标准包")
-    ip = request.client.host if request.client else "?"
-    if not _rate_ok(ip):
+    if not _rate_ok(_client_ip(request)):
         raise HTTPException(429, "这一小时批得太多了，歇一会儿再来（防盗刷用的限额）")
 
     raw = await image.read()
@@ -562,10 +589,14 @@ async def grade(request: Request,
 
 
 @app.post("/api/diagnose")
-async def diagnose(body: dict):
+async def diagnose(request: Request, body: dict):
     pack = PACKS.get(body.get("lesson_id"))
     if not pack:
         raise HTTPException(404, "没有这一课的标准包")
+    # 这一条也是真实模型调用（max_tokens 6000），跟 /api/grade 共用同一个桶。
+    # 原先只有 grade 挂了限额，diagnose 完全裸奔，是个盗刷缺口。
+    if not _rate_ok(_client_ip(request)):
+        raise HTTPException(429, "这一小时用得太多了，歇一会儿再来（防盗刷用的限额）")
     results = body.get("results") or []
     if not results:
         raise HTTPException(400, "还没有批改结果")
