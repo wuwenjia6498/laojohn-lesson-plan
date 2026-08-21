@@ -25,6 +25,12 @@
   <p class="lead">今天批哪一课？</p>
   <input id="lesson-search" class="search" type="search" placeholder="搜题目，如「日记」" hidden>
   <div id="lesson-list" class="lesson-list"><p class="hint">正在读课次…</p></div>
+  <button id="hist-entry" class="hist-entry" hidden>
+    <span class="he-t">以前批过的</span>
+    <span class="he-n">（<span id="hist-n">0</span> 课）</span>
+    <span class="he-go">›</span>
+  </button>
+
   <div class="boundary">
     <b>使用提示</b>
     <ul>
@@ -59,6 +65,13 @@
   <div id="class-body"></div>
 </main>
 
+<!-- ── 视图五 · 以前批过的 ─────────────────────── -->
+<main id="view-history" class="view" hidden>
+  <p class="lead">以前批过的</p>
+  <p class="hint">批语留在这台手机上，不会自己消失；照片过一天就清掉了，所以这里看不到稿子。</p>
+  <div id="hist-body"></div>
+</main>
+
 <!-- 底部固定条 -->
 <footer id="bottombar" class="bottombar" hidden>
   <span id="bottom-stat"></span>
@@ -78,10 +91,14 @@
     <h3>它不做的</h3>
     <p>错别字、标点、卷面一律不看；不打分不排名。</p>
     <h3>照片和批语存在哪</h3>
-    <p><b>我们的服务器一张不存</b>——照片和作文全文不写文件、不进日志，批完即弃。<br>
-    为了防止批到一半被打断，<b>压缩后的照片和批语会暂存在这台手机上，最多 24 小时</b>，
-    过期自动清、换一课也清。你也可以现在就清掉：</p>
-    <button id="btn-clear-draft" class="ghost">清掉这台手机上的暂存</button>
+    <p><b>我们的服务器一张不存</b>——照片和作文全文不写文件、不进日志，批完即弃。</p>
+    <p>存在<b>这台手机上</b>的有两样，各管各的：<br>
+    <b>批语一直留着</b>，过几天想再看，从选课页最下面的「以前批过的」进去，
+    还能改、还能重新生成点评卡。要删就在那里单独删。<br>
+    <b>照片只留一天</b>，过一天自动清掉——它只是为了「批一半被打断能接着批」，
+    所以历史里看不到稿子。</p>
+    <p>这些都不会传到我们的服务器。要一次全清干净：</p>
+    <button id="btn-clear-draft" class="ghost">清掉这台手机上的全部记录</button>
     <button id="btn-close-info" class="ghost">知道了</button>
   </div>
 </div>

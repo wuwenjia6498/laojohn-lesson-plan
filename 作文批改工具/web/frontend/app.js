@@ -7,9 +7,10 @@
  *    而稿纸是黑字白纸、1600 足够认字。
  * 3. 前端不碰密钥。作文分两层，别混成一句「什么都不存」：
  *    **服务端一张不留**——收到即用、用完即弃，不写文件不进日志；
- *    **本机暂存 24 小时**——压缩图与批语进 IndexedDB，只为了扛住「批一半被打断、
- *    回来接着批」，过期自动清、换课清、帮助面板可手动清，**不回传**。
- *    存压缩图不存原图；一份批完（ok）之后连压缩图也丢掉，只留批语。
+ *    **本机存档**——进老师自己手机的 IndexedDB，不回传。其中又分两种寿命：
+ *    **批语永久留**（历史，老师自己在「以前批过的」里删），
+ *    **图只留一天**（暂存，为了「批一半被打断能接着批」；一份批完时立刻丢）。
+ *    存的是压缩后那张、不是原图。
  */
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -39,7 +40,7 @@ async function api(path, opts) {
 }
 
 /* ── 视图路由 ───────────────────────────────── */
-const VIEWS = ["pick", "grade", "detail", "class"];
+const VIEWS = ["pick", "grade", "detail", "class", "history"];
 let viewStack = ["pick"];
 
 function show(name, title) {
@@ -93,21 +94,24 @@ function pushRecent(id) {
   try { localStorage.setItem(RECENT_KEY, JSON.stringify(r)); } catch (e) { /* 隐私模式 */ }
 }
 
-/* ── 本机暂存（IndexedDB，24 小时）───────────────
- * 为什么要有：批一半被电话打断、被系统回收，三十份得重来一遍。
+/* ── 本机存档（IndexedDB）─────────────────────
+ * 一份数据，两个用途，过期策略不同——这是理解这一段的关键：
  *
- * 存什么：**压缩后**的那张图（不是原图）+ 批语。一份批完（ok）之后连压缩图
- *   也丢掉，只留批语——照片只对「重批」和缩略图有用，而重批只对 err 项开放。
- *   这一条让稳态占用只剩「还没批完那几份」，配额风险基本归零。
- * 不存什么：原图；createObjectURL 的 url（那是 document 生命周期的，
- *   存下来刷新即成死链，只会让缩略图变裂图）。
- * 存在哪：只在老师这台手机上，**不回传服务端**。24 小时自动清、换课清、
- *   帮助面板可手动清。服务端那条「不落盘」红线不受影响，两层是分开的。
- * 失败怎么办：**一律静默退化成没有暂存的行为**。暂存是锦上添花，
+ *   **批语（result）＝ 历史，永久留**，老师过几天还能打开那一课再看，
+ *     只能自己在「以前批过的」里删。一课几十 KB，几十课也不到 1MB。
+ *   **图（blob）＝ 暂存，24 小时清**。图只对「重批」和缩略图有用，而重批只对
+ *     err 项开放；隔了一天再重批也没意义，而它才是占空间的大头。
+ *     一份批完（ok）时立刻丢图，不等 24 小时。
+ *
+ * 不存什么：原图（存的是 shrink 后的那张，200-500KB）；createObjectURL 的 url
+ *   （document 生命周期的，存下来刷新即成死链，只会让缩略图变裂图）。
+ * 存在哪：只在老师这台手机的浏览器沙盒里，**不回传服务端**，换手机就没有。
+ *   服务端那条「不落盘」红线不受影响——两层是分开的，别混成一句「什么都不存」。
+ * 失败怎么办：**一律静默退化成没有存档的行为**。存档是锦上添花，
  *   任何时候都不能挡住批改。
  */
-const DB_NAME = "lj_draft", DB_VER = 1;
-const DRAFT_TTL = 24 * 3600 * 1000;
+const DB_NAME = "lj_draft", DB_VER = 2;
+const BLOB_TTL = 24 * 3600 * 1000;   // 图只留一天；批语不过期，见下
 const OFF_KEY = "lj_draft_off";
 
 let dbP = null;        // Promise<IDBDatabase|null>，只解析一次
@@ -143,12 +147,20 @@ function idbOpen() {
     let req;
     try { req = indexedDB.open(DB_NAME, DB_VER); }
     catch (e) { return fin(null); }   // 部分隐私模式在这里就同步抛了
-    req.onupgradeneeded = () => {
+    req.onupgradeneeded = (ev) => {
       const db = req.result;
       if (!db.objectStoreNames.contains("items")) {
         db.createObjectStore("items", { keyPath: "key" }).createIndex("by_sid", "sid");
       }
       if (!db.objectStoreNames.contains("meta")) db.createObjectStore("meta", { keyPath: "k" });
+      // v1 → v2：meta 从「单条会话」改成「每课一条 + 一个当前指针」，结构不兼容。
+      // v1 时代的东西本来就只是 24 小时暂存，直接丢掉，不值得写转换。
+      if (ev.oldVersion === 1 && req.transaction) {
+        try {
+          req.transaction.objectStore("meta").clear();
+          req.transaction.objectStore("items").clear();
+        } catch (e) { /* 清不掉也不影响，下面按 sid 认领时会忽略认不出的记录 */ }
+      }
     };
     req.onsuccess = () => fin(req.result);
     req.onerror = req.onblocked = () => fin(null);
@@ -216,24 +228,75 @@ function saveFlush() {
   if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; saveItem(savePend); }
 }
 
+const CUR_KEY = "__cur";   // meta 里指向「当前这一课」的那条
+
+/* 开一课新的。⚠ 不再清库——以前批过的是历史，要留着。 */
 function draftReset(lesson) {
   S.sid = newSid();
   if (dbDead) return;
-  idbTx("items", "readwrite", (s) => s.clear());
-  idbTx("meta", "readwrite", (s) => s.put({
-    k: "session", sid: S.sid,
-    lesson_id: lesson.lesson_id, lesson_label: lesson.label,
-    // mock 必须记：makeCard() 读的是**当前** S.mock。演示模式批的草稿，等服务端
-    // 配上密钥后恢复出来，点评卡会不带「非真实批改」水印却带着品牌落款——
-    // 那是能发进家长群的对外事故。恢复前对不上就静默丢弃。
-    mock: S.mock, created: Date.now(),
-  }));
+  idbTx("meta", "readwrite", (s) => {
+    s.put({ k: CUR_KEY, sid: S.sid });
+    s.put({
+      k: S.sid, sid: S.sid,
+      lesson_id: lesson.lesson_id, lesson_label: lesson.label,
+      // mock 必须记：makeCard() 读的是**当前** S.mock。演示模式批的东西，等服务端
+      // 配上密钥后再打开，点评卡会不带「非真实批改」水印却带着品牌落款——
+      // 那是能发进家长群的对外事故。打开前对不上就不给用。
+      mock: S.mock, created: Date.now(), updated: Date.now(), total: 0, done: 0,
+    });
+  });
 }
 
-function draftClear() {
+/* 队列有变动就更新这一课的份数，历史列表要显示它 */
+function draftTouch() {
+  if (dbDead || !S.sid) return;
+  const total = S.items.length;
+  const done = S.items.filter(x => x.status === "ok").length;
+  idbTx("meta", "readwrite", (s) => {
+    const q = s.get(S.sid);
+    q.onsuccess = () => {
+      const m = q.result;
+      if (m) s.put(Object.assign(m, { updated: Date.now(), total, done }));
+    };
+  });
+}
+
+/* 所有批过的课，新的在前。__cur 那条不是课，要滤掉。 */
+async function draftSessions() {
+  const all = (await idbTx("meta", "readonly", (s) => s.getAll())) || [];
+  return all.filter(m => m.k !== CUR_KEY && m.sid)
+            .sort((a, b) => (b.updated || 0) - (a.updated || 0));
+}
+
+async function draftItems(sid) {
+  const all = (await idbTx("items", "readonly", (s) => s.getAll())) || [];
+  return all.filter(r => r.sid === sid).sort((a, b) => a.id - b.id);
+}
+
+/* 删一课：meta 与它名下的 items 一起走 */
+async function draftDropSession(sid) {
+  if (dbDead) return;
+  const rows = await draftItems(sid);
+  idbTx("items", "readwrite", (s) => { rows.forEach(r => s.delete(r.key)); });
+  idbTx("meta", "readwrite", (s) => s.delete(sid));
+}
+
+function draftClearAll() {
   if (dbDead) return;
   idbTx("items", "readwrite", (s) => s.clear());
   idbTx("meta", "readwrite", (s) => s.clear());
+}
+
+/* 图放一天就够了：它只对重批有用，而重批只对 err 项开放，隔天再批也没意义。
+   批语不动——那是历史。这一步顺手把占空间的大头清掉，历史却完整保留。 */
+async function sweepOldBlobs() {
+  if (dbDead) return;
+  const all = (await idbTx("items", "readonly", (s) => s.getAll())) || [];
+  const old = all.filter(r => r.blob && Date.now() - (r.ts || 0) > BLOB_TTL);
+  if (!old.length) return;
+  idbTx("items", "readwrite", (s) => {
+    old.forEach(r => s.put(Object.assign({}, r, { blob: null })));
+  });
 }
 
 // blob URL 是 document 生命周期的，不 revoke 就一直钉着内存。以前不补是合理的
@@ -416,6 +479,7 @@ $("#file-input").onchange = (e) => {
     saveItem(it);
   });
   renderQueue();
+  draftTouch();
   pump();
 };
 
@@ -496,6 +560,7 @@ async function pump() {
         it.status = "err"; it.error = e.message;
       }
       saveItem(it);   // ok 时 recOf 会顺手把图丢掉，err 时保住错误文案
+      draftTouch();
       renderQueue();
     }
   } finally { S.busy = false; }
@@ -830,58 +895,58 @@ $("#btn-class").onclick = async () => {
 /* ── 启动时的暂存恢复 ─────────────────────────── */
 async function draftBoot(lessonsP) {
   if (dbDead) return;
+  sweepOldBlobs();            // 顺手把过夜的图清掉，历史（批语）不动
 
-  const meta = await idbTx("meta", "readonly", (s) => s.get("session"));
-  if (!meta || !meta.sid) return;
+  const cur = await idbTx("meta", "readonly", (s) => s.get(CUR_KEY));
+  if (!cur || !cur.sid) { refreshHist(); return; }
+  const meta = await idbTx("meta", "readonly", (s) => s.get(cur.sid));
+  if (!meta) { refreshHist(); return; }
 
-  // 过期是**唯一**允许不问就删的理由。24 小时按会话开始时间硬顶、不滑动——
-  // 滑动窗口下，一个连批三天的老师会让暂存永不过期，界面上那句「最多 24 小时」
-  // 就成了假话。
-  if (Date.now() - (meta.created || 0) > DRAFT_TTL) { draftClear(); return; }
-
-  // loadLessons 内部自己 catch 了，永远 resolve，所以判失败要看 S.lessons 有没有货。
-  // ⚠ 网络抽风时**不弹框、但也绝不清库**——那会毁掉老师半个班的成果，等下次打开
-  //   （24 小时内）再说。同时这一步也保证了 S.mock 已经是真的，下面才判得准。
+  // loadLessons 内部自己 catch 了、永远 resolve，所以判失败要看 S.lessons 有没有货。
+  // ⚠ 网络抽风时**不弹框、也绝不删任何东西**。同时这一步保证 S.mock 已经是真的。
   await lessonsP;
+  refreshHist();
   if (!S.lessons.length) return;
 
-  // 演示模式批的草稿在真实模式下一文不值，反过来也一样。更要紧的是 makeCard()
-  // 读的是**当前** S.mock：拿演示草稿在真实模式下出图，点评卡会少掉「非真实批改」
-  // 水印却带着品牌落款——那是能发进家长群的对外事故。静默丢弃，连问都不问。
-  if (!!meta.mock !== !!S.mock) { draftClear(); return; }
+  // 演示模式批的东西在真实模式下一文不值，反过来也一样（makeCard 读的是当前
+  // S.mock，拿演示稿出图会少掉「非真实批改」水印却带着品牌落款）。不打扰，
+  // 但也不删——它照样躺在历史里，从那边打开时会被拦住。
+  if (!!meta.mock !== !!S.mock) return;
 
-  // 课次得还在：renderQueue / renderDetail / makeCard 要真的 S.lesson（bands、
-  // three_checks、label），meta 里那份 label 只够画提示框。
   const lesson = S.lessons.find(x => x.lesson_id === meta.lesson_id);
-  if (!lesson) { draftClear(); return; }
+  if (!lesson) return;
 
-  const recs = (await idbTx("items", "readonly", (s) => s.getAll())) || [];
-  const mine = recs.filter(r => r.sid === meta.sid);
-  // 顺手扫掉不属于这次会话的残留（上次 clear 只成功一半是真实存在的失败态，
-  // 记录自带 sid 就是为了这种时候能无条件认出来）
-  if (recs.length !== mine.length) {
-    idbTx("items", "readwrite", (s) => { recs.forEach(r => { if (r.sid !== meta.sid) s.delete(r.key); }); });
-  }
-  if (!mine.length) return;
+  const rows = await draftItems(cur.sid);
+  if (!rows.length) return;
+
+  // 只有「还批得动的」才值得打扰老师：没批完、且图还在。已经批完的那些进历史，
+  // 老师想看自己会去点，不该一开 App 就弹框。
+  const pending = rows.filter(r => r.status !== "ok" && r.blob);
+  if (!pending.length) return;
 
   // 没有图的 wait/run 是批不动的幽灵——摆进队列只会让老师反复去点。丢掉，
-  // 但把数量说给他听：那是诚实且可行动的信息，比一排点不动的灰卡好得多。
-  const ghosts = mine.filter(r => !r.blob && r.status !== "ok" && r.status !== "err");
-  const keep = mine.filter(r => ghosts.indexOf(r) < 0);
+  // 但把数量说给他听：那是诚实且可行动的信息。
+  const ghosts = rows.filter(r => !r.blob && r.status !== "ok" && r.status !== "err");
+  const keep = rows.filter(r => ghosts.indexOf(r) < 0);
   if (ghosts.length) idbTx("items", "readwrite", (s) => { ghosts.forEach(r => s.delete(r.key)); });
-  if (!keep.length) { draftClear(); return; }
 
   const yes = await askSheet(
     "上次批到一半",
-    esc(meta.lesson_label || lesson.label) + " 还有 <b>" + keep.length + " 份</b>没导出。" +
+    esc(meta.lesson_label || lesson.label) + " 还有 <b>" + pending.length + " 份</b>没批完。" +
     (ghosts.length ? "<br>其中 " + ghosts.length + " 份的照片没来得及存下，需要重拍。" : "") +
-    "<br><span class=\"aside\">暂存在这台手机上，超过 24 小时会自动清掉。</span>",
-    "继续批", "清掉");
-  if (!yes) { draftClear(); return; }
+    "<br><span class=\"aside\">已经批好的那些不会丢，在「以前批过的」里随时能翻。</span>",
+    "接着批", "先不批");
+  if (!yes) return;   // ⚠ 不删——「先不批」只是这次不弹，不是要丢掉
 
+  openSession(lesson, cur.sid, keep, true);
+}
+
+/* 把一课的记录装回队列视图。live=true 时会接着批没批完的那些。 */
+function openSession(lesson, sid, rows, live) {
   S.lesson = lesson;
-  S.sid = meta.sid;
-  S.items = keep.sort((a, b) => a.id - b.id).map(r => ({
+  S.sid = sid;
+  dropItems();
+  S.items = rows.map(r => ({
     id: r.id,
     file: null,                                        // 原图早就不在了，别假装还有
     blob: r.blob || null,
@@ -898,7 +963,92 @@ async function draftBoot(lessonsP) {
   renderBrief();
   renderQueue();
   go("grade", lesson.topic);
-  pump();   // 放在最后：pump 花的是真钱，等老师真的进了这个视图再开始
+  if (live) pump();   // 放在最后：pump 花的是真钱，等老师真的进了这个视图再开始
+}
+
+/* ── 以前批过的 ─────────────────────────────── */
+let histCount = 0;
+
+async function refreshHist() {
+  const ss = await draftSessions();
+  histCount = ss.length;
+  const el = $("#hist-entry");
+  if (!el) return;
+  el.hidden = !histCount;              // 一次都没批过时，整条不显示
+  $("#hist-n").textContent = histCount;
+}
+
+async function renderHistory() {
+  const ss = await draftSessions();
+  const body = $("#hist-body");
+  if (!ss.length) {
+    body.innerHTML = `<p class="hint center">还没有批过的课。</p>`;
+    return;
+  }
+  body.innerHTML = ss.map(m => {
+    const d = new Date(m.updated || m.created || Date.now());
+    const when = (d.getMonth() + 1) + "月" + d.getDate() + "日";
+    const left = (m.total || 0) - (m.done || 0);
+    return `<div class="hist-row">
+      <button class="hist-open" data-sid="${esc(m.sid)}">
+        <div class="t">${esc(m.lesson_label || "（这一课已经下架）")}</div>
+        <div class="s">${when} · 批了 ${m.done || 0} 份${left > 0 ? "，还有 " + left + " 份没批完" : ""}</div>
+        ${m.mock ? `<span class="tag unverified">演示模式批的</span>` : ""}
+      </button>
+      <button class="hist-del" data-sid="${esc(m.sid)}">删掉</button>
+    </div>`;
+  }).join("");
+
+  $$("#hist-body .hist-open").forEach(b => { b.onclick = () => openHistSession(b.dataset.sid); });
+  $$("#hist-body .hist-del").forEach(b => {
+    b.onclick = async () => {
+      const m = ss.find(x => x.sid === b.dataset.sid);
+      const stay = await askSheet(
+        "删掉这一课的批改？",
+        esc((m && m.lesson_label) || "这一课") + " 批过的 <b>" + ((m && m.done) || 0) +
+        " 份</b>批语会被删掉，删了找不回来。<br>" +
+        "<span class=\"aside\">点评卡如果已经保存到相册，那些图不受影响。</span>",
+        "先留着", "删掉");
+      if (stay) return;
+      await draftDropSession(b.dataset.sid);
+      // 删的正好是当前这一课时，把队列也清干净，免得界面还留着已删的东西
+      if (S.sid === b.dataset.sid) { dropItems(); S.sid = ""; }
+      renderHistory();
+      refreshHist();
+    };
+  });
+}
+
+async function openHistSession(sid) {
+  const ss = await draftSessions();
+  const m = ss.find(x => x.sid === sid);
+  if (!m) return;
+
+  // 演示模式批的东西，在真实模式下打开会出一张没有「非真实批改」水印、却带着
+  // 品牌落款的点评卡——那能直接发进家长群。不给开。
+  if (!!m.mock !== !!S.mock) {
+    const stay = await askSheet(
+      "这一课是演示模式批的",
+      "当时服务器还没配密钥，批语是结构完整的**假数据**，没有参考价值；" +
+      "现在打开还会生成不带「非真实批改」水印的点评卡。建议直接删掉。",
+      "先留着", "删掉这一课");
+    if (!stay) { await draftDropSession(sid); renderHistory(); refreshHist(); }
+    return;
+  }
+
+  const lesson = S.lessons.find(l => l.lesson_id === m.lesson_id);
+  if (!lesson) {
+    await askSheet("这一课已经下架了",
+      "标准包里找不到这一课了，批语还在但没法正常显示（档位和判据都读不到）。",
+      "知道了", "删掉这一课").then(async (stay) => {
+        if (!stay) { await draftDropSession(sid); renderHistory(); refreshHist(); }
+      });
+    return;
+  }
+
+  const rows = await draftItems(sid);
+  if (!rows.length) return;
+  openSession(lesson, sid, rows, false);   // live=false：图早清了，重批也批不了
 }
 
 /* ── 启动 ───────────────────────────────────── */
@@ -909,13 +1059,25 @@ draftBoot(lessonsP);
 // 全仓唯一一个 addEventListener。整个暂存功能就是为「被打断」服务的，而切后台
 // 和锁屏正是最主要的那种打断——不 flush 就会丢掉老师改的最后几个字。
 // 只加这一个：iOS 上 beforeunload 本就不可靠，不必再凑 pagehide 那一套。
+$("#hist-entry").onclick = () => { renderHistory(); go("history", "以前批过的"); };
+
 document.addEventListener("visibilitychange", () => { if (document.hidden) saveFlush(); });
 
-$("#btn-clear-draft").onclick = () => {
-  // 往安全方向走的动作，不做二次确认——再问一遍是添乱。
-  draftClear();
+$("#btn-clear-draft").onclick = async () => {
+  // 以前这里只清 24 小时的暂存，不问也罢；现在它会把**所有批过的课**一起删掉，
+  // 那是删数据，必须问一句。
+  const stay = await askSheet(
+    "清掉这台手机上的全部记录？",
+    "包括<b>以前批过的 " + histCount + " 课</b>的批语，删了找不回来。<br>" +
+    "<span class=\"aside\">只想删某一课的话，去「以前批过的」里单独删。" +
+    "已经保存到相册的点评卡不受影响。</span>",
+    "先留着", "全部删掉");
+  if (stay) return;
+  draftClearAll();
   dropItems();
+  S.sid = "";
   renderQueue();
+  refreshHist();
   const b = $("#btn-clear-draft");
   b.textContent = "已清掉";
   setTimeout(() => { b.textContent = "清掉这台手机上的暂存"; }, 1200);

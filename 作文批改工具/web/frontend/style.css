@@ -280,3 +280,26 @@ textarea:focus{outline:0;border-color:var(--blue-line)}
 .grouphead .gc{margin-left:auto;font-size:20px;line-height:1;color:var(--ink-soft);
   transition:transform .15s;transform:rotate(0deg)}
 .grouphead .gc.open{transform:rotate(90deg)}
+
+/* 「以前批过的」入口：夹在课次列表和使用提示之间，不抢顶部位置 */
+.hist-entry{
+  display:flex;align-items:center;gap:6px;width:100%;text-align:left;
+  margin-top:16px;padding:13px 14px;border-radius:var(--r);
+  background:var(--paper);border:1px dashed var(--line);color:var(--ink-soft);font-size:14px}
+.hist-entry .he-t{color:var(--ink);font-weight:700}
+.hist-entry .he-go{margin-left:auto;font-size:18px;color:var(--ink-soft)}
+.hist-entry:active{background:var(--brown-cell)}
+
+/* 历史列表：一行一课，右边挂删除 */
+#hist-body{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.hist-row{display:flex;align-items:stretch;gap:8px}
+.hist-open{
+  flex:1;min-width:0;text-align:left;padding:13px 15px;border-radius:var(--r);
+  background:var(--paper);border:1px solid var(--line)}
+.hist-open:active{background:var(--brown-cell)}
+.hist-open .t{font-weight:700;font-size:15px;color:var(--ink)}
+.hist-open .s{margin-top:3px;font-size:13px;color:var(--ink-soft)}
+.hist-del{
+  flex:none;padding:0 14px;border-radius:var(--r);font-size:13px;
+  background:none;border:1px solid var(--line);color:var(--ink-soft)}
+.hist-del:active{background:var(--note-bg);color:var(--brand-red)}
