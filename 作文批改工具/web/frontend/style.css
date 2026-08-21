@@ -111,6 +111,9 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .card:active{background:var(--brown-cell)}
 .thumb{flex:none;width:46px;height:60px;border-radius:6px;object-fit:cover;
   background:var(--brown-cell);border:1px solid var(--line)}
+/* 照片没暂存下来的那一份：结果还在，详情页与点评卡照常可用，只是没缩略图 */
+.thumb.ph{display:flex;align-items:center;justify-content:center;text-align:center;
+  font-size:11px;line-height:1.2;color:var(--ink-soft)}
 .card .mid{flex:1;min-width:0}
 .card .name{font-weight:700;font-size:16px}
 .card .name.anon{color:var(--ink-soft);font-weight:400}
@@ -205,6 +208,10 @@ textarea:focus{outline:0;border-color:var(--blue-line)}
 .sheet-card li{margin:6px 0;line-height:1.65}
 .sheet-card p{font-size:14px;color:var(--ink-soft);margin:0}
 .sheet-card .ghost{width:100%;margin-top:18px}
+/* 询问框：两个按钮并排，第一个永远是安全的那个 */
+.sheet-card .row2{display:flex;gap:10px;margin-top:18px}
+.sheet-card .row2 .ghost{width:auto;flex:1;margin-top:0}
+#ask-body .aside{color:var(--ink-soft);font-size:12px}
 
 .mockbar{background:#FBF1E3;color:#7C5330;border:1px solid #E5CFA6;
   border-radius:9px;padding:8px 12px;font-size:13px;margin-bottom:12px}

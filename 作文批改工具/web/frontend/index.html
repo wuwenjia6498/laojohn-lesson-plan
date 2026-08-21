@@ -76,8 +76,26 @@
       <li>全批完点「班级诊断」，看这个班共性卡在哪，讲评课照着讲。</li>
     </ol>
     <h3>它不做的</h3>
-    <p>错别字、标点、卷面一律不看；不打分不排名；批完不留底，图和作文都不存。</p>
+    <p>错别字、标点、卷面一律不看；不打分不排名。</p>
+    <h3>照片和批语存在哪</h3>
+    <p><b>我们的服务器一张不存</b>——照片和作文全文不写文件、不进日志，批完即弃。<br>
+    为了防止批到一半被打断，<b>压缩后的照片和批语会暂存在这台手机上，最多 24 小时</b>，
+    过期自动清、换一课也清。你也可以现在就清掉：</p>
+    <button id="btn-clear-draft" class="ghost">清掉这台手机上的暂存</button>
     <button id="btn-close-info" class="ghost">知道了</button>
+  </div>
+</div>
+
+<!-- 通用询问框：恢复暂存、换课确认都用它。不用 confirm()——微信内置浏览器的
+     confirm 会带上域名标题，而且能被「阻止此页面再弹出」永久屏蔽。 -->
+<div id="sheet-ask" class="sheet" hidden>
+  <div class="sheet-card">
+    <h3 id="ask-title"></h3>
+    <p id="ask-body"></p>
+    <div class="row2">
+      <button id="btn-ask-ok" class="ghost"></button>
+      <button id="btn-ask-no" class="ghost"></button>
+    </div>
   </div>
 </div>
 
