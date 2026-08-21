@@ -45,7 +45,8 @@ let viewStack = ["pick"];
 
 function show(name, title) {
   VIEWS.forEach(v => { $("#view-" + v).hidden = (v !== name); });
-  $("#topbar-title").textContent = title || "同步习作批改助手";
+  $("#topbar-title").textContent = title || "习作批改";   // 与 manifest 的 short_name 一致
+  $("#topbar-title").classList.toggle("dim", name === "pick");
   $("#btn-back").hidden = (name === "pick");
   $("#bottombar").hidden = !(name === "grade" && S.items.length);
   window.scrollTo(0, 0);

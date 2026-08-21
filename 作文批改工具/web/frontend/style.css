@@ -43,6 +43,9 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .brand{flex:1;display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--brand-red);flex:none}
+/* 选课页有封面区扛品牌了，顶栏标题就退成导航标识——同样字号会显得重复。
+   其余视图顶栏写的是课题，那是要看清的，保持原样。 */
+#topbar-title.dim{font-size:15px;font-weight:400;color:var(--ink-soft)}
 .topbar .back,.topbar .info{
   width:34px;height:34px;border-radius:50%;flex:none;
   font-size:20px;line-height:1;color:var(--ink-soft);background:var(--page);
@@ -50,6 +53,21 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .topbar .back{font-size:26px;padding-bottom:3px}
 
 .view{padding:16px 14px 8px;max-width:640px;margin:0 auto}
+/* 选课页顶部的品牌区。只在这一页出现（它就写在 #view-pick 里），
+   批改过程中不占任何空间。图标是纯 CSS 画的，跟 .shoot-icon 一个路子，
+   不多引一个图片文件。 */
+.cover{
+  display:flex;align-items:center;gap:13px;
+  margin:-2px 0 16px;padding:13px 15px;border-radius:var(--r);
+  background:var(--paper);border:1px solid var(--line)}
+.cover-mark{
+  flex:none;width:42px;height:42px;border-radius:11px;
+  background:var(--brand-red);color:#fff;
+  font-size:23px;font-weight:700;line-height:42px;text-align:center;
+  box-shadow:0 1px 5px rgba(200,53,43,.25)}
+.cover-t{font-size:18px;font-weight:700;color:var(--ink);letter-spacing:.2px}
+.cover-s{margin-top:3px;font-size:12.5px;line-height:1.5;color:var(--ink-soft)}
+
 .lead{margin:4px 2px 12px;font-size:17px;font-weight:700}
 .hint{color:var(--ink-soft);font-size:14px;line-height:1.6}
 .center{text-align:center;padding:24px 12px}
