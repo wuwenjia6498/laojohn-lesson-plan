@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>IndexedDB 可用性自测</title>
+<style>
+  :root{--ok:#2E7D32;--no:#C0392B;--wait:#8A7B63}
+  body{margin:0;padding:18px 16px 40px;background:#FBFAF7;color:#2A2723;
+       font:15px/1.7 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+  h1{margin:0 0 4px;font-size:19px}
+  .sub{color:#8A7B63;font-size:13px;margin:0 0 18px}
+  .verdict{padding:14px 16px;border-radius:10px;font-size:17px;font-weight:700;
+           margin:0 0 16px;background:#F0EDE6;color:var(--wait)}
+  .verdict.ok{background:#E8F3E9;color:var(--ok)}
+  .verdict.no{background:#FBEAE7;color:var(--no)}
+  ol{margin:0;padding-left:22px}
+  li{margin:7px 0}
+  li b{font-weight:700}
+  .ok b{color:var(--ok)} .no b{color:var(--no)} .wait b{color:var(--wait)}
+  .env{margin-top:22px;padding:12px 14px;background:#F5F2EC;border-radius:10px;
+       font-size:12px;color:#6B6156;word-break:break-all;line-height:1.6}
+  button{margin-top:18px;width:100%;padding:12px;font-size:15px;border-radius:10px;
+         border:1px solid #D6D0C4;background:#fff;color:#2A2723}
+</style>
+</head>
+<body>
+
+<h1>IndexedDB 可用性自测</h1>
+<p class="sub">批改助手要用它在你手机上暂存批到一半的稿子。这一页只测能不能用，不碰任何学生数据。<br><b>请在微信里打开这一页</b>——微信内置浏览器是最要紧的那个环境。</p>
+
+<div class="verdict" id="verdict">正在测…</div>
+<ol id="steps"></ol>
+<div class="env" id="env"></div>
+<button onclick="location.reload()">再测一次</button>
+
+<script>
+/* 这一页是独立的诊断工具，不进 app.js。测的是真实往返，不是 "indexedDB" in window
+   ——微信内置浏览器（WKWebView）的失败形态是**挂住不返回**，既不 success 也不 error，
+   所以每一步都必须带超时。 */
+/* 超时取 3000ms 而不是 1500ms：页面刚加载时主线程最忙（解析、字体、扩展注入），
+   IDB 的回调排在任务队列后面。实测本机 Chrome 手动调只要 38ms，但页面自动跑时
+   1500ms 会误判成"打不开"——探测的超时必须宽到不会把"慢"错当成"坏"。 */
+const DB = "lj_probe_" + Date.now(), TIMEOUT = 3000;
+const T0 = performance.now();
+const el = () => Math.round(performance.now() - T0) + "ms";   // elapsed，别叫 ms：withTimeout 的参数就叫 ms
+const $steps = document.getElementById("steps");
+const $verdict = document.getElementById("verdict");
+
+function step(text, cls, note) {
+  const li = document.createElement("li");
+  li.className = cls;
+  li.innerHTML = "<b>" + (cls === "ok" ? "通过" : cls === "no" ? "失败" : "…") + "</b>　" +
+                 text + (note ? "<br><span style='color:#8A7B63;font-size:12px'>" + note + "</span>" : "");
+  $steps.appendChild(li);
+  return li;
+}
+
+function withTimeout(p, ms, label) {
+  return Promise.race([
+    p,
+    new Promise((_, rej) => setTimeout(() => rej(new Error(label + " 超过 " + ms + "ms 没有返回")), ms)),
+  ]);
+}
+
+function open1() {
+  return new Promise((res, rej) => {
+    let req;
+    try { req = indexedDB.open(DB, 1); }
+    catch (e) { return rej(e); }          // 部分隐私模式在这里同步抛
+    req.onupgradeneeded = () => {          // WKWebView 常在这一步死
+      try { req.result.createObjectStore("t", { keyPath: "k" }); }
+      catch (e) { rej(e); }
+    };
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej(req.error || new Error("open 报错"));
+    req.onblocked = () => rej(new Error("open 被其它标签页阻塞"));
+  });
+}
+
+function tx(db, mode, fn) {
+  return new Promise((res, rej) => {
+    const t = db.transaction("t", mode);
+    const r = fn(t.objectStore("t"));
+    t.oncomplete = () => res(r ? r.result : true);
+    // 配额错误在这里，不是同步抛的
+    t.onabort = t.onerror = () => rej(t.error || new Error("事务被中止"));
+  });
+}
+
+async function run() {
+  const marker = "probe-" + Date.now();
+  let db = null;
+
+  if (!("indexedDB" in window)) {
+    step("浏览器根本没有 indexedDB", "no");
+    return fail("这个浏览器不支持，暂存功能会自动关掉");
+  }
+  step("indexedDB 对象存在", "ok", "注意：存在不等于能用，继续往下测");
+
+  try {
+    db = await withTimeout(open1(), TIMEOUT, "打开数据库");
+    step("打开数据库（含建表）", "ok", "耗时 " + el() + "（含页面加载开销）· 手机上几百毫秒以内都正常；只有真的卡到几秒才要留意");
+  } catch (e) {
+    step("打开数据库", "no", String(e.message || e) + "（已等 " + el() + "）");
+    return fail("打不开数据库，暂存会自动关掉——工具其余功能不受影响");
+  }
+
+  try {
+    await withTimeout(tx(db, "readwrite", (s) => s.put({ k: "probe", v: marker })), TIMEOUT, "写入");
+    step("写入一条", "ok", "累计 " + el());
+  } catch (e) {
+    step("写入一条", "no", String(e.message || e));
+    return fail("写不进去，暂存会自动关掉");
+  }
+
+  let got;
+  try {
+    got = await withTimeout(tx(db, "readonly", (s) => s.get("probe")), TIMEOUT, "读取");
+  } catch (e) {
+    step("读回来", "no", String(e.message || e));
+    return fail("读不出来，暂存会自动关掉");
+  }
+
+  // 关键一步：坏的 WebView 会接受写入然后返回 undefined，只看"没报错"会误判
+  if (!got || got.v !== marker) {
+    step("读回来的值对得上", "no", "写进去了，但读出来是 " + JSON.stringify(got));
+    return fail("写得进读不出（这是坏 WebView 的典型症状），暂存会自动关掉");
+  }
+  step("读回来的值对得上", "ok", "这一步最要紧——有的浏览器写得进却读不出");
+
+  try {
+    await withTimeout(tx(db, "readwrite", (s) => s.delete("probe")), TIMEOUT, "删除");
+    step("删掉", "ok", "累计 " + el());
+  } catch (e) {
+    step("删掉", "no", String(e.message || e));
+  }
+
+  // 顺带测一张 300KB 的 Blob（实际存的就是压缩图这个量级）
+  try {
+    const blob = new Blob([new Uint8Array(300 * 1024)], { type: "image/jpeg" });
+    await withTimeout(tx(db, "readwrite", (s) => s.put({ k: "blob", v: blob })), TIMEOUT, "存图");
+    const b = await withTimeout(tx(db, "readonly", (s) => s.get("blob")), TIMEOUT, "取图");
+    const size = b && b.v && b.v.size;
+    if (size === 300 * 1024) step("存取一张 300KB 的图", "ok", "这是压缩后照片的真实量级 · 累计 " + el());
+    else step("存取一张 300KB 的图", "no", "取回来的大小是 " + size);
+    await tx(db, "readwrite", (s) => s.delete("blob"));
+  } catch (e) {
+    step("存取一张 300KB 的图", "no", String(e.message || e) + "（能存文本但存不了图，暂存会降级成只存批语）");
+  }
+
+  db.close();   // 必须先关，否则 deleteDatabase 会被 blocked 挂住
+  try { indexedDB.deleteDatabase(DB); } catch (e) { /* 清不掉也无所谓，库名带时间戳、不会累积复用 */ }
+
+  const bad = $steps.querySelectorAll("li.no").length;
+  if (bad === 0) {
+    $verdict.className = "verdict ok";
+    $verdict.textContent = "能用 ✓ 暂存功能在这个浏览器里可以正常工作";
+  } else {
+    $verdict.className = "verdict no";
+    $verdict.textContent = "部分不可用——把这一页截图发回来";
+  }
+}
+
+function fail(msg) {
+  $verdict.className = "verdict no";
+  $verdict.textContent = msg;
+}
+
+/* 环境信息：判断是不是微信、配额多大 */
+(async function env() {
+  const ua = navigator.userAgent;
+  const wx = /MicroMessenger/i.test(ua);
+  const ios = /iPhone|iPad|iPod/i.test(ua);
+  const standalone = window.navigator.standalone === true ||
+                     window.matchMedia("(display-mode: standalone)").matches;
+  let quota = "问不到";
+  try {
+    if (navigator.storage && navigator.storage.estimate) {
+      const e = await navigator.storage.estimate();
+      quota = Math.round((e.quota || 0) / 1048576) + " MB（已用 " +
+              Math.round((e.usage || 0) / 1048576) + " MB）";
+    }
+  } catch (e) { /* 有的浏览器没有这个 API */ }
+  document.getElementById("env").innerHTML =
+    "<b>在哪打开的：</b>" + (wx ? "微信内置浏览器 ← 这个最要紧" : ios ? "iOS 浏览器" : "普通浏览器") +
+    (standalone ? "（已添加到主屏幕）" : "") +
+    "<br><b>可用空间：</b>" + quota +
+    "<br><b>UA：</b>" + ua;
+})();
+
+run();
+</script>
+</body>
+</html>
