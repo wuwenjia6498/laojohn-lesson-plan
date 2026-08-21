@@ -38,6 +38,7 @@
 ### 规则与体例
 - [教师自拟例子四条硬判据(0817)](writing-lesson-example-must-be-unique-anchor.md) — 连否四轮五次返工换来:**独一份**(嗓门大/不爱笑=通用款,会让课自相矛盾)／**夸张≠计数**(「问了八遍我们数过」不是放大)／**样板不得低于例句**／**一篇内锚点不复用**;判据在model-essay §四之四、管全篇例子不只示范文
 - [比喻类写人反刻板＋示范材料不绑老师真实生活(0802/0817)](writing-lesson-metaphor-antistereotype.md) — 解法「先想只有他家才有的画面再找动物」须做成课堂明线;**两条全线通则:①例子不落到老师家人 ②默认措辞不强断言老师当下生活事实**(课案多人复用,「这是老师每天背的包」会逼老师说假话;授课提示是补救不是解法,须给替换清单+降级兜底)
+- [③引本单元课文佐证技法·匹配则引(0821立)](writing-lesson-cite-unit-text-0821.md) — **并非每个单元课文都配得上习作主题,不配就不引、不许硬上**(三形态:阅读要素≠习作技法/课文是对象不是示范/方向相反,实证三上二·五上三);判据=有没有一篇「最突出的写法」正是本课这一招,沾边不算;判不引≠欠账、冷审不得逼补引;由「可引」升格;新建 unit-texts.md 事实源(仓内原本没有单元篇目、archive/course-map 设计范围都不含);**联网核实存量三处 3/3 全中,但「碰巧对」不是流程**故仍须先核实后落笔;CLAUDE.md §5 开第二个联网例外口;「没课本」与「引课文」冲突已定口径＝**禁指向动作不禁指代进度**
 - [电报体/生造词红线第7条(0731立·0819补第5形态)](writing-lesson-telegraphese-and-coinage-redline.md) — 五形态自查(省主语/名词压缩/电报短语/生造词/**中心宾语残缺**);补宾语有反向刹车:术语只在定义句补一次,逐处补会撞池8配额;讲评括注直写动作、「占位」已升机检
 - [师话必须接住上一轮真实产出(0803)](writing-lesson-shihua-must-follow-real-turn.md) — 假转折/假情境/假引文三变体;checklist·tone_gate·冷审三关全漏,只有通读语感抓得到
 - [学段口气全线没分级(0817)](writing-lesson-grade-tone-not-differentiated.md) — 九篇③环节同构;**判断分三层(用词/技法深度/思维层级)别混说**;判据=降两级反问,改不动即没分级;已补technique-levels口气落地动作表+checklist C组+rubric第六节
@@ -128,7 +129,7 @@
 - [两个常驻文件的分层重构(0818)](memory-index-structure-over-size-0818.md) — 常驻仅占窗口2.5%故**别再拿字符数当优化目标**;MEMORY.md真病灶=单课次状态占64.6%·必读通胀·**通则被埋在课次条目里**(⚠重构后字符反增4.5%,通则上浮是有意净投入);CLAUDE.md降12.2%且**判据=共享脚本docstring才是细则天然唯一源、比references更好**(下沉前先head -20,多半是纯重复可直接删);已修templates路径错+README↔§7双向循环指针;改这两个文件前必读
 - [读书会详案原书插图链路(0730)](lesson-plan-book-illustration-chain.md) — 新顶层`读书会原书插图\<书名>\`(图不入库·_图单.md入库)+回插件升共享件PROFILES;详案写`【图位:插-01｜图注】`禁`![]()`;⚠PROFILES字段的CLI默认值一律None(硬默认静默盖档);PPT与阅读单吃图未做
 - [fix_quotes会毁代码块里的命令(0807)](fix-quotes-breaks-code-blocks.md) — 无差别替换不认```,粘出去的bash直接跑不了且check_quotes也不报;含命令示例的md跑完须回扫代码块还原半角
-- [Bash heredoc写代码文件三坑(0820)](bash-heredoc-file-writing-pitfalls.md) — 超长静默截断(≤90行一块)/`
+- [Bash heredoc写文件六坑(0820立·0821补三条)](bash-heredoc-file-writing-pitfalls.md) — **定界符漏引号→反引号被shell执行成空、脚本照报成功**/中文别手写unicode转义(已两次打错字)/读写不带newline=''会把CRLF换成LF(diff炸全文但git只认真实改动);超长静默截断(≤90行一块)/`
 `被折成真换行(用chr(92)拼)/替换失败前先grep数次数别默认没写入;三者报错都指错方向
 - [Write吞弯引号→必跑fix_quotes](write-tool-normalizes-curly-quotes.md) / [下游JSON引号统一弯引号禁「」](json-materials-curly-quotes.md) / [雅黑弯引号显示半角](curly-quotes-render-halfwidth-yahei.md) — 含引号段落Edit改用无引号锚点;存量4本已改;字符层U+201C已对别改JSON,靠模板unicode-range落宋体
 - [桌面插图批量去豆包水印管线](doubao-watermark-removal-pipeline.md) — 两批106张已交付;脚本dewatermark_batch.py在记忆目录;方位判定只能用参考模板形状匹配、输入glob必须排除产物
