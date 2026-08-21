@@ -54,7 +54,14 @@ $("#btn-back").onclick = () => {
   viewStack.pop();
   const back = viewStack[viewStack.length - 1] || "pick";
   if (back === "grade") { show("grade", S.lesson.topic); renderQueue(); }
-  else if (back === "pick") { viewStack = ["pick"]; show("pick"); }
+  else if (back === "pick") {
+    viewStack = ["pick"];
+    show("pick");
+    // 必须重渲：刚选过的那一课要浮到「最近用过」，否则这个区块永远等下次冷启动才出现
+    const box = $("#lesson-search");
+    if (box) box.value = "";
+    if (S.lessons.length) renderLessons("");
+  }
   else show(back);
 };
 
