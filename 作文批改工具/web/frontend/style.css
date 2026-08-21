@@ -262,13 +262,21 @@ textarea:focus{outline:0;border-color:var(--blue-line)}
   font-size:15px;font-family:inherit;-webkit-appearance:none}
 .search:focus{outline:0;border-color:var(--blue-line)}
 
+/* 折叠头做成一条明确可点的带底色的条：页面底(--page) < 折叠头(--brown-cell)
+   < 课次卡(--paper)，层级一眼看得出。原先只是一行浅色文字加个小箭头，
+   五个组收起时像五个孤立的标签，看不出下面还藏着东西。 */
+/* ⚠ 间距归 .lesson-list 的 flex gap 管（gap:10px），这里**不要再加 margin-top**
+   ——会叠加成两倍，原先那种松散感就是这么来的。 */
 .grouphead{
   display:flex;align-items:center;gap:10px;width:100%;text-align:left;
-  padding:9px 4px;margin-top:6px;color:var(--ink-soft);font-size:14px;font-weight:700}
-.grouphead:first-child{margin-top:0}
-.grouphead.plain{cursor:default}
+  padding:12px 14px;border-radius:var(--r);
+  background:var(--brown-cell);border:1px solid var(--line);
+  color:var(--ink-soft);font-size:14px;font-weight:700}
+.grouphead[data-g]:active{background:#E7E2D8}
+/* 「最近用过」那种纯标题不可点，就别装成按钮 */
+.grouphead.plain{cursor:default;background:none;border:none;padding:4px 4px 0}
 .grouphead .gt{color:var(--ink);font-size:15px}
 .grouphead .gn{color:var(--ink-soft);font-weight:400;font-size:13px}
-.grouphead .gc{margin-left:auto;font-size:18px;color:#C4BDB0;
+.grouphead .gc{margin-left:auto;font-size:20px;line-height:1;color:var(--ink-soft);
   transition:transform .15s;transform:rotate(0deg)}
 .grouphead .gc.open{transform:rotate(90deg)}
