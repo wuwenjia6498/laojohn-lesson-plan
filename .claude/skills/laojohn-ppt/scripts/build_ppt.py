@@ -16,6 +16,18 @@ import theme
 from parser import parse_md, Page
 from layouts_reading import RENDERERS_READING
 from layouts_writing import RENDERERS_WRITING
+from layouts_promo import RENDERERS_PROMO
+
+
+# profile 分派表（唯一接缝）：中间稿元信息 `文体：` → 该 profile 的 renderer 字典。
+# 键 "" = 缺省读书会（向后兼容，元信息不写文体时走它）。
+# 新增课型只在这里加一行 + 新建 layouts_<profile>.py / theme_<profile>.py，
+# 底层 helpers / parser 不得出现任何课型分支（见 references/architecture.md）。
+PROFILES = {
+    "": RENDERERS_READING,
+    "写作": RENDERERS_WRITING,
+    "宣讲": RENDERERS_PROMO,
+}
 
 
 def find_default_asset(filename_candidates, asset_subdir):
@@ -48,8 +60,13 @@ def build(input_md: str, output_pptx: str, *,
     if book_title:
         deck.title = book_title
 
-    # 按文体选 profile：写作课 → 写作 renderer 集；否则读书会（缺省/向后兼容）
-    renderers = RENDERERS_WRITING if deck.doc_kind == "写作" else RENDERERS_READING
+    # 按文体选 profile（查表，见模块级 PROFILES）。
+    # 刻意不用「非写作即读书会」的三元式：那样 `文体：写作课`（多打一个字）会**静默**
+    # 落回读书会 renderer，整份稿按错版式烘出来还不报错。
+    renderers = PROFILES.get(deck.doc_kind)
+    if renderers is None:
+        known = "、".join(k or "（省略=读书会）" for k in PROFILES)
+        raise ValueError(f"未知文体：{deck.doc_kind!r}（应为：{known}）")
 
     # 默认资源
     if logo_path is None:
@@ -118,6 +135,11 @@ def build(input_md: str, output_pptx: str, *,
         if renderer is None:
             raise ValueError(f"P{page.num} 无渲染器：{page.page_type}")
         renderer(slide, page, ctx)
+
+        # 演讲者备注 → pptx 自带备注页（放映时只有讲者看得到）。
+        # 课型无关：中间稿不写 `备注：` 就是空字符串，此处直接跳过。
+        if getattr(page, "notes", ""):
+            slide.notes_slide.notes_text_frame.text = page.notes
 
         # 占位清单（仅对中间稿原生页报告，跳过 synthetic）
         if page.page_type in {"_END", "封面"} and page.num in {0, 999}:

@@ -9,15 +9,35 @@
   - `layouts_common.py`——公共元素 + 参数化封面基函数 + END 页；
   - `layouts_reading.py`——读书会 6 页型 `RENDERERS_READING`；
   - `layouts_writing.py`——写作课 `RENDERERS_WRITING`；
-  - `theme_writing.py`——写作课视觉变体。
-- `build_ppt.py` 按中间稿元信息 `文体：写作` 选 profile（**缺省 = 读书会**，向后兼容）。
-- **新增写作课视觉/页型时只动 writing 模块 + theme_writing，绝不往 reading renderer 或 helpers 里塞课型分支**——否则共享引擎退化成条件分支堆。
+  - `theme_writing.py`——写作课视觉变体；
+  - `layouts_promo.py`——对外宣讲 `RENDERERS_PROMO`（2026-08-24 新增，非课堂件）；
+  - `theme_promo.py`——宣讲视觉变体（取已发布招生海报的品牌色板，不沿用课件深灰蓝）。
+- `build_ppt.py` 按中间稿元信息 `文体：` 查 **`PROFILES` 表**选 profile（**缺省 = 读书会**，向后兼容）。
+  该表是**唯一分派点**，新增课型只加一行：
+
+  ```python
+  PROFILES = {"": RENDERERS_READING, "写作": RENDERERS_WRITING, "宣讲": RENDERERS_PROMO}
+  ```
+
+  查不到即显式报错。**刻意不用「非写作即读书会」的三元式**——那样 `文体：写作课`
+  （多打一个字）会静默落回读书会 renderer，整份稿按错版式烘出来还不报错。
+- **新增课型的视觉/页型时只动该 profile 的 layouts_* + theme_*，绝不往 reading/writing renderer 或 helpers 里塞课型分支**——否则共享引擎退化成条件分支堆。
+
+### ⚠ 两个页型名不可改（改了完全静默）
+
+`封面` 与 `环节标题` 这两个字符串是 `build_ppt.py` 里**课型无关逻辑的判据**：
+前者决定「首页不是封面就自动补一页」，后者决定「按环节标题自动编章节序号」。
+任何 profile 都必须沿用这两个名字。若为了「宣讲件叫章节页更自然」把名字改掉，
+会同时丢掉自动封面判定与章节编号，**且不报任何错**。
 
 ## 二、页型枚举按 profile 裁决
 
 `parser.PAGE_TYPES` 是语法全集；某页型在某 profile 下是否有效，按该 profile 的 `RENDERERS_<profile>` 字典裁决。
 
 - **读书会 6 种**：封面 / 环节标题 / 引导问题 / 原文齐读 / 要点小结 / 填空表格。
+- **宣讲 12 种**（`文体：宣讲`）：封面 / 环节标题（章节大间隔页）/ 主张 / 数据面板 /
+  体系全景 / 流程时间轴 / 并列卡片 / 双栏对照 / 图集 / 满屏图 / 收尾 / 要点小结（清单页），
+  另有自带的 `_END`（**不出现「THE END / 下一次再见」**，见第五节）。
 - **写作课自成一套**：
   - 共用：封面 / 环节标题 / 填空表格（构思表·五感表·评价量表）；
   - **弃用**：引导问题 / 要点小结（读书会"思辨追问"的 Q 水印 + 红方块隐喻，套写作讲解会把连贯话切碎）；

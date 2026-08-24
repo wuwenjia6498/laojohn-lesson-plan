@@ -137,7 +137,7 @@
 `被折成真换行(用chr(92)拼)/替换失败前先grep数次数别默认没写入;三者报错都指错方向
 - [Write吞弯引号→必跑fix_quotes](write-tool-normalizes-curly-quotes.md) / [下游JSON引号统一弯引号禁「」](json-materials-curly-quotes.md) / [雅黑弯引号显示半角](curly-quotes-render-halfwidth-yahei.md) — 含引号段落Edit改用无引号锚点;存量4本已改;字符层U+201C已对别改JSON,靠模板unicode-range落宋体
 - [桌面插图批量去豆包水印管线](doubao-watermark-removal-pipeline.md) — 两批106张已交付;脚本dewatermark_batch.py在记忆目录;方位判定只能用参考模板形状匹配、输入glob必须排除产物
-- **PPT 引擎**：[按profile分层](ppt-profile-seam-architecture.md)（呈现层分reading/writing、底层原语不fork;Phase3待办）· [中文变Calibri修复](ppt-font-ea-latin-order.md)（根因OOXML字体槽latin须在ea前）· [表格自适应](ppt-table-autofit.md) / [原文齐读超长自适应](ppt-quote-autofit.md)（存量pptx重烘才生效）· [阅读单页型已下线](ppt-reading-sheet-page.md)
+- **PPT 引擎**：[新增第三个profile宣讲(0824)](ppt-promo-profile-0824.md)（对外宣讲件47页16:9;分派点改PROFILES查表顺带修掉「文体写错静默落回读书会」;**四个静默坑**=封面/环节标题两名字不可改·要点块裸行被丢弃·多图只能走`场景：`·add_image_cover放文档截图必裁;版式溢出机检查不出来）· [按profile分层](ppt-profile-seam-architecture.md)（呈现层分reading/writing、底层原语不fork;Phase3待办）· [中文变Calibri修复](ppt-font-ea-latin-order.md)（根因OOXML字体槽latin须在ea前）· [表格自适应](ppt-table-autofit.md) / [原文齐读超长自适应](ppt-quote-autofit.md)（存量pptx重烘才生效）· [阅读单页型已下线](ppt-reading-sheet-page.md)
 - **PPT 视觉**：[副标题克制电报体](ppt-subtitle-no-telegraphese.md) / [参考答案红字上屏](ppt-reference-answer-on-slide.md) / [逐条点击动画](ppt-click-reveal-animation.md) / [四图网格](ppt-four-image-grid.md) / [逐页讲稿新增docx](lecture-notes-docx.md) — 末条:打包只收docx
 - **工程坑**：题目带全角＿＿则 `place_pptx` 必认领失败、须手工归位；配图空占位机检查不出、须肉眼看 —— 出自 [woheguoyitian-4a-ppt-chain-state](woheguoyitian-4a-ppt-chain-state.md)
 - [阅读单skill固化](reading-sheet-skill.md) / [模板库扩到18个](reading-sheet-template-expansion-18.md) / [默认同出PPTX](reading-sheet-always-pptx.md) / [原生可编辑PPTX](reading-sheet-editable-pptx.md) / [不打ZIP要合订PDF](reading-sheet-no-auto-zip.md)

@@ -41,7 +41,10 @@ from typing import List, Optional, Dict, Tuple
 # 不产出写作页型即可。
 PAGE_TYPES = {"封面", "环节标题", "引导问题", "原文齐读", "要点小结", "填空表格",
               "双栏对照", "写作任务", "情境任务", "写法讲解", "活动指令", "示范文",
-              "实景观察"}
+              "实景观察",
+              # 宣讲 profile（文体：宣讲）新增 8 种，同样由 RENDERERS_PROMO 裁决有效性
+              "主张", "数据面板", "体系全景", "流程时间轴", "并列卡片", "图集",
+              "满屏图", "收尾"}
 
 # 表格单元格答案标记：{{答案}} —— full 取答案、blank 取占位
 ANSWER_RE = re.compile(r"\{\{(.+?)\}\}")
@@ -111,6 +114,9 @@ class Page:
     # 来源=页内重复的 `场景：图=<路径>｜名=<场景名>｜问=<问题>｜答=<答案>` 行。
     # 1 景→单景版面(图右/图上)，2 景→双景并排。无图路径的场景仍渲染卡片骨架（图位留占位）。
     scenes: List[dict] = field(default_factory=list)
+    # 演讲者备注：写进 pptx 自带的备注页（放映时只有讲者看得到，不占版面）。
+    # 来源=页内 `备注：` 多行字段。课型无关——不写该字段即留空、对既有两 profile 无影响。
+    notes: str = ""
 
 
 @dataclass
@@ -196,7 +202,8 @@ def parse_md(md_text: str) -> Deck:
     pending_table_lines: List[str] = []
 
     # 多行字段名 → Page 属性（正文/左正文/右正文 共用同一收集机制）
-    multiline_targets = {"正文": "body", "左正文": "left_body", "右正文": "right_body"}
+    multiline_targets = {"正文": "body", "左正文": "left_body", "右正文": "right_body",
+                         "备注": "notes"}
 
     def flush_field():
         nonlocal pending_field, field_buf, pending_table_lines
@@ -242,7 +249,7 @@ def parse_md(md_text: str) -> Deck:
 
         # 字段头匹配："X：" 或 "X:"
         m_field = re.match(
-            r"^(眉标|标题样式|标题|副标题|正文|要点样式|要点|表格|配图建议|左标题|左正文|右标题|右正文|计时|字数|图例|场景)\s*[:：]\s*(.*)$",
+            r"^(眉标|标题样式|标题|副标题|正文|要点样式|要点|表格|配图建议|左标题|左正文|右标题|右正文|计时|字数|图例|场景|备注)\s*[:：]\s*(.*)$",
             stripped)
         if m_field:
             # 切换字段前 flush
