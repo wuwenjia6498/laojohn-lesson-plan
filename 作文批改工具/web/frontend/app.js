@@ -31,10 +31,19 @@ const S = {
 const VCLS = { "达成": "v-ok", "部分达成": "v-half", "未达成": "v-no", "不适用": "v-na" };
 const BCLS = ["b0", "b1", "b2"];
 
+/* 口令。服务端配了 LJ_ACCESS_CODE 才需要；存在本机，不随批改内容走。 */
+const CODE_KEY = "lj_access_code";
+const getCode = () => { try { return localStorage.getItem(CODE_KEY) || ""; } catch (e) { return ""; } };
+const setCode = (v) => { try { localStorage.setItem(CODE_KEY, v); } catch (e) { /* 无痕模式，本次会话仍可用 */ } };
+
 async function api(path, opts) {
+  opts = opts || {};
+  const code = getCode();
+  if (code) opts.headers = Object.assign({}, opts.headers, { "X-Access-Code": code });
   const r = await fetch(path, opts);
   let d = null;
   try { d = await r.json(); } catch (e) { /* 非 JSON 一律按下面的错处理 */ }
+  if (r.status === 401) { const e = new Error((d && d.error) || "口令不对"); e.needCode = true; throw e; }
   if (!r.ok) throw new Error((d && d.error) || `请求失败（${r.status}）`);
   return d;
 }
@@ -313,10 +322,41 @@ function dropItems() {
   S.seq = 0;
 }
 
+/* 口令闸。校验通过前一直不 resolve——外面的 loadLessons 就停在这里，
+   不会先把课次列表读出来。口令存本机，下次打开直接过。 */
+async function passGate() {
+  const check = async () => {
+    try { await api("/api/auth-check"); return true; } catch (e) { return false; }
+  };
+  if (getCode() && await check()) return;
+
+  const gate = $("#gate"), inp = $("#gate-input"), err = $("#gate-err"), btn = $("#gate-go");
+  gate.hidden = false;
+  inp.focus();
+  return new Promise(resolve => {
+    const submit = async () => {
+      const v = inp.value.trim();
+      if (!v || btn.disabled) return;
+      btn.disabled = true; err.hidden = true; btn.textContent = "验证中…";
+      setCode(v);
+      const ok = await check();
+      btn.disabled = false; btn.textContent = "进入";
+      if (ok) { gate.hidden = true; resolve(); return; }
+      setCode("");                       // 存错的会让下次打开还是进不去，且看不出原因
+      err.textContent = "口令不对，再试一次";
+      err.hidden = false;
+      inp.select();
+    };
+    btn.onclick = submit;
+    inp.onkeydown = (e) => { if (e.key === "Enter") submit(); };
+  });
+}
+
 async function loadLessons() {
   try {
-    const h = await api("/api/health");
+    const h = await api("/api/health");     // health 不要口令，正是用来问「要不要口令」
     S.mock = h.mock;
+    if (h.auth) await passGate();           // 拿不到口令就一直停在这，不往下走
     S.lessons = await api("/api/lessons");
   } catch (e) {
     $("#lesson-list").innerHTML = `<p class="hint">读不到课次：${esc(e.message)}</p>`;

@@ -21,6 +21,18 @@
 </header>
 
 <!-- ── 视图一 · 选课 ───────────────────────────── -->
+<!-- 口令闸：服务端配了 LJ_ACCESS_CODE 时才显示（链接会被转发，口令挡的是外泄） -->
+<div id="gate" class="gate" hidden>
+  <div class="gate-box">
+    <div class="gate-t">请输入使用口令</div>
+    <div class="gate-s">口令由老约翰提供。输一次就记住，换手机要重输。</div>
+    <input id="gate-input" class="search" type="password" placeholder="口令"
+           autocomplete="off" enterkeyhint="go">
+    <div id="gate-err" class="gate-err" hidden></div>
+    <button id="gate-go" class="primary">进入</button>
+  </div>
+</div>
+
 <main id="view-pick" class="view">
   <div class="cover">
     <span class="cover-mark">批</span>

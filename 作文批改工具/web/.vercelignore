@@ -1,0 +1,16 @@
+# 别删这个文件：vercel CLI **不看 .gitignore**，只看这里。
+# server/config.json 里有真密钥，没这行就会被打进部署包。
+server/config.json
+
+# 测试/造图工具，线上不需要（还依赖 Windows 字体，装了也跑不了）
+server/_testdata/
+server/make_test_sheets.py
+server/make_sheet.py
+server/run_regression.py
+server/smoke_real.py
+build_deploy.py
+frontend/idb-probe.html
+
+__pycache__/
+*.pyc
+.vercel/

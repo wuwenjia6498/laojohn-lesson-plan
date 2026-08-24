@@ -35,6 +35,11 @@ HERE = Path(__file__).resolve().parent
 TOOL_ROOT = HERE.parent.parent
 PACK_DIR = TOOL_ROOT / "标准包"
 FRONTEND = HERE.parent / "frontend"
+# 部署包目录。Vercel 的部署根是 web/，够不到上一级的中文源目录（标准包、
+# build_prompt.py），所以由 build_deploy.py 预先把两者收进这里、全 ASCII 命名。
+# 本地跑时这些文件可能不存在，一律回退读中文源——本地行为不变。
+# ⚠ 不要叫 api/：Vercel 把 /api 当成「一个文件一个端点」的旧式文件路由目录。
+BUNDLE = HERE.parent / "_bundle"
 
 
 def load_config():
@@ -43,7 +48,9 @@ def load_config():
         "base_url": "https://aihubmix.com/v1",
         "grade_model": "gpt-4o",
         "rate_limit_per_hour": 120,
-        "max_image_mb": 8,
+        "max_image_mb": 4,   # 别调过 4：Vercel 函数请求体硬限 4.5MB（含 multipart
+                             # 开销），超过在平台层就 413，我们的提示轮不到。
+                             # 前端已压到长边 1600、约 300KB，这个值只是兜底。
         "trust_proxy": False,
     }
     f = HERE / "config.json"
@@ -52,6 +59,10 @@ def load_config():
                     if not k.startswith("_")})
     if os.environ.get("AIHUBMIX_API_KEY"):
         cfg["api_key"] = os.environ["AIHUBMIX_API_KEY"]
+    # 线上不放 config.json（密钥只走环境变量），所以 trust_proxy 也得有个环境变量
+    # 入口，否则托管平台上它永远是 false。⚠ 只在确知前面有反代时才开，见 _client_ip。
+    if os.environ.get("LJ_TRUST_PROXY", "").strip().lower() in ("1", "true", "yes"):
+        cfg["trust_proxy"] = True
     return cfg
 
 
@@ -74,6 +85,8 @@ if PROD and MOCK:
 def _load_prompt_module():
     """importlib 载入 build_prompt —— 标准包渲染与判断规则都与 Phase 0 共用一份。"""
     src = TOOL_ROOT / "build_prompt.py"
+    if not src.exists():                      # 线上：见 BUNDLE 注释
+        src = BUNDLE / "_build_prompt.py"
     spec = importlib.util.spec_from_file_location("build_prompt", src)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -114,10 +127,13 @@ def grade_label(g, ab):
 def load_packs():
     """按 (年级, 上下册, 单元) 排序装载。顺序即前端选课页的顺序。"""
     ds = []
-    for f in PACK_DIR.glob("*.json"):
-        d = json.loads(f.read_text(encoding="utf-8"))
-        d["_stem"] = f.stem
-        ds.append(d)
+    if PACK_DIR.is_dir():
+        for f in PACK_DIR.glob("*.json"):
+            d = json.loads(f.read_text(encoding="utf-8"))
+            d["_stem"] = f.stem
+            ds.append(d)
+    else:                                     # 线上：见 BUNDLE 注释
+        ds = json.loads((BUNDLE / "_packs.json").read_text(encoding="utf-8"))
     ds.sort(key=grade_of)
     return {d["lesson_id"]: d for d in ds}
 
@@ -539,10 +555,40 @@ def mock_diagnose(pack, results):
 app = FastAPI(title="老约翰 · 同步习作批改助手")
 
 
+# 访问口令：环境变量 LJ_ACCESS_CODE。为空＝不设防（本地开发默认如此）。
+#
+# 为什么需要它，而不是只靠 _rate_ok 的频率限制：那个桶在内存里，单进程时够用，
+# **上了 Serverless（Vercel）就形同虚设**——每个实例一个桶、冷启动即清零，
+# 打一次就换一个实例的话根本累计不起来。而链接一旦发给加盟商就会被转发，
+# 谁拿到谁能烧我们的模型额度。口令挡的是这个：链接外泄了，没口令也用不了。
+#
+# 挡住全部 /api/*，只放行 /api/health（前端要靠它判断该不该弹口令框）。
+# 课次列表也挡——判据（「先看三条」）是这工具的核心，不该谁点开链接都能抄走。
+ACCESS_CODE = os.environ.get("LJ_ACCESS_CODE", "").strip()
+
+
+@app.middleware("http")
+async def _gate(request: Request, call_next):
+    if (ACCESS_CODE
+            and request.url.path.startswith("/api/")
+            and request.url.path != "/api/health"
+            and request.headers.get("x-access-code", "").strip() != ACCESS_CODE):
+        return JSONResponse({"error": "口令不对，或者还没输入口令"}, status_code=401)
+    return await call_next(request)
+
+
 @app.get("/api/health")
 def health():
     return {"ok": True, "mock": MOCK, "model": CFG["grade_model"],
-            "lessons": len(PACKS), "rate_limit_per_hour": CFG["rate_limit_per_hour"]}
+            "lessons": len(PACKS), "rate_limit_per_hour": CFG["rate_limit_per_hour"],
+            # 前端据此决定要不要弹口令框；也是线上确认「口令真的配上了」的唯一途径
+            "auth": bool(ACCESS_CODE)}
+
+
+@app.get("/api/auth-check")
+def auth_check():
+    """口令对不对。本身不做事——能走到这里就说明过了上面那道中间件。"""
+    return {"ok": True}
 
 
 @app.get("/api/lessons")
@@ -627,7 +673,10 @@ async def http_err(request, exc):
     return JSONResponse({"error": exc.detail}, status_code=exc.status_code)
 
 
-app.mount("/", StaticFiles(directory=str(FRONTEND), html=True), name="static")
+# 本地跑时由这个进程一并供前端；线上（Vercel）前端走 CDN、函数包里没有 frontend/，
+# 而 StaticFiles 指向不存在的目录会直接抛异常、整个函数 500，所以先判断。
+if FRONTEND.is_dir():
+    app.mount("/", StaticFiles(directory=str(FRONTEND), html=True), name="static")
 
 
 if __name__ == "__main__":

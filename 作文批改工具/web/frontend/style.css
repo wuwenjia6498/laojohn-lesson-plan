@@ -321,3 +321,14 @@ textarea:focus{outline:0;border-color:var(--blue-line)}
   flex:none;padding:0 14px;border-radius:var(--r);font-size:13px;
   background:none;border:1px solid var(--line);color:var(--ink-soft)}
 .hist-del:active{background:var(--note-bg);color:var(--brand-red)}
+
+/* ── 口令闸 ─────────────────────────────────────── */
+.gate{position:fixed;inset:0;z-index:60;display:flex;align-items:center;
+  justify-content:center;padding:24px;background:var(--page)}
+.gate[hidden]{display:none}
+.gate-box{width:100%;max-width:340px;text-align:center}
+.gate-t{font-size:19px;font-weight:700;margin-bottom:6px}
+.gate-s{font-size:13px;color:var(--ink-soft);line-height:1.6;margin-bottom:18px}
+.gate .search{width:100%;margin:0 0 10px;text-align:center;letter-spacing:2px}
+.gate .primary{width:100%}
+.gate-err{font-size:13px;color:var(--brand-red);margin-bottom:10px}

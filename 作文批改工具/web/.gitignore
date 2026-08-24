@@ -1,0 +1,6 @@
+.vercel
+.env*
+
+# build_deploy.py 的产物：由「标准包 + build_prompt.py」重生成，不入库（§8）。
+# index.py（部署入口）是源，要入库。
+_bundle/
