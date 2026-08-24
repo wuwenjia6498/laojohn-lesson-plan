@@ -81,7 +81,8 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 
 - **Anthropic 官方 `docx`/`pptx`/`xlsx`/`pdf` skill：只许读改外部文件，禁止用来新建本仓产物（2026-08-18 装 · user 级 `anthropic-agent-skills` 市场）**。作用域**仅限「读取或修改一份已经存在的外部文件」**——体检外部平台生成的 pptx、拆解第三方 docx、合并 pdf 之类。**本仓一切交付产物的生成一律走 laojohn-* 流水线**：docx 走 `md_to_laojohn_docx.py`（且必带 `--header-left/--header-right`），读书会 pptx 走 `build_ppt.py`，写作课 pptx 走「归位 → 读详案审查 → 动画 → 页标回注」四步链（含 `plan_link.py` 闸门）。用官方 skill 新建，产出既不带品牌版式、也绕过页眉参数与闸门。
   - **须防触发词撞车**：官方 pptx 的 description 明写「凡用户提到 deck／slides／presentation 或点到 .pptx 文件名就触发，不问他接下来要干什么」，docx 亦覆盖 report／memo／letter／template；而本仓天天说 PPT、课件、docx。**凡涉及本仓产出，一律以 laojohn-* skill 为准**，官方件不得抢活。
-  - **环境事实（省得反复试错）**：本机无 node/npm、无 LibreOffice、无 pandoc、无 markitdown，故官方 docx/pptx 的「新建」（docx-js／pptxgenjs）与「读取」（pandoc／markitdown）路径本就跑不通，xlsx 亦缺 openpyxl/pandas 而整体不可用。**真正能用的只有三样**：pdf 各项操作（pypdf 已装）、docx/pptx 的 unzip→改 XML→zip 编辑路径（纯标准库）、以及 `scripts/office/validate.py` 结构校验（已补装 `defusedxml`）。不要为跑通其余路径去装 Node/LibreOffice/pandoc——那与本仓已成熟的产出链重复造轮子。
+  - **环境事实（2026-08-24 实测复核 · 已推翻 0818 的记载）**：本机**现已装 node v22.14.0 / npm 10.9.2**（还有 Vercel CLI，作文批改工具部署用），**openpyxl 3.1.5 / pandas 2.2.3 / python-docx 0.8.11 / python-pptx 1.0.2 也都在**。仍然没有的只剩 **LibreOffice、pandoc、markitdown**。故官方 skill 的实际可用面比 0818 记的宽得多：docx/pptx 的「新建」路径（docx-js／pptxgenjs）**现在跑得通**，xlsx **整体可用**，pdf 各项操作可用（pypdf 6.7.1），`scripts/office/validate.py` 可用（defusedxml 0.7.1）；只有「读取」路径（pandoc／markitdown）仍跑不通。
+  - **⚠ 由此风险性质变了，禁令必须当真**：0818 那条禁令背后其实有环境天然挡着——**想违反也违反不了**；现在 node 装上了，**违反禁令随时能成功**，挡住它的只剩纪律这一层。上面那条「禁止用官方 skill 新建本仓产物」的理由从来不是「跑不通」，而是**产出不带品牌版式、绕过 `--header-left/--header-right` 页眉参数与 `plan_link.py` 闸门**——这个理由与装没装 node 完全无关，一个字都不因环境变化而松动。**别因为「现在能跑了」就去用**。仍然不要为跑通 pandoc／markitdown 路径去装 LibreOffice／pandoc——那与本仓已成熟的产出链重复造轮子。
 
 - **`【PPT换页-PXX】` 已废弃**（lesson-plan、writing-lesson 详案均不再写）。分页权归 `laojohn-ppt-draft`，由它按"教学节拍"自行切页；详案只需 `## 第N课时 · 课型` 划课时、`### 一、xx` 划环节。
 - docx 引擎仍把残留换页点渲染成橙色，**仅为向后兼容旧 docx**，新稿一律不产出。
