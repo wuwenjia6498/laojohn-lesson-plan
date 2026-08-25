@@ -26,4 +26,6 @@ metadata:
 
 5. **手写 unicode 转义会打错字，且错得很隐蔽。** 为绕开「弯引号被打直」而改用 `\uXXXX` 拼中文，两次打错——「抛」写成「招」（U+629B→U+62DB，导致 anchor 找不到）、「摊开」写成「摧开」（已写进文件才发现）。**中文不该手写转义。解法：正文中文直接写（`<<'EOF'` 不会动它），只有弯引号用常量拼**——scratchpad 里的 `patch.py` 就是为此而写：`CQ/CQR/SQ/SQR` 四个常量 + 读写都带 `newline=''` 保 CRLF + 替换前断言命中数。改本仓 md 规则文件直接复用它。
 
-6. **读写文件不带 `newline=''` 会把工作区 CRLF 整体换成 LF**，`diff` 立刻炸成全文（实测 417 行），而 `git diff --numstat` 只显示真实的 9/2——**因为仓库存的是 LF、autocrlf 在起作用**。别被 `diff` 吓到去回滚，以 git 的统计为准；但工作区仍应转回 CRLF 保持一致。
+6. **读写文件不带 `newline=''` 会把工作区 CRLF 整体换成 LF**，`diff` 立刻炸成全文（实测 417 行），而 `git diff --numstat` 只显示真实的 9/2——**因为仓库存的是 LF、autocrlf 在起作用**。别被 `diff` 吓到去回滚，以 git 的统计为准；但工作区仍应转回 CRLF 保持一致。 **⚠ 但「以 git 统计为准」只在仓库存 LF 时成立**（2026-08-25 订正）：本仓 `MEMORY.md` 在仓库里存的是 **CRLF**（实测 159 CRLF + 3 裸 LF 的混合），而 `core.autocrlf=true` 会把工作区 CRLF clean 成 LF 再入库——于是 `git diff --cached` 同样炸成全文（163/160），**放行就是真把全文改写提交进去**，双人协作时对方合并会爆炸。故动手前先查一句仓库里存的是什么：`git show HEAD:<file>` 数 CRLF。仓库存 LF → 照旧以 git 统计为准；**仓库存 CRLF → 必须按 HEAD 字节重建**：取 HEAD 原始字节，用 `difflib.SequenceMatcher` 比对「去掉行尾后」的两组行，`equal` 段保留 HEAD 原行尾、改动段才用新内容，写回后以 `git -c core.autocrlf=false add` 暂存。实测把 323 行噪声压回真实的 7 行。
+
+7. **`open(f, 'wb')` 先截断文件，异常发生在 write 的参数里就会把文件清成 0 字节。**2026-08-25 实测：`open(f,'wb').write(d.replace(old, old + ' ' + new))` 因 bytes 拼 str 抛 `TypeError`，但截断已经发生——一条 TypeError 清空了一份记忆文件，且报错信息完全指向类型问题、不会提示文件已毁。**解法：把内容全部算完并断言通过，最后一步才 `open(...,'wb')`**；二进制改写时 old/new 两侧都要 `.encode()`，别只 encode 一半。真清空了也别慌：已提交过的文件 `git checkout HEAD -- <file>` 即可完整恢复。
