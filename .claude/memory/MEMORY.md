@@ -151,6 +151,7 @@
 - [目录口径大改名已收官](bookclub-materials-dir-consolidation.md) — 读书会线顶层目录加前缀、两线课件目录拆分
 
 ## 未决事项与交付风险（做完即删）
+- **⚠ 四上换题《我的家人》波及面未收完（0826）**：对外物料仍写《小小“动物园”》——招生海报.html／馆内张贴海报.html＋馆内海报.pdf（2 处）／家长端海报.pdf（**无 html 源、只能手改**）／同步习作课程总地图.docx+pdf（2 处）；批改工具缺《我的家人》标准包（旧包仍在线）；《我的家人》除详案外配套/PPT/中间稿全缺。已改的只有宣讲件（中间稿 P05 + 桌面 pptx），且中间稿文件头已记「这一格改取 course-map、勿据海报改回去」 — [详情](wodejiaren-4a-lesson-state.md)
 - **⚠ 神笔马良 插-24 页码未裁，不得对外交付** — [详情](shenbi-maliang-lesson-plan-state.md)
 - **⚠ 阅读单线 18 份 PDF 的 Type3 字体遗留未修** — [详情](pdf-type3-fonts-fixed.md)
 - 彼得·潘档案 line23/32 与机读块不一致待清理 — [详情](peterpan-book-profile-state.md)
