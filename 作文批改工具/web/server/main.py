@@ -118,6 +118,17 @@ def grade_of(d):
     return 99, 9, 999
 
 
+def sort_key(d):
+    """选课页排序键 ＝ grade_of 三元组 ＋ 版本序。
+
+    同一年级同一单元并存新旧两套教材题目时（2026 秋四上·二《小小“动物园”》→
+    《我的家人》是首例），grade_of 三元组完全相同，`ds.sort` 稳定排序就退化成
+    glob 顺序（本地）或 _packs.json 的数组顺序（线上）——**旧题可能排在现行题
+    前面，且不报错**。故补第四位：现行与无标注的排前，legacy 排后。
+    """
+    return grade_of(d) + (1 if (d.get("edition") or {}).get("status") == "legacy" else 0,)
+
+
 def grade_label(g, ab):
     if g > 6:
         return "其他"
@@ -134,7 +145,7 @@ def load_packs():
             ds.append(d)
     else:                                     # 线上：见 BUNDLE 注释
         ds = json.loads((BUNDLE / "_packs.json").read_text(encoding="utf-8"))
-    ds.sort(key=grade_of)
+    ds.sort(key=sort_key)
     return {d["lesson_id"]: d for d in ds}
 
 
@@ -153,6 +164,12 @@ def public_view(d):
         "unit_label": m.get("unit", ""),
         "label": f'{m["grade_volume"]}·{m["unit"]}《{m["topic"]}》',
         "topic": m["topic"],
+        # 版本标注 {status, note}：同一年级同一单元并存新旧两套教材题目时才有
+        # （2026 秋四上·二换题后首例）。**只进选课页的徽章**——不进 label、不进
+        # topic，因为那两个会印到发给家长的点评卡上。绝大多数课次没有此字段，
+        # 下发 None、前端不渲染徽章。status 供排序（见 sort_key），note 供显示，
+        # 两者解耦：改文案不影响排序。
+        "edition": d.get("edition") or None,
         "genre": m.get("genre", ""),
         "core_technique": d.get("core_technique", ""),
         "three_checks": [{"no": c["no"], "text": c["text"]} for c in d["three_checks"]],

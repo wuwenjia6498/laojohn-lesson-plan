@@ -85,6 +85,11 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
   display:inline-block;margin-top:8px;padding:2px 8px;border-radius:20px;
   font-size:12px;background:var(--blue-soft);color:var(--blue-head)}
 .lesson .tag.unverified{background:#FBEFEA;color:var(--brand-red)}
+/* 版本徽章：同一单元新旧两套教材题目并列时才出现（2026 秋四上·二换题后首例）。
+   跟在「判据已核」那枚后面，故要 margin-left。现行绿、旧版灰——灰是有意的，
+   让旧题在列表里退居二线，老师一眼看得出该点哪个。 */
+.lesson .tag.edition{margin-left:6px;background:#E9F1EC;color:var(--ok)}
+.lesson .tag.edition.old{background:var(--brown-cell);color:var(--na)}
 
 .boundary{
   margin:22px 0 10px;padding:14px 16px;border-radius:var(--r);

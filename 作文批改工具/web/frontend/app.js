@@ -373,7 +373,13 @@ function lessonCard(l) {
       <div class="t">${esc(l.label)}</div>
       <div class="s">${esc(l.core_technique)}</div>
       <span class="tag${l.verified ? "" : " unverified"}">${
-        l.verified ? "判据已核" : "判据待人工核对"}</span>
+        l.verified ? "判据已核" : "判据待人工核对"}</span>${
+      // 版本徽章：只有同一单元并存新旧两套教材题目的课次才有 edition（多数为 null）。
+      // status 决定灰/绿，note 是显示文案——改文案不会动到样式或排序。
+      l.edition
+        ? `<span class="tag edition${
+            l.edition.status === "legacy" ? " old" : ""}">${esc(l.edition.note || "")}</span>`
+        : ""}
     </button>`;
 }
 
