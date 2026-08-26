@@ -40,7 +40,7 @@ PYTHONUTF8=1 python .claude\skills\laojohn-ppt\scripts\place_pptx.py --dry-run  
 PYTHONUTF8=1 python .claude\skills\laojohn-ppt\scripts\place_pptx.py             # 再执行
 ```
 
-把根目录的散件按文件名认领到课次，移进 `写作课件PPT输出\<年级册>-第N单元-<题目>\`，按内容定名（两节合一→`<题目>-全课.pptx`）。
+把根目录的散件按文件名认领到课次，移进 `写作课件PPT输出\<年级册>-第N单元-<题目>\`，定名为 `<年级册>-第N单元-<题目>-课件PPT.pptx`（2026-08-26 改；旧的 `<题目>-全课.pptx` 已作废）。
 
 - **散在根目录的件打包收不到**（`package_writing.py` 只 glob 课次子目录），这一步不能跳。
 - 认领不唯一时脚本会列候选**让你选，绝不猜**——照它给的清单问用户。
@@ -51,7 +51,7 @@ PYTHONUTF8=1 python .claude\skills\laojohn-ppt\scripts\place_pptx.py            
 **先把详案整篇读完**（`写作课详案输出\<年级册>-第N单元-<题目>-写作课详案.md`），再动任何脚本。
 
 ```bash
-PYTHONUTF8=1 python .claude\skills\laojohn-ppt\scripts\audit_against_plan.py "<课次目录>\<题目>-全课.pptx"
+PYTHONUTF8=1 python .claude\skills\laojohn-ppt\scripts\audit_against_plan.py "<课次目录>\<课次>-课件PPT.pptx"
 ```
 
 脚本按 **pptx 所在课次目录名**拼详案路径（不搜索，故不受弯引号/全角字符影响），跑五类机检、把结论写进工作单的 `audit` 字段。**这道闸门是硬的**：没跑过、或详案在审查后改过（md5 对不上），第 3 步的 `animate_pptx.py` 直接拒绝注入。
@@ -83,7 +83,7 @@ PYTHONUTF8=1 python .claude\skills\laojohn-ppt\scripts\audit_against_plan.py "<�
 ### 第 3 步 · 注入点击动画
 
 ```bash
-PYTHONUTF8=1 python .claude\skills\laojohn-ppt\scripts\inspect_pptx.py "<课次目录>\<题目>-全课.pptx"   # ① 勘查出建议分组
+PYTHONUTF8=1 python .claude\skills\laojohn-ppt\scripts\inspect_pptx.py "<课次目录>\<课次>-课件PPT.pptx"   # ① 勘查出建议分组
 #                                     ② 用 regroup_anim.py 重建分组（见下，不能省）
 PYTHONUTF8=1 python .claude\skills\laojohn-ppt\scripts\animate_pptx.py "<同上>.pptx" "<同上>-anim.json" --in-place   # ③ 注入
 ```

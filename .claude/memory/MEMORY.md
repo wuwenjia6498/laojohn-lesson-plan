@@ -59,7 +59,8 @@
 - [指纹块改14字段+装置粒度门槛](writing-lesson-fingerprint-fields-revised.md) / [横向生产+反同质化四项升级](writing-lesson-antihomogenization-upgrade.md) — 指纹会回读重建台账,装置判据=当场演过一件事;距离化避让/池5篇内规则/批次横审(⚠该条12字段说法已过时)
 - [正文标点全角+方括号提示体例](writing-lesson-fullwidth-punct-bracket.md) / [语言风格红线覆盖后续改写](style-redline-covers-edits.md) / [交付前加通读语感扫](writing-lesson-naturalness-readthrough.md) — 去游戏化叫法+去形象比喻;checklist抓不到生造/别扭须纯语感通读
 - [进阶线升全覆盖63任务+填空位必须全角＿＿(0802)](writing-progression-chain-full-coverage.md) — 总地图由md反向回写(全仓唯一);归线=文体首段·分档=册次;半角`____`会被docx引擎当加粗标记静默吃掉
-- [文件名/目录名加「第N单元」段(0802)](writing-line-filename-unit-segment.md) — 全线标识改`<年级册>-第N单元-<题目>`(中文数字·取course-map单元列;自拟主题省略);PPT/讲稿文件名内仍纯题目
+- [文件名/目录名加「第N单元」段(0802)](writing-line-filename-unit-segment.md) — 全线标识改`<年级册>-第N单元-<题目>`(中文数字·取course-map单元列;自拟主题省略);⚠「PPT文件名内仍纯题目」那半条**0826已推翻**
+- [写作课线三项命名/结构调整(0826立)](writing-line-naming-flattened-0826.md) — 配套件`-X合订`→`-X用`／打包目录**单层平铺**撤两层子文件夹／PPT改`<年级册>-第N单元-<题目>-课件PPT.pptx`(**推翻CLAUDE.md §7「PPT文件名内纯题目」**);⚠**pptx与anim.json必须同批改名**否则inspect_pptx防覆盖闸门静默失效、人工排的分组全废;⚠**Windows下glob返反斜杠、`rstrip("/")`是空操作**→basename得空串(取目录名一律用pathlib `.name`);**预演输出要逐行真看**(把丢了课次段的`→ -课件PPT.pptx`看成了列宽截断);打包脚本零删除逻辑故改结构必清存量;闸门=validate的E24＋shots.json的12条src逐条exists
 - [标题与环节命名定稿](writing-lesson-title-naming.md) — 唯一源=references/title-naming.md;改体例前必全skill搜一遍
 - [首页改无区头单表6行(现行)](writing-lesson-front-page-single-table.md) — 0729定稿:删区头与「怎么落地」/课时回表/文体线→同类习作顺序;写详案或改style_front_page前必读(前身[分区版](writing-lesson-front-page-zones.md)、[两区表](writing-lesson-front-page-two-zones.md)已作废)
 - [审题固化为③开头固定半环](writing-lesson-shenti-bianxi-fixed-half-step.md) / [第2节降压起步环节](writing-lesson-destress-onramp.md) / [修改符号自然用不重教](writing-lesson-revision-symbols-natural-use.md)
@@ -70,7 +71,7 @@
 - [配套三侧削页+去逐字稿框架(0803)](writing-materials-pages-trimmed-0803.md) — 家长1页/教师2页;homework·feedback字段作废;教师侧禁「配合逐字稿·照本念」(grep要搜念|背稿|讲义);**⚠学生侧0818已回4页=加备用稿纸续页、非课后练笔页**
 - [配套物料skill三侧全落地(建设史)](writing-materials-skill-student-bundle.md) — ⚠页数已被上条覆盖;_shared.py共享勿复制;家长侧禁虚构作品
 - [手改只改HTML必被重渲冲掉(0821查实)](writing-materials-handedits-lost-on-rerender.md) — 0817修Type3那次重渲已实际冲掉一批手改文字且全程无提示;文字改动一律回写_data.json;判据=PDF文本比对同目录json措辞;只剩产物时用PyMuPDF show_pdf_page原位抠版式+insert_pdf补页(不动正文);⚠仓库内9课json仍不含那批手改
-- **PPT 链**：[外部PPT须先读详案再审查再做动画(0806)](writing-ppt-review-against-detail-first.md)（链改四步+**已装机器闸门**,守做过不守全绿,机检全过≠审查完成,常反查出详案自身错、PPT对详案错勿迁就）· [改外部生成+本仓只做动画(0803)](writing-ppt-external-plus-animation.md)（build_ppt对写作课停用;讲稿页序改跟外部pptx;合一件叫`<题目>-全课`）· [动画工作单填的是shape_id不是位置索引(0804)](ppt-anim-groups-are-shape-ids.md)（差2且范围重叠→静默绑歪整份;一律走regroup_anim.py+时间树反查）
+- **PPT 链**：[外部PPT须先读详案再审查再做动画(0806)](writing-ppt-review-against-detail-first.md)（链改四步+**已装机器闸门**,守做过不守全绿,机检全过≠审查完成,常反查出详案自身错、PPT对详案错勿迁就）· [改外部生成+本仓只做动画(0803)](writing-ppt-external-plus-animation.md)（build_ppt对写作课停用;讲稿页序改跟外部pptx;~~合一件叫`<题目>-全课`~~**0826改`<课次>-课件PPT`**）· [动画工作单填的是shape_id不是位置索引(0804)](ppt-anim-groups-are-shape-ids.md)（差2且范围重叠→静默绑歪整份;一律走regroup_anim.py+时间树反查）
   · **[手工动画会被注入器静默清掉+逐字对齐勿抄嵌套引号(0825)](manhua-laoshi-5a-ppt-chain-state.md)**（clear_timing在skip判断之前故skip页照清且不报警;详案单引号是嵌套降级、上屏须回升双引号而逐字校验必报True;页标回注后详案行号整体偏移、按行号取原文全错位）
   · **[外部件重复投放须先三项比对判重(0825)](external-pptx-duplicate-drop-0825.md)**（place_pptx按文件名认领会静默覆盖已处理件、动画与引号修正全丢;判据=文本块/媒体md5/形状几何全等即同源;重复件不归位、问用户删;真修订版重跑前须重跑audit_against_plan因页标回注已改详案md5）
 - 历史条目(主体已废止,但夹带的规则仍有效别当垃圾删): [核心素养四维](writing-lesson-core-literacy-goals.md)(⚠四维节已取消;提纲表结构/不设任务背景节/H1体例仍有效) / [配套曾两轮清空](writing-materials-tools-removed.md)(已重建;仍有效=写作配套独立原则)

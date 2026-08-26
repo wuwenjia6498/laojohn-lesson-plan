@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""同步习作 · 家长合订渲染器
+"""同步习作 · 家长用渲染器
 data.json -> 家长一页纸 HTML（1 个 A4 sheet）-> A4 PDF
 
 用法:
@@ -19,7 +19,7 @@ EXPECTED_PAGES = 1  # 家长一页纸
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("data", help="家长合订 data.json 路径")
+    ap.add_argument("data", help="家长用 data.json 路径")
     ap.add_argument("out_dir", help="输出目录（写作配套输出\\<年级册>-第N单元-<题目>\\）")
     ap.add_argument("--template", default=None)
     args = ap.parse_args()

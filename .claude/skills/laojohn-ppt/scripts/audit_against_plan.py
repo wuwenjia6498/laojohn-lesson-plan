@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 r"""外部 PPT 后处理链第 2 步的机检部分：拿详案审 pptx，结果回写工作单。
 
-    PYTHONUTF8=1 python audit_against_plan.py <课次目录>\<题目>-全课.pptx
+    PYTHONUTF8=1 python audit_against_plan.py <课次目录>\<课次>-课件PPT.pptx
 
 **这道闸门守的是「审查做过」，不是「审查全绿」**：查出的问题多半要另行改详案或补页，
 不该卡住投屏件产出。所以本脚本只把结论写进工作单的 `audit` 字段，`animate_pptx.py`

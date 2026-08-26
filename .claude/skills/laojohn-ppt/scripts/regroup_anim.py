@@ -13,7 +13,7 @@ inspect_pptx.py 的几何启发式只给得出「组的构成」，实测还会�
         5:  ("grid", 0.8),                    # 先分行、行内再分格（2×2 网格页）
         7:  ("col", None),                    # 自左向右逐栏（并列卡片页）
     }
-    run(r"...\某课-全课.pptx", PLAN)           # 改写同名 -anim.json
+    run(r"...\<课次>-课件PPT.pptx", PLAN)      # 改写同名 -anim.json
     # 再跑 animate_pptx.py 注入
 
 explicit 里写的是**形状在 slide.shapes 里的位置索引**（0 起），不是 shape_id——
@@ -40,6 +40,7 @@ explicit 里写的是**形状在 slide.shapes 里的位置索引**（0 起），
 阈值一律按页面尺寸取相对值，换成 13.33×7.5 的常规尺寸也能直接用。
 """
 import json
+import os
 
 from pptx import Presentation
 from pptx.util import Emu
@@ -171,7 +172,7 @@ def run(pptx, plan, only=None):
     prs = Presentation(pptx)
     sheet = Sheet(prs)
     slides = list(prs.slides)
-    jpath = pptx.replace(".pptx", "-anim.json")
+    jpath = os.path.splitext(pptx)[0] + "-anim.json"
     with open(jpath, encoding="utf-8") as f:
         doc = json.load(f)
 
@@ -209,7 +210,7 @@ def audit(pptx):
     """落盘前自检：装饰认领得离谱、某组只有装饰没有文字，都在这儿抓。"""
     prs = Presentation(pptx)
     sheet = Sheet(prs)
-    with open(pptx.replace(".pptx", "-anim.json"), encoding="utf-8") as f:
+    with open(os.path.splitext(pptx)[0] + "-anim.json", encoding="utf-8") as f:
         doc = json.load(f)
     bad = []
     for pg, sl in enumerate(prs.slides, 1):

@@ -7,11 +7,15 @@
 
     PYTHONUTF8=1 python place_pptx.py [--dry-run] [--root <项目根>]
 
-认领规则：拿 pptx 文件名剥掉 PPT/课件/日期/版本一类尾缀后的「题目」，去和
-`写作课详案输出\\*-写作课详案.md` 的题目段比对。**命中 0 个或多个一律列候选让人选，绝不猜。**
+认领规则：拿 pptx 文件名剥掉 PPT/课件/日期/版本一类尾缀后的串，去和
+`写作课详案输出\\*-写作课详案.md` 的**课次标识与题目段双向**比对（外部平台导出的名字
+可能只有题目，也可能已经是规范全名）。**命中 0 个或多个一律列候选让人选，绝不猜。**
 
-命名规则：读 pptx 判断是否两节合一（眉标为纯数字的课时分隔页 >= 2 即合一）——
-合一命名 `<题目>-全课.pptx`，否则保持原题目名并提示人工确认课型段。
+命名规则（2026-08-26 改）：一律 `<年级册>-第N单元-<题目>-课件PPT.pptx`，与详案、配套、
+中间稿的课次标识段对齐。**旧口径是 `<题目>-全课.pptx`（文件名内不带年级单元），已作废**——
+存量 12 份已随本次改名一并迁移，`CLAUDE.md` §7 那条也同步推翻了。
+两节合一与否仍要读 pptx 判定（眉标为纯数字的课时分隔页 >= 2 即合一），但**不再影响文件名**，
+只在分节/单节时提示人工确认要不要在尾缀前补课型段。
 """
 import argparse
 import os
@@ -65,11 +69,17 @@ def strip_noise(stem):
 
 
 def claim(stem, unit_map):
-    """返回命中的课次列表。先精确、再双向子串。"""
+    """返回命中的课次列表。先精确、再双向子串。
+
+    精确匹配走**双键**：课次标识（三上-第一单元-猜猜他是谁）与纯题目（猜猜他是谁）都算。
+    2026-08-26 起规范名带课次标识段，剥噪后得到的正是课次标识——只比纯题目的话，
+    重跑认领（如外部件重复投放判重）会从精确跌到下面那行的模糊子串。而 `写日记`/`写观察日记`、
+    `续写故事`/`缩写故事` 这类题目互为子串的课次已经存在，模糊匹配迟早撞车。
+    """
     key = strip_noise(stem)
     if not key:
         return []
-    exact = [u for u, t in unit_map.items() if t == key]
+    exact = [u for u, t in unit_map.items() if key in (u, t)]
     if exact:
         return exact
     return [u for u, t in unit_map.items() if t in key or key in t]
@@ -125,15 +135,17 @@ def main():
             continue
 
         unit = hits[0]
-        title = unit_map[unit]
         m = merged(src)
-        name = "%s-全课.pptx" % title if m else "%s.pptx" % title
+        # 命名只认课次标识，与合一与否无关（见文件头「命名规则」）
+        name = "%s-课件PPT.pptx" % unit
         dst_dir = os.path.join(ppt_root, unit)
         dst = os.path.join(dst_dir, name)
 
         print("   认领 -> %s" % unit)
-        print("   %s，命名为 %s" % ("判定两节合一" if m else
-                                    ("判定分节/单节，请人工确认课型段" if m is False else "无法判定"), name))
+        print("   %s，命名为 %s" % (
+            "判定两节合一" if m else
+            ("判定分节/单节——若同课次还有另一份，请人工在 -课件PPT 前补课型段" if m is False
+             else "无法判定合一与否"), name))
 
         if os.path.exists(dst):
             held += 1

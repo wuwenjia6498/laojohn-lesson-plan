@@ -5,9 +5,9 @@ description: 把一份「老约翰」同步习作写作课详案(.md)转成三�
 
 # 老约翰 · 同步习作配套物料
 
-把一份写作课详案按侧抽成 `data.json`，注入对应合订模板，每侧渲出 **1 份 HTML 源件 + 1 份多页 A4 合订 PDF**。
+把一份写作课详案按侧抽成 `data.json`，注入对应模板，每侧渲出 **1 份 HTML 源件 + 1 份多页 A4 打印件 PDF**。
 
-**学生合订（4 页，`template_student.html` + `render_student.py`）**：
+**学生用（4 页，`template_student.html` + `render_student.py`）**：
 
 | 页 | 物料 | 内容 |
 |----|------|------|
@@ -16,7 +16,7 @@ description: 把一份「老约翰」同步习作写作课详案(.md)转成三�
 | P3 | 写作稿纸 · 续页（备用） | 姓名栏 + 纯格子（无起笔提示与符号表，故行数更多）；写不下时接着用，写不满就空着 |
 | P4 | 范文页 | 教师示范文（技法句高亮）+ 侧边旁批 + 一句话记住 |
 
-**教师合订（2 页，`template_teacher.html` + `render_teacher.py`）**：
+**教师用（2 页，`template_teacher.html` + `render_teacher.py`）**：
 
 | 页 | 物料 | 内容 |
 |----|------|------|
@@ -35,11 +35,11 @@ description: 把一份「老约翰」同步习作写作课详案(.md)转成三�
 
 1. **读详案**：`<项目根目录>\写作课详案输出\<年级册>-第N单元-<题目>-写作课详案.md`。执行前用 `(Get-Location).Path` 确认盘符，禁止硬编码。
 2. **抽取/派生字段**：学生侧按 `references/data_schema.md`、教师侧按 `references/data_schema_teacher.md`、家长侧按 `references/data_schema_parent.md` 的字段契约与「详案锚点速查」逐项填。可直接抽取的（构思表行、示范文、旁批表、环节分钟数）逐字取；派生的（导语、易错点、三色旁注、家长对照例/亲子任务）必须能回溯到详案技法点/环节动作——学生侧对学生说话，教师侧对教研同行说话，家长侧全大白话不带术语。
-3. **写 data.json**：存 `<项目根目录>\写作配套输出\<年级册>-第N单元-<题目>\<年级册>-第N单元-<题目>-<侧名>合订_data.json`（侧名=学生/教师/家长）。写完**核验弯引号**：内容里的引用词语须是“”（Write 工具可能打直成 ASCII `"`，发现即修）；禁「」。
+3. **写 data.json**：存 `<项目根目录>\写作配套输出\<年级册>-第N单元-<题目>\<年级册>-第N单元-<题目>-<侧名>用_data.json`（侧名=学生/教师/家长）。写完**核验弯引号**：内容里的引用词语须是“”（Write 工具可能打直成 ASCII `"`，发现即修）；禁「」。
 4. **渲染**（用 `python` 勿用 `python3`——Store 占位别名 exit 49；三侧入口同一 CLI 形态）：
    ```
    PYTHONUTF8=1 python .claude/skills/laojohn-writing-materials/scripts/render_<student|teacher|parent>.py \
-       "写作配套输出/<年级册>-第N单元-<题目>/<年级册>-第N单元-<题目>-<侧名>合订_data.json" \
+       "写作配套输出/<年级册>-第N单元-<题目>/<年级册>-第N单元-<题目>-<侧名>用_data.json" \
        "写作配套输出/<年级册>-第N单元-<题目>"
    ```
    自检内置（`_shared.py`）：sheet 溢出 + pypdf 页数（学生 4 页 / 教师 2 页 / 家长 1 页）；学生侧另查两页格子数（续页格数应不少于 P2）。
@@ -59,22 +59,22 @@ description: 把一份「老约翰」同步习作写作课详案(.md)转成三�
 ## 输出目录与命名
 
 `<项目根目录>\写作配套输出\<年级册>-第N单元-<题目>\`：
-- `<年级册>-第N单元-<题目>-<侧名>合订_data.json`（源，进 git；侧名=学生/教师/家长）
-- `<年级册>-第N单元-<题目>-<侧名>合订.html/.pdf`（渲染产物，已 gitignore，勿 `git add -f`）
+- `<年级册>-第N单元-<题目>-<侧名>用_data.json`（源，进 git；侧名=学生/教师/家长）
+- `<年级册>-第N单元-<题目>-<侧名>用.html/.pdf`（渲染产物，已 gitignore，勿 `git add -f`）
 
 ## 文件说明
 
 | 文件 | 作用 |
 |------|------|
-| `assets/template_student.html` | 学生合订三页模板（数据驱动，`/*__DATA__*/ null` 占位） |
-| `assets/template_teacher.html` | 教师合订两页模板（速览页 + 怎么讲活三色旁注） |
+| `assets/template_student.html` | 学生用四页模板（构思表 / 稿纸 / 备用续页 / 范文页；数据驱动，`/*__DATA__*/ null` 占位） |
+| `assets/template_teacher.html` | 教师用两页模板（速览页 + 怎么讲活三色旁注） |
 | `assets/template_parent.html` | 家长一页纸单页模板 |
 | `scripts/_shared.py` | 渲染共享件：logo/数据注入、safe_pdf 防锁旁路、溢出与页数自检、Type3 字体机检（各入口共用，勿复制逻辑） |
-| `scripts/render_student.py` | 学生合订入口（附加格子稿纸自检） |
-| `scripts/render_teacher.py` | 教师合订入口 |
-| `scripts/render_parent.py` | 家长合订入口 |
-| `references/data_schema.md` | 学生合订字段契约 + 详案锚点映射（抽学生侧前必读） |
-| `references/data_schema_teacher.md` | 教师合订字段契约 + 详案锚点映射（抽教师侧前必读） |
-| `references/data_schema_parent.md` | 家长合订字段契约 + 详案锚点映射（抽家长侧前必读） |
+| `scripts/render_student.py` | 学生用入口（附加格子稿纸自检） |
+| `scripts/render_teacher.py` | 教师用入口 |
+| `scripts/render_parent.py` | 家长用入口 |
+| `references/data_schema.md` | 学生用字段契约 + 详案锚点映射（抽学生侧前必读） |
+| `references/data_schema_teacher.md` | 教师用字段契约 + 详案锚点映射（抽教师侧前必读） |
+| `references/data_schema_parent.md` | 家长用字段契约 + 详案锚点映射（抽家长侧前必读） |
 
 新增侧/新模板时：从桌面模板取骨架须把手工仿制 CSS logo 换成 `__LOGO_SRC__` 真图注入（单一源 `品牌资产\logo.png`），渲染一律走 `_shared.py`，勿复制管线逻辑。

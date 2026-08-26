@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>学生合订</title>
+<title>学生用</title>
 <style>
   /* ===== 设计令牌（固定骨架，勿改）===== */
   :root{
@@ -332,7 +332,7 @@
   /* ---------- 数据填充 ---------- */
   function fill(){
     const d=DATA, m=d.meta;
-    document.title='学生合订 · '+m.topic;
+    document.title='学生用 · '+m.topic;
     document.querySelectorAll('.js-kicker').forEach(e=>e.textContent=m.kicker);
     document.querySelectorAll('.js-topic').forEach(e=>e.textContent='· '+m.topic);
 

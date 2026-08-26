@@ -13,9 +13,9 @@
     {
       "out_dir": "写作课相关宣传文件/同步写作课上线宣讲/imgs",
       "shots": [
-        {"src": "写作配套输出/…/…-学生合订.pdf", "page": 1, "out": "学生单-构思表.png"},
+        {"src": "写作配套输出/…/…-学生用.pdf", "page": 1, "out": "学生单-构思表.png"},
         {"src": "写作课详案输出/…-写作课详案.docx", "page": 1, "out": "详案-首页.png"},
-        {"src": "写作课件PPT输出/…/…-全课.pptx", "slide": 6, "out": "课件-示范文页.png"}
+        {"src": "写作课件PPT输出/…/…-课件PPT.pptx", "slide": 6, "out": "课件-示范文页.png"}
       ]
     }
     page/slide 均 1 基。dpi 缺省 170（够清晰，又不至于把 pptx 撑爆）。
