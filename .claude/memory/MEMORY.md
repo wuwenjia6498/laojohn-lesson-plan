@@ -154,7 +154,6 @@
 - [目录口径大改名已收官](bookclub-materials-dir-consolidation.md) — 读书会线顶层目录加前缀、两线课件目录拆分
 
 ## 未决事项与交付风险（做完即删）
-- **⚠ 四上换题《我的家人》只差部署（0826）**：批改工具新包已抽好（0 失败）、旧包按拍板保留在线并已加版本徽章（现行/旧版，排序已让现行排前）、`_bundle` 已重打成 15 课，**未部署**。其余波及面全部收完 — [详情](wodejiaren-4a-lesson-state.md)
 - **⚠ 神笔马良 插-24 页码未裁，不得对外交付** — [详情](shenbi-maliang-lesson-plan-state.md)
 - **⚠ 阅读单线 18 份 PDF 的 Type3 字体遗留未修** — [详情](pdf-type3-fonts-fixed.md)
 - 彼得·潘档案 line23/32 与机读块不一致待清理 — [详情](peterpan-book-profile-state.md)
