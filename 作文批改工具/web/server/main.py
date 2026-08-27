@@ -237,7 +237,8 @@ GRADE_RULES = """你是老约翰同步习作课的批改助手。老师会发来
 只输出一个 JSON 对象，不要任何解释文字、不要代码块围栏：
 
 {
-  "transcript": "整篇作文的逐字转写。按稿纸原样抄，**包括你认为写错的字**，不要顺手改通顺；看不清的字写成 [?]。这一项是给程序核对引用用的，不会给老师看。",
+  "paragraph_count": "稿纸上一共几个自然段，填数字。**先数这个，再往下写 transcript**——一开始转写就顾不上分段了。短得一行都不满的段落最容易漏，开头那一段尤其要看清。",
+  "transcript": "整篇作文的逐字转写。按稿纸原样抄，**包括你认为写错的字**，不要顺手改通顺；看不清的字写成 [?]。**分段必须照抄**：稿纸是方格纸，新起一段有两个看得见的标志——这一段的头一行**空出前两格**，而上一段的末行**右边空着没写满**。见到这两个标志就是新的一段，转写里用空行隔开。**必须分成 paragraph_count 段**——「分段」那一项就是照这里的换行判的，段数点错了，那一项跟着说错。这一项是给程序核对引用用的，不会给老师看。",
   "student_name": "稿纸姓名栏上的名字；栏空着或看不清就填空字符串",
   "unclear": ["看不清的句子，连同上下文；没有就空数组"],
   "checks": [
@@ -245,9 +246,19 @@ GRADE_RULES = """你是老约翰同步习作课的批改助手。老师会发来
      "evidence": "学生原文里的句子，一字不差", "comment": "一句话说清为什么这样判"}
   ],
   "whole_piece": {
-    "completeness": {"verdict": "完整｜基本完整｜没写完｜只开了个头", "note": "一句话说清怎么看出来的"},
-    "order":        {"verdict": "清楚｜有跳跃｜乱", "note": "一句话"},
-    "flow":         {"verdict": "顺｜个别别扭｜多处不通", "note": "一句话"}
+    "completeness": {"verdict": "完整｜基本完整｜未写完｜仅有开头", "note": "20字内。判得不好说**断在哪一句**；判「完整」说**具体怎么完整的**，如「开头点出人物，中间一件事，结尾收住」"},
+    "order":        {"verdict": "清晰｜有跳跃｜混乱", "note": "20字内。判得不好说**哪一处跳了**；判「清晰」说**怎么个清楚法**，如「按事情发生的先后讲，没有跳」"},
+    "paragraph":    {"verdict": "清晰｜该分未分｜通篇一段", "note": "20字内。判得不好说**该在哪儿另起一段**；判「清晰」说**怎么分的**，如「一段一件事」。**不要报具体段数**，你常数错"},
+    "detail":       {"verdict": "重点突出｜主次平均｜重点过简｜不适用", "note": "20字内，写重点几句、写别处几句"},
+    "flow":         {"verdict": "通顺｜个别不畅｜多处不通", "note": "20字内。判得不好说**绕的是哪一句**；判「通顺」说**怎么个顺法**，如「短句为主，一句一件事」"}
+  },
+  "language": {
+    "issues": [
+      {"kind": "同起头｜口水词｜动词笼统",
+       "detail": "连着哪几句／全篇几次；要有数字",
+       "quote": "原句一字不差。口水词类给次数即可，这里留空；引不出来也留空，不要硬造"}
+    ],
+    "overall": "一句话、30字内，只说这三样：句子长短／爱用哪个词／有没有写到对话和动作。**不许评通顺不通顺**（那是上一行的事，重复说等于没说），也不许写「读起来轻松愉快」这类观感。**生动、优美、细腻、流畅、活泼、精彩、丰富、到位、感染力，这些词一个都不许出现，换近义词绕开也不行**；说不出具体的就写「就是平常说话的样子，没什么大毛病」"
   },
   "highlights": [
     {"quote": "孩子自己写得好的那一句，一字不差", "why": "具体好在哪",
@@ -262,7 +273,10 @@ GRADE_RULES = """你是老约翰同步习作课的批改助手。老师会发来
 }
 
 highlights 可以是空数组——这一篇确实没有出彩的地方，就空着，不要硬凑。
-whole_piece 三项**不影响 band**，band 只由三条判据定。
+whole_piece 那五项**一项都不能少，verdict 与 note 都必填**（漏掉整项，老师那一行就成了「—」）。
+判得好的项也要写 note，说清好在哪儿——**不许留空**。
+whole_piece 与 language **都不影响 band**，band 只由三条判据定。
+language.issues 可以是空数组——这一篇没毛病就空着，凑毛病比不判还糟。
 
 **先写 transcript，再判断**。后面所有引用都必须能在 transcript 里**逐字找到**——
 程序会拿它们去 transcript 里比对，对不上的会被标成可疑。
@@ -306,15 +320,18 @@ DIAGNOSE_RULES = """你是老约翰同步习作课的教研助手。下面是一
 
 ## 全班批改结果
 
-每行＝一个学生：姓名｜档位｜三条判据的判定｜整篇三项｜亮点数｜点评卡引用的句子
+每行＝一个学生：姓名｜档位｜三条判据的判定｜结构四项｜语言毛病｜亮点数｜点评卡引用的句子
 
 @RESULTS@
 
 ## 怎么看
 
-- **三条判据的账和整篇的账要分开说。** 判据卡住的是「这次课教的没学会」，
-  整篇卡住的（没写完、顺序乱、句子不通）是「更底下的地基」——地基的人数多时，
-  讲评课先讲地基，本课技法往后放。
+- **三层账要分开说，别混成一锅。** 判据卡住的是「这次课教的没学会」；
+  结构卡住的（未写完、顺序混乱、通篇一段、主次平均）和语言卡住的（句子不通、
+  口水词扎堆、动词笼统）是「更底下的地基」——**地基的人数多时，讲评课先讲地基，
+  本课技法往后放**。
+- **结构的账和语言的账也要分开。** 一个班「通篇一段」的人多，和「然后满篇飞」的人多，
+  是两件事、两种练法，合着说老师没法备课。
 - 亮点为零的人数也要报：**一个班多数人写不出一句自己的话，比判据不达标更值得警惕。**
 - 讲评课念谁的，优先挑「有亮点」的，别只挑档位高的。
 
@@ -324,9 +341,9 @@ DIAGNOSE_RULES = """你是老约翰同步习作课的教研助手。下面是一
 
 {
   "overall": "两三句话说清这个班这次整体怎么样，要有具体数字",
-  "whole_piece_summary": "整篇层面的账：多少人没写完、多少人顺序有跳、多少人句子不通、多少人一个亮点也没有；各点一两个名字",
+  "whole_piece_summary": "地基这一层的账，结构与语言分两句说：结构——多少人未写完、多少人顺序有跳、多少人通篇一段、多少人主次平均；语言——多少人句子不通、最扎堆的口水词是哪个几人有、多少人一个亮点也没有。各点一两个名字",
   "common_problems": [
-    {"problem": "共性问题", "layer": "判据｜整篇",
+    {"problem": "共性问题", "layer": "判据｜结构｜语言",
      "how_many": "多少人", "why": "根子上是哪一步没做到",
      "how_to_fix": "讲评课上怎么讲这一点，要具体到一个可操作的活动"}
   ],
@@ -472,12 +489,130 @@ def fix_quotes(d):
         one(c, "evidence")
     for h in d.get("highlights") or []:
         one(h, "quote")
+    for g in (d.get("language") or {}).get("issues") or []:
+        one(g, "quote")          # 口水词类留空，one() 会自己跳过
     one(d, "quoted_sentence")
     sc = d.get("showcase") or {}
     if sc:
         one(sc, "paragraph")
     return fixed, suspect
 
+
+
+# 口水词表。与 build_prompt.judging_rules 第 6 条列的那五个词一一对应，改一处要改两处。
+FILLERS = ("然后", "就", "很", "非常", "特别")
+
+# 放在谁身上都成立的空夸词。trim_verdict_tail 与 run_regression 的机检共用这一张
+#（回归脚本从 srv 取，不自己另写一份）。
+# ⚠ 与 judging_rules 里给模型看的那串**有意不同**：给模型的宁可宽（连「丰富」都禁），
+# 机检宁可严（只查「内容丰富」）——「建议丰富表达」是具体建议，不是空夸，别误伤。
+EMPTY_WORDS = ("生动", "优美", "细腻", "流畅", "活泼", "精彩", "内容丰富", "到位", "感染力")
+
+
+def recount_fillers(d):
+    """口水词整类由程序处理：从 transcript 数，到 3 次就补一条毛病。
+
+    模型数不准（同一张稿纸两次跑出「然后4」和「然后5」）；更麻烦的是它数得出 4 次、
+    整体评价里也写了「多用“然后”串联」，却照样把 issues 留空。既然计数由程序做，
+    判定就一并接过来——与 enforce_grade_rules 同一个判断：能算出来的别交给模型。
+
+    ⚠ **只在到线时报那一条，不下发五个词的完整计数**（0827 用户要求去掉）：
+    罗列「然后0／就0／很2」像调试信息，不是评价栏该有的东西。数字只出现在真有问题的那条里。"""
+    t = d.get("transcript") or ""
+    lg = d.get("language")
+    if not t or not isinstance(lg, dict):
+        return
+    counts = {w: t.count(w) for w in FILLERS}
+
+    # 数到线了就由程序把这条毛病补上，不等模型报。实测它数得出「然后 4 次」、
+    # 甚至在整体评价里写「多用“然后”串联」，却照样把 issues 留空——判定和计数
+    # 是同一件事，计数既然已经由程序做了，判定也一并接过来。
+    over = [(w, n) for w, n in counts.items() if n >= 3]
+    if not over:
+        return
+    issues = lg.get("issues")
+    if not isinstance(issues, list):
+        issues = lg["issues"] = []
+    if not any(isinstance(x, dict) and x.get("kind") == "口水词" for x in issues):
+        issues.insert(0, {"kind": "口水词",
+                          "detail": "、".join(f"“{w}”{n} 次" for w, n in over)
+                                    + "——一篇里反复用同一个词",
+                          "quote": ""})
+
+
+def check_paragraphs(d):
+    """转写段数与模型自报段数对不上就标可疑。
+
+    分段是这一层里唯一靠转写还原的项，实测不稳：同一张三段稿纸，三次跑出 3/3/2 段，
+    被并掉的总是开头那个不满一行的短段。并掉之后它会一本正经地判「全文两段，分段恰当」——
+    **错的结论比没有结论更伤**，所以宁可告诉老师这项没把握。"""
+    t = d.get("transcript") or ""
+    w = d.get("whole_piece")
+    n = d.get("paragraph_count")
+    if not t or not isinstance(w, dict) or not isinstance(w.get("paragraph"), dict):
+        return
+    try:
+        n = int(n)
+    except (TypeError, ValueError):
+        return
+    got = len([x for x in t.split(chr(10)) if x.strip()])
+
+    # 转写和它自报的段数都说只有一段，那就是通篇一段，不该由它判。
+    # 实测同一张一段到底的稿纸，一轮判「通篇一段」（对）、一轮判「清晰」（错）。
+    # 两个来源都说 1 段才强制——只有转写说 1 段时可能是转写把分段丢了，那种交给下面标可疑。
+    if got <= 1 and n <= 1 and len(t) >= 80:
+        if w["paragraph"].get("verdict") != "通篇一段":
+            w["paragraph"]["verdict"] = "通篇一段"
+            w["paragraph"]["note"] = "按事情的先后，至少分成两三段。"
+        return
+
+    if got != n:
+        w["paragraph"]["suspect"] = True
+        w["paragraph"]["note"] = (f"（它数到 {n} 段，转写却只分出 {got} 段，"
+                                  f"这一项没把握，你对着原稿看一眼。）"
+                                  + str(w["paragraph"].get("note") or ""))
+
+
+def trim_verdict_tail(d):
+    """剥掉 note 末尾那句「……，结构完整」「……，读起来流畅」式的收尾。
+
+    取消「判得好就留空」之后冒出来的新形态：模型会在具体说明后面再补一句把判定重说
+    一遍（「有开头点人，中间描述，结尾以问题收尾，结构完整。」）——这正是用户最早
+    抱怨的重复。规则里明写禁止，三张基准稿纸仍中两张，所以这里确定性地剥掉。
+
+    只剥「最后一个逗号之后、且含判定词、且很短」的收尾总结；判定词出现在开头的
+    （「结尾未写完，最后一句停在……」）不动——剥了句子就不通了。"""
+    w = d.get("whole_piece")
+    if not isinstance(w, dict):
+        return
+    for v in w.values():
+        if not isinstance(v, dict):
+            continue
+        vd, nt = str(v.get("verdict") or ""), str(v.get("note") or "")
+        if not vd or not nt:
+            continue
+        body = nt.rstrip("。．.！!　 ")
+        i = max(body.rfind("，"), body.rfind("；"))
+        if i <= 0:
+            continue
+        tail = body[i + 1:]
+        # 尾巴上挂的要么是判定复读（「……，结构完整」），要么是空话（「……，读起来流畅」）
+        if (vd in tail or any(x in tail for x in EMPTY_WORDS)) and len(tail) <= max(len(vd), 4) + 3:
+            v["note"] = body[:i] + "。"
+
+
+def enforce_grade_rules(pack, d):
+    """按学段强制覆写模型判不得的项。
+
+    三年级不判详略——这条由课次唯一决定，不该指望模型听话。实测：规则里明写
+    「本项不判、直接记不适用」，gpt-4o 照旧判「重点突出」并编出「8句/4句」。
+    而这一栏一旦开始说空话，整层的可信度就跟着塌。与「引用一字不差靠工程不靠
+    提示词」是同一个判断：能由课次算出来的，就别交给模型。"""
+    if not (pack.get("meta", {}).get("grade_volume") or "").startswith("三年级"):
+        return
+    w = d.get("whole_piece")
+    if isinstance(w, dict):
+        w["detail"] = {"verdict": "不适用", "note": "本学段不评。"}
 
 
 _MOCK_N = {"i": 0}
@@ -504,13 +639,40 @@ def mock_grade(pack):
     bands = list(pack.get("bands", {}).keys()) or ["基础过关"]
     q = anchors[i % len(anchors)]
 
+    # 三年级不判详略，mock 也照着走，好让前端的「不适用」中性色真被测到
+    low = (pack.get("meta", {}).get("grade_volume") or "").startswith("三年级")
     whole = {
-        "completeness": {"verdict": ["完整", "基本完整", "没写完", "只开了个头"][i % 4],
-                         "evidence": q, "note": "（mock）完整性说明。"},
-        "order": {"verdict": ["清楚", "有跳跃", "乱"][i % 3],
-                  "evidence": q, "note": "（mock）顺序说明。"},
-        "flow": {"verdict": ["顺", "个别别扭", "多处不通"][(i + 1) % 3],
-                 "evidence": q, "note": "（mock）通顺度说明。"},
+        "completeness": {"verdict": ["完整", "基本完整", "未写完", "仅有开头"][i % 4],
+                         "note": "（mock）开头点出人物，中间一件事，结尾收住。" if i % 4 == 0
+                                 else "（mock）第三件事写到一半停住。"},
+        "order": {"verdict": ["清晰", "有跳跃", "混乱"][i % 3],
+                  "note": "（mock）按事情发生的先后讲，没有跳。" if i % 3 == 0
+                          else "（mock）第二件事插在第一件中间。"},
+        "paragraph": {"verdict": ["清晰", "该分未分", "通篇一段"][i % 3],
+                      "note": "（mock）三段，一段一件事。" if i % 3 == 0
+                              else "（mock）两件事挤在同一段里。"},
+        "detail": {"verdict": "不适用" if low else
+                   ["重点突出", "主次平均", "重点过简"][i % 3],
+                   "note": "（mock）本学段不评。" if low else
+                           "（mock）重点 6 句，别处 3 句。"},
+        "flow": {"verdict": ["通顺", "个别不畅", "多处不通"][(i + 1) % 3],
+                 "note": "（mock）短句为主，一句一件事。" if (i + 1) % 3 == 0
+                 else "（mock）“又回来了又跑过去”这句绕。"},
+    }
+    if i % 4 == 0:   # 让前端「这一项没把握」那条红字分支在演示模式下也看得到
+        whole["paragraph"]["suspect"] = True
+        whole["paragraph"]["note"] = ("（mock）它数到 3 段，转写却只分出 2 段，"
+                                      "这一项没把握，你对着原稿看一眼。")
+    # 每三篇留一篇一条毛病也没有——「允许判没问题」是规则里明写的，前端得能显示空的样子。
+    # 与空亮点那篇错开，好让「有亮点无毛病」「无亮点有毛病」两种组合都被看到。
+    language = {
+        "issues": [] if i % 3 == 1 else [
+            {"kind": "口水词", "detail": "（mock）“然后”全篇 5 次", "quote": ""},
+            {"kind": "动词笼统", "detail": "（mock）这一处本可以写出具体动作", "quote": q},
+        ][: 1 + i % 2],
+        "overall": ["（mock）就是平常说话的样子，没什么大毛病。",
+                    "（mock）句子偏短，一句一件事，读着利索。",
+                    "（mock）爱用长句，有两处绕了一下。"][i % 3],
     }
     # 每三篇留一篇没有亮点：硬凑亮点是假话，前端与提示词都得能处理空的情况
     highlights = [] if i % 3 == 2 else [
@@ -525,6 +687,7 @@ def mock_grade(pack):
         "unclear": [] if i % 4 else ["（mock）这一句有两个字看不清"],
         "checks": checks,
         "whole_piece": whole,
+        "language": language,
         "highlights": highlights,
         "band": bands[i % len(bands)],
         "focus": "（mock）这一篇最值得说的是他写的那个动作细节。",
@@ -543,21 +706,25 @@ def mock_diagnose(pack, results):
     n = len(results)
     unfinished = sum(1 for r in results
                      if (r.get("whole_piece") or {}).get("completeness", {})
-                        .get("verdict") in ("没写完", "只开了个头"))
+                        .get("verdict") in ("未写完", "仅有开头"))
     nohl = sum(1 for r in results if not (r.get("highlights") or []))
     return {
         "overall": f"（mock 假数据）全班 {n} 份，主特点抓住的过半，卡在「写具体」这一步的偏多。",
-        "whole_piece_summary": (f"（mock）{unfinished} 人没写完或只开了个头，"
+        "whole_piece_summary": (f"（mock）{unfinished} 人未写完或仅有开头，"
                                 f"{nohl} 人一句自己的话也没写出来——地基这一层比本课技法更急。"),
         "common_problems": [
             {"problem": "并列罗列多个特点，没有主特点", "layer": "判据",
              "how_many": f"约 {max(1, n // 3)} 人",
              "why": "构思表填了五行，就照着五行各写一句",
              "how_to_fix": "讲评课上拿两篇对着念，让学生自己听出哪一篇有主角"},
-            {"problem": "写到一半停住", "layer": "整篇",
+            {"problem": "写到一半停住", "layer": "结构",
              "how_many": f"{unfinished} 人",
              "why": "开头铺得太长，写到主体没时间了",
              "how_to_fix": "当堂限时三分钟只写结尾，练「先把话说完」"},
+            {"problem": "“然后”当连接词用，一段里三四个", "layer": "语言",
+             "how_many": f"约 {max(1, n // 4)} 人",
+             "why": "按事情发生的顺序想到哪写到哪，句子之间只会用「然后」搭",
+             "how_to_fix": "拿一段有四个「然后」的当堂删干净，让学生听删完是不是更清楚"},
         ],
         "showcase_plan": [{"name": r.get("student_name", ""),
                            "read_what": (r.get("highlights") or [{}])[0].get("quote")
@@ -647,9 +814,14 @@ async def grade(request: Request,
     # 引用一字不差这条不能靠模型自觉：拿它自己的 transcript 把每处引用对回原文，
     # 对不上的标 suspect 交给老师留意（见 fix_quotes 的注释）。
     fixed, suspect = fix_quotes(out)
+    recount_fillers(out)          # 这两道都必须在 transcript 被 pop 掉之前
+    check_paragraphs(out)
+    trim_verdict_tail(out)
+    enforce_grade_rules(pack, out)
     out["quote_check"] = {"fixed": fixed, "suspect": suspect}
     # transcript 只用于校验，不下发——老师手上有原稿，不需要看打字版
     out.pop("transcript", None)
+    out.pop("paragraph_count", None)   # 与 transcript 同样只用于校验，不下发
 
     # 原图与 base64 到此为止：不落盘、不进日志
     return out
@@ -675,9 +847,13 @@ async def diagnose(request: Request, body: dict):
         cs = "；".join(f'{c["no"]}{c["verdict"]}' for c in r.get("checks", []))
         w = r.get("whole_piece") or {}
         wp = "／".join(f'{k}:{(w.get(v) or {}).get("verdict", "?")}'
-                      for k, v in (("完整", "completeness"), ("顺序", "order"), ("通顺", "flow")))
+                      for k, v in (("完整", "completeness"), ("顺序", "order"),
+                                   ("分段", "paragraph"), ("详略", "detail"),
+                                   ("通顺", "flow")))
+        li = (r.get("language") or {}).get("issues") or []
+        lg = "／".join(x.get("kind", "?") for x in li) or "无"
         lines.append(f'- {r.get("student_name") or "（无名）"}｜{r.get("band", "")}'
-                     f'｜{cs}｜{wp}｜亮点{len(r.get("highlights") or [])}'
+                     f'｜{cs}｜{wp}｜语言:{lg}｜亮点{len(r.get("highlights") or [])}'
                      f'｜引用：{r.get("quoted_sentence", "")}')
     prompt = (DIAGNOSE_RULES
               .replace("@PACK@", render_pack(pack))

@@ -257,11 +257,19 @@ textarea:focus{outline:0;border-color:var(--blue-line)}
 /* 整篇三项：紧凑三行，不跟三条判据抢视觉重量（它不进档位） */
 .wp{padding:9px 0;border-top:1px dashed var(--line)}
 .wp:first-of-type{border-top:0;padding-top:0}
-.wp .h{display:flex;align-items:baseline;gap:8px}
-.wp .t{font-weight:700;font-size:14px}
-.wp .v{margin-left:auto;flex:none;font-size:14px;font-weight:700;white-space:nowrap}
-.wp .cm{margin-top:3px;font-size:13px;color:var(--ink-soft)}
-.wp .ev.sm{margin:5px 0 0;padding:5px 9px;font-size:13px}
+.wp .h{display:block}
+.wp .t{font-weight:600;font-size:14px;margin-right:8px}
+/* 维度名后面那句「这一项在看什么」。字号、字重、颜色三样一起压下去——
+   这一块刚犯过「两级文字只差 1px、字重相同就糊成一片」的错。
+   nowrap+ellipsis：极窄屏宁可把说明截掉，也不能换行撑高整行或把判定值挤下去。 */
+.wp .h .what{font-size:11px;font-weight:400;color:var(--ink-soft);line-height:1.6}
+.wp .cm{margin-top:4px;font-size:13px;color:var(--ink-soft)}
+.wp .vtag{display:inline-block;margin-right:6px;padding:1px 8px;border-radius:20px;
+  font-size:12px;font-weight:700;white-space:nowrap}
+.wp .vtag.v-ok{background:#EEF3EE;color:var(--ok)}
+.wp .vtag.v-no{background:#FBEAE8;color:var(--bad)}
+.wp .vtag.v-na{background:var(--brown-cell);color:var(--na)}
+.wp .ev{margin:5px 0 0;padding:5px 9px;font-size:13px;line-height:1.65}
 
 /* 共性问题分两层：判据层＝这次课教的没学会；整篇层＝更底下的地基。
    混在一起报，老师看不出该先管哪个 */
@@ -269,13 +277,17 @@ textarea:focus{outline:0;border-color:var(--blue-line)}
   font-size:11px;font-weight:700;vertical-align:2px}
 .layer.l1{background:var(--blue-soft);color:var(--blue-head)}
 .layer.l2{background:#FBF1E3;color:var(--warn)}
+/* 第三层「语言」。用中性的棕灰，不引第四种语义色——配色语义倒置过一次，颜色越少越不容易再倒。 */
+.layer.l3{background:var(--brown-cell);color:var(--ink-soft)}
 /* 整篇三项是参考区，判出问题时才举证、且最多两行——它不该比主判据还占版面 */
-.wp .ev.sm{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
 
 /* 引用与原文对不上：程序拿模型自己的转写比对不出来的那些。
    这张卡是要发给家长的，引错一个字老师就再也不信这工具了——必须让他看见 */
 .ev.sus,.hl .q.sus{background:#FBEAE8;border-left-color:var(--bad)}
 .sustag{display:block;margin-top:4px;font-size:12px;font-weight:700;color:var(--bad)}
+/* 分段这一项测不准时的提示。错结论比没结论更伤，所以要显眼 */
+.wp .cm.sus-note{color:var(--bad);font-weight:700}
 
 /* 选课页：课次会长到 63 课 / 8 个年级册，平铺成一条流水线老师每次都要滚半天。
    但只有两三课时又不该摆折叠面板——分组是 renderLessons 里按数量动态决定的。 */
@@ -337,3 +349,28 @@ textarea:focus{outline:0;border-color:var(--blue-line)}
 .gate .search{width:100%;margin:0 0 10px;text-align:center;letter-spacing:2px}
 .gate .primary{width:100%}
 .gate-err{font-size:13px;color:var(--brand-red);margin-bottom:10px}
+
+
+/* 篇章结构与语言两层默认折叠：详情页区块已经十来个，移动端一屏放不下，
+   而展开的顺序就是老师的注意力顺序——地基这两层收起来，要看再点。
+   summary 直接套 .sec h3 的排版，右侧 aside 仍靠 margin-left:auto 推到行尾。 */
+.sec.fold{padding:0}
+/* 区块标题做成表头：原先它 15px/700，下面的事项标题 14px/700，只差 1px、字重一样，
+   两级标题糊成一片；而且标题和第一个事项之间没有任何分隔，直接贴着。
+   靠「浅底色 + 一道实线 + 字号差」分层，不引新颜色（--page 就是页面底色）。 */
+.sec.fold summary{
+  margin:0;padding:13px 16px;font-size:16px;font-weight:700;cursor:pointer;
+  background:var(--page);border-radius:var(--r);
+  display:flex;align-items:center;gap:8px;list-style:none}
+.sec.fold[open] summary{
+  border-radius:var(--r) var(--r) 0 0;border-bottom:1px solid var(--line)}
+/* 表头下面要留口气，否则第一个事项贴着分隔线 */
+.sec.fold > .wp:first-of-type{padding-top:12px}
+.sec.fold summary::-webkit-details-marker{display:none}
+.sec.fold summary::after{
+  content:"▾";margin-left:8px;flex:none;color:var(--ink-soft);font-size:12px}
+.sec.fold[open] summary::after{content:"▴"}
+.sec.fold summary .aside{
+  margin-left:auto;font-size:12px;font-weight:400;color:var(--ink-soft)}
+.sec.fold > .wp{margin-left:16px;margin-right:16px}
+.sec.fold > *:last-child{margin-bottom:14px}

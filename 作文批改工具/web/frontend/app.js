@@ -640,14 +640,22 @@ function openDetail(it) {
   go("detail", (it.result.student_name || "这一份") + " · 批改");
 }
 
+// 共性问题的层级标签。「整篇」是旧值，留着兼容早先存进 IndexedDB 的历史记录——
+// 那些记录永久留存，删掉这一项它们的标签会掉回「判据」蓝，看着像判据问题。
+const LCLS = {"判据": "l1", "结构": "l2", "整篇": "l2", "语言": "l3"};
+
 const WP_ROWS = [
-  ["completeness", "写完了没有"],
-  ["order", "顺序清不清楚"],
-  ["flow", "句子顺不顺"],
+  ["completeness", "完整性", "开头、经过、结尾是否齐全"],
+  ["order", "叙述顺序", "事情先后是否清楚，有无颠倒"],
+  ["paragraph", "分段", "段落划分是否得当"],
+  ["detail", "详略", "重点是否展开，次要是否从简"],
 ];
-// 整篇三项的判定分好坏两色。三项**不进档位**（档位只由三条判据定），
-// 这里只给老师看，也不要把「逻辑乱」这种话直接转给家长。
-const WP_BAD = ["没写完", "只开了个头", "有跳跃", "乱", "个别别扭", "多处不通"];
+const LANG_ROWS = [["flow", "语句", "有无生硬、不通的句子"]];
+// 结构四项与句子通不通都**不进档位**（档位只由三条判据定），只给老师看，
+// 也不要把「逻辑乱」这种话直接转给家长。
+// 「不适用」不在坏值里——那是三年级不判详略时的取值，走中性色，它不是毛病。
+const WP_BAD = ["未写完", "仅有开头", "有跳跃", "混乱", "个别不畅", "多处不通",
+                "该分未分", "通篇一段", "主次平均", "重点过简"];
 
 function renderDetail() {
   const it = cur, r = it.result, l = S.lesson;
@@ -665,16 +673,39 @@ function renderDetail() {
     : `<div class="hint">这一篇没有特别出彩的句子。<b>不用硬找</b>——硬夸家长看得出来。</div>`;
 
   const wp = r.whole_piece || {};
-  const wpBody = WP_ROWS.map(([k, label]) => {
+  const wpRow = ([k, label, hint]) => {
     const v = wp[k] || {};
     const bad = WP_BAD.includes(v.verdict);
+    const cls = v.verdict === "不适用" ? "v-na" : (bad ? "v-no" : "v-ok");
     return `<div class="wp">
-      <div class="h"><span class="t">${label}</span>
-        <span class="v ${bad ? "v-no" : "v-ok"}">${esc(v.verdict || "—")}</span></div>
-      ${v.note ? `<div class="cm">${esc(v.note)}</div>` : ""}
-      ${bad && v.evidence ? `<div class="ev sm">${esc(v.evidence)}</div>` : ""}
+      <div class="h"><span class="t">${label}</span>${
+        hint ? `<span class="what">${esc(hint)}</span>` : ""}</div>
+      <div class="cm${v.suspect ? " sus-note" : ""}"><span class="vtag ${cls}">${
+        esc(v.verdict || "—")}</span>${esc(v.note || "")}</div>
     </div>`;
-  }).join("");
+  };
+  const wpBody = WP_ROWS.map(wpRow).join("");
+
+  // 语言：句子通不通 + 三种可数毛病 + 整篇一句话。
+  // 毛病的引用不加 .sm 类——`.wp .ev.sm` 有两行截断，会把 sustag 那条红字一起藏掉。
+  const lg = r.language || {};
+  const lgIssues = lg.issues || [];
+  // 语言按「用词 → 语句 → 表达」排：语句是唯一带判定值的，另两项是描述性的。
+  // 三类毛病（口水词／同起头／动词笼统）都收在「用词」这一项下面。
+  const lgBody =
+    `<div class="wp"><div class="h"><span class="t">用词</span><span class="what">词语重复、动作笼统、句式单一</span></div>${
+      lgIssues.length
+        ? lgIssues.map(x => `${x.kind || x.detail
+            ? `<div class="cm">${esc(x.kind || "")}${x.kind && x.detail ? "：" : ""}${
+                esc(x.detail || "")}</div>` : ""}${
+            x.quote ? `<div class="ev${x.quote_suspect ? " sus" : ""}">${esc(x.quote)}${
+              x.quote_suspect ? '<span class="sustag">与原文对不上，核一下</span>' : ""}</div>` : ""}`
+          ).join("")
+        : `<div class="hint">无明显问题。</div>`
+    }</div>`
+    + LANG_ROWS.map(wpRow).join("")
+    + (lg.overall ? `<div class="wp"><div class="h"><span class="t">表达</span><span class="what">句式、用词与描写方式</span></div>
+        <div class="cm">${esc(lg.overall)}</div></div>` : "");
 
   const checks = (r.checks || []).map(c => `
     <div class="check">
@@ -696,7 +727,8 @@ function renderDetail() {
   const showcase = sc.suitable ? `
     <div class="sec">
       <h3>可以拿到讲评课上念<span class="aside">讲：${esc(sc.point || "")}</span></h3>
-      <div class="ev">${esc(sc.paragraph || "")}</div>
+      <div class="ev${sc.paragraph_suspect ? " sus" : ""}">${esc(sc.paragraph || "")}${
+        sc.paragraph_suspect ? '<span class="sustag">与原文对不上，念之前核一遍</span>' : ""}</div>
     </div>` : "";
   $("#detail-body").innerHTML = `
     <div class="namerow">
@@ -710,9 +742,14 @@ function renderDetail() {
       ${hlBody}
     </div>
     <div class="sec"><h3>三条判据<span class="aside">学生课上听过这三条</span></h3>${checks}</div>
-    <div class="sec">
-      <h3>整篇怎么样<span class="aside">不算档位，给你参考</span></h3>${wpBody}
-    </div>
+    <details class="sec fold">
+      <summary>篇章结构<span class="aside">不算档位，只做参考</span></summary>
+      ${wpBody}
+    </details>
+    <details class="sec fold">
+      <summary>语言<span class="aside">不算档位，只做参考</span></summary>
+      ${lgBody}
+    </details>
     <div class="sec">
       <h3>写进稿纸「老师批改」栏<span class="aside">30 字以内</span></h3>
       <textarea id="ta-note" rows="2">${esc(r.teacher_note || "")}</textarea>
@@ -908,7 +945,7 @@ $("#btn-class").onclick = async () => {
 
   const probs = (d.common_problems || []).map(p => `
     <div class="prob">
-      <div class="p">${p.layer ? `<span class="layer ${p.layer === "整篇" ? "l2" : "l1"}">${esc(p.layer)}</span>` : ""}${esc(p.problem)}</div>
+      <div class="p">${p.layer ? `<span class="layer ${LCLS[p.layer] || "l1"}">${esc(p.layer)}</span>` : ""}${esc(p.problem)}</div>
       <div class="m">${esc(p.how_many || "")}　${esc(p.why || "")}</div>
       <div class="f">讲评课上：${esc(p.how_to_fix || "")}</div>
     </div>`).join("");

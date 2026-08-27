@@ -48,7 +48,14 @@ TYPO_READ = {"经长": "经常"}
 
 # 固定起手式：一个班二三十份发同一个群，起手动词一样就是一个模子。
 # 实测 gpt-4o 三篇全是「孩子写到……」，只比前 8 字漏得掉，得单独抓。
-OPENERS = ["孩子写到", "孩子写的", "同学写到", "同学笔下", "家长您好", "这篇文章", "这篇写"]
+# 起手式黑名单。⚠ 一个变体一个串，别指望前缀能覆盖变体——「孩子在作文中」这个串
+# 原先没收，于是三篇点评卡全用它起头，这道防线整批静默放过（2026-08-27 实测）。
+OPENERS = ["孩子写到", "孩子写道", "孩子写的", "孩子在作文中", "孩子在这篇作文中",
+           "同学写到", "同学笔下", "家长您好", "这篇文章", "这篇写"]
+
+
+# 空夸词表取自服务端，别在这里另写一份（那正是「改一处不改另一处」的老毛病）
+EMPTY_WORDS = srv.EMPTY_WORDS
 
 
 def norm(s):
@@ -73,6 +80,10 @@ async def grade_one(pack, img, prev_heads):
     msgs = srv.build_messages(pack, b64, "image/jpeg", prev_heads)
     r = srv.parse_json(await srv.call_model(msgs))
     r["_fix"] = srv.fix_quotes(r)
+    srv.recount_fillers(r)             # 与 /api/grade 同一道后处理，别漏
+    srv.check_paragraphs(r)
+    srv.trim_verdict_tail(r)
+    srv.enforce_grade_rules(pack, r)
     return r
 
 
@@ -126,7 +137,10 @@ async def main():
         quotes = [("evidence", c.get("evidence")) for c in r.get("checks", [])]
         quotes += [("quoted_sentence", r.get("quoted_sentence"))]
         quotes += [("highlight", h.get("quote")) for h in (r.get("highlights") or [])]
-        w = r.get("whole_piece") or {}   # 整篇三项已不要求举原文，不参与引用校验
+        # 语言毛病可以引原句（结构四项不引），引了就同样受逐字铁律管
+        quotes += [("语言毛病", g.get("quote"))
+                   for g in ((r.get("language") or {}).get("issues") or []) if g.get("quote")]
+        w = r.get("whole_piece") or {}   # 结构四项不举原文，不参与引用校验
         bad = loose = 0
         for label, q in quotes:
             st = check_quote(q, body)
@@ -141,10 +155,50 @@ async def main():
               f"，标点有出入 {loose}，查无此句 {bad}"
               f"　（校正前已自动对回原文 {fx} 处、标可疑 {sp} 处）")
 
+        # 取消「判得好就留空」之后，模型最可能的退化是把判定重说一遍
+        #（判「完整」写「结构完整」）。这是唯一能机检出来的形态。
+        for k, lab in (("completeness", "完整性"), ("order", "叙述顺序"),
+                       ("paragraph", "分段"), ("detail", "详略"), ("flow", "语句")):
+            v = w.get(k) or {}
+            vd, nt = str(v.get("verdict") or ""), str(v.get("note") or "")
+            if vd == "不适用":
+                continue
+            if not nt:
+                fails.append(f"{key} 篇「{lab}」的 note 空着——判得好也要说清好在哪")
+                print(f"  ✗ {lab} note 空着")
+            elif [x for x in EMPTY_WORDS if x in nt]:
+                w2 = [x for x in EMPTY_WORDS if x in nt]
+                fails.append(f"{key} 篇「{lab}」的 note 用了空话{w2}：{nt}")
+                print(f"  ✗ {lab} note 空话{w2}：{nt}")
+            elif vd and vd in nt:
+                rest = nt.replace(vd, "").strip("，。、；：“”‘’（）()… ")
+                if len(rest) < 6:
+                    fails.append(f"{key} 篇「{lab}」的 note 只是把判定重说一遍：{nt}")
+                    print(f"  ✗ {lab} note 除了「{vd}」没别的：{nt}")
+                else:
+                    print(f"  · {lab} note 里带了判定词「{vd}」，看看能不能删掉：{nt}")
+
+        lang = r.get("language") or {}
         print(f"  亮点 {len(r.get('highlights') or [])} 处｜"
-              f"整篇 " + "／".join(f"{k}:{(w.get(v) or {}).get('verdict','?')}"
-                                   for k, v in (("完整", "completeness"),
-                                                ("顺序", "order"), ("通顺", "flow"))))
+              f"结构 " + "／".join(f"{k}:{(w.get(v) or {}).get('verdict','?')}"
+                                   for k, v in (("完整", "completeness"), ("顺序", "order"),
+                                                ("分段", "paragraph"), ("详略", "detail")))
+              + f"｜语句:{(w.get('flow') or {}).get('verdict','?')}"
+              + "｜语言毛病:" + ("／".join(g.get("kind", "?")
+                                          for g in (lang.get("issues") or [])) or "无"))
+        kinds = [g.get("kind") for g in (lang.get("issues") or [])]
+        over = [w for w in srv.FILLERS if body.count(w) >= 3]
+        if over and "口水词" not in kinds:
+            fails.append(f"{key} 篇「{over[0]}」用了 {body.count(over[0])} 次却没报口水词"
+                         f"——recount_fillers 的兜底没生效")
+            print(f"  ✗ 口水词到线没报：{over}")
+        print(f"  语言整体：{lang.get('overall', '')}")
+        # 这三张基准稿纸都是三年级，详略必须记「不适用」——年级分支没生效的话，
+        # 模型会给三年级硬判「重点一笔带过」，而这栏一旦说空话，整层就没人看了
+        dv = (w.get("detail") or {}).get("verdict")
+        if dv != "不适用":
+            fails.append(f"{key} 篇三年级的详略判成了「{dv}」，应记「不适用」")
+            print(f"  ✗ 三年级不该判详略，却判了「{dv}」")
         print(f"  焦点：{r.get('focus', '')}")
         print(f"  点评卡：{r.get('parent_card', '')}")
 
@@ -179,6 +233,27 @@ async def main():
         card = v.get("parent_card", "")
         if "你可以" in card or "你写" in card or "你看你" in card or "期待你" in card:
             fails.append(f"{k} 篇点评卡在跟孩子说话（应是跟家长说）")
+
+    # 6 语言整体评价撞不撞车
+    #
+    # 这是加通用维度之后最可能的退化，也是唯一能机检出来的同质化。实测规律：
+    # 约束一收紧，模型就找一个新模板躲进去——让它评语言，它会给三十篇写出同一句。
+    # 三张基准稿纸差异很大（一篇写得实、一篇流水账、一篇没写完），
+    # 语言评价还一模一样，就说明它在套模板而不是在读这一篇。
+    print()
+    print("语言整体评价：")
+    for k, v in results.items():
+        print(f"  {k}「{(v.get('language') or {}).get('overall', '')}」")
+    ov = {k: norm((v.get("language") or {}).get("overall", "")) for k, v in results.items()}
+    for a in results:
+        for b in results:
+            if a < b and ov[a] and ov[a] == ov[b]:
+                fails.append(f"{a}、{b} 两篇语言整体评价一字不差地相同——模型在套模板")
+    # 空话也要抓：这几个词是规则里点名禁止的
+    for k, t in ov.items():
+        for w2 in EMPTY_WORDS:
+            if w2 in t:
+                fails.append(f"{k} 篇语言评价用了空话「{w2}」")
 
     if fails:
         print(f"\n不合格 {len(fails)} 项：")
