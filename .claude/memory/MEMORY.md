@@ -38,6 +38,7 @@
 - **「倒过来写」指构思顺序、不指成文顺序**：本课差异轴与写人档降压铁律（第 2 节第一句先写点题中心句）表面相抵，用户拍板守铁律＋补出口——教的是「怎么想到这个特点」，不是「不许有中心句」；凡新技法与既有铁律冲突，先分清它管的是构思还是成文 — [源](wodejiaren-4a-lesson-state.md)
 - **`参考：` 里的学生答案要过一遍「多数人家真会这样吗」**：编得巧但生活里不常有（「她炒糊一锅菜还说是故意炒的」），学生照着想不出对应的自家事，这一步就空转 — [源](wodejiaren-4a-lesson-state.md)
 - **教材照片与联网核到的教参对不上时，称谓/数字/篇名这类逐字项须逐项复核，别一笔归为「版本差异」**：《我的家人》练书法那位被我录成「姥爷」（实为爷爷），教参本来是对的，却被「应为版本差异」这句结论连带盖住，错到详案 32 处才由用户抓出 — [源](wodejiaren-4a-lesson-state.md)
+- **教材自带的提纲/范例＝必须落实的习作知识点，自创工具只能细化、不能顶替**：顺序「先教材框架→后自创工具→再回填」；同族坑＝否定反例须精确落到「缺了什么」，别扩大成「写了什么就错」 — [源](twentyyears-hometown-5a-lesson-state.md)
 - **点名「可行做法」只点一种＝指定默认款**:覆盖面/支架/装置这类「硬要求但解法开放」的位置写清单不写单例,只有一种时显式标注「不是唯一」;不限于⑦位 — [源](writing-lesson-stage7-interaction-form-gap.md)
 
 ### 规则与体例
@@ -166,7 +167,7 @@
 **读书会 · L2/L3 合集批（0806–0807）**：[神笔马良详案+配图](shenbi-maliang-lesson-plan-state.md)/[建档](shenbi-maliang-book-profile-state.md)（存量书按0806新规补做第一例·9图落点全换·角色不跨篇）· [孤独的小螃蟹详案](guduxiaopangxie-lesson-plan-state.md)/[建档](guduxiaopangxie-book-profile-state.md)（首个建档时同步读图·两篇结构不同·跨行断裂别当错字改）· [小狗的小房子详案](xiaogou-xiaofangzi-lesson-plan-state.md)/[建档](xiaogou-xiaofangzi-book-profile-state.md)（第二篇残缺标节选但不对学生说「没结局」）· [大头儿子和小头爸爸详案](datou-erzi-lesson-plan-state.md)/[建档](datou-erzi-book-profile-state.md)（24篇四辑·**有班底无主线**故禁全书成长曲线·画文冲突11/17幅）· [克雷洛夫寓言建档L3](kryluov-book-profile-state.md)（71则·**寓意三形态**·同名角色不跨篇·47篇无图）· [稻草人建档L3](daocaoren-book-profile-state.md)（12篇零共同角色·**电子版三处串行错乱禁逐字引**）
 > 这批的共同教训：**事务性话术是跨书查重高发位**（第2课时开场骨架已四本连用）；下一本 L2 的开场/预测单/送卡三形态必须换。
 **写作课 · 详案**：[三上续写故事](xuxie-gushi-textbook-image-rewrite.md)（改用教材真图+新建教材插图目录）· [三上我来编童话](bianTonghua-3a-lesson-state.md)· [三上写日记](xieriji-3a-lesson-state.md)（例句池三处联动）· [四上写观察日记](guanchariji-4a-lesson-state.md)（三杯不同天数真豆子·⚠须沥干湿布捂养）· [四上我和＿＿过一天](woheguoyitian-4a-lesson-state.md)· [五上我的心爱之物](xinaizhiwu-5a-lesson-state.md)（开场道具·③装置·示范文是同一件东西须三处同步）· [五上“漫画”老师](manhua-laoshi-5a-lesson-state.md)（三处同一例须同步）
-· [五上二十年后的家乡](twentyyears-hometown-5a-lesson-state.md)（正向对比首份实践·「具体」≠「切题」·课文判不引形态A·旧知退路第四种）
+· [五上二十年后的家乡](twentyyears-hometown-5a-lesson-state.md)（**0827依教材页原件重写**：教材提纲被自创表顶替／猜年份误当合格门槛／「跑题」误判＋详略情感补齐；正向对比首份实践·课文判不引形态A）
 · [四上我的家人](wodejiaren-4a-lesson-state.md)（**2026秋教材换题首例·替代小小动物园**；写人线差异轴必须反转「事→特点」因三下已教完「特点→事」；教材气泡当公共素材源破「不拿老师家人举例」；四坑＝引教材原句擅自加词废掉后续演示／③剧透④指向性问题／审题辨析与示范文须投屏否则「回头数一数」做不到／提纲表核心技法行是正向表述最易漏的落点）
 **写作课 · PPT 链与配套**：[四上推荐一个好地方](tuijian-haodifang-4a-ppt-chain-state.md)· [四上写观察日记](guanchariji-4a-ppt-chain-state.md)（**二维构思表转置法**·教师侧压页合并heading比删行管用）· [四上我和＿＿过一天](woheguoyitian-4a-ppt-chain-state.md)· [四上小小"动物园"](xiaoxiao-dongwuyuan-4a-ppt-chain-state.md)（**教材已换题停用，产物原地保留**；含删重复段按行切片、直引号批量转弯引号两条可复用，与教材无关仍有效）· [五上我的心爱之物](xinaizhiwu-5a-ppt-chain-state.md)（文件名中文丢成下划线的认领法·旁批表引用第四次被改写）· [五上“漫画”老师](manhua-laoshi-5a-ppt-chain-state.md)（进仓叫00000.pptx靠封面认领·图例保留改人工加动画）
 **看图写话 · 课次**：[期6细节四问(二上第1次)](picture-writing-stage6-state.md)（例-01季节违规重生教训·先生锚图再生例库图才锁画风）· [二上第2次](picture-writing-2a-lesson2-state.md)（节2整节评改升格）· [二上第3次](picture-writing-2a-lesson3-state.md)（`**`在配套模板不解析只认`{b}`·页数核验只测第1个sheet）· [一上第2次](picture-writing-1a-lesson2-state.md)（全线首个无主图课次·generate_images已加无主图兜底·「上次约定」入师话须回查原话）· [一上第3次](picture-writing-1a-lesson3-state.md)（首个多格课次·**C级链首验成立→18个多格课次可直接排**·docx「半角标点」警告是误报勿改）
