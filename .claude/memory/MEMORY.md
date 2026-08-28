@@ -34,7 +34,7 @@
 - **「当场换人试装」装置**:念完自写段落当场换掉人名、余字不动再念,学生自己听出垮在哪;凡写人物特点/身份感的题目(写人·想象·故事新编·变形记)可照搬,配套成败标准「换上同桌名字故事一字不用改＝没写成」一并复用 — [源](woheguoyitian-4a-lesson-state.md)
 - **外部件「示范文里的句子」类表格须逐行与示范文逐字比对**:截断可接受、**改写必须打回**;已四次出现 — [源](woheguoyitian-4a-ppt-chain-state.md)
 - **往「禁止逐字复用」清单补串:一个串一条 bullet,不要并列写**——tone_gate 每条只取第一个「…」串,并列写的第二个串永不报警(实测画圈口令一篇内复发3处、机检全绿);清单运行时解析,补 bullet 即自动进机检、不必改脚本 — [源](twentyyears-hometown-5a-lesson-state.md)
-- **教材换题＝重写不是改稿，且第 0 步是改事实源不是写详案**：新题在 `archive/` 零命中就动笔＝伪造官方条款；五处事实源连改（archive 旧节标停用·新节另起／index／course-map 题目行＋文体线链／锚点表／unit-texts **旧结论不变也要整节重写**，因判据「课文最突出的写法是不是正是本课这一招」里的「这一招」变了）；**文体线链一改，既有详案提纲表第 3 行会静默过期** — [源](wodejiaren-4a-lesson-state.md)
+- **教材换题＝重写不是改稿，且第 0 步是改事实源不是写详案**：新题在 `archive/` 零命中就动笔＝伪造官方条款；五处事实源连改（archive 旧节标停用·新节另起／index／course-map 题目行＋文体线链／锚点表／unit-texts **旧结论不变也要整节重写**，因判据「课文最突出的写法是不是正是本课这一招」里的「这一招」变了）；**文体线链一改，既有详案提纲表第 3 行会静默过期** — [源](wodejiaren-4a-lesson-state.md)｜**跨册迁移变体(0828《故事新编》四下八→五上三)**:改9处不是5处;教材题面与archive指导件是**两层**(指导件正文里根本没有题面内容,题面须单独入档);换题会让**判据表的实例**连带失效(C形态唯一实例没了);**多图对照别按给定顺序配标签**,用页码等图内锚反查(实测接反过) — [源2](gushi-xinbian-5a-unit-move-0828.md)
 - **「倒过来写」指构思顺序、不指成文顺序**：本课差异轴与写人档降压铁律（第 2 节第一句先写点题中心句）表面相抵，用户拍板守铁律＋补出口——教的是「怎么想到这个特点」，不是「不许有中心句」；凡新技法与既有铁律冲突，先分清它管的是构思还是成文 — [源](wodejiaren-4a-lesson-state.md)
 - **`参考：` 里的学生答案要过一遍「多数人家真会这样吗」**：编得巧但生活里不常有（「她炒糊一锅菜还说是故意炒的」），学生照着想不出对应的自家事，这一步就空转 — [源](wodejiaren-4a-lesson-state.md)
 - **教材照片与联网核到的教参对不上时，称谓/数字/篇名这类逐字项须逐项复核，别一笔归为「版本差异」**：《我的家人》练书法那位被我录成「姥爷」（实为爷爷），教参本来是对的，却被「应为版本差异」这句结论连带盖住，错到详案 32 处才由用户抓出 — [源](wodejiaren-4a-lesson-state.md)
@@ -48,7 +48,7 @@
 - [教学指令一律正向表述·写法只作对比不判对错(0824立)](writing-lesson-positive-framing-not-prohibition.md) — 禁令伤的是**照着上课的老师**(会形成「直接抒情=错误」认知并一刀切);判据先分两类(**写法偏好类**不判对错走三步对比、**题目要求类**照旧可判不合要求);五落点逐处查(提纲表核心技法行/③/④/⑥/**⑦最易漏**);**最主要复发路径=档案自己**(archive重难点常写成「避免笼统地说…」,那是给老师的教学重点不是课堂话术);与③「审题辨析」半步**不可合并**(那处比切题与否、有对错);三条反向刹车(减负性否定照写/教师可以有倾向/真实性格式硬要求不作对比);已落规则五处(红线第8条+workflow③+checklist C+rubric跨维八+brief);基准篇本就是正例、是固化不是新增负担
 - [电报体/生造词红线第7条(0731立·0819补第5形态)](writing-lesson-telegraphese-and-coinage-redline.md) — 五形态自查(省主语/名词压缩/电报短语/生造词/**中心宾语残缺**);补宾语有反向刹车:术语只在定义句补一次,逐处补会撞池8配额;讲评括注直写动作、「占位」已升机检
 - [师话必须接住上一轮真实产出(0803)](writing-lesson-shihua-must-follow-real-turn.md) — 假转折/假情境/假引文三变体;checklist·tone_gate·冷审三关全漏,只有通读语感抓得到
-- [学段口气全线没分级(0817)](writing-lesson-grade-tone-not-differentiated.md) — 九篇③环节同构;**判断分三层(用词/技法深度/思维层级)别混说**;判据=降两级反问,改不动即没分级;已补technique-levels口气落地动作表+checklist C组+rubric第六节
+- [学段口气全线没分级(0817)](writing-lesson-grade-tone-not-differentiated.md) — 九篇③环节同构;**判断分三层(用词/技法深度/思维层级)别混说**;判据=降两级反问,改不动即没分级;已补technique-levels口气落地动作表+checklist C组+rubric第六节;**0828复发新形态**:档案重点是并列短语时只落实了好落实的那一半(「有趣合理」只教了合理),查法=把重难点按短语拆开逐个问落在哪个环节
 - [新增「话轮骨架」层=池9+指纹第15字段(0817)](writing-turn-skeleton-layer-pool9.md) — 补零件层与措辞层之间的空档:③④⑦话轮序列;**冷审能打散措辞、打散不掉同构**;配 batch_ngram_scan 新增`--focus/--against`单篇邻篇机检(进checklist E组);⚠池9编号在后但属零件层
 - [⑦交流评议连撞四人小组的根因(0817)](writing-lesson-stage7-interaction-form-gap.md) — 一推一放:F组「人人被听见」只点名小组内轮读、G组明说⑦不进跨篇避让;已改四处规则
 - [技法N件套须练全N件](technique-set-practice-all-parts.md) — 少练的那一件学生动笔前零产出、⑦补不回来;定稿前做「每件×是否产出过」对账,机检与checklist都抓不到
@@ -63,7 +63,7 @@
 - [文件名/目录名加「第N单元」段(0802)](writing-line-filename-unit-segment.md) — 全线标识改`<年级册>-第N单元-<题目>`(中文数字·取course-map单元列;自拟主题省略);⚠「PPT文件名内仍纯题目」那半条**0826已推翻**
 - [写作课线三项命名/结构调整(0826立)](writing-line-naming-flattened-0826.md) — 配套件`-X合订`→`-X用`／打包目录**单层平铺**撤两层子文件夹／PPT改`<年级册>-第N单元-<题目>-课件PPT.pptx`(**推翻CLAUDE.md §7「PPT文件名内纯题目」**);⚠**pptx与anim.json必须同批改名**否则inspect_pptx防覆盖闸门静默失效、人工排的分组全废;⚠**Windows下glob返反斜杠、`rstrip("/")`是空操作**→basename得空串(取目录名一律用pathlib `.name`);**预演输出要逐行真看**(把丢了课次段的`→ -课件PPT.pptx`看成了列宽截断);打包脚本零删除逻辑故改结构必清存量;闸门=validate的E24＋shots.json的12条src逐条exists
 - [标题与环节命名定稿](writing-lesson-title-naming.md) — 唯一源=references/title-naming.md;改体例前必全skill搜一遍
-- [首页改无区头单表6行(现行)](writing-lesson-front-page-single-table.md) — 0729定稿:删区头与「怎么落地」/课时回表/文体线→同类习作顺序;写详案或改style_front_page前必读(前身[分区版](writing-lesson-front-page-zones.md)、[两区表](writing-lesson-front-page-two-zones.md)已作废)
+- [首页改无区头单表6行+两行文案体例(现行)](writing-lesson-front-page-single-table.md) — 0729定稿:删区头与「怎么落地」/课时回表/文体线→同类习作顺序;**0828两行体例改版:目标「能…」起句·分句须对得上末页自查表·技法只写一招且招名同「学写法」标题·两行禁反例/备选/选材/成果包装·不再用**加粗**;推翻旧的「下课时手上有什么」写法**;写详案或改style_front_page前必读(前身[分区版](writing-lesson-front-page-zones.md)、[两区表](writing-lesson-front-page-two-zones.md)已作废)
 - [审题固化为③开头固定半环](writing-lesson-shenti-bianxi-fixed-half-step.md) / [第2节降压起步环节](writing-lesson-destress-onramp.md) / [修改符号自然用不重教](writing-lesson-revision-symbols-natural-use.md)
 - [去先导预设/技法克制](writing-lesson-drop-prelude-preset.md) / [不引读书会书目](writing-lesson-drop-book-club-link.md) / [不写下游ppt提示标签](writing-lesson-no-downstream-ppt-hints.md)
 - [详案出PPTX](writing-lesson-to-pptx.md) / [docx页眉定版](writing-lesson-docx-header.md) / [对标竞品待实施清单](writing-lesson-competitor-borrow-backlog.md) — 漏传--header-left/right静默回落读书会页眉;D3–D5/N1待做
@@ -160,6 +160,7 @@
 - **⚠ 阅读单线 18 份 PDF 的 Type3 字体遗留未修** — [详情](pdf-type3-fonts-fixed.md)
 - 彼得·潘档案 line23/32 与机读块不一致待清理 — [详情](peterpan-book-profile-state.md)
 - 封面图缺（汉修先生 / 呼兰河传 / 骑鹅旅行记，骑鹅须补图重跑）· 快乐王子下游未做 · 快乐读书吧 6 本已建 2 本余 4 本
+- **⚠ 四下第八单元现行习作待核实**——定了才能改 63→62、序 32 回填、馆内海报两格重渲;`assets` 总地图 docx 原件尚未换版(**全仓唯一 md 先于原件**) — [详情](gushi-xinbian-5a-unit-move-0828.md)
 - 《推荐一个好地方》两处详案↔PPT微差未拍板 · writing 竞品借鉴 D3–D5/N1 待做 · ppt-profile Phase3 待办
 
 ## 已交付归档（细节各见链接 · 排新课次前按需打开）
