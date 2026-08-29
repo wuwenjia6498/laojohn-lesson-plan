@@ -488,7 +488,7 @@ function renderBrief() {
     <h2>${esc(l.label)}</h2>
     <div class="hint">${esc(l.core_technique)}</div>
     <ul class="checks">
-      ${l.three_checks.map(c => `<li><span>${c.no}</span>${esc(c.text)}</li>`).join("")}
+      ${l.three_checks.map(c => `<li><span>${c.no}</span>${esc(c.display_text || c.text)}</li>`).join("")}
     </ul>
     <div class="nis">不在批改范围：${esc(l.not_in_scope.join("、"))}——该层请教师当面看稿。</div>`;
 }
