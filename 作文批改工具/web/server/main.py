@@ -379,8 +379,8 @@ async def call_model(messages, max_tokens=8000):
     # 截断了要明说。0820 实测：加了 whole_piece/highlights/focus 之后 1600 不够，
     # JSON 从中间断掉，报出来却是「没有返回可解析的 JSON」，会让人往提示词上找错。
     if ch.get("finish_reason") == "length":
-        raise HTTPException(502, "模型输出被截断（max_tokens 不够），JSON 不完整。"
-                                 "调大 call_model 的 max_tokens 再试。")
+        raise HTTPException(502, "模型输出被截断（max_tokens 不足），JSON 不完整。"
+                                 "请调大 call_model 的 max_tokens 后重试。")
     return ch["message"]["content"]
 
 
@@ -393,7 +393,7 @@ def parse_json(text):
     except json.JSONDecodeError:
         m = re.search(r"\{.*\}", t, flags=re.S)
         if not m:
-            raise HTTPException(502, "模型没有返回可解析的 JSON：" + t[:300])
+            raise HTTPException(502, "模型未返回可解析的 JSON：" + t[:300])
         return json.loads(m.group(0))
 
 
@@ -761,7 +761,7 @@ async def _gate(request: Request, call_next):
             and request.url.path.startswith("/api/")
             and request.url.path != "/api/health"
             and request.headers.get("x-access-code", "").strip() != ACCESS_CODE):
-        return JSONResponse({"error": "口令不对，或者还没输入口令"}, status_code=401)
+        return JSONResponse({"error": "口令有误，或尚未输入口令"}, status_code=401)
     return await call_next(request)
 
 
@@ -788,7 +788,7 @@ def lessons():
 def lesson(lesson_id: str):
     d = PACKS.get(lesson_id)
     if not d:
-        raise HTTPException(404, "没有这一课的标准包")
+        raise HTTPException(404, "未找到该课次的标准包")
     return public_view(d)
 
 
@@ -799,13 +799,13 @@ async def grade(request: Request,
                 image: UploadFile = File(...)):
     pack = PACKS.get(lesson_id)
     if not pack:
-        raise HTTPException(404, "没有这一课的标准包")
+        raise HTTPException(404, "未找到该课次的标准包")
     if not _rate_ok(_client_ip(request)):
-        raise HTTPException(429, "这一小时批得太多了，歇一会儿再来（防盗刷用的限额）")
+        raise HTTPException(429, "本小时批改次数已达上限，请稍后再试（防盗刷限额）")
 
     raw = await image.read()
     if len(raw) > CFG["max_image_mb"] * 1024 * 1024:
-        raise HTTPException(413, f'图片超过 {CFG["max_image_mb"]}MB，请在手机上压一压再传')
+        raise HTTPException(413, f'图片超过 {CFG["max_image_mb"]}MB，请压缩后重新上传')
 
     if MOCK:
         return mock_grade(pack)
@@ -835,14 +835,14 @@ async def grade(request: Request,
 async def diagnose(request: Request, body: dict):
     pack = PACKS.get(body.get("lesson_id"))
     if not pack:
-        raise HTTPException(404, "没有这一课的标准包")
+        raise HTTPException(404, "未找到该课次的标准包")
     # 这一条也是真实模型调用（max_tokens 6000），跟 /api/grade 共用同一个桶。
     # 原先只有 grade 挂了限额，diagnose 完全裸奔，是个盗刷缺口。
     if not _rate_ok(_client_ip(request)):
-        raise HTTPException(429, "这一小时用得太多了，歇一会儿再来（防盗刷用的限额）")
+        raise HTTPException(429, "本小时调用次数已达上限，请稍后再试（防盗刷限额）")
     results = body.get("results") or []
     if not results:
-        raise HTTPException(400, "还没有批改结果")
+        raise HTTPException(400, "尚无批改结果")
     if MOCK:
         return mock_diagnose(pack, results)
 
