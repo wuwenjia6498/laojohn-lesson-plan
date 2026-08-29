@@ -207,6 +207,13 @@ def check_pack(path, srv, bp, sents_cache):
         text = str(c.get("text") or "")
         if len(text) < 6:
             rep.fail("B9", "第 " + str(i) + " 条 text 过短，疑似抽成碎片：" + text)
+        disp = str(c.get("display_text") or "")
+        # display_text＝界面上屏的规范维度名（text 是学生当堂听过的原话，只进提示词）。
+        # 缺了不会报错、界面自动回退到原话——所以只有这条警告拦得住「新课漏填」。
+        if not disp:
+            rep.warn("B13", "第 " + str(i) + " 条缺 display_text，界面会回落到课堂原话")
+        elif len(disp) > 26:
+            rep.warn("B13", "第 " + str(i) + " 条 display_text 过长，上屏会折行：" + disp)
         jb = str(c.get("judge_by") or "")
         if not jb.strip():
             rep.fail("B9", "第 " + str(i) + " 条缺 judge_by")

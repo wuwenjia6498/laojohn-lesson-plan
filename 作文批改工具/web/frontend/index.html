@@ -25,7 +25,7 @@
 <div id="gate" class="gate" hidden>
   <div class="gate-box">
     <div class="gate-t">请输入使用口令</div>
-    <div class="gate-s">口令由老约翰提供。输一次就记住，换手机要重输。</div>
+    <div class="gate-s">口令由老约翰提供，本机记住一次；更换设备需重新输入。</div>
     <input id="gate-input" class="search" type="password" placeholder="口令"
            autocomplete="off" enterkeyhint="go">
     <div id="gate-err" class="gate-err" hidden></div>
@@ -38,15 +38,15 @@
     <span class="cover-mark">批</span>
     <div class="cover-txt">
       <div class="cover-t">老约翰 · 同步习作批改</div>
-      <div class="cover-s">拍完全班稿纸，逐份出批语与家长点评卡</div>
+      <div class="cover-s">拍摄全班稿纸，逐份生成教师批语与家长点评卡</div>
     </div>
   </div>
 
-  <p class="lead">今天批哪一课？</p>
-  <input id="lesson-search" class="search" type="search" placeholder="搜题目，如「日记」" hidden>
-  <div id="lesson-list" class="lesson-list"><p class="hint">正在读课次…</p></div>
+  <p class="lead">选择本次批改的课次</p>
+  <input id="lesson-search" class="search" type="search" placeholder="搜索课次题目，如「日记」" hidden>
+  <div id="lesson-list" class="lesson-list"><p class="hint">正在载入课次…</p></div>
   <button id="hist-entry" class="hist-entry" hidden>
-    <span class="he-t">以前批过的</span>
+    <span class="he-t">历史批改记录</span>
     <span class="he-n">（<span id="hist-n">0</span> 课）</span>
     <span class="he-go">›</span>
   </button>
@@ -54,8 +54,8 @@
   <div class="boundary">
     <b>使用提示</b>
     <ul>
-      <li><b>错别字、标点、卷面不在批改范围内</b>——照片上的字会被不自觉读通顺，这一层判不准，交给老师当面看稿。</li>
-      <li><b>批语为草稿</b>，发出前请先过一遍。</li>
+      <li><b>错别字、标点、卷面不在批改范围内</b>——照片识别易将字迹自动读通，此层判定不可靠，请教师当面看稿。</li>
+      <li><b>批语为草稿</b>，发送前请教师复核。</li>
     </ul>
   </div>
 </main>
@@ -67,12 +67,12 @@
   <label class="shoot">
     <input id="file-input" type="file" accept="image/*" multiple hidden>
     <span class="shoot-icon"></span>
-    <span class="shoot-text">拍照 / 从相册选<em>可以一次连拍或多选整个班</em></span>
+    <span class="shoot-text">拍照 / 从相册选取<em>支持连拍，或一次多选全班稿纸</em></span>
   </label>
 
   <div id="queue" class="queue"></div>
 
-  <div id="empty-tip" class="hint center">还没有稿子。一份一张，拍全整页，四角都在画面里。</div>
+  <div id="empty-tip" class="hint center">尚未添加稿纸。一份一张，拍摄整页，确保四角都在画面内。</div>
 </main>
 
 <!-- ── 视图三 · 单份详情 ───────────────────────── -->
@@ -85,10 +85,10 @@
   <div id="class-body"></div>
 </main>
 
-<!-- ── 视图五 · 以前批过的 ─────────────────────── -->
+<!-- ── 视图五 · 历史批改记录 ───────────────────── -->
 <main id="view-history" class="view" hidden>
-  <p class="lead">以前批过的</p>
-  <p class="hint">批语留在这台手机上，不会自己消失。照片在<b>一份批完的那一刻就不再保存</b>了，所以这里只有批语、看不到稿子。</p>
+  <p class="lead">历史批改记录</p>
+  <p class="hint">批语保存在本机，不会自动清除。照片在<b>每份批改完成时即不再保存</b>，因此此处仅有批语，不含稿纸照片。</p>
   <div id="hist-body"></div>
 </main>
 
@@ -101,18 +101,18 @@
 <!-- 说明弹层 -->
 <div id="sheet-info" class="sheet" hidden>
   <div class="sheet-card">
-    <h3>怎么用</h3>
+    <h3>使用步骤</h3>
     <ol>
-      <li>选今天上的那一课。判据来自这一课的详案，是<b>学生当堂听过的那三条</b>——所以批语可以直接说“你没做到今天课上讲的那一招”。</li>
-      <li>连拍全班稿纸，一份一张。它一份一份批，你可以边拍边看。</li>
-      <li>每份点开可以改批语，点评卡改完生成图片，长按保存发家长群。</li>
-      <li>全批完点「班级诊断」，看这个班共性卡在哪，讲评课照着讲。</li>
+      <li>选择本次授课的课次。评价判据取自该课详案，即<b>学生当堂听过的那三条</b>，因此批语可直接对应课上讲授的技法。</li>
+      <li>连拍全班稿纸，一份一张；系统逐份批改，可边拍边看结果。</li>
+      <li>逐份打开可修改批语；点评卡确认后生成图片，长按保存即可发送家长群。</li>
+      <li>全部批完后点「班级诊断」，查看本班共性问题，作为讲评课依据。</li>
     </ol>
-    <h3>照片和批语存在哪</h3>
-    <p><b>我们的服务器一张不存。</b>批语留在这台手机上，从选课页最下面的
-    「以前批过的」能翻回去；照片批完就不留，所以回头只看得到批语。</p>
-    <button id="btn-clear-draft" class="ghost">清掉这台手机上的全部记录</button>
-    <button id="btn-close-info" class="ghost">知道了</button>
+    <h3>照片与批语的存储</h3>
+    <p><b>服务器不保存任何照片。</b>批语保存在本机，可从选课页底部的
+    「历史批改记录」查看；照片在批改完成后即删除，故仅能查看批语。</p>
+    <button id="btn-clear-draft" class="ghost">清除本机全部记录</button>
+    <button id="btn-close-info" class="ghost">关闭</button>
   </div>
 </div>
 

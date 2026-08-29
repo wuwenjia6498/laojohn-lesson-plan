@@ -172,7 +172,11 @@ def public_view(d):
         "edition": d.get("edition") or None,
         "genre": m.get("genre", ""),
         "core_technique": d.get("core_technique", ""),
-        "three_checks": [{"no": c["no"], "text": c["text"]} for c in d["three_checks"]],
+        # display_text＝界面显示的规范维度名；text 是学生当堂听过的原话（逐字铁律，
+        # 只供提示词与逐字核对，不上屏）。老包没有 display_text，前端回退到 text。
+        "three_checks": [{"no": c["no"], "text": c["text"],
+                          "display_text": c.get("display_text") or c["text"]}
+                         for c in d["three_checks"]],
         "bands": list(d.get("bands", {}).keys()),
         "not_in_scope": (d.get("not_in_scope") or {}).get("items", []),
         "verified": bool(d.get("source", {}).get("verified_by_human")),
@@ -635,7 +639,7 @@ def mock_grade(pack):
             v = "不适用"
         checks.append({"no": c["no"], "verdict": v,
                        "evidence": anchors[c["no"] % len(anchors)],
-                       "comment": f'（mock）第{c["no"]}条「{c["text"]}」的判断说明。'})
+                       "comment": f'（mock）第{c["no"]}条「{c.get("display_text") or c["text"]}」的判断说明。'})
     bands = list(pack.get("bands", {}).keys()) or ["基础过关"]
     q = anchors[i % len(anchors)]
 
@@ -868,8 +872,23 @@ async def http_err(request, exc):
 
 # 本地跑时由这个进程一并供前端；线上（Vercel）前端走 CDN、函数包里没有 frontend/，
 # 而 StaticFiles 指向不存在的目录会直接抛异常、整个函数 500，所以先判断。
+class NoCacheStatic(StaticFiles):
+    """前端文件一律带 Cache-Control: no-cache。
+
+    StaticFiles 缺省只发 etag/last-modified、不发 Cache-Control，浏览器于是走
+    启发式缓存：改完 app.js、重启服务、刷新页面，拿到的仍是磁盘里的旧脚本，且
+    从界面上看只像是「改动没生效」（2026-08-29 实测踩过，transferSize=0）。
+    no-cache 不是不缓存——仍带 etag 条件请求，没变就 304，几乎不费流量。
+    """
+
+    def file_response(self, *a, **kw):
+        resp = super().file_response(*a, **kw)
+        resp.headers["Cache-Control"] = "no-cache"
+        return resp
+
+
 if FRONTEND.is_dir():
-    app.mount("/", StaticFiles(directory=str(FRONTEND), html=True), name="static")
+    app.mount("/", NoCacheStatic(directory=str(FRONTEND), html=True), name="static")
 
 
 if __name__ == "__main__":

@@ -43,7 +43,7 @@ async function api(path, opts) {
   const r = await fetch(path, opts);
   let d = null;
   try { d = await r.json(); } catch (e) { /* 非 JSON 一律按下面的错处理 */ }
-  if (r.status === 401) { const e = new Error((d && d.error) || "口令不对"); e.needCode = true; throw e; }
+  if (r.status === 401) { const e = new Error((d && d.error) || "口令有误"); e.needCode = true; throw e; }
   if (!r.ok) throw new Error((d && d.error) || `请求失败（${r.status}）`);
   return d;
 }
@@ -343,7 +343,7 @@ async function passGate() {
       btn.disabled = false; btn.textContent = "进入";
       if (ok) { gate.hidden = true; resolve(); return; }
       setCode("");                       // 存错的会让下次打开还是进不去，且看不出原因
-      err.textContent = "口令不对，再试一次";
+      err.textContent = "口令有误，请重新输入";
       err.hidden = false;
       inp.select();
     };
@@ -359,7 +359,7 @@ async function loadLessons() {
     if (h.auth) await passGate();           // 拿不到口令就一直停在这，不往下走
     S.lessons = await api("/api/lessons");
   } catch (e) {
-    $("#lesson-list").innerHTML = `<p class="hint">读不到课次：${esc(e.message)}</p>`;
+    $("#lesson-list").innerHTML = `<p class="hint">课次载入失败：${esc(e.message)}</p>`;
     return;
   }
   const box = $("#lesson-search");
@@ -417,7 +417,7 @@ function renderLessons(kw) {
     html = list.map(lessonCard).join("");
   } else {
     if (recentIds.length) {
-      html += `<div class="grouphead plain">最近用过</div>`
+      html += `<div class="grouphead plain">最近使用</div>`
             + recentIds.map(id => lessonCard(all.find(l => l.lesson_id === id))).join("");
     }
     html += groups.map(g => {
@@ -467,9 +467,9 @@ async function pickLesson(l) {
   if (kept && S.lesson && l.lesson_id !== S.lesson.lesson_id) {
     // askSheet 的第一个按钮永远是安全的那个，所以这里问的是「留下」
     const stay = await askSheet(
-      "换课会清掉上一课",
-      esc(S.lesson.label) + " 还有 <b>" + kept + " 份</b>批完了没导出，换过去就清掉了。",
-      "先回去导出", "还是换课");
+      "切换课次将清除当前记录",
+      esc(S.lesson.label) + " 尚有 <b>" + kept + " 份</b>已批改但未导出，切换后将被清除。",
+      "返回导出", "确认切换");
     if (stay) return;
   }
   S.lesson = l;
@@ -484,13 +484,13 @@ async function pickLesson(l) {
 function renderBrief() {
   const l = S.lesson;
   $("#lesson-brief").innerHTML = `
-    ${S.mock ? '<div class="mockbar">演示模式：服务端没配密钥，下面的批改结果是<b>假数据</b>，只用来看流程。</div>' : ""}
+    ${S.mock ? '<div class="mockbar">演示模式：服务端未配置密钥，以下批改结果为<b>模拟数据</b>，仅供流程演示。</div>' : ""}
     <h2>${esc(l.label)}</h2>
     <div class="hint">${esc(l.core_technique)}</div>
     <ul class="checks">
       ${l.three_checks.map(c => `<li><span>${c.no}</span>${esc(c.text)}</li>`).join("")}
     </ul>
-    <div class="nis">不看：${esc(l.not_in_scope.join("、"))}——这一层交给你当面看稿。</div>`;
+    <div class="nis">不在批改范围：${esc(l.not_in_scope.join("、"))}——该层请教师当面看稿。</div>`;
 }
 
 /* ── 图片压缩 ───────────────────────────────── */
@@ -536,7 +536,7 @@ $("#file-input").onchange = (e) => {
 function statusCell(it) {
   if (it.status === "wait") return '<span class="badge wait">排队中</span>';
   if (it.status === "run") return '<span class="spin"></span>';
-  if (it.status === "err") return '<span class="badge err">失败·点开重试</span>';
+  if (it.status === "err") return '<span class="badge err">批改失败 · 点击重试</span>';
   const r = it.result, bi = S.lesson.bands.indexOf(r.band);
   return `<span class="badge ${BCLS[bi] || "b1"}">${esc(r.band)}</span>`;
 }
@@ -547,12 +547,12 @@ function renderQueue() {
   q.innerHTML = S.items.map(it => {
     const r = it.result;
     const name = r && r.student_name ? esc(r.student_name)
-      : `<span class="anon">第 ${it.id} 份（没读到姓名）</span>`;
+      : `<span class="anon">第 ${it.id} 份（未识别姓名）</span>`;
     const sub = it.status === "err" ? esc(it.error)
-      : (r ? esc(r.focus || r.teacher_note || "") : "等着批…");
+      : (r ? esc(r.focus || r.teacher_note || "") : "待批改");
     return `<button class="card" data-id="${it.id}">
       ${it.url ? `<img class="thumb" src="${it.url}" alt="">`
-              : `<span class="thumb ph">照片<br>没存</span>`}
+              : `<span class="thumb ph">照片<br>未保存</span>`}
       <div class="mid"><div class="name">${name}</div><div class="sub">${sub}</div></div>
       ${statusCell(it)}
       <span class="go">›</span>
@@ -567,7 +567,7 @@ function renderQueue() {
     img.onerror = () => {
       const ph = document.createElement("span");
       ph.className = "thumb ph";
-      ph.innerHTML = "照片<br>坏了";
+      ph.innerHTML = "照片<br>损坏";
       img.replaceWith(ph);
     };
   });
@@ -626,7 +626,7 @@ function openDetail(it) {
     // 图没存下来的那种 err 批不动：转 wait → pump → !it.blob 成立 → shrink(null)
     // → 又回 err，会一直空转。直接说清楚要重拍。
     if (!it.blob && !it.file) {
-      it.error = "照片没能存下来，请重新拍这一份";
+      it.error = "照片保存失败，请重新拍摄此份";
       renderQueue();
       return;
     }
@@ -637,7 +637,7 @@ function openDetail(it) {
   }
   if (it.status !== "ok") return;
   renderDetail();
-  go("detail", (it.result.student_name || "这一份") + " · 批改");
+  go("detail", (it.result.student_name || "未署名") + " · 批改");
 }
 
 // 共性问题的层级标签。「整篇」是旧值，留着兼容早先存进 IndexedDB 的历史记录——
@@ -659,18 +659,19 @@ const WP_BAD = ["未写完", "仅有开头", "有跳跃", "混乱", "个别不�
 
 function renderDetail() {
   const it = cur, r = it.result, l = S.lesson;
-  const checkMap = Object.fromEntries(l.three_checks.map(c => [c.no, c.text]));
+  // 上屏用 display_text（规范维度名）；c.text 是学生当堂听过的原话，只进提示词。
+  const checkMap = Object.fromEntries(l.three_checks.map(c => [c.no, c.display_text || c.text]));
 
-  const focus = r.focus ? `<div class="focus"><b>这一篇最值得说的</b>${esc(r.focus)}</div>` : "";
+  const focus = r.focus ? `<div class="focus"><b>本篇讲评要点</b>${esc(r.focus)}</div>` : "";
 
   const hls = r.highlights || [];
   const hlBody = hls.length
     ? hls.map(h => `<div class="hl">
         <div class="q${h.quote_suspect ? " sus" : ""}">${esc(h.quote)}${
-          h.quote_suspect ? '<span class="sustag">与原文对不上，核一下</span>' : ""}</div>
+          h.quote_suspect ? '<span class="sustag">与原稿不符，请核对</span>' : ""}</div>
         <div class="w">${h.kind ? `<span class="kind">${esc(h.kind)}</span>` : ""}${esc(h.why)}</div>
       </div>`).join("")
-    : `<div class="hint">这一篇没有特别出彩的句子。<b>不用硬找</b>——硬夸家长看得出来。</div>`;
+    : `<div class="hint">本篇未发现明显出彩的句子。<b>不必勉强摘录</b>——牵强的表扬家长能看出来。</div>`;
 
   const wp = r.whole_piece || {};
   const wpRow = ([k, label, hint]) => {
@@ -699,7 +700,7 @@ function renderDetail() {
             ? `<div class="cm">${esc(x.kind || "")}${x.kind && x.detail ? "：" : ""}${
                 esc(x.detail || "")}</div>` : ""}${
             x.quote ? `<div class="ev${x.quote_suspect ? " sus" : ""}">${esc(x.quote)}${
-              x.quote_suspect ? '<span class="sustag">与原文对不上，核一下</span>' : ""}</div>` : ""}`
+              x.quote_suspect ? '<span class="sustag">与原稿不符，请核对</span>' : ""}</div>` : ""}`
           ).join("")
         : `<div class="hint">无明显问题。</div>`
     }</div>`
@@ -715,51 +716,51 @@ function renderDetail() {
         <span class="v ${VCLS[c.verdict] || ""}">${esc(c.verdict)}</span>
       </div>
       ${c.evidence ? `<div class="ev${c.evidence_suspect ? " sus" : ""}">${esc(c.evidence)}${
-        c.evidence_suspect ? '<span class="sustag">与原文对不上，核一下</span>' : ""}</div>` : ""}
+        c.evidence_suspect ? '<span class="sustag">与原稿不符，请核对</span>' : ""}</div>` : ""}
       ${c.comment ? `<div class="cm">${esc(c.comment)}</div>` : ""}
     </div>`).join("");
 
   const unclear = (r.unclear || []).length ? `
-    <div class="unclear"><b>这几处它没看清，你翻原稿确认一下</b>
+    <div class="unclear"><b>以下内容识别不清，请核对原稿</b>
       ${r.unclear.map(u => `<div>· ${esc(u)}</div>`).join("")}</div>` : "";
 
   const sc = r.showcase || {};
   const showcase = sc.suitable ? `
     <div class="sec">
-      <h3>可以拿到讲评课上念<span class="aside">讲：${esc(sc.point || "")}</span></h3>
+      <h3>讲评课范读推荐<span class="aside">讲评点：${esc(sc.point || "")}</span></h3>
       <div class="ev${sc.paragraph_suspect ? " sus" : ""}">${esc(sc.paragraph || "")}${
-        sc.paragraph_suspect ? '<span class="sustag">与原文对不上，念之前核一遍</span>' : ""}</div>
+        sc.paragraph_suspect ? '<span class="sustag">与原稿不符，范读前请核对</span>' : ""}</div>
     </div>` : "";
   $("#detail-body").innerHTML = `
     <div class="namerow">
-      <input id="in-name" value="${esc(r.student_name || "")}" placeholder="没读到姓名，手填">
+      <input id="in-name" value="${esc(r.student_name || "")}" placeholder="未识别姓名，请手动填写">
       <span class="badge ${BCLS[l.bands.indexOf(r.band)] || "b1"}">${esc(r.band)}</span>
     </div>
     ${focus}
     ${unclear}
     <div class="sec">
-      <h3>他自己写得好的地方<span class="aside">点评卡优先引这里的句子</span></h3>
+      <h3>亮点句摘录<span class="aside">点评卡优先引用</span></h3>
       ${hlBody}
     </div>
-    <div class="sec"><h3>三条判据<span class="aside">学生课上听过这三条</span></h3>${checks}</div>
+    <div class="sec"><h3>本课评价判据<span class="aside">课堂已讲授 · 档位依据</span></h3>${checks}</div>
     <details class="sec fold">
-      <summary>篇章结构<span class="aside">不算档位，只做参考</span></summary>
+      <summary>篇章结构<span class="aside">不计入档位 · 教师参考</span></summary>
       ${wpBody}
     </details>
     <details class="sec fold">
-      <summary>语言<span class="aside">不算档位，只做参考</span></summary>
+      <summary>语言表达<span class="aside">不计入档位 · 教师参考</span></summary>
       ${lgBody}
     </details>
     <div class="sec">
-      <h3>写进稿纸「老师批改」栏<span class="aside">30 字以内</span></h3>
+      <h3>稿纸批语<span class="aside">誊写至稿纸「老师批改」栏 · 30 字以内</span></h3>
       <textarea id="ta-note" rows="2">${esc(r.teacher_note || "")}</textarea>
-      <div class="row"><button class="ghost" id="btn-copy-note">复制这句</button></div>
+      <div class="row"><button class="ghost" id="btn-copy-note">复制批语</button></div>
     </div>
     ${showcase}
     <div class="sec">
-      <h3>给家长的点评卡<span class="aside">改完再出图</span></h3>
-      ${r.quoted_sentence_suspect ? `<div class="unclear"><b>点评卡引的那句话，跟稿纸对不上</b>
-        它引的是：${esc(r.quoted_sentence || "")}<br>发出去之前请对着原稿核一遍。</div>` : ""}
+      <h3>家长点评卡<span class="aside">确认文字后生成图片</span></h3>
+      ${r.quoted_sentence_suspect ? `<div class="unclear"><b>点评卡引用与原稿不符</b>
+        引用内容：${esc(r.quoted_sentence || "")}<br>发送前请对照原稿核对。</div>` : ""}
       <textarea id="ta-card" rows="7">${esc(r.parent_card || "")}</textarea>
       <div class="count" id="cnt-card"></div>
       <div class="row">
@@ -767,7 +768,7 @@ function renderDetail() {
         <button class="primary" id="btn-make">生成图片</button>
       </div>
       <img id="cardimg" hidden alt="点评卡">
-      <div class="saveTip" id="save-tip" hidden>长按上面这张图保存，再发到家长群。</div>
+      <div class="saveTip" id="save-tip" hidden>长按上图保存，再发送至家长群。</div>
     </div>`;
 
   const ta = $("#ta-card"), cnt = $("#cnt-card");
@@ -929,7 +930,7 @@ $("#btn-class").onclick = async () => {
       ${S.lesson.bands.map((b, i) =>
         `<div class="stat"><b>${counts[i]}</b><span>${esc(b)}</span></div>`).join("")}
     </div>
-    <div class="sec"><h3>正在看这一批的共性…</h3><div class="hint">稍等几秒。</div></div>`;
+    <div class="sec"><h3>正在分析本批共性…</h3><div class="hint">请稍候。</div></div>`;
 
   let d;
   try {
@@ -939,7 +940,7 @@ $("#btn-class").onclick = async () => {
     });
   } catch (e) {
     $("#class-body").insertAdjacentHTML("beforeend",
-      `<div class="sec"><h3>没出来</h3><div class="hint">${esc(e.message)}</div></div>`);
+      `<div class="sec"><h3>分析未完成</h3><div class="hint">${esc(e.message)}</div></div>`);
     return;
   }
 
@@ -947,14 +948,14 @@ $("#btn-class").onclick = async () => {
     <div class="prob">
       <div class="p">${p.layer ? `<span class="layer ${LCLS[p.layer] || "l1"}">${esc(p.layer)}</span>` : ""}${esc(p.problem)}</div>
       <div class="m">${esc(p.how_many || "")}　${esc(p.why || "")}</div>
-      <div class="f">讲评课上：${esc(p.how_to_fix || "")}</div>
+      <div class="f">讲评处理：${esc(p.how_to_fix || "")}</div>
     </div>`).join("");
 
   const plan = (d.showcase_plan || []).map(s => `
     <div class="prob">
       <div class="p">${esc(s.name || "")}</div>
-      <div class="m">念：${esc(s.read_what || "")}</div>
-      <div class="f">用来讲：${esc(s.teach_what || "")}</div>
+      <div class="m">范读：${esc(s.read_what || "")}</div>
+      <div class="f">讲评点：${esc(s.teach_what || "")}</div>
     </div>`).join("");
 
   $("#class-body").innerHTML = `
@@ -963,14 +964,14 @@ $("#btn-class").onclick = async () => {
       ${S.lesson.bands.map((b, i) =>
         `<div class="stat"><b>${counts[i]}</b><span>${esc(b)}</span></div>`).join("")}
     </div>
-    <div class="sec"><h3>整体</h3><div>${esc(d.overall || "")}</div></div>
+    <div class="sec"><h3>整体情况</h3><div>${esc(d.overall || "")}</div></div>
     ${d.whole_piece_summary ? `<div class="sec">
-      <h3>地基这一层<span class="aside">比本课技法更该先管</span></h3>
+      <h3>基础问题<span class="aside">优先于本课技法</span></h3>
       <div>${esc(d.whole_piece_summary)}</div></div>` : ""}
     ${probs ? `<div class="sec"><h3>共性问题</h3>${probs}</div>` : ""}
-    ${plan ? `<div class="sec"><h3>讲评课念谁的</h3>${plan}</div>` : ""}
+    ${plan ? `<div class="sec"><h3>讲评课范读安排</h3>${plan}</div>` : ""}
     ${d.next_lesson_slots ? `<div class="sec">
-      <h3>填进详案讲评环节的空槽<span class="aside">可直接抄</span></h3>
+      <h3>讲评环节教学建议<span class="aside">可直接填入详案</span></h3>
       <textarea id="ta-slot" rows="5">${esc(d.next_lesson_slots)}</textarea>
       <div class="row"><button class="ghost" id="btn-copy-slot">复制</button></div>
     </div>` : ""}`;
@@ -1018,11 +1019,11 @@ async function draftBoot(lessonsP) {
   if (ghosts.length) idbTx("items", "readwrite", (s) => { ghosts.forEach(r => s.delete(r.key)); });
 
   const yes = await askSheet(
-    "上次批到一半",
-    esc(meta.lesson_label || lesson.label) + " 还有 <b>" + pending.length + " 份</b>没批完。" +
-    (ghosts.length ? "<br>其中 " + ghosts.length + " 份的照片没来得及存下，需要重拍。" : "") +
-    "<br><span class=\"aside\">已经批好的那些不会丢，在「以前批过的」里随时能翻。</span>",
-    "接着批", "先不批");
+    "上次批改未完成",
+    esc(meta.lesson_label || lesson.label) + " 尚有 <b>" + pending.length + " 份</b>未批改。" +
+    (ghosts.length ? "<br>其中 " + ghosts.length + " 份照片未保存，需重新拍摄。" : "") +
+    "<br><span class=\"aside\">已批改的记录不会丢失，可在「历史批改记录」中查看。</span>",
+    "继续批改", "暂不继续");
   if (!yes) return;   // ⚠ 不删——「先不批」只是这次不弹，不是要丢掉
 
   openSession(lesson, cur.sid, keep, true);
@@ -1069,7 +1070,7 @@ async function renderHistory() {
   const ss = await draftSessions();
   const body = $("#hist-body");
   if (!ss.length) {
-    body.innerHTML = `<p class="hint center">还没有批过的课。</p>`;
+    body.innerHTML = `<p class="hint center">暂无批改记录。</p>`;
     return;
   }
   body.innerHTML = ss.map(m => {
@@ -1078,11 +1079,11 @@ async function renderHistory() {
     const left = (m.total || 0) - (m.done || 0);
     return `<div class="hist-row">
       <button class="hist-open" data-sid="${esc(m.sid)}">
-        <div class="t">${esc(m.lesson_label || "（这一课已经下架）")}</div>
-        <div class="s">${when} · 批了 ${m.done || 0} 份${left > 0 ? "，还有 " + left + " 份没批完" : ""}</div>
-        ${m.mock ? `<span class="tag unverified">演示模式批的</span>` : ""}
+        <div class="t">${esc(m.lesson_label || "（该课次已下架）")}</div>
+        <div class="s">${when} · 已批 ${m.done || 0} 份${left > 0 ? "，" + left + " 份未完成" : ""}</div>
+        ${m.mock ? `<span class="tag unverified">演示模式</span>` : ""}
       </button>
-      <button class="hist-del" data-sid="${esc(m.sid)}">删掉</button>
+      <button class="hist-del" data-sid="${esc(m.sid)}">删除</button>
     </div>`;
   }).join("");
 
@@ -1091,11 +1092,11 @@ async function renderHistory() {
     b.onclick = async () => {
       const m = ss.find(x => x.sid === b.dataset.sid);
       const stay = await askSheet(
-        "删掉这一课的批改？",
-        esc((m && m.lesson_label) || "这一课") + " 批过的 <b>" + ((m && m.done) || 0) +
-        " 份</b>批语会被删掉，删了找不回来。<br>" +
-        "<span class=\"aside\">点评卡如果已经保存到相册，那些图不受影响。</span>",
-        "先留着", "删掉");
+        "删除该课次的批改记录？",
+        esc((m && m.lesson_label) || "这一课") + " 已批改的 <b>" + ((m && m.done) || 0) +
+        " 份</b>批语将被删除，且无法恢复。<br>" +
+        "<span class=\"aside\">已保存至相册的点评卡不受影响。</span>",
+        "保留", "删除");
       if (stay) return;
       await draftDropSession(b.dataset.sid);
       // 删的正好是当前这一课时，把队列也清干净，免得界面还留着已删的东西
@@ -1115,19 +1116,19 @@ async function openHistSession(sid) {
   // 品牌落款的点评卡——那能直接发进家长群。不给开。
   if (!!m.mock !== !!S.mock) {
     const stay = await askSheet(
-      "这一课是演示模式批的",
-      "当时服务器还没配密钥，批语是结构完整的**假数据**，没有参考价值；" +
-      "现在打开还会生成不带「非真实批改」水印的点评卡。建议直接删掉。",
-      "先留着", "删掉这一课");
+      "该课次为演示模式批改",
+      "服务端当时未配置密钥，批语为结构完整的<b>模拟数据</b>，不具参考价值；" +
+      "此时生成的点评卡也不带「非真实批改」水印，建议删除。",
+      "保留", "删除该课次");
     if (!stay) { await draftDropSession(sid); renderHistory(); refreshHist(); }
     return;
   }
 
   const lesson = S.lessons.find(l => l.lesson_id === m.lesson_id);
   if (!lesson) {
-    await askSheet("这一课已经下架了",
-      "标准包里找不到这一课了，批语还在但没法正常显示（档位和判据都读不到）。",
-      "知道了", "删掉这一课").then(async (stay) => {
+    await askSheet("该课次已下架",
+      "标准包中已无此课次，批语仍在但无法正常显示（档位与判据均读取不到）。",
+      "关闭", "删除该课次").then(async (stay) => {
         if (!stay) { await draftDropSession(sid); renderHistory(); refreshHist(); }
       });
     return;
@@ -1146,7 +1147,7 @@ draftBoot(lessonsP);
 // 全仓唯一一个 addEventListener。整个暂存功能就是为「被打断」服务的，而切后台
 // 和锁屏正是最主要的那种打断——不 flush 就会丢掉老师改的最后几个字。
 // 只加这一个：iOS 上 beforeunload 本就不可靠，不必再凑 pagehide 那一套。
-$("#hist-entry").onclick = () => { renderHistory(); go("history", "以前批过的"); };
+$("#hist-entry").onclick = () => { renderHistory(); go("history", "历史批改记录"); };
 
 document.addEventListener("visibilitychange", () => { if (document.hidden) saveFlush(); });
 
@@ -1154,11 +1155,11 @@ $("#btn-clear-draft").onclick = async () => {
   // 以前这里只清 24 小时的暂存，不问也罢；现在它会把**所有批过的课**一起删掉，
   // 那是删数据，必须问一句。
   const stay = await askSheet(
-    "清掉这台手机上的全部记录？",
-    "包括<b>以前批过的 " + histCount + " 课</b>的批语，删了找不回来。<br>" +
-    "<span class=\"aside\">只想删某一课的话，去「以前批过的」里单独删。" +
-    "已经保存到相册的点评卡不受影响。</span>",
-    "先留着", "全部删掉");
+    "清除本机全部记录？",
+    "包括<b>历史记录中 " + histCount + " 个课次</b>的批语，删除后无法恢复。<br>" +
+    "<span class=\"aside\">如仅需删除某一课次，请在「历史批改记录」中单独删除。" +
+    "已保存至相册的点评卡不受影响。</span>",
+    "保留", "全部删除");
   if (stay) return;
   draftClearAll();
   dropItems();
@@ -1166,8 +1167,8 @@ $("#btn-clear-draft").onclick = async () => {
   renderQueue();
   refreshHist();
   const b = $("#btn-clear-draft");
-  b.textContent = "已清掉";
-  setTimeout(() => { b.textContent = "清掉这台手机上的暂存"; }, 1200);
+  b.textContent = "已清除";
+  setTimeout(() => { b.textContent = "清除本机全部记录"; }, 1200);
   // 若此刻 pump 正在批：它持有 it 引用，会把当前这份跑完、把结果写回一个已被
   // 丢弃的对象，下一轮 find 返回 undefined 自然退出。无副作用，这是有意的。
 };
