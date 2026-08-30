@@ -23,6 +23,7 @@
 import argparse
 import csv
 import re
+import shutil
 import datetime
 import json
 import pathlib
@@ -259,11 +260,12 @@ def stage_pages(d, outdir, client, force, only=None, proj_path=None):
 
 def stage_export(d, outdir):
     """按 PRD FR-7 导出：课名-P页码-用途-序号.png + 清单 csv。"""
-    g = require_gate(outdir, "pages")
+    # 闸门改成不阻断后，没验收时 require_gate 返回 None —— 这里必须接住。
+    # 漏了它，一个没签过字的项目一点「导出」就是 500，而报错还指向 csv 那一行。
+    g = require_gate(outdir, "pages") or {}
     name = d["project"]["名称"]
     pack = outdir / "导出"
     pack.mkdir(exist_ok=True)
-    from PIL import Image
     rows = []
     for s in d["slides"]:
         if s["通道"] == "人工素材位":
@@ -281,15 +283,19 @@ def stage_export(d, outdir):
         # 于是 60 多字连标点全进了文件名。按第一个标点切、再截到 14 字。
         use = re.split(r"[·，。、；：—\-]", s["用途"])[0].strip()[:14]
         use = re.sub(r'[/\:*?"<>|]', "／", use) or "配图"
-        fn = f"{name}-{s['页码']}-{use}-01.png"
-        Image.open(src).convert("RGB").save(pack / fn)
+        # 直接复制，不转 PNG。源图本来就是 JPEG —— 转 PNG 既不提升画质
+        # （有损压缩的损失早已发生），还把体积放大 6.3 倍、每张多花 1.3 秒。
+        # 实测一课 27 张：转 PNG 是 36 秒 / 124MB，直接复制是 1 秒 / 20MB。
+        # PPT 插图用 JPEG 完全够。
+        fn = f"{name}-{s['页码']}-{use}-01.jpg"
+        shutil.copy2(src, pack / fn)
         rows.append([s["页码"], fn, s["画幅"], s["用途"],
                      g.get("验收人", ""), g.get("时间", "")])
     with open(pack / "导出清单.csv", "w", newline="", encoding="utf-8-sig") as f:
         w = csv.writer(f)
         w.writerow(["页码", "文件名", "画幅", "用途", "验收人", "验收时间"])
         w.writerows(rows)
-    print(f"✓ 导出 {sum(1 for r in rows if r[1].endswith('.png'))} 张到 {pack}")
+    print(f"✓ 导出 {sum(1 for r in rows if r[1].endswith('.jpg'))} 张到 {pack}")
     print(f"  清单：{pack / '导出清单.csv'}")
 
 

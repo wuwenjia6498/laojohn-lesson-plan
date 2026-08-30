@@ -36,7 +36,9 @@ import sys
 import threading
 import time
 import traceback
+import urllib.parse
 import uuid
+import zipfile
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
@@ -724,9 +726,8 @@ async def api_approve(name: str, body: dict):
 def api_export(name: str):
     """导出成品包。走 CLI 同一个 stage_export，命名与清单格式完全一致。
 
-    ⚠ 它内部会 require_gate("pages")：导出是交付动作，这一步仍要求页目验收过。
-    「页目软」指的是**生成**不被拦住，可以边生边看边改；到了往外交的这一步，
-    还是得有人签字说这批能用。
+    导出**不要求验收**（2026-08-28 用户决定闸门不阻断）。清单里的
+    「验收人 / 验收时间」两列签过就有名字、没签就是空的 —— 如实反映做没做过。
     """
     d, outdir = load_proj(name)
     # 导出同样不拦（2026-08-28 用户决定）。导出清单里的「验收人 / 验收时间」两列
@@ -735,8 +736,50 @@ def api_export(name: str):
     if pack.exists():
         shutil.rmtree(pack)
     run_lesson.stage_export(d, outdir)
-    files = sorted(p.name for p in pack.glob("*.png"))
-    return {"ok": True, "目录": str(pack), "文件数": len(files), "文件": files}
+    files = sorted(p.name for p in pack.glob("*.jpg"))
+    # 打成 zip —— **不打包等于没导出**：服务跑在谁的机器上，PNG 就落在谁的盘上，
+    # 网页那头只有个浏览器，什么都拿不到。同事用这个工具时，
+    # 「导出」必须以「他能下载到自己电脑」为终点，而不是「文件写到服务器某个目录」。
+    zpath = outdir / f"{name}-导出.zip"
+    if zpath.exists():
+        zpath.unlink()
+    # 只打包不压缩：里面全是 JPEG，DEFLATE 再压收益近零、时间却不少。
+    with zipfile.ZipFile(zpath, "w", zipfile.ZIP_STORED) as z:
+        for f in sorted(pack.iterdir()):          # 含 PNG 与导出清单.csv
+            if f.is_file():
+                z.write(f, f.name)
+    return {"ok": True, "目录": str(pack), "文件数": len(files), "文件": files,
+            "下载": f"/dl/pack/{urllib.parse.quote(name)}",
+            "大小MB": round(zpath.stat().st_size / 1e6, 1)}
+
+
+@app.get("/dl/pack/{name}")
+def api_dl_pack(name: str):
+    """下载整包 zip。先点「导出」生成，这里只负责把它送出去。"""
+    _, outdir = load_proj(name)
+    z = outdir / f"{name}-导出.zip"
+    if not z.exists():
+        raise HTTPException(404, "还没有导出包，先点「导出」。")
+    return FileResponse(z, media_type="application/zip", filename=z.name)
+
+
+@app.get("/dl/img/{name}/{sub}/{fn}")
+def api_dl_img(name: str, sub: str, fn: str):
+    """下载单张图。与 /img 的区别只在 Content-Disposition：
+    /img 是给页面显示用的，这个是让浏览器存盘的。
+
+    文件名带上课名和页码 —— 存到本地一堆 P01.jpg 分不清是哪一课的。"""
+    if sub not in ("角色", "页目"):
+        raise HTTPException(400, "sub 只能是 角色/页目")
+    if "/" in fn or "\\" in fn:
+        raise HTTPException(400, "文件名不合法")
+    d, outdir = load_proj(name)
+    f = outdir / sub / fn
+    if not f.exists():
+        raise HTTPException(404, "图不存在")
+    pj = d.get("project")
+    course = (pj.get("名称") if isinstance(pj, dict) else pj) or name
+    return FileResponse(f, media_type="image/jpeg", filename=f"{course}-{fn}")
 
 
 @app.get("/api/rules")
@@ -827,6 +870,23 @@ def api_health():
     except SystemExit as e:
         ok, info = False, {"错误": str(e)}
     return {"密钥": ok, **info, "规则库": RULES.exists(), "项目目录": str(PROJECTS)}
+
+
+@app.middleware("http")
+async def _no_cache(request, call_next):
+    """前端文件一律不缓存。
+
+    这个工具的前端天天在改，而浏览器会把 app.js / style.css 缓存住 ——
+    人看到的是旧界面，还以为功能没做（实测：加了「下载这张」按钮，
+    刷新页面照样看不见，因为跑的还是上一版 js）。
+    本地单机工具，重新读一遍文件的开销可以忽略，不值得为它省。
+    """
+    resp = await call_next(request)
+    path = request.url.path
+    if path == "/" or path.endswith((".js", ".css", ".html")):
+        resp.headers["Cache-Control"] = "no-store, must-revalidate"
+        resp.headers["Pragma"] = "no-cache"
+    return resp
 
 
 app.mount("/", StaticFiles(directory=str(FRONTEND), html=True), name="static")

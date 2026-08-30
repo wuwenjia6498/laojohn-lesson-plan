@@ -234,10 +234,19 @@ function secHead() {
   };
   const bExp = el('button', 'small ghost', '导出');
   bExp.onclick = async () => {
-    try { const r = await api(`/projects/${encodeURIComponent(NAME)}/export`, { method: 'POST' });
-          alert(`✓ 导出 ${r.文件数} 张到
-${r.目录}`); }
-    catch (e) { alert(e.message); }
+    bExp.disabled = true; bExp.textContent = '打包中…';
+    try {
+      const r = await api(`/projects/${encodeURIComponent(NAME)}/export`, { method: 'POST' });
+      // 直接把 zip 拉下来 —— 服务可能跑在别人的机器上，
+      // 只把文件写到服务端目录，用的人一张也拿不到。
+      if (r.下载) location.href = r.下载;
+      setTimeout(() => alert(
+        `✓ 导出 ${r.文件数} 张（${r.大小MB} MB），浏览器正在下载压缩包。
+
+`
+        + `服务端也留了一份：${r.目录}`), 400);
+    } catch (e) { alert(e.message); }
+    finally { bExp.disabled = false; bExp.textContent = '导出'; }
   };
   bar.append(bAll, bExp); h.append(bar); c.append(h);
   c.append(el('p', 'muted',
@@ -302,9 +311,19 @@ function openChar(ch) {
   const t = el('textarea'); t.rows = 5; t.value = ch.prompt;
   t.onchange = async () => { ch.prompt = t.value; await save({ characters: P.characters }); };
   lab.append(t); box.append(lab);
+  const row = el('div', 'row'); row.style.marginTop = '8px';
   const b = el('button', '', '按新描述重出');
   b.onclick = () => { closeModal(); genImages('char', [ch.id], true, $('#view')); };
-  box.append(b);
+  row.append(b);
+  if (P.图状态.角色[ch.id]) {
+    const dl = el('button', 'small ghost', '下载这张');
+    dl.onclick = () => {
+      location.href = `/dl/img/${encodeURIComponent(NAME)}/角色/`
+                    + encodeURIComponent(ch.id + '.jpg');
+    };
+    row.append(dl);
+  }
+  box.append(row);
   openModal(ch.id, box);
 }
 /* —— 画面清单：缩略图网格。首屏就是一屏图，点某张才展开详情 ——
@@ -454,6 +473,15 @@ function openSlide(s) {
   if (shown) { const im = el('img'); im.src = imgUrl('页目', shown); left.append(im); }
   else left.append(el('div', 'thumb miss', s.通道 === '人工素材位' ? '人工素材位' : '未生成'));
   if (s._说明) left.append(el('p', 'muted', s._说明));
+  if (shown) {
+    const dl = el('button', 'small ghost', '下载这张');
+    dl.style.marginTop = '8px';
+    dl.onclick = () => {
+      location.href = `/dl/img/${encodeURIComponent(NAME)}/页目/`
+                    + encodeURIComponent(shown + '.jpg');
+    };
+    left.append(dl);
+  }
   wrap.append(left);
 
   const right = el('div');
