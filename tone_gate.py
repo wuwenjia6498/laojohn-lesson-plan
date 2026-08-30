@@ -266,7 +266,10 @@ POOL7_PER_ITEM_CAP = 2   # pools 池7 硬规则：单篇同一说法至多两次
 # ⚠ 双写位置＝variation-pools.md 池6「### 硬规则」第 2 条，改那里须同步这里。
 PRAISE_WORDS = ['说得好', '太妙了', '太棒了']
 PRAISE_CAP = 1
-MECH_WORDS = ['A 档', 'A档', '降压', '兜底', '锚点', '指纹', '台账', '零件']
+MECH_WORDS = ['A 档', 'A档', '降压', '兜底', '锚点', '指纹', '台账', '零件', '定起点']
+# 「定起点」＝2026-08-30 新增:L5–L6 起步半环改判后的内部方法名(见 workflow-engine
+# 环节⑥-起步改判块)。它同「降压」一样只供 skill 内部使用——详案环节名写平实话
+# (「看着构思表,定下从哪儿起笔」),师话里出现「定起点」三个字即漏。
 # 池8 技法口令：口令因课而异、无法预置词表，改动态检测全篇 ≥N 次的中文短语。
 # 阈值 6 是四篇存量实测定的（≥4 每篇报 10–14 条、噪声六成；≥6 每篇 2–4 条）。
 # ⚠ 它**不是**池8 配额（配额＝同一短语 ≤4 次，见 pools 池8），4~5 次的漏网归人工判。
@@ -495,7 +498,7 @@ def check_writing(lines, in_outline, rep):
     mech = re.compile('|'.join(map(re.escape, MECH_WORDS)))
     hits = [(i + 1, ln) for i, ln in enumerate(lines)
             if ln.strip().startswith(('师：', '参考：')) and mech.search(ln)]
-    rep.fail('内部机制名漏进师话/参考（A 档/降压/兜底/锚点/指纹/台账/零件）', hits)
+    rep.fail('内部机制名漏进师话/参考（A 档/降压/定起点/兜底/锚点/指纹/台账/零件）', hits)
     # 讲评括注禁机制词「占位」（lesson-structure §三「填空横线写法」，2026-07-31 用户拍板；
     # 同步定义在 checklist B 组附讲评条、workflow-engine 讲评模块）：横线旁的括注**直接写
     # 动作指令**（`＿＿＿（念该生最传神的一两句）`），「占位」是生成侧机制词、印进 docx 对
