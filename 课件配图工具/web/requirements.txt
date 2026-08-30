@@ -1,0 +1,10 @@
+# 课件配图工具 · 本地单机版运行时依赖
+# 安装：pip install -r 课件配图工具/web/requirements.txt
+# 启动：PYTHONUTF8=1 python 课件配图工具/web/server/main.py
+
+fastapi>=0.115.6
+uvicorn>=0.32.1
+python-multipart>=0.0.20    # 上传 pptx / 详案走 multipart，少了它一上传就 500
+
+# 生图与拆解由 scripts/ 下的引擎承担，它们自带的依赖（requests、google-genai、
+# python-pptx、Pillow）不在这里重复声明——那几个脚本 CLI 也在用，是同一套。

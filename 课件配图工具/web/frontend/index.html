@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>课件配图工具</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>课件配图工具</h1>
+  <div class="right">
+    <span id="health" class="pill">检查中…</span>
+    <button id="btnRules" class="ghost">规则库</button>
+    <button id="btnHome" class="ghost">项目列表</button>
+  </div>
+</header>
+
+<main id="view"></main>
+
+<div id="modal" class="modal hidden">
+  <div class="modal-box">
+    <div class="modal-head"><span id="modalTitle"></span>
+      <button class="ghost" onclick="closeModal()">关闭</button></div>
+    <div id="modalBody" class="modal-body"></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
