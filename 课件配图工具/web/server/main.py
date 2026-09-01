@@ -891,8 +891,70 @@ async def _no_cache(request, call_next):
 
 app.mount("/", StaticFiles(directory=str(FRONTEND), html=True), name="static")
 
+def _lan_ips():
+    """列出本机可能的局域网地址，排序后返回（最可能的在前）。
+
+    不能只用 UDP connect 取一个——实测本机拿到的是 198.18.0.1，那是
+    Clash 这类代理软件 TUN 网卡占的保留网段，拿去给同事根本连不上，
+    而它看上去就像个正常 IP、不报任何错。所以改成：把所有网卡都拿出来，
+    排掉已知的非物理网段，剩下不止一个就全列出来让人自己试。
+    宁可让人试两个地址，不能自信地给一个错的。"""
+    import socket
+    cand = set()
+    try:                                   # 路由表选出的出口网卡
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            s.connect(("223.5.5.5", 80))   # 不真发包，只为选路由
+            cand.add(s.getsockname()[0])
+        finally:
+            s.close()
+    except OSError:
+        pass
+    try:                                   # 主机名解析出的全部网卡
+        for info in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET):
+            cand.add(info[4][0])
+    except OSError:
+        pass
+
+    def rank(ip):
+        """越小越可能是真实局域网地址。None = 排掉。"""
+        if ip.startswith("127.") or ip.startswith("169.254."):
+            return None                    # 回环 / 拿不到 DHCP 的自分配地址
+        if ip.startswith("198.18.") or ip.startswith("198.19."):
+            return None                    # 代理软件 TUN 网卡（实测就是它冒充）
+        if ip.startswith("192.168."):
+            return 0                       # 家庭/办公路由器最常见
+        if ip.startswith("10."):
+            return 1                       # 企业网常见
+        second = ip.split(".")[1] if ip.count(".") == 3 else ""
+        if ip.startswith("172.") and second.isdigit() and 16 <= int(second) <= 31:
+            return 2                       # 也是私有网段，但常被 Docker/虚拟机占
+        return 3
+
+    return sorted((ip for ip in cand if rank(ip) is not None), key=rank)
+
+
 if __name__ == "__main__":
     import uvicorn
+
+    # 默认只听 127.0.0.1：本机自用不暴露。要给同局域网的同事用才加 --lan。
+    # 安全默认不能反过来：这个服务没有任何登录，听 0.0.0.0 就意味着同网段
+    # 任何人都能上传、生图（花的是本机 .env 里那把密钥的钱）、下载已有产出。
+    lan = "--lan" in sys.argv
+    host = "0.0.0.0" if lan else "127.0.0.1"
+
     print("课件配图工具 · 本地单机版")
-    print("  打开 http://127.0.0.1:8848")
-    uvicorn.run(app, host="127.0.0.1", port=8848, log_level="warning")
+    print("  本机打开 http://127.0.0.1:8848")
+    if lan:
+        ips = _lan_ips()
+        print("  局域网已开放（--lan），同事浏览器打开：")
+        for i, ip in enumerate(ips):
+            print(f"      http://{ip}:8848" + ("        ← 先试这个" if i == 0 and len(ips) > 1 else ""))
+        if not ips:
+            print("      未识别到内网 IP，请跑 ipconfig 看无线/以太网那张网卡的 IPv4 地址")
+        elif len(ips) > 1:
+            print("      （多网卡：上面哪个能开就用哪个）")
+        print("  ↑ 此服务无登录，同网段任何人拿到网址都能用。不用时关掉窗口。")
+        print("  ↑ 头一次跑 Windows 会弹防火墙，勾“专用网络”并允许；勾错了同事连不上。")
+    print("  任务状态在内存：关掉或重启服务，正在跑的批量任务会丢（已出的图不丢）。")
+    uvicorn.run(app, host=host, port=8848, log_level="warning")

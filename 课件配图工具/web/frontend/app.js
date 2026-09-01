@@ -103,6 +103,12 @@ function watchJob(jid, box, onDone) {
 
 /* ───────────────────── 项目列表 ───────────────────── */
 
+// 新建项目表单的默认值。写成 value 而不是 placeholder 是有意的：
+// placeholder 只是灰字提示，人还得从头敲一遍；默认值能直接改。
+// 项目名重名不会静默覆盖——后端建项目时查重并报 409。
+const DEFAULT_NAME = '三上-第一单元-猜猜他是谁';
+const DEFAULT_STYLE = '水彩儿童插画：柔和水彩质感、干净留白';
+
 async function viewHome() {
   const v = $('#view'); v.innerHTML = '';
   const head = el('div', 'card');
@@ -112,9 +118,9 @@ async function viewHome() {
     <b>教学详案</b> 决定画什么。少了 pptx 就只能让模型猜页码，实测会错位 1–3 页。</p>
     <div class="row" style="margin-bottom:10px">
       <label class="field" style="flex:1 1 240px"><span>项目名（也是产出目录名）</span>
-        <input id="pName" placeholder="三上-第一单元-猜猜他是谁"></label>
-      <label class="field" style="flex:2 1 380px"><span>画风（留空则由模型推一个并标注待确认）</span>
-        <input id="pStyle" placeholder="水彩儿童插画：柔和水彩质感、干净留白"></label>
+        <input id="pName" value="${DEFAULT_NAME}" placeholder="三上-第一单元-猜猜他是谁"></label>
+      <label class="field" style="flex:2 1 380px"><span>画风（改成你要的；清空则由模型推一个并标注待确认）</span>
+        <input id="pStyle" value="${DEFAULT_STYLE}" placeholder="水彩儿童插画：柔和水彩质感、干净留白"></label>
     </div>
     <div class="row" style="margin-bottom:10px">
       <label class="field" style="flex:1"><span>课件 .pptx</span><input type="file" id="pPptx" accept=".pptx"></label>

@@ -27,7 +27,7 @@
 - **目录口径(2026-07-23后)**:读书会线顶层目录全带「读书会」前缀;写作课件三目录+整套打包目录独立分线;旧名全部作废,详见 [bookclub-materials-dir-consolidation](bookclub-materials-dir-consolidation.md)
 
 ## 写作课（writing-lesson）
-**写任何一篇前必读**：[教师自拟例子四判据](writing-lesson-example-must-be-unique-anchor.md) · [比喻反刻板+不绑老师真实生活](writing-lesson-metaphor-antistereotype.md) · [电报体/生造词红线](writing-lesson-telegraphese-and-coinage-redline.md) · 下方「跨课次通则」整块
+**写任何一篇前必读**：[⚠文风定盘·PassC已撤·判据缺AI痕迹半边](writing-style-two-directions-conflict-0831.md) · [教师自拟例子四判据](writing-lesson-example-must-be-unique-anchor.md) · [比喻反刻板+不绑老师真实生活](writing-lesson-metaphor-antistereotype.md) · [电报体/生造词红线](writing-lesson-telegraphese-and-coinage-redline.md) · 下方「跨课次通则」整块
 ### 跨课次通则（从课次经验抽离 · 写同类题目直接适用 · 展开见各源条）
 - **开场姿态**：教具别编「本想做却没做成」的懊恼制造由头(学生看得出假),坦白说特意准备;凡用教具起头的课 — [源](guanchariji-4a-lesson-state.md)
 - **官方情境在机构班不可兑现→把限制变成设定,不退回自造情境**:依赖「自带物品」的(四下《我的动物朋友》等)→实物不在场·稿子顶替;依赖「同班互相认识」的猜人反馈(四上《自画像》·六上《有你,真好》)→换掉「猜」保留内核,听众各说「看见的哪一处」 — [源1](xinaizhiwu-5a-lesson-state.md)/[源2](manhua-laoshi-5a-lesson-state.md)
@@ -43,6 +43,8 @@
 - **换掉教师示范文＝四处下游连改**(详案12处/配套学生·教师两侧json/批改标准包前两组进提示词/PPT六类页外部重做),且必须回看③判断对比的反例有没有跟新示范文撞车 — [源](model-essay-swap-downstream-chain.md)
 
 ### 规则与体例
+- [⚠文风定盘0831立·0901修正:判据缺AI痕迹半边](writing-style-two-directions-conflict-0831.md) — 润色方向仍是向规范书面靠(抒情句被保留);AI痕迹=破折号/导演腔/省主语/术语漂移;**PassC整篇重写已撤销别重开**(方向会反、被网页端完全覆盖);现行=判据`style-criteria.md`+执行位并入**PassB**;**护栏对+机检绿≠方向对**→新增`--baseline`方向指标,改写类工序跑完必看;**0901收敛定盘=一主三从**(主判据唯一源style-criteria·判据卡并入§六·benchmark降级正样本库·三分歧拍板念→读/短指令加请/术语门槛);修文件批量脚本必须**每步立即写盘**
+- [横审报告曾被页标与_报告件淹没(0831)](batch-ngram-scan-pagemark-noise-0831.md) — 373→139条;页标带页码进不了白名单须正则剥;补白名单只收体例层不收师话;⚠逐字复用基线40已过时、实测48
 - [教师自拟例子四条硬判据(0817)](writing-lesson-example-must-be-unique-anchor.md) — 连否四轮五次返工换来:**独一份**(嗓门大/不爱笑=通用款,会让课自相矛盾)／**夸张≠计数**(「问了八遍我们数过」不是放大)／**样板不得低于例句**／**一篇内锚点不复用**;判据在model-essay §四之四、管全篇例子不只示范文
 - [比喻类写人反刻板＋示范材料不绑老师真实生活(0802/0817)](writing-lesson-metaphor-antistereotype.md) — 解法「先想只有他家才有的画面再找动物」须做成课堂明线;**两条全线通则:①例子不落到老师家人 ②默认措辞不强断言老师当下生活事实**(课案多人复用,「这是老师每天背的包」会逼老师说假话;授课提示是补救不是解法,须给替换清单+降级兜底)
 - [③引本单元课文佐证技法·匹配则引(0821立)](writing-lesson-cite-unit-text-0821.md) — **并非每个单元课文都配得上习作主题,不配就不引、不许硬上**(三形态:阅读要素≠习作技法/课文是对象不是示范/方向相反,实证三上二·五上三);判据=有没有一篇「最突出的写法」正是本课这一招,沾边不算;判不引≠欠账、冷审不得逼补引;由「可引」升格;新建 unit-texts.md 事实源(仓内原本没有单元篇目、archive/course-map 设计范围都不含);**联网核实存量三处 3/3 全中,但「碰巧对」不是流程**故仍须先核实后落笔;CLAUDE.md §5 开第二个联网例外口;「没课本」与「引课文」冲突已定口径＝**禁指向动作不禁指代进度**
@@ -64,7 +66,7 @@
 - [文件名/目录名加「第N单元」段(0802)](writing-line-filename-unit-segment.md) — 全线标识改`<年级册>-第N单元-<题目>`(中文数字·取course-map单元列;自拟主题省略);⚠「PPT文件名内仍纯题目」那半条**0826已推翻**
 - [写作课线三项命名/结构调整(0826立)](writing-line-naming-flattened-0826.md) — 配套件`-X合订`→`-X用`／打包目录**单层平铺**撤两层子文件夹／PPT改`<年级册>-第N单元-<题目>-课件PPT.pptx`(**推翻CLAUDE.md §7「PPT文件名内纯题目」**);⚠**pptx与anim.json必须同批改名**否则inspect_pptx防覆盖闸门静默失效、人工排的分组全废;⚠**Windows下glob返反斜杠、`rstrip("/")`是空操作**→basename得空串(取目录名一律用pathlib `.name`);**预演输出要逐行真看**(把丢了课次段的`→ -课件PPT.pptx`看成了列宽截断);打包脚本零删除逻辑故改结构必清存量;闸门=validate的E24＋shots.json的12条src逐条exists
 - [标题与环节命名定稿](writing-lesson-title-naming.md) — 唯一源=references/title-naming.md;改体例前必全skill搜一遍
-- [首页改无区头单表6行+两行文案体例(现行)](writing-lesson-front-page-single-table.md) — 0729定稿:删区头与「怎么落地」/课时回表/文体线→同类习作顺序;**0828两行体例改版:目标「能…」起句·分句须对得上末页自查表·技法只写一招且招名同「学写法」标题·两行禁反例/备选/选材/成果包装·不再用**加粗**;推翻旧的「下课时手上有什么」写法**;写详案或改style_front_page前必读(前身[分区版](writing-lesson-front-page-zones.md)、[两区表](writing-lesson-front-page-two-zones.md)已作废)
+- [首页改无区头单表6行+两行文案体例(现行)](writing-lesson-front-page-single-table.md) — 0729定稿:删区头与「怎么落地」/课时回表/文体线→同类习作顺序;**0831两行体例二次改版(推翻0828):目标=一句话说清学会写哪一类文章(「通过…来学习怎么写…」或「掌握…;能…写成…」)、不写效果检验句;技法首句固定「使用“<构思工具名>”。」+平白两三分句,工具名须与正文一字一致;0828的破折号招名/旁批表/（辅：）三条停用;两行禁反例·备选·成果包装仍有效**;写详案或改style_front_page前必读(前身[分区版](writing-lesson-front-page-zones.md)、[两区表](writing-lesson-front-page-two-zones.md)已作废)
 - [审题固化为③开头固定半环](writing-lesson-shenti-bianxi-fixed-half-step.md) / [第2节起步半环·L5–L6改判「定起点」+自由写作≥25分钟(0830)](writing-lesson-destress-onramp.md) / [修改符号自然用不重教](writing-lesson-revision-symbols-natural-use.md)
 - [去先导预设/技法克制](writing-lesson-drop-prelude-preset.md) / [不引读书会书目](writing-lesson-drop-book-club-link.md) / [不写下游ppt提示标签](writing-lesson-no-downstream-ppt-hints.md)
 - [详案出PPTX](writing-lesson-to-pptx.md) / [docx页眉定版](writing-lesson-docx-header.md) / [对标竞品待实施清单](writing-lesson-competitor-borrow-backlog.md) — 漏传--header-left/right静默回落读书会页眉;D3–D5/N1待做
