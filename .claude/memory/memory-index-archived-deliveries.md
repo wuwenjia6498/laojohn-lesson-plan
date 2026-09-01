@@ -15,3 +15,6 @@ metadata:
 **写作课 · PPT 链与配套**：[四上推荐一个好地方](tuijian-haodifang-4a-ppt-chain-state.md)· [四上写观察日记](guanchariji-4a-ppt-chain-state.md)（**二维构思表转置法**·教师侧压页合并heading比删行管用）· [四上我和＿＿过一天](woheguoyitian-4a-ppt-chain-state.md)· [四上小小"动物园"](xiaoxiao-dongwuyuan-4a-ppt-chain-state.md)（**教材已换题停用，产物原地保留**；含删重复段按行切片、直引号批量转弯引号两条可复用，与教材无关仍有效）· [五上我的心爱之物](xinaizhiwu-5a-ppt-chain-state.md)（文件名中文丢成下划线的认领法·旁批表引用第四次被改写）· [五上“漫画”老师](manhua-laoshi-5a-ppt-chain-state.md)（进仓叫00000.pptx靠封面认领·图例保留改人工加动画）
 **看图写话 · 课次**：[期6细节四问(二上第1次)](picture-writing-stage6-state.md)（例-01季节违规重生教训·先生锚图再生例库图才锁画风）· [二上第2次](picture-writing-2a-lesson2-state.md)（节2整节评改升格）· [二上第3次](picture-writing-2a-lesson3-state.md)（`**`在配套模板不解析只认`{b}`·页数核验只测第1个sheet）· [一上第2次](picture-writing-1a-lesson2-state.md)（全线首个无主图课次·generate_images已加无主图兜底·「上次约定」入师话须回查原话）· [一上第3次](picture-writing-1a-lesson3-state.md)（首个多格课次·**C级链首验成立→18个多格课次可直接排**·docx「半角标点」警告是误报勿改）
 
+## 已废止/被覆盖的历史条目（0902 从 MEMORY.md 外移 · 别当垃圾删）
+- 历史条目(主体已废止别当垃圾删):[核心素养四维](writing-lesson-core-literacy-goals.md)(提纲表结构/H1体例仍有效) / [配套曾两轮清空](writing-materials-tools-removed.md)(仍有效=写作配套独立原则)
+- 历史条目(排期已被v5覆盖,【图位:编号】硬契约仍有效):[v4](picture-writing-course-map-v4-0723.md) / [v6](picture-writing-24-stages-v6.md) / [v3](picture-writing-course-map-v3.md) / [20期制](picture-writing-20-stages-expansion.md)
