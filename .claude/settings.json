@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/memory/check_memory_index.py --quiet",
+            "timeout": 15,
+            "statusMessage": "记忆索引机检"
+          }
+        ]
+      }
+    ]
+  }
+}
