@@ -27,7 +27,7 @@
 - **目录口径(2026-07-23后)**:读书会线顶层目录全带「读书会」前缀;写作课件三目录+整套打包目录独立分线;旧名全部作废,详见 [bookclub-materials-dir-consolidation](bookclub-materials-dir-consolidation.md)
 
 ## 写作课（writing-lesson）
-**写任何一篇前必读**：[教师自拟例子四判据](writing-lesson-example-must-be-unique-anchor.md) · [比喻反刻板+不绑老师真实生活](writing-lesson-metaphor-antistereotype.md) · [电报体/生造词红线](writing-lesson-telegraphese-and-coinage-redline.md) · 下方「跨课次通则」整块
+**写任何一篇前必读**：[⚠文风定盘·PassC已撤·判据缺AI痕迹半边](writing-style-two-directions-conflict-0831.md) · [教师自拟例子四判据](writing-lesson-example-must-be-unique-anchor.md) · [比喻反刻板+不绑老师真实生活](writing-lesson-metaphor-antistereotype.md) · [电报体/生造词红线](writing-lesson-telegraphese-and-coinage-redline.md) · 下方「跨课次通则」整块
 ### 跨课次通则（从课次经验抽离 · 写同类题目直接适用 · 展开见各源条）
 - **开场姿态**：教具别编「本想做却没做成」的懊恼制造由头(学生看得出假),坦白说特意准备;凡用教具起头的课 — [源](guanchariji-4a-lesson-state.md)
 - **官方情境在机构班不可兑现→把限制变成设定,不退回自造情境**:依赖「自带物品」的(四下《我的动物朋友》等)→实物不在场·稿子顶替;依赖「同班互相认识」的猜人反馈(四上《自画像》·六上《有你,真好》)→换掉「猜」保留内核,听众各说「看见的哪一处」 — [源1](xinaizhiwu-5a-lesson-state.md)/[源2](manhua-laoshi-5a-lesson-state.md)
@@ -42,6 +42,8 @@
 - **点名「可行做法」只点一种＝指定默认款**:覆盖面/支架/装置这类「硬要求但解法开放」的位置写清单不写单例,只有一种时显式标注「不是唯一」;不限于⑦位 — [源](writing-lesson-stage7-interaction-form-gap.md)
 
 ### 规则与体例
+- [⚠文风定盘0831立·0901修正:判据缺AI痕迹半边](writing-style-two-directions-conflict-0831.md) — 润色方向仍是向规范书面靠(抒情句被保留);AI痕迹=破折号/导演腔/省主语/术语漂移;**PassC整篇重写已撤销别重开**(方向会反、被网页端完全覆盖);现行=判据`style-criteria.md`+执行位并入**PassB**;**护栏对+机检绿≠方向对**→新增`--baseline`方向指标,改写类工序跑完必看;**0901收敛定盘=一主三从**(主判据唯一源style-criteria·判据卡并入§六·benchmark降级正样本库·三分歧拍板念→读/短指令加请/术语门槛);修文件批量脚本必须**每步立即写盘**
+- [横审报告曾被页标与_报告件淹没(0831)](batch-ngram-scan-pagemark-noise-0831.md) — 373→139条;页标带页码进不了白名单须正则剥;补白名单只收体例层不收师话;⚠逐字复用基线40已过时、实测48
 - [教师自拟例子四条硬判据(0817)](writing-lesson-example-must-be-unique-anchor.md) — 连否四轮五次返工换来:**独一份**(嗓门大/不爱笑=通用款,会让课自相矛盾)／**夸张≠计数**(「问了八遍我们数过」不是放大)／**样板不得低于例句**／**一篇内锚点不复用**;判据在model-essay §四之四、管全篇例子不只示范文
 - [比喻类写人反刻板＋示范材料不绑老师真实生活(0802/0817)](writing-lesson-metaphor-antistereotype.md) — 解法「先想只有他家才有的画面再找动物」须做成课堂明线;**两条全线通则:①例子不落到老师家人 ②默认措辞不强断言老师当下生活事实**(课案多人复用,「这是老师每天背的包」会逼老师说假话;授课提示是补救不是解法,须给替换清单+降级兜底)
 - [③引本单元课文佐证技法·匹配则引(0821立)](writing-lesson-cite-unit-text-0821.md) — **并非每个单元课文都配得上习作主题,不配就不引、不许硬上**(三形态:阅读要素≠习作技法/课文是对象不是示范/方向相反,实证三上二·五上三);判据=有没有一篇「最突出的写法」正是本课这一招,沾边不算;判不引≠欠账、冷审不得逼补引;由「可引」升格;新建 unit-texts.md 事实源(仓内原本没有单元篇目、archive/course-map 设计范围都不含);**联网核实存量三处 3/3 全中,但「碰巧对」不是流程**故仍须先核实后落笔;CLAUDE.md §5 开第二个联网例外口;「没课本」与「引课文」冲突已定口径＝**禁指向动作不禁指代进度**

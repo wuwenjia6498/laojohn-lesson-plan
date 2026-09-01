@@ -253,7 +253,9 @@ WRT_BLACKLIST = ['宛如', '犹如', '交织', '无形中', '诉说着']
 POOL6_FALLBACK = ['先别急', '谁愿意', '谁先来', '还没写完也没关系']
 POOL7_FALLBACK = {'A': ['立起来', '站在眼前', '活生生'],
                   'B': ['干巴巴', '流水账'], 'C': ['怦怦直跳']}
-REDLINE_BAN_FALLBACK = ['真真切切', '浮现在眼前', '闪闪发光', '愿你们', '往后的日子里',
+# 回落值须与规则文件同步——「浮现在眼前」已于 2026-07-31 收窄为「重新浮现」，
+#   不同步会在解析降级时误伤用户手定措辞（2026-09-01 审计修正）。
+REDLINE_BAN_FALLBACK = ['真真切切', '重新浮现', '闪闪发光', '愿你们', '往后的日子里',
                         '被吸引着想', '留在了纸上', '有了眉目', '真切地感受到']
 # 池7 形态变体：只对**确有形态变化的词族**逐族施加，不做通用模糊匹配（那会误伤）。
 # (族内成员词, 正则, 显示名)；成员词会被从逐词计数里吸收，由族统一计一次，避免重复报数。
@@ -476,8 +478,290 @@ def _pool7_line(cls, word, count, extra=''):
     return f'池7-{cls}「{word}」×{count}{tail}（上限 {POOL7_PER_ITEM_CAP}）'
 
 
+# ---------- 红线第六条④⑥⑦ 与第九条：句式层候选清单（2026-08-31 立） ----------
+# 立条缘由：红线 6②-⑦ 原写明「判断项、不入机检，归 checklist E 组人工判」，而 E 组措辞条
+# 又于 2026-08-04 后移到冷审 Pass B，冷审按篇手动跑、覆盖不到三分之一。2026-08-31 实证取样
+# 四份详案通读 92 条病灶，57% 属「规则已写但没执行」——《漫画的启示》第 1 课时格言体对举
+# 实测 6 处（配额 1）、三份稿结课位全部命中 6⑥。规则判据清晰、形态固定，缺的只是「谁在什么
+# 时候扫」。
+#
+# ⚠ 本组除预演式总结外一律 [INFO]，**只捞候选、不判决**（同 batch_ngram_scan 的定位）：
+# 6⑦ 自带「教学演示位不计配额」例外，其判据是「把这句删掉，学生少学到一个可照做的东西吗」
+# ——机器判不了，硬做成 FAIL 会误伤红线第 8 条要求的写法对比句（2026-08-24 冷审实测：一篇
+# 5 处命中里 3 处是第 8 条的产物）。有了带行号的候选清单，人工逐条判是几秒钟的事；没有清单
+# 才要通读全篇，这正是它一年没被扫过的原因。
+#
+# 适用范围分两档（2026-09-01 订正，此前注释与实现不符）：6④⑥⑦ 与第九条严格照红线
+# 「只限师话层」——只扫 `师：` 与 `（教师总结）` 行；引出式破折号候选**另扫 `[…]`/`〔…〕`
+# 提示行**（依据＝style-criteria §二.7 提示层引导句破折号同改冒号）。
+# 示范文/表格/`参考：` 学生话轮一律不扫（红线明写「不得反向误伤」）。
+
+# 不含「（本课总结）」：writing 骨架只有（教师总结），（本课总结）在 picture 档是
+#   标记漂移 FAIL（check_picture），两档定性须一致（2026-09-01 审计修正）。
+SHIHUA_PREFIX = ('师：', '（教师总结）')
+
+# 6⑦ 格言体对举判断句（配额：每课时 <=1，文末附录讲评环节单独算 <=1）
+MAXIM_PATTERNS = [
+    (r'不是[^。！？\n]{2,28}[，,—]+\s*(?:其实说的|而)?是[^。！？\n]{2,28}', '不是A，(而)是B'),
+    (r'不看[^。！？\n]{2,28}[，,—]+\s*看[^。！？\n]{2,28}', '不看X，看Y'),
+    (r'不在[^。！？\n]{2,28}[，,—]+\s*(?:而)?在[^。！？\n]{2,28}', '不在A，(而)在B'),
+    (r'只是[^。！？\n]{1,20}[，,][^。！？\n]{0,22}才是[^。！？\n]{1,20}', 'A只是引子，B才是主体'),
+    (r'(?<!来)(?<!越)越(?!来越)[^。！？\n]{1,16}[，,]?[^。！？\n]{0,8}就?越(?!来)', '越…越…'),
+]
+
+# 第九条 预演式总结：把还没发生的课堂结果写成既成事实（2026-08-31 立）
+# ⚠ 判据是**评价性完成体**，不是「都」字本身（2026-08-31 全线 17 篇实测校准）：
+#   命中——「大部分同学…都想到了」「刚才这几位…都念得让人看见了」「你们观察到的都写出来了」
+#   不命中——「等一会儿每个人都要在组里念」（将来时，分派任务）、「现在每个人都有事做」
+#           （分派）、「每个人都给日记本写下了第一篇」（纯动作完成，本课必做任务，不是
+#           对学生表现的预先评价）
+# 早前版本按「每…都＋动词」宽匹配，17 篇里误报 4 条、全是将来时与任务分派，故收窄。
+PREEMPTIVE_PATTERNS = [
+    r'大部分同学[^。！？\n]{0,14}都',
+    r'刚才这[几两]位[^。！？\n]{0,18}都',
+    r'(?:每个人|每位同学|每个同学|你们|同学们|全班|大家)[^。！？\n]{0,10}都'
+    r'(?:想到|做到|找到|用上|答对|说对|写出|说出|讲出|至少)',
+    r'(?:每个人|每位同学|每个同学|你们|同学们|全班|大家)[^。！？\n]{0,10}都'
+    r'(?:念|讲|写|说|读)得[^。！？\n]{0,10}了',
+]
+
+
+def _lesson_sections(lines):
+    """按 `## 第N课时` 与 `## 附：` 切段，返回 [(段名, 起行idx, 止行idx)]。
+    提纲表与文首不计入（那里没有师话）。"""
+    marks = []
+    for i, ln in enumerate(lines):
+        s = ln.strip()
+        if s.startswith('## 第') and '课时' in s:
+            marks.append((i, s.lstrip('# ').strip()))
+        elif s.startswith('## 附'):
+            marks.append((i, s.lstrip('# ').strip()))
+    out = []
+    for k, (i, name) in enumerate(marks):
+        end = marks[k + 1][0] if k + 1 < len(marks) else len(lines)
+        out.append((name, i, end))
+    return out
+
+
+def _is_shihua(ln):
+    return ln.strip().startswith(SHIHUA_PREFIX)
+
+
+def scan_lead_in_dash(lines):
+    """引出式破折号候选（2026-08-31 立 · style-criteria §二.2「AI 痕迹头号形态」）。
+
+    判据（该文件给的原判法）：**把破折号后半截删掉，句子仍完整＝插入语，保留；
+    删掉就断头＝引出式，改冒号/句号**。机器用「一句内破折号成对＝插入语、单个＝引出式」
+    近似它——成对是插入语的可靠标志（「这几句——A、B——只有它才有」）。
+
+    ⚠ 立此条的直接原因＝**整体改写对这一类不稳定**（当时那道工序叫 Pass C，已撤）：同一份 prompt、同一配方，
+    2026-08-31 首验《漫画的启示》把它从 36 处压到 5 处，次日《我的心爱之物》却一处没动
+    （36→36），漏的正是 style-criteria 逐字点名的「第一段——“…”」形态。
+    「只给目标、不给禁令清单」换来的语感，代价就是**可判定形态会看运气**。
+    故按既定分工收口：**改写工序管语感，可判定的形态归机检兜底**（同预演式总结那条）。
+    """
+    hits = []
+    for i, ln in enumerate(lines, 1):
+        s = ln.strip()
+        if '——' not in s or not s.startswith(SHIHUA_PREFIX + ('[', '〔')):
+            continue
+        for sent in re.split(r'(?<=[。！？])', s):
+            if sent.count('——') == 1:
+                hits.append(f'行{i}: {sent.strip()[:72]}')
+    return hits
+
+
+def check_writing_style_candidates(lines, rep):
+    sections = _lesson_sections(lines)
+    if not sections:
+        sections = [('全篇', 0, len(lines))]
+
+    # --- 6⑦ 格言体对举：按课时计数，超配额给结论 ---
+    compiled = [(re.compile(p), label) for p, label in MAXIM_PATTERNS]
+    detail, over = [], []
+    for name, a, b in sections:
+        hits = []
+        for i in range(a, b):
+            ln = lines[i]
+            if not ln or not _is_shihua(ln):
+                continue
+            for rx, label in compiled:
+                m = rx.search(ln)
+                if m:
+                    hits.append((i + 1, label, m.group(0)[:46]))
+                    break
+        if not hits:
+            continue
+        flag = ' ⚠ 超配额' if len(hits) > 1 else ''
+        detail.append(f'【{name}】{len(hits)} 处（配额 1）{flag}')
+        for no, label, frag in hits:
+            detail.append(f'    行{no} [{label}] {frag}')
+        if len(hits) > 1:
+            over.append(name)
+    if detail:
+        head = '格言体对举判断句候选（红线6⑦ · 每课时 ≤1、文末附录单独算 ≤1）'
+        if over:
+            head += f'——⚠ {"／".join(over)} 超配额，须逐条判后处置'
+        rep.info(head + '。**本清单只捞候选不判决**：红线6⑦「教学演示位不计配额」例外'
+                 '（对举两端均为可照抄的具体写法样例／承载红线第8条三步对比的），'
+                 '按「把这句删掉，学生少学到一个可照做的东西吗」逐条判——少→不计配额，'
+                 '不少、只是少了一句漂亮话→照计', detail)
+
+    # --- 6④ 三个及以上对仗分句作收束 ---
+    # 红线6④管的是「作**收束**」，故只扫收束位：（教师总结）行 + 每个 ### 环节的末条师话。
+    # 早前版本全量扫师话，噪声压过病征（技法三步口令「读画面、提寓意、联生活」这类并列举例
+    # 会大量命中，而它们正当）。
+    closing = set()
+    seg_start = None
+    for i, ln in enumerate(lines):
+        s = ln.strip()
+        if s.startswith('### ') or s.startswith('## '):
+            if seg_start is not None:
+                last = max((j for j in range(seg_start, i) if lines[j] and _is_shihua(lines[j])),
+                           default=None)
+                if last is not None:
+                    closing.add(last)
+            seg_start = i
+    if seg_start is not None:
+        last = max((j for j in range(seg_start, len(lines)) if lines[j] and _is_shihua(lines[j])),
+                   default=None)
+        if last is not None:
+            closing.add(last)
+    for i, ln in enumerate(lines):
+        if ln and ln.strip().startswith(('（教师总结）', '（本课总结）')):
+            closing.add(i)
+
+    par = []
+    for i in sorted(closing):
+        ln = lines[i]
+        if not ln or not _is_shihua(ln):
+            continue
+        body = ln.strip()
+        for pre in SHIHUA_PREFIX:
+            if body.startswith(pre):
+                body = body[len(pre):]
+                break
+        for sent in re.split(r'[。！？]', body):
+            parts = [p for p in re.split(r'[，,、；;]', sent) if p.strip()]
+            if len(parts) < 3:
+                continue
+            lens = [len(p.strip()) for p in parts]
+            if min(lens) < 3 or max(lens) > 14:
+                continue
+            if max(lens) - min(lens) <= 2:
+                par.append(f'行{i + 1}: {sent.strip()[:56]}（{len(parts)} 分句，'
+                           f'字数 {"/".join(map(str, lens))}）')
+    if par:
+        rep.info('三分句以上字数齐平的对仗句候选（红线6④「不得用三个及以上对仗分句作收束」）'
+                 '——含并列举例的正当用法，逐条判：是收束性的金句才算，'
+                 '单纯罗列要素/材料的不算', par)
+
+    # --- 6⑥ 结课位抒情段：位置固定，直接摘出来交人判 ---
+    tail = []
+    for name, a, b in sections:
+        last = None
+        for i in range(a, b):
+            if lines[i] and _is_shihua(lines[i]):
+                last = i
+        if last is not None:
+            tail.append(f'【{name}】行{last + 1}: {lines[last].strip()[:120]}')
+    if tail:
+        rep.info('结课位师话（红线6⑥「结课祈愿·抒情段」——存量体检 6 篇中 5 篇命中，'
+                 '是全线最普遍的抒情形态）。判据：**把这段删掉，课的完整性有没有损失**。'
+                 '⚠ 本条实操从宽（style-criteria §三.2：2026-08-31 用户润色实测保留了'
+                 '禁用表原例句）——**只标注、不激进删，删不删由用户逐处拍板**；'
+                 '生成新稿时仍不主动写这类收束', tail)
+
+    # --- 引出式破折号候选（style-criteria §二.2） ---
+    dash_hits = scan_lead_in_dash(lines)
+    if dash_hits:
+        rep.info('引出式破折号候选（style-criteria §二.2「AI 痕迹头号形态」；'
+                 '本清单只取「一句内单个破折号」，成对的插入语已排除）。'
+                 '判据：**把破折号后半截删掉，句子还完整吗**——完整＝插入语，保留；'
+                 '断头＝引出式，改冒号或直接成句（「第一段——“…”」→「第一段：“…”」）。'
+                 '⚠ 改写类工序对这一类**不稳定**（2026-08-31 实测：同一配方两篇，'
+                 '一篇 36→5、一篇 36→36），**整体改写跑完必须照本清单再核一遍**', dash_hits)
+
+    # --- 第九条 预演式总结（FAIL：几无正当用法） ---
+    pre_re = re.compile('|'.join(PREEMPTIVE_PATTERNS))
+    hits = [(i + 1, ln) for i, ln in enumerate(lines)
+            if ln and _is_shihua(ln) and pre_re.search(ln)]
+    rep.fail('预演式总结：把还没发生的课堂结果写成既成事实（红线第九条；'
+             '真老师不可能在稿子上预先宣布全班答对了。改成条件式或指向具体某一位）', hits)
+
+
+
+
+# ---------- 术语一致性（2026-08-31 立 · 治 08-30 诊断的头号病症） ----------
+# 2026-08-30 全线 17 篇通读：③ 教学用语 108 处 > ① 生僻口语 103 处，而 ③ 里又以「术语混用」
+# 为主症——《缩写故事》同一组技法在「动作／方法／小方法／小技巧／小窍门／小原则／项」间换了
+# 八个名字，《我的心爱之物》「妙招」10 次「写法」10 次「方法」2 次「一招」2 次指同一件事，
+# 「示范文」与「范文」并存全线 9 篇命中。它比文风更硬——**老师照着上课会当场卡住，学生也
+# 对不上号**。
+#
+# ⚠ 只有「范文」一条做 FAIL，其余一律 [INFO] 候选：是不是「同一件事的第 N 个名字」是语义
+# 判断，机器分不出来。2026-08-31 实测《缩写故事》「方法×6／写法×7」并存，但其中「方法」指
+# 摘删缩改四个动作、「写法」指学生的两种写法，两者本就不是一回事——按词频硬判会误伤。
+# 真正的源头解法是生成侧的**术语登记**（指纹块「本篇术语表」字段，写之前先定名、全篇服从），
+# 本清单只负责验证登记有没有被遵守。
+
+# ⚠ 词表与阈值均按 2026-08-31 全线 17 篇实测校准，收紧过一轮：
+#   「习作」（单元习作是专名）、「稿子」（多指学生手里那张纸）有正当分工，全篇必然并存，
+#   收进来等于每篇都报、报告没人看；表格单位的「行」在中文里过泛（「写两行字」），
+#   故要求次少的那种也达 MIN 次才算并存。**报告太长没人看，是「没牙齿的规则」的另一种死法。**
+# 元组＝(组名, 词表, 并存种数门槛 min_kinds, 单词最低出现次数 min_count)。
+# min_count=2（2026-09-01 立）：出现 1 次的词不算并存成员——实测「技法统称」组曾 16/17 篇
+# 恒亮，多因「本事×1」「路子×1」类单次噪声；偶现一次是行文自然波动，不是术语混用。
+TERM_GROUPS = [
+    ('技法统称', ['写法', '方法', '法子', '本事', '妙招', '窍门', '路子', '招数',
+                  '要领', '诀窍', '小技巧', '小原则'], 2, 2),
+    ('文体称谓', ['作文', '文章', '文稿', '片段'], 3, 2),
+]
+TABLE_UNIT_MIN = 3
+TABLE_UNIT_PATTERNS = [
+    ('栏', r'[这那每]\s*一?\s*栏|[一二三四五六七八九十两\d]\s*栏'),
+    ('格', r'[这那每]\s*一?\s*格|[一二三四五六七八九十两\d]\s*格'),
+    ('行', r'[这那每]\s*一?\s*行(?![为走人业列])|[一二三四五六七八九十两\d]\s*行(?![为走人业列])'),
+]
+
+
+def check_terminology_consistency(lines, rep):
+    # 「范文」→ 全线统一用「示范文」（2026-08-30 全线改 15 处）。注释块/指纹块已由
+    # load_body 清空，故元描述里的「一整篇范文」不会误报。
+    rx = re.compile(r'(?<!示)范文')
+    rep.fail('术语不统一：独立的「范文」（全线统一用「示范文」，'
+             '体例单一源＝title-naming §四之二）',
+             grep(lines, rx))
+
+    det = []
+    for name, words, min_kinds, min_count in TERM_GROUPS:
+        found = []
+        for w in words:
+            hits = [(i + 1, ln) for i, ln in enumerate(lines) if ln and w in ln]
+            c = sum(ln.count(w) for _, ln in hits)
+            if c >= min_count:
+                found.append((w, c, hits[0][0]))
+        if len(found) >= min_kinds:
+            cells = '／'.join(f'「{w}」×{c}(首现行{no})' for w, c, no in
+                             sorted(found, key=lambda x: -x[1]))
+            det.append(f'{name}：{len(found)} 种并存 —— {cells}')
+    units = [(u, len(re.findall(pat, '\n'.join(lines)))) for u, pat in TABLE_UNIT_PATTERNS]
+    units = [(u, c) for u, c in units if c >= TABLE_UNIT_MIN]
+    if len(units) >= 2:
+        det.append('表格单位：' + '／'.join(f'「{u}」×{c}' for u, c in units)
+                   + ' —— 同一张表的单位须前后一致（栏／格／行三选一）')
+    if det:
+        rep.info('术语一致性候选（2026-08-30 诊断头号病症：同一件事换名字，'
+                 '老师照着上课会卡住、学生对不上号）。⚠ **只捞候选不判决**——'
+                 '并存本身不等于混用（「方法」指四个动作、「写法」指学生的两种写法，'
+                 '本就不是一回事）。逐条问一句：**这几个词指的是不是同一件事？**'
+                 '是 → 挑一个、全篇统一，并回填指纹块「本篇术语表」字段', det)
+
+
 def check_writing(lines, in_outline, rep):
     check_common(lines, in_outline, rep, 'writing')
+    check_writing_style_candidates(lines, rep)
+    check_terminology_consistency(lines, rep)
     rep.fail('词级黑名单（宛如/犹如/交织/无形中/诉说着）',
              grep(lines, re.compile('|'.join(WRT_BLACKLIST))))
     rep.fail('词级黑名单（「不仅…更…」递进套式）',
@@ -501,7 +785,7 @@ def check_writing(lines, in_outline, rep):
     rep.fail('内部机制名漏进师话/参考（A 档/降压/定起点/兜底/锚点/指纹/台账/零件）', hits)
     # 讲评括注禁机制词「占位」（lesson-structure §三「填空横线写法」，2026-07-31 用户拍板；
     # 同步定义在 checklist B 组附讲评条、workflow-engine 讲评模块）：横线旁的括注**直接写
-    # 动作指令**（`＿＿＿（念该生最传神的一两句）`），「占位」是生成侧机制词、印进 docx 对
+    # 动作指令**（`＿＿＿（读该生最传神的一两句）`），「占位」是生成侧机制词、印进 docx 对
     # 上课老师是噪声，故正文检索应为零。上面那条 MECH_WORDS 只扫 师：/参考： 行，而「占位」
     # 也出现在选稿列表与 blockquote 提示里，故本条**全文扫**。误伤已核：指纹/生图工单等
     # <!-- --> 块已由 load_body 清空；`【图位:编号】` 与示范文数据占位的规范写法
@@ -560,14 +844,27 @@ def check_writing(lines, in_outline, rep):
                 hits.append((i + 1, f'{ln.strip()[:50]} ←命中「{src}…」'))
                 break
     rep.fail('「禁止逐字复用」清单命中（variation-pools，近似口径＝核心短语同款）', hits)
+    # 短串硬命中（2026-09-01 立）：pools 里为进机检而显式单列、却低于 load_forbidden_phrases
+    # >=8 字门槛的串——门槛会把它们静默丢弃（正是 docstring 警告的那类静默失效）。
+    # 逐字口径、只扫师话层；词表极小、逐条有出处，增删同步 pools 对应 bullet。
+    SHORT_FORBIDDEN_EXACT = {'确实不糙': 'pools 单列条·四篇复发族第四形态'}
+    sf_hits = [(i + 1, ln.strip()[:50] + ' <-命中[' + w + ']') 
+               for i, ln in enumerate(lines)
+               if ln and ln.strip().startswith(SHIHUA_PREFIX)
+               for w in SHORT_FORBIDDEN_EXACT if w in ln]
+    rep.fail('「禁止逐字复用」短串硬命中（<8 字显式单列条，逐字口径）', sf_hits)
     # INFO：破折号 + 池6/池7/空夸词计数
     dash = sum(ln.count('——') for ln in lines)
     rep.info(f'「——」正文共 {dash} 处（筛查线索，逐处按 pools「破折号套式」判断；冷审只标不判）', [])
     det = []
+    # 池6 与空夸词只扫师话层（2026-09-01 收窄）：此前全文 count，「先别急」落在示范文
+    #   正文与旁批表被计入，measurement-ledger 数据点 10/11/12 三次记录同一误报——
+    #   「有牙齿但咬错地方」。口径同红线 6① 机检（lesson-structure L201）。
+    shihua = [ln for ln in lines if ln and ln.strip().startswith(SHIHUA_PREFIX)]
     for w in load_pool6_words():
-        c = sum(ln.count(w) for ln in lines)
+        c = sum(ln.count(w) for ln in shihua)
         if c:
-            det.append(f'池6 发令词「{w}」×{c}（跨篇同款须查台账，本脚本只报数）')
+            det.append(f'池6 发令词「{w}」×{c}（只计师话层；跨篇同款须查台账，本脚本只报数）')
     pool7 = load_pool7_words()
     fam_members = {w for members, _, _ in POOL7_FAMILIES for w in members}
     for cls in ('A', 'B', 'C'):
@@ -585,7 +882,7 @@ def check_writing(lines, in_outline, rep):
             forms = sorted({m.group(0) for ln in lines for m in rx.finditer(ln)})
             det.append(_pool7_line(cls, label, c, extra='实际形态：' + '／'.join(forms)))
     for w in PRAISE_WORDS:
-        c = sum(ln.count(w) for ln in lines)
+        c = sum(ln.count(w) for ln in shihua)
         if c > PRAISE_CAP:
             det.append(f'空夸词「{w}」×{c} ⚠ 超单篇上限 {PRAISE_CAP}，须改'
                        f'（其余改成「复述+点一句」，落到学生的具体句子上）')
@@ -613,10 +910,74 @@ def check_writing(lines, in_outline, rep):
 
 # ---------- main ----------
 
+# ---------- 方向指标（2026-09-01 立 · --baseline） ----------
+# 立此条的直接原因：2026-08-31 那道 Pass C（整篇师话重写，只给一句话目标）在《我的心爱之物》
+# 上**把方向跑反了**——口语词 82→105，甚至把原稿的「现在」改成了「这会儿」——而当时的验收
+# （护栏零侵入 ＋ 机检全绿）**全部通过**。教训：**护栏对、机检绿，不等于方向对**。
+#
+# ⚠ 这批词做不成禁令表（`prose-style-benchmark.md` 2026-08-04 已实测否掉：「头一回」在基准篇
+# 自己命中 9 次，是用户保留的自然口语）。但作为**同一篇改前改后的相对增减**是成立的：
+# 它不判定单个词该不该留，只回答「这一轮整体朝哪个方向走」。同一批词，当禁令表无效、
+# 当方向指标有效——同仓内既有判据「这类病征依赖语境，只有密度指标能分开两组」。
+#
+# 实测校准（2026-09-01 复测 · 现行 21 词表＋剥注释/引块/参考行的计数面；
+#   ⚠ 词表或计数面再变动时须重测本块，过期快照曾在 0901 审计被点名）：
+#   《猜猜他是谁》网页端润色     22 → 6   ✓ 下降 73%
+#   《漫画的启示》Pass C         32 → 22  ✓ 下降 31%
+#   《我的心爱之物》网页端回贴   30 → 5   ✓ 下降 83%
+#   《我的心爱之物》Pass C 作废版 30 → 45  ⚠ 反向 ← 本参数就是为抓住这种情况而立
+#   （事故原始口径为 82→105：16 词表·全文计数，见 memory 与 detail-review 留痕）
+
+# 「劲儿」「本事」已移出（2026-09-01 审计）：二者是 style-criteria §三.1 明载的示范文
+#   保留项（「风风火火的劲儿」「画画的本事」），留在表里会成为永不下降的地板、
+#   或反过来诱导去改保留边界。计数面收窄见 report_direction 预处理。
+COLLOQUIAL_WORDS = ['这会儿', '哪儿', '那儿', '咱们', '干什么', '一回', '几回', '念',
+                    '块钱', '挺', '里头', '有的是', '说说看', '点子上', '搁',
+                    # ↓ 2026-09-01 从 framework §7.8 机械自检清单收编
+                    '宝贝', '玩意儿', '待会儿', '等会儿', '脑子里', '蹦出']
+
+
+def report_direction(md_path, baseline_path):
+    """把「改前 vs 改后」的方向指标打出来。只报数不 fail——判据仍是人读，
+    但方向反了必须显眼，否则会像 2026-08-31 那次一样被「机检全绿」盖过去。"""
+    def _countable(path):
+        # 计数面与 style-criteria §三保留边界对齐（2026-09-01）：剥 <!-- --> 注释块、
+        # `> ` 引块（示范文）、`参考：` 学生话轮——那三处的口语是设计要求，计入会把
+        # 合规保留变成「永不下降」，或诱导改写越界。
+        t = io.open(path, encoding='utf-8').read()
+        t = re.sub(r'<!--.*?-->', '', t, flags=re.S)
+        keep = [ln for ln in t.splitlines()
+                if not ln.strip().startswith(('>', '参考：'))]
+        return chr(10).join(keep)
+    cur = _countable(md_path)
+    base = _countable(baseline_path)
+    rows, warn = [], False
+    for label, fn in (
+        ('口语词合计', lambda t: sum(t.count(w) for w in COLLOQUIAL_WORDS)),
+        ('破折号 ——', lambda t: t.count('——')),
+    ):
+        b, a = fn(base), fn(cur)
+        if a > b:
+            warn = True
+            verdict = f'⚠ 反向 +{a - b}'
+        elif a < b:
+            verdict = f'✓ 下降 {b - a}（{100 * (b - a) / b:.0f}%）' if b else '✓'
+        else:
+            verdict = '持平'
+        rows.append(f'{label}：改前 {b} → 改后 {a}　{verdict}')
+    head = '方向指标（vs %s）' % os.path.basename(baseline_path)
+    if warn:
+        head += ' ⚠ **有指标不降反升——这一轮的改写方向可能反了，逐处复看再交付**'
+    print('[INFO] ' + head)
+    for r in rows:
+        print('    ' + r)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('md_path')
     ap.add_argument('--profile', required=True, choices=['picture', 'writing'])
+    ap.add_argument('--baseline', help='改前稿 .md：给出后追加方向指标（口语词/破折号的前后增减）。改写类工序跑完必看——护栏对、机检绿，不等于方向对。')
     args = ap.parse_args()
     lines, in_outline = load_body(args.md_path)
     rep = Report()
@@ -627,7 +988,11 @@ def main():
         check_writing(lines, in_outline, rep)
         print('（注：本门是**新稿交付门**。存量已交付稿的「禁止逐字复用/导演腔/行首提示体例」'
               '历史命中不回溯——SKILL 批次横审：存量不强制回改、用户点名才回改重导。）')
-    sys.exit(rep.dump())
+    code = rep.dump()
+    if args.baseline:
+        print()
+        report_direction(args.md_path, args.baseline)
+    sys.exit(code)
 
 
 if __name__ == '__main__':
