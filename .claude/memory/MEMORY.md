@@ -25,6 +25,7 @@
 - **教材照片与教参对不上时,称谓/数字/篇名逐字项逐项复核**,别一笔归为「版本差异」(姥爷实为爷爷曾错到32处) — [源](wodejiaren-4a-lesson-state.md)
 - **教材自带提纲/范例=必须落实的知识点,自创工具只能细化不能顶替**;否定反例精确落到「缺了什么」 — [源](twentyyears-hometown-5a-lesson-state.md)
 - **点名「可行做法」只点一种=指定默认款**:硬要求但解法开放处写清单不写单例 — [源](writing-lesson-stage7-interaction-form-gap.md)
+- **换掉教师示范文=四处下游连改**:详案12处/配套学生·教师两侧json/批改标准包前两组进提示词/PPT六类页外部重做;须回看③判断对比的反例有没有跟新示范文撞车 — [源](model-essay-swap-downstream-chain.md)
 ### 规则与体例
 - [⚠文风定盘0831·0901收敛一主三从](writing-style-two-directions-conflict-0831.md) — 方向=向规范书面靠;AI痕迹=破折号/导演腔/省主语/术语漂移;**PassC已撤别重开**;主判据唯一源style-criteria+执行位在PassB;改写工序跑完必看--baseline方向指标;批量修文件脚本每步立即写盘
 - [配套三侧文案0901起桥接style-criteria](writing-materials-style-bridge-0901.md) — 此前只有0803单边去AI腔、方向反;SKILL红线拆两条+§四认领+§二.1回填8对;picture-materials仍真空(补时桥它自己线§13)
