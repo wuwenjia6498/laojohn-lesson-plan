@@ -58,7 +58,7 @@
 - [批改工具已部署Vercel(0824)](writing-correction-tool-vercel-deploy-0824.md) — 入口必须是部署根index.py绝不能放api/;.vercelignore必须挡config.json;国内直连vercel.app不通,正式地址grader.skyline666.top;⚠validate全绿证明不了包对;部署/DNS细节在源条
 - [配套三侧削页+去逐字稿框架(0803)](writing-materials-pages-trimmed-0803.md) — 家长1页/教师2页;教师侧禁「配合逐字稿」;⚠学生侧0818已回4页｜[配套skill三侧全落地](writing-materials-skill-student-bundle.md) — ⚠页数已被上条覆盖;_shared.py勿复制;家长侧禁虚构作品
 - [手改只改HTML必被重渲冲掉(0821)](writing-materials-handedits-lost-on-rerender.md) — 文字改动一律回写_data.json;只剩产物时PyMuPDF原位抠版式;⚠仓内9课json仍不含那批手改
-- **PPT链**(实现细节全在各源条):[先读详案再审查再动画(0806)](writing-ppt-review-against-detail-first.md)(⚠机检全过≠审查完成;PPT对详案错勿迁就)· [外部生成+本仓只做动画(0803)](writing-ppt-external-plus-animation.md)· [动画工作单填shape_id非位置索引(0804)](ppt-anim-groups-are-shape-ids.md)· [手工动画被注入器静默清掉(0825)](manhua-laoshi-5a-ppt-chain-state.md)· [重复投放先三项比对判重(0825)](external-pptx-duplicate-drop-0825.md)
+- **PPT链**(实现细节全在各源条):[⚠交付边界:本仓止于动画注入·终稿不回仓(0902)](ppt-delivery-boundary-0902.md)(打包不收PPT/压缩降级为>5MB才跑/仓内≈1.5MB而终稿13~22MB;⚠下一课次须确认收到的是初稿不是终稿)· [先读详案再审查再动画(0806)](writing-ppt-review-against-detail-first.md)(⚠机检全过≠审查完成;PPT对详案错勿迁就)· [外部生成+本仓只做动画(0803)](writing-ppt-external-plus-animation.md)· [动画工作单填shape_id非位置索引(0804)](ppt-anim-groups-are-shape-ids.md)· [手工动画被注入器静默清掉(0825)](manhua-laoshi-5a-ppt-chain-state.md)· [重复投放先三项比对判重(0825)](external-pptx-duplicate-drop-0825.md)
 ## 看图写话（picture-writing）
 **排新课或出图前必读**:[总地图v5](picture-writing-course-map-v5-0728.md) · [角色口径](picture-writing-character-roster-policy.md) · [三图位两道硬门](picture-writing-three-image-slots.md) · [写规格判据](picture-writing-imgspec-writing-lessons.md) · 下方通则整块
 ### 跨课次通则(排同类课次直接适用 · 展开见各源条)
