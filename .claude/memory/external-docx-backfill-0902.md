@@ -1,0 +1,41 @@
+---
+name: external-docx-backfill-0902
+description: 外部人工改过的详案 docx 回贴 md 事实源的工具与工序，及四条判据（判新旧看措辞不看哈希／外部重做会换动画方案／PPT与配套同源可作基准／结构变动不自动改写）
+metadata:
+  type: project
+---
+
+2026-09-02 立。外部把 7 篇写作课详案 docx 整篇书面化改写、并整份重做 7 份 pptx，回贴入仓。
+
+**新增回贴器 `.claude\skills\laojohn-lesson-plan\assets\docx_backfill.py`**（补上全仓此前为零的 docx→md 反向能力）。做法＝**骨架继承＋文本整体替换**，不是裸转也不是逐条 diff 裁决：影子解析 md（镜像 `md_to_laojohn_docx.convert` 的文本分支）→ 与外部 docx 段落级对齐 → 用 docx 文本重建 md 行、`> `／`### `／`师：`／表格 `|` 等 md 前缀原样保留；未被 Unit 覆盖的行（注释块／空行／`---`／首页 `[授课提示]`）原样留在原位。子命令 `selfcheck`／`backfill`／`verify`。
+
+**自证闸门是这个方案唯一的安全阀**：动手前先用引擎渲一份基线 docx，断言 `extract(基线) ≡ shadow(md)`，不等即 exit 2 罢工——把"影子解析器抄错引擎分支"从静默出错变成响亮失败。7 篇实测全绿。**改 `md_to_laojohn_docx.py` 的解析分支必须回归它**。
+
+四个踩过的坑（都在脚本头注释）：`SequenceMatcher` 必须 `autojunk=False`（骨架话术单篇 ×5 会被判垃圾拉黑、对齐崩）；归一只 strip ASCII 空白、**绝不折叠 U+3000**；首页必须走独立通道（`style_front_page._render_value` 做过文本级重排）；写回必须 `detect_eol` 保持原行尾（否则 git diff 整篇标改动）。
+
+## 四条判据（下次外部回贴直接适用）
+
+1. **判文件新旧一律看措辞方向，不看哈希**。《推荐一个好地方》的 docx 与另一目录 `优化AI腔前` MD5 完全相同，据此判成旧版是错的——实为同一份**最终稿**被放进了两个目录。MD5 相同只证明文件同源，不指示新旧。核措辞（如 0831 方向：那儿→那里、挑→选、破折号→逗号）才判得准。
+
+2. **外部整份重做会换掉动画方案，"没动过动画"不可信**。旧件是本仓注入的 234 个 `animEffect` fade 淡入，新件变成 268 个 `set` 瞬现＋17 个 `wipe`；**点击逐条出现（clickEffect）的教学功能仍在**，丢的是淡入。检测时**不能只数 `animEffect`**（会误报"动画全丢"），也不能写成 `timing and clickEffect or par and animEffect`（运算符优先级 + 空时间树里也有 `p:par`，会误报"全在"）——数全部行为标签才准。连带：pptx 整份换过则旧 `anim.json` 的 groups 按旧 shape_id 排定**已失效**（"仍存在"的 id 是巧合，不指向同一形状），须打 `plan_stale` 标记。
+
+3. **示范文三方不同步时，PPT 与三侧配套本就同源、可作基准**。实测《写观察日记》《我和＿＿过一天》的 PPT 与配套 `_data.json` 逐字一致，详案是另一版——二对一，且学生看的是屏幕，故以 PPT 为基准改详案（合 CLAUDE.md §3 硬序③）。改完 5 篇自然对上，只剩 2 篇 4 处要补。**改示范文必连查同篇的「示范文里的句子」表格列**（本次第五次复发，见 [[woheguoyitian-4a-ppt-chain-state]]）。
+
+4. **结构变动（新增／消失／移动）一律只报告不自动改写**。docx 侧的一条"消失＋新增"往往是同一块位置移动（页标最常见），自动插入而不删旧会造成重复。本次 11 条全部人工判：采纳 3 条真新增，保留 6 条（页标增删移动归 PPT 侧 `pageback_annotate`、投屏提示是机构课硬要求、示范示例句删除属教学内容删减）。
+
+## 外部改稿常见的体例回归（回贴后必查）
+
+外部人工改稿会带进本仓禁止的写法，`tone_gate` 抓得到一部分，抓不到的要自己查：示范文→**范文**（全线统一「示范文」，本次详案 7 处＋配套 9 处）、`[教师提示]` 半角方括号→全角 `（…）`、积木→**零件**（撞 `tone_gate` 内部机制名黑名单）、弯引号方向写反（`“观察记录表“`）。相关：[[writing-style-two-directions-conflict-0831]] · [[terminology-unified-image-and-model-essay]]
+
+## 入库前压缩（同日立 · 已固化为链条第 1.5 步）
+
+外部件每份 13~22MB，一轮 7 份 125.5MB；本目录入库、git 只进不出。体检：`.git` 已 **689MB**、远程 549MB，GitHub 软建议 1GB——**两三轮即触线**。08-20 定「PPT 入库」时 pptx 都是 `build_ppt.py` 烘焙的、每份约 1MB（CLAUDE.md §8 那句「三类大件 79.5MB」），**决策前提对外部件已不成立**。
+
+病因**不是分辨率**（图普遍 ≤1.4MP、长边不超 2000px，投屏够用），是 **AI 插画用无损 PNG 承载**：pptx 约 89% 是 `ppt/media/`，zip 层压不动（`compress_size≈file_size`）。新增 `laojohn-ppt\scripts\shrink_pptx_media.py`，量化 256 色，实测 **125.5MB → 42.6MB（34%）**，透明保留、画质目检无损（2.00MB→0.36MB 的水彩插画，质感/发丝/渐变都在）。
+
+五条连带口径：
+1. **验收判据＝压缩前后页数/形状数/动画行为数/点击触发数逐项相等**（只换图片字节，不碰 XML/rels/SVG）。本次 7 份全等，audit 复跑仍 0 待办。
+2. **只压新入库的件**。已在远程历史里的旧件压了也收不回，反而再叠一版。
+3. **判重能力要补偿**：压后仓内 pptx 与外部件不再字节一致，[[external-pptx-duplicate-drop-0825]] 那条三项比对的 media md5 项失效；脚本默认写 sidecar `<pptx>-origin.json` 存原件指纹，**判重与它比，别与仓内 pptx 比**。
+4. ⚠ **压缩前若已 commit 过原始件，必须重写那条未推送的 commit**——只加一条「压缩」提交会让历史里同时留下原始版与压缩版，净增 150MB。本次即 `git reset --mixed` 回基点后重新分组提交（`--mixed` 保留工作区、只重置索引与 HEAD）。
+5. `Image.quantize(method=MEDIANCUT)` **不支持 RGBA 会直接抛错**，带透明的图必须走 `FASTOCTREE`。

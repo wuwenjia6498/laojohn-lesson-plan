@@ -18,7 +18,7 @@
 - **开场姿态**:教具别编「本想做却没做成」的懊恼由头(学生看得出假),坦白说特意准备 — [源](guanchariji-4a-lesson-state.md)
 - **官方情境在机构班不可兑现→把限制变成设定,不退回自造情境**:自带物品类→实物不在场稿子顶替;同班互认的猜人反馈→换掉「猜」保留内核 — [源1](xinaizhiwu-5a-lesson-state.md)/[源2](manhua-laoshi-5a-lesson-state.md)
 - **「当场换人试装」装置**:念完当场换人名再念,学生自己听出垮在哪;写人物特点/身份感的题目可照搬,成败标准「换名字一字不用改=没写成」一并复用 — [源](woheguoyitian-4a-lesson-state.md)
-- **外部件「示范文里的句子」类表格逐行与示范文逐字比对**:截断可接受、改写必须打回;已四次出现 — [源](woheguoyitian-4a-ppt-chain-state.md)
+- **外部件「示范文里的句子」类表格逐行与示范文逐字比对**:截断可接受、改写必须打回;已五次出现(0902第五次:改示范文必连查同篇表格列) — [源](woheguoyitian-4a-ppt-chain-state.md)
 - **往「禁止逐字复用」清单补串一个串一条bullet**:tone_gate每条只取第一个串,并列写的第二个串永不报警;清单运行时解析补bullet即进机检 — [源](twentyyears-hometown-5a-lesson-state.md)
 - **教材换版(题目没变、题面/课文换掉)=第三形态,连改9处但course-map与文件名全不动**:三上四单元实做;教师侧配套2页是硬闸门,示范文变长须回压旁注 — [源](textbook-revision-same-title-new-page-0902.md)
 - **教材换题=重写不是改稿,第0步是改事实源**:archive零命中就动笔=伪造官方条款;五处连改(archive/index/course-map/锚点表/unit-texts);文体线链一改既有详案提纲表第3行静默过期 — [源](wodejiaren-4a-lesson-state.md)｜跨册迁移改9处不是5处;题面与指导件是两层 — [源2](gushi-xinbian-5a-unit-move-0828.md)
@@ -109,6 +109,7 @@
 **碰引擎/共享件前必读**：[下游六件抽共享层](downstream-shared-layer-and-token-facts.md)（改真源照该条回归法）· [0727上下文瘦身收官](context-engineering-slimdown-0727.md)（细节已下沉references别抄回）
 - [宣传件渲染链+PDF反查源三指纹(0826)](promo-materials-render-chain.md) — 手改PDF前先三指纹反查源html;馆内海报scale须0.98;海报html已改入库
 - [配套PDF的Type3字体病已修两线(0817)](pdf-type3-fonts-fixed.md) — 装饰图标改纯CSS图形非换emoji;.mark .sym字体栈中间那档雅黑勿删;已装check_type3
+- [外部改稿docx回贴md(0902)](external-docx-backfill-0902.md) — 新增docx_backfill.py(骨架继承+文本整替,自证闸门shadow≡基线);⚠判新旧看措辞不看哈希;外部重做必换动画方案(只数animEffect会误报);示范文三方不同步时PPT与配套同源可作基准;结构变动只报告不自动改;⚠外部pptx入库前必压缩(89%是无损PNG,量化后34%)且压前若已commit须重写未推送提交
 - [下游六件抽共享层+token账实测](downstream-shared-layer-and-token-facts.md) — 合并skill省不了token;三条真源+薄壳;改真源照该条回归法(PDF比字节数不比md5)
 - [0727上下文瘦身收官](context-engineering-slimdown-0727.md) / [docx引擎标题层版式](docx-engine-title-heading-layout.md) / [引擎冗余审计](docx-engine-redundancy-audit.md) — 细节已下沉references别抄回;评估过拆三脚本→不拆别再重复排查
 - [两个常驻文件的分层重构(0818)](memory-index-structure-over-size-0818.md) — MEMORY真病灶=通则被埋进课次条目;CLAUDE下沉判据=脚本docstring才是细则唯一源;0901立check_memory_index.py防截尾,已挂hook双机自动跑
