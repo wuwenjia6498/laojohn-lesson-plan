@@ -115,6 +115,11 @@ PROFILES = {
                     "emph": P_RED, "label_bg": P_LABEL_BG, "label_fg": P_GREY,
                     "value_bold": False},
         "caption": "教学提纲",
+        # 2026-09-02 用户定：提纲表行距 1.5→2.0（继承 Normal 的 1.5 太挤）；
+        # 「课题·课时」值列从第 3 段（课时信息）起换行显示，不再用 　│　 接在同一行。
+        # 两项均为 writing 档专属——picture 档不设这两个键，行为与改动前完全一致。
+        "row_line_spacing": 2.0,
+        "course_wrap_from": 2,
         "rules": {
             "课题·课时": "p_course",
             "能力阶段": "p_ability",
@@ -280,10 +285,13 @@ def _tbl_cell_margins(tbl, top=0, left=108, bottom=0, right=108):
     tblpr.append(mar)
 
 
-def _cell_text(cell, text, size, bold, color, space=3, center=False):
+def _cell_text(cell, text, size, bold, color, space=3, center=False,
+               line_spacing=None):
     p = cell.paragraphs[0]
     p.paragraph_format.space_before = Pt(space)
     p.paragraph_format.space_after = Pt(space)
+    if line_spacing is not None:
+        p.paragraph_format.line_spacing = line_spacing
     if center:
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     run = p.add_run(text)
@@ -312,7 +320,8 @@ def _p_rule(p, side="bottom", color=P_BORDER, sz=4):
 
 
 # ---------- 值列富文本渲染（规则按 profile 选，实现共享） ----------
-def _render_value(cell, label, value, current_key, rules, pal, space=3):
+def _render_value(cell, label, value, current_key, rules, pal, space=3,
+                  line_spacing=None, course_wrap_from=None):
     """按 profile 的行名→规则表定制值列样式（p_* 系，全加粗）；配色取 profile 色板
     （picture＝语义灰阶＋纯黑强调；writing＝全黑＋「（本课）」红标）。
     值里的 <br> 一律渲染成真换行（与共享 docx 引擎口径一致）。
@@ -323,6 +332,8 @@ def _render_value(cell, label, value, current_key, rules, pal, space=3):
     p = cell.paragraphs[0]
     p.paragraph_format.space_before = Pt(space)
     p.paragraph_format.space_after = Pt(space)
+    if line_spacing is not None:
+        p.paragraph_format.line_spacing = line_spacing
 
     def run(text, size=11, bold=B, color=TXT):
         """写一段；<br> 转真换行。"""
@@ -342,7 +353,13 @@ def _render_value(cell, label, value, current_key, rules, pal, space=3):
         parts = [s.strip() for s in re.split(r"[│|]", value) if s.strip()]
         for i, seg in enumerate(parts):
             if i:
-                run(SEP, 12, B, MUT)
+                # course_wrap_from 起改为换行（不写 　│　 分隔符）；未设则全段同一行。
+                if course_wrap_from is not None and i >= course_wrap_from:
+                    _br = p.add_run()
+                    _set_font(_br, 12, B, MUT)   # _set_font 无返回值，勿链式调用
+                    _br.add_break()
+                else:
+                    run(SEP, 12, B, MUT)
             run(seg, 12, B, KEY if i == 1 else (MUT if i >= 2 else INK))
     elif rule == "p_dash":
         head, dash, tail = value.partition("——")
@@ -481,10 +498,14 @@ def build_front(doc, data):
         _cell_width(c1, tbl_w - label_w)
         _cell_bg(c0, pal["label_bg"])
         _cell_bg(c1, "FFFFFF")
-        _cell_text(c0, label, 11.5, True, pal["label_fg"], center=True)
+        ls = prof.get("row_line_spacing")
+        _cell_text(c0, label, 11.5, True, pal["label_fg"], center=True,
+                   line_spacing=ls)
         _cell_valign_center(c0)
         _cell_valign_center(c1)
-        _render_value(c1, label, value, current_key, prof["rules"], pal)
+        _render_value(c1, label, value, current_key, prof["rules"], pal,
+                      line_spacing=ls,
+                      course_wrap_from=prof.get("course_wrap_from"))
 
     ri = 0
     for header, rows in zones:

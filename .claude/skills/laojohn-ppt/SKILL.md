@@ -46,6 +46,24 @@ PYTHONUTF8=1 python .claude\skills\laojohn-ppt\scripts\place_pptx.py            
 - 认领不唯一时脚本会列候选**让你选，绝不猜**——照它给的清单问用户。
 - 脚本会报告子目录里已有的其它 pptx：**作废的旧烘焙件要删**，否则打包一并收走（踩过）。
 
+### 第 1.5 步 · 压缩媒体（入库前必跑，2026-09-02 立）
+
+```bash
+PYTHONUTF8=1 python .claude\skills\laojohn-ppt\scripts\shrink_pptx_media.py "<课次目录>\<课次>-课件PPT.pptx" --dry-run
+PYTHONUTF8=1 python .claude\skills\laojohn-ppt\scripts\shrink_pptx_media.py "<同上>.pptx"
+```
+
+**为什么必做**：外部件每份 13~22MB，一轮 7 份就是 125.5MB；而 `写作课件PPT输出\` 是入库的（CLAUDE.md §8）、**git 只进不出**，每轮外部重做都再叠一次。08-20 定「PPT 入库」时 pptx 都是 `build_ppt.py` 烘焙的、每份约 1MB，那条决策的前提对外部件已不成立。2026-09-02 体检：`.git` 已 689MB、远程 549MB，GitHub 软建议 1GB——两三轮即触线。
+
+病因不是分辨率（图普遍 ≤1.4MP、长边不超 2000px，投屏够用），是 **AI 插画用无损 PNG 承载**：pptx 约 **89% 是 `ppt/media/`**，且 zip 层压不动。量化 256 色后实测 **125.5MB → 42.6MB（34%）**，透明通道保留。
+
+- **只换 `ppt/media/*.png` 的字节**，不碰任何 XML／rels／SVG。**验收判据＝压缩前后页数/形状数/动画行为数/点击触发数逐项相等**（本次 7 份全等）。
+- **画质须目检**：量化对水彩/插画类几乎无损（实测 2.00MB→0.36MB，质感、发丝、渐变、透明均保留），但**首次对一批新风格的图仍要抽一张看**。
+- ⚠ **只压新入库的件，不要去压已在远程历史里的旧件**——旧版收不回，压了反而再叠一个版本。
+- ⚠ **判重能力补偿**：压后仓内 pptx 与外部件不再字节一致，「重复投放三项比对」的 media md5 项会失效。脚本默认写 sidecar `<pptx>-origin.json` 存原件指纹（整体 md5 + 各 media md5 + 原始字节数），**以后判重与它比，别与仓内 pptx 比**；别加 `--no-sidecar`。
+- 压缩后须重跑第 2 步 audit（本次复跑 7 份仍 0 条待办）。
+
+**读书会线不适用**——`读书会课件PPT输出\` 由 `build_ppt.py` 烘焙、体积正常，不接此工序。
 ### 第 2 步 · 读详案，据详案审查 PPT
 
 **先把详案整篇读完**（`写作课详案输出\<年级册>-第N单元-<题目>-写作课详案.md`），再动任何脚本。
