@@ -1,0 +1,30 @@
+{
+  "note": "外部原件指纹。本仓 pptx 已做媒体压缩、与外部件不再字节一致，判重（三项比对的 media md5 项）请与本文件比，不要与仓内 pptx 比。",
+  "shrunk_at": "2026-09-02",
+  "origin_bytes": 21703295,
+  "origin_md5": "f2caf4c3025e55e1786f25616adeae15",
+  "shrunk_bytes": 6983610,
+  "colors": 256,
+  "origin_media_md5": {
+    "ppt/media/image20.png": "79f9d6ee99668b05259228612bfde8c4",
+    "ppt/media/image7.png": "35355bccdf9e7fe00e4af1c0b5da9016",
+    "ppt/media/image19.png": "f65d188db7144ca82ad430d96b318b8d",
+    "ppt/media/image11.png": "27245908a870670715672dfdeb91c240",
+    "ppt/media/image13.png": "04710127684df831c5939a3e93b220d3",
+    "ppt/media/image12.png": "fa031a7b1892bc645c2bce14ac8a9216",
+    "ppt/media/image3.png": "f0ce72b0f3a7963f0801937442474596",
+    "ppt/media/image6.png": "ab40ac5cb596f383213275ee9d989b8a",
+    "ppt/media/image14.png": "6b3af87d685f8a8265262375a2d97e45",
+    "ppt/media/image16.png": "1f9c90b008bea41abb1d906150a97007",
+    "ppt/media/image18.png": "8184cbda620bc67a2355ff5f2f47dafd",
+    "ppt/media/image5.png": "092adf7949261f50b26753736f877879",
+    "ppt/media/image4.png": "fa977b5a86bf6fb17b268e05c500e861",
+    "ppt/media/image15.png": "55b99dac2b23d2742aec1a901e406d29",
+    "ppt/media/image10.png": "d4db434365e845d7cfb77db9fb826323",
+    "ppt/media/image2.png": "e9bc7f24ad80f4af7f8eb71a231405c5",
+    "ppt/media/image17.png": "973ca6d167b9c0a08b17ee6a193bc33f",
+    "ppt/media/image9.png": "6d22336004dcf4450177a208a5f74d83",
+    "ppt/media/image8.png": "7466d687296f3a7b33310a12ecc47883",
+    "ppt/media/image1.png": "2330b94ecbbb272c8acb8bcede3b0042"
+  }
+}
