@@ -605,9 +605,13 @@ def backfill(md_path, docx_path, out_path=None, dry_run=False, skip_selfcheck=Fa
 
 
 def _front_norm(v):
-    """首页值列归一：_render_value 做过 `　│　` 重拼、剥 **、partition 后 strip。"""
+    """首页值列归一：_render_value 做过 `　│　` 重拼、剥 **、partition 后 strip。
+
+    0902 起 writing 档 `course_wrap_from` 把「课题·课时」第 3 段起渲染成换行（不再写
+    `　│　`），md 侧写法一字不变——故换行与 │ 同视为段分隔，否则每篇首页行必假报差异。
+    """
     v = norm(v)
-    parts = [p.strip() for p in re.split(r'[│|]', v) if p.strip()]
+    parts = [p.strip() for p in re.split(r'[│|\n]', v) if p.strip()]
     return F.SEP.join(parts) if len(parts) > 1 else v
 
 

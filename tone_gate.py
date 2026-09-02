@@ -808,7 +808,7 @@ def check_writing(lines, in_outline, rep):
         s = ln.strip()
         if not re.search(r'〔[^〕]*教师掌握[^〕]*〕', s):
             continue
-        if '不必念给学生' not in s:
+        if not re.search(r'不必[念读]给学生', s):   # 0831 方向 念→读 后两写法并认
             no_note.append((i + 1, s))
         j = i - 1
         while j >= 0 and not lines[j].strip():
@@ -817,7 +817,7 @@ def check_writing(lines, in_outline, rep):
         if prev.startswith('师：') and re.search(r'[：:—]$', prev):
             dangling.append((i + 1, f'{s[:26]} ←上文师话止于「{prev[-18:]}」'))
     rep.fail('悬空师话：〔…教师掌握〕上方师话以 ：/—— 收尾（⑥.1；预告了就须在师话里讲完）', dangling)
-    rep.fail('〔…教师掌握〕标题缺括注「不必念给学生」（⑥.4）', no_note)
+    rep.fail('〔…教师掌握〕标题缺括注「不必念给学生／不必读给学生」（⑥.4）', no_note)
     # 行首全角（ 的行级提示（（教师总结）豁免）
     rep.fail('行首全角（ 的行级提示（应改半角方括号 […] 体例）',
              grep(lines, re.compile(r'^（(?!教师总结）)'),
