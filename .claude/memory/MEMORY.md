@@ -20,6 +20,7 @@
 - **「当场换人试装」装置**:念完当场换人名再念,学生自己听出垮在哪;写人物特点/身份感的题目可照搬,成败标准「换名字一字不用改=没写成」一并复用 — [源](woheguoyitian-4a-lesson-state.md)
 - **外部件「示范文里的句子」类表格逐行与示范文逐字比对**:截断可接受、改写必须打回;已四次出现 — [源](woheguoyitian-4a-ppt-chain-state.md)
 - **往「禁止逐字复用」清单补串一个串一条bullet**:tone_gate每条只取第一个串,并列写的第二个串永不报警;清单运行时解析补bullet即进机检 — [源](twentyyears-hometown-5a-lesson-state.md)
+- **教材换版(题目没变、题面/课文换掉)=第三形态,连改9处但course-map与文件名全不动**:三上四单元实做;教师侧配套2页是硬闸门,示范文变长须回压旁注 — [源](textbook-revision-same-title-new-page-0902.md)
 - **教材换题=重写不是改稿,第0步是改事实源**:archive零命中就动笔=伪造官方条款;五处连改(archive/index/course-map/锚点表/unit-texts);文体线链一改既有详案提纲表第3行静默过期 — [源](wodejiaren-4a-lesson-state.md)｜跨册迁移改9处不是5处;题面与指导件是两层 — [源2](gushi-xinbian-5a-unit-move-0828.md)
 - **「倒过来写」指构思顺序不指成文顺序**:新技法与既有铁律冲突,先分清管构思还是成文 — [源](wodejiaren-4a-lesson-state.md)｜**`参考：`里的学生答案过一遍「多数人家真会这样吗」**,编得巧但生活不常有=空转 — [源](wodejiaren-4a-lesson-state.md)
 - **教材照片与教参对不上时,称谓/数字/篇名逐字项逐项复核**,别一笔归为「版本差异」(姥爷实为爷爷曾错到32处) — [源](wodejiaren-4a-lesson-state.md)
