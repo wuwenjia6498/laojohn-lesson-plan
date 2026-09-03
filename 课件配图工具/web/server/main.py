@@ -54,6 +54,7 @@ DECKS = TOOL_ROOT / "拆解底稿"
 OUTPUTS = TOOL_ROOT / "课件产出"
 RULES = TOOL_ROOT / "拆解规则.md"
 UPLOADS = TOOL_ROOT / "web" / "_uploads"    # 上传的 pptx/详案原件，留档备查
+PLAN_SUFFIXES = {".md", ".txt", ".markdown", ".docx"}   # 详案入口后缀；docx 由 build_specs.load_plan 转文本
 
 
 def _load(name):
@@ -317,9 +318,12 @@ async def api_create(name: str = Form(...), style: str = Form(""),
         raise HTTPException(400, "项目名不能为空，也不能含路径分隔符")
     if (PROJECTS / f"{name}.json").exists():
         raise HTTPException(409, f"项目「{name}」已存在")
+    plan_suffix = (Path(plan.filename).suffix or ".md").lower()
+    if plan_suffix not in PLAN_SUFFIXES:
+        raise HTTPException(400, f"详案只收 {'/'.join(sorted(PLAN_SUFFIXES))}，收到的是「{plan_suffix}」")
     UPLOADS.mkdir(parents=True, exist_ok=True)
     pf = UPLOADS / f"{name}{Path(pptx.filename).suffix or '.pptx'}"
-    lf = UPLOADS / f"{name}-详案{Path(plan.filename).suffix or '.md'}"
+    lf = UPLOADS / f"{name}-详案{plan_suffix}"      # docx 原件留档，读取由 build_specs.load_plan 按后缀分派
     pf.write_bytes(await pptx.read())
     lf.write_bytes(await plan.read())
 

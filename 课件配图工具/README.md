@@ -53,7 +53,7 @@ python scripts/extract_deck.py <课件.pptx> -o 拆解底稿/<课>-deck.json
 python scripts/extract_deck.py <课件.pptx> --dump-sizes    # 换新模板时先看这个校准阈值
 
 # ② 模型层：读详案 + deck，产出角色清单与逐页规格
-python scripts/build_specs.py 拆解底稿/<课>-deck.json <详案.md>     -o 拆解底稿/<课>-拆解.json --model claude-opus-4-5     --style "水彩儿童插画：柔和水彩质感、干净留白"
+python scripts/build_specs.py 拆解底稿/<课>-deck.json <详案.md|.docx>  -o 拆解底稿/<课>-拆解.json --model claude-opus-4-5     --style "水彩儿童插画：柔和水彩质感、干净留白"
 python scripts/build_specs.py ... --stage1-only            # 只盘角色，先看再往下
 python scripts/build_specs.py ... --reuse-stage1 <角色盘点.json>   # 阶段一不重跑
 ```

@@ -232,7 +232,10 @@ def stage_pages(d, outdir, client, force, only=None, proj_path=None):
             skipped.append((s["页码"], s.get("_说明", "人工素材位")))
             continue
         if ch == "复用":
-            src = made.get(s["复用"]) or done.get(s["复用"])
+            # --only 补跑时源页多半不在本轮 done 里，但盘上早就有 —— 直接拿盘上那张。
+            # 实测 0903 补跑 4 页，走到 P15 复用 P14 就 SystemExit，后面的页全没跑。
+            src = (made.get(s["复用"]) or done.get(s["复用"])
+                   or outdir / "页目" / f"{s['复用']}.jpg")
             if not src or not pathlib.Path(src).exists():
                 raise SystemExit(f"⛔ {s['页码']} 要复用「{s['复用']}」，但那张还不存在。")
             done[s["页码"]] = src

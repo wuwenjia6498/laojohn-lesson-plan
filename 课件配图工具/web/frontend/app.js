@@ -124,7 +124,7 @@ async function viewHome() {
     </div>
     <div class="row" style="margin-bottom:10px">
       <label class="field" style="flex:1"><span>课件 .pptx</span><input type="file" id="pPptx" accept=".pptx"></label>
-      <label class="field" style="flex:1"><span>教学详案 .md / .txt</span><input type="file" id="pPlan" accept=".md,.txt,.markdown"></label>
+      <label class="field" style="flex:1"><span>教学详案 .md / .txt / .docx</span><input type="file" id="pPlan" accept=".md,.txt,.markdown,.docx"></label>
     </div>
     <div class="row"><button id="pGo">开始拆解</button>
       <span class="muted">拆解要调两次模型，约 1–2 分钟</span></div>

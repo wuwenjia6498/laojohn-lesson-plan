@@ -5,6 +5,7 @@
 fastapi>=0.115.6
 uvicorn>=0.32.1
 python-multipart>=0.0.20    # 上传 pptx / 详案走 multipart，少了它一上传就 500
+python-docx>=0.8.11         # 详案可传 .docx（2026-09-03 起），由 build_specs.load_plan 转文本
 
 # 生图与拆解由 scripts/ 下的引擎承担，它们自带的依赖（requests、google-genai、
 # python-pptx、Pillow）不在这里重复声明——那几个脚本 CLI 也在用，是同一套。

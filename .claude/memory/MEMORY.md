@@ -117,6 +117,7 @@
 - [fix_quotes会毁代码块里的命令(0807)](fix-quotes-breaks-code-blocks.md) — 不认代码围栏;含命令示例的md跑完须回扫还原半角
 - [Bash heredoc写文件六坑(0820/0821)](bash-heredoc-file-writing-pitfalls.md) — 定界符漏引号反引号被执行成空;超长静默截断;替换失败先grep数次数;报错都指错方向,细节见源条
 - [Write吞弯引号→必跑fix_quotes](write-tool-normalizes-curly-quotes.md) / [下游JSON引号统一弯引号禁「」](json-materials-curly-quotes.md) / [雅黑弯引号显示半角](curly-quotes-render-halfwidth-yahei.md) — 含引号段落Edit改用无引号锚点;字符层U+201C已对别改JSON,靠模板unicode-range落宋体
+- [配图工具：多页道具须定妆件+示范文的「我」是大人(0903)](imgtool-prop-consistency-and-owner-0903.md) — 帆布包三错同根因;道具定妆必开去人物条目;款式写到托特/书包这一级
 - [桌面插图批量去豆包水印管线](doubao-watermark-removal-pipeline.md) — 106张已交付;脚本在记忆目录;输入glob必须排除产物
 - **PPT引擎**:[第三profile宣讲(0824)](ppt-promo-profile-0824.md)· [按profile分层](ppt-profile-seam-architecture.md)(底层原语不fork)· [中文变Calibri修复](ppt-font-ea-latin-order.md)(latin须在ea前)· [表格自适应](ppt-table-autofit.md) / [原文齐读自适应](ppt-quote-autofit.md)(存量重烘才生效)· [阅读单页型已下线](ppt-reading-sheet-page.md)
 - **PPT 视觉**：[副标题克制电报体](ppt-subtitle-no-telegraphese.md) / [参考答案红字上屏](ppt-reference-answer-on-slide.md) / [逐条点击动画](ppt-click-reveal-animation.md) / [四图网格](ppt-four-image-grid.md) / [逐页讲稿新增docx](lecture-notes-docx.md) — 末条:打包只收docx

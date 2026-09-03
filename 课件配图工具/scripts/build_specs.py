@@ -22,10 +22,50 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 RULES = ROOT / "拆解规则.md"
 
 
+def docx_to_text(path):
+    """把详案 docx 按正文顺序拍成纯文本：段落一行一段，表格一行一行、单元格用「 | 」隔开。
+
+    只走正文（body），页眉页脚不进来——那是「老约翰深度阅读」品牌页眉，不是教学内容。
+    页标 〖PPT 第N页 · …〗 在 docx 里是独占一行的普通文字段，原样保留，
+    所以 `split_by_pagetag` 对 docx 来的详案照样按页切得开。
+    合并单元格 python-docx 会重复返回同一对象，按 _tc 去重，否则表格一行会出现两遍同一格。
+    """
+    from docx import Document                      # 只在真的传 docx 时才 import
+    from docx.table import Table
+    from docx.text.paragraph import Paragraph
+    doc = Document(str(path))
+    lines = []
+    for child in doc.element.body.iterchildren():
+        tag = child.tag.rsplit("}", 1)[-1]
+        if tag == "p":
+            lines.append(Paragraph(child, doc).text.replace("\x0b", "\n"))
+        elif tag == "tbl":
+            for row in Table(child, doc).rows:
+                cells, seen = [], set()
+                for c in row.cells:
+                    if id(c._tc) in seen:
+                        continue
+                    seen.add(id(c._tc))
+                    # 格内换行（md 表格里的 <br>）拍成空格，否则一格会把表格行拆成两行
+                    cells.append(" ".join(pp.text for pp in c.paragraphs).replace("\x0b", " ").replace("\n", " ").strip())
+                lines.append("| " + " | ".join(cells) + " |")
+            lines.append("")
+    return "\n".join(lines)
+
+
 def load_plan(path):
-    """读详案 md。整篇喂，不做摘要——摘要会先一步丢掉必现细节的来源原文，
-    而 R5「来源可追溯」正是靠原文句撑着的。"""
-    txt = pathlib.Path(path).read_text(encoding="utf-8")
+    """读详案（.md / .txt / .docx）。整篇喂，不做摘要——摘要会先一步丢掉必现细节的来源原文，
+    而 R5「来源可追溯」正是靠原文句撑着的。
+
+    docx 是 2026-09-03 加的入口：审核方常只回传 docx 而不回传 md（详见仓库根 CLAUDE.md §9），
+    要求先手工转 md 等于多一道容易忘的工序。转出来的文本与 md 版差别只在 Markdown 标记
+    （`##`、`**`、`>`）没了——`来源` 核对走的是 `_norm`（已剥标点空白），不受影响。
+    """
+    path = pathlib.Path(path)
+    if path.suffix.lower() == ".docx":
+        txt = docx_to_text(path)
+    else:
+        txt = path.read_text(encoding="utf-8")
     txt = re.sub(r"<!--.*?-->", "", txt, flags=re.S)   # 注释区不是教学内容
     return txt.strip()
 
@@ -529,7 +569,7 @@ def main():
 def _main():
     ap = argparse.ArgumentParser(description="详案 + PPT → 项目 JSON（拆解器）")
     ap.add_argument("deck", help="extract_deck.py 产出的 deck.json")
-    ap.add_argument("plan", help="教学详案 .md")
+    ap.add_argument("plan", help="教学详案 .md / .txt / .docx")
     ap.add_argument("-o", "--out", required=True, help="输出项目 json")
     ap.add_argument("--provider", default=None, help="gemini / doubao，缺省读 .env")
     ap.add_argument("--model", default=None, help="拆解用的文本模型，缺省读 .env")
