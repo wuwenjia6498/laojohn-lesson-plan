@@ -18,4 +18,14 @@ metadata:
 
 ⚠ **遗留风险**：仓库内 9 个课次的学生合订 `_data.json` 仍是不含那批手改的版本，日后任何重渲都会再次得到无手改版。用户 0821 明确说这次只改他给的 z 盘目录、不动仓库，所以没回填。
 
+## 0904 补：用户手改 PDF 后「照着回贴源文件」的做法（五上《“漫画”老师》学生用实做）
+
+用户在 PDF 编辑器里直接改了学生用 PDF，要求照着改源。**源是 `_data.json`，不是 markdown**（用户嘴上说的是「markdown 源文件」，别照字面去翻详案）；只有改动触及教学内容时才另外同步详案 .md。
+
+比对法（本次 41 个字段里精准命中 3 处改动）：`pypdf` 提 PDF 全文 → 两边都 `re.sub(r'\s+','')` 去空白 → 逐个 json 字符串（先剥 `{b}`/`{hl}` 标记）判断是否为 PDF 文本的子串，不是即被改。**必须去空白再比**——PDF 提取会因字体子集切分（`/DAAAAA+MicrosoftYaHei` 与用户新输入文字用的 `/MicrosoftYaHei`）在词中间插入换行与空格，肉眼看像「借鉴 范文的写作方法」，实际原文无空格。
+
+**判断用户是不是想加粗，用 `extract_text(visitor_text=…)` 读 `/BaseFont`**：本次用户在起笔提示里打了一个 markdown 式 `**`，visitor 显示那段全是 `MicrosoftYaHei`（非 `-Bold`），说明星号只是**字面字符、没被渲染成加粗**。而 `worksheet.draftnote` 在模板里走 `textContent`（不是 `rich()`），**富文本标记与星号都会原样印在学生打印件上**——所以回写时把 `**` 删掉，需要加粗得先改模板。支持 `{b}` 的字段只有 `worksheet.skills`、`essay.notes[].a`、`essay.method`、`essay.footer`（见 data_schema.md），别往别处塞。
+
+**手改文字常常撑破页数闸门**：本次用户把 `essay.footer` 从 43 字改到 58 字，`.footer-skill` 的 p 被 badge 挤窄（可用宽约 600px、每行约 54 字），一变两行范文页立刻裂成 5 页。压回一行时**保留用户的全部意思、只压字数**，并把改动原句与落地句一并报给用户核对——不要默默改写他刚写下的话。
+
 相关：[[writing-materials-skill-student-bundle]] · [[writing-materials-pages-trimmed-0803]] · [[pdf-type3-fonts-fixed]]
