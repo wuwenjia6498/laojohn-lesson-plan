@@ -26,7 +26,7 @@
 - **教材照片与教参对不上时,称谓/数字/篇名逐字项逐项复核**,别一笔归为「版本差异」(姥爷实为爷爷曾错到32处) — [源](wodejiaren-4a-lesson-state.md)
 - **教材自带提纲/范例=必须落实的知识点,自创工具只能细化不能顶替**;否定反例精确落到「缺了什么」 — [源](twentyyears-hometown-5a-lesson-state.md)
 - **点名「可行做法」只点一种=指定默认款**:硬要求但解法开放处写清单不写单例 — [源](writing-lesson-stage7-interaction-form-gap.md)
-- **换掉教师示范文=四处下游连改**:详案12处/配套学生·教师两侧json/批改标准包前两组进提示词/PPT六类页外部重做;须回看③判断对比的反例有没有跟新示范文撞车 — [源](model-essay-swap-downstream-chain.md)
+- **换掉/改长教师示范文=四处下游连改**:详案12处/配套两侧json/批改标准包进提示词/PPT六类页外部重做;须回看③反例是否撞车;⚠变长还会顶爆配套页数闸门(0904已把范文页段距改0.5mm) — [源](model-essay-swap-downstream-chain.md)
 ### 规则与体例
 - [⚠文风定盘0831·0901收敛一主三从](writing-style-two-directions-conflict-0831.md) — 方向=向规范书面靠;AI痕迹=破折号/导演腔/省主语/术语漂移;**PassC已撤别重开**;主判据唯一源style-criteria+执行位在PassB;改写工序跑完必看--baseline方向指标;批量修文件脚本每步立即写盘
 - [配套三侧文案0901起桥接style-criteria](writing-materials-style-bridge-0901.md) — 此前只有0803单边去AI腔、方向反;SKILL红线拆两条+§四认领+§二.1回填8对;picture-materials仍真空(补时桥它自己线§13)
@@ -109,7 +109,7 @@
 **碰引擎/共享件前必读**：[下游六件抽共享层](downstream-shared-layer-and-token-facts.md)（改真源照该条回归法）· [0727上下文瘦身收官](context-engineering-slimdown-0727.md)（细节已下沉references别抄回）
 - [宣传件渲染链+PDF反查源三指纹(0826)](promo-materials-render-chain.md) — 手改PDF前先三指纹反查源html;馆内海报scale须0.98;海报html已改入库
 - [配套PDF的Type3字体病已修两线(0817)](pdf-type3-fonts-fixed.md) — 装饰图标改纯CSS图形非换emoji;.mark .sym字体栈中间那档雅黑勿删;已装check_type3
-- [外部改稿docx回贴md(0902/0903)](external-docx-backfill-0902.md) — docx_backfill.py骨架继承+文本整替,闸门shadow≡基线;⚠判新旧看措辞不看哈希;外部重做必换动画方案(只数animEffect误报);示范文三方不同步以PPT+配套为基准;⚠取舍权在用户,AI逐条摆冲突不替他驳回;判改写前先读本篇首页[授课提示]
+- [外部改稿docx回贴md(0902-0904)](external-docx-backfill-0902.md) — docx_backfill.py骨架继承+文本整替,闸门shadow≡基线;⚠判新旧看措辞不看哈希;⚠外部说「只改了X」先互比外部目录历次版本定基线(0904藏了一版没回贴过的);回退vs真改写要分开报数交用户拍板;示范文三方不同步以PPT+配套为基准;⚠取舍权在用户,AI逐条摆冲突不替他驳回;判改写前先读本篇首页[授课提示]
 - [下游六件抽共享层+token账实测](downstream-shared-layer-and-token-facts.md) — 合并skill省不了token;三条真源+薄壳;改真源照该条回归法(PDF比字节数不比md5)
 - [0727上下文瘦身收官](context-engineering-slimdown-0727.md) / [docx引擎标题层版式](docx-engine-title-heading-layout.md) / [引擎冗余审计](docx-engine-redundancy-audit.md) — 细节已下沉references别抄回;评估过拆三脚本→不拆别再重复排查
 - [两个常驻文件的分层重构(0818)](memory-index-structure-over-size-0818.md) — MEMORY真病灶=通则被埋进课次条目;CLAUDE下沉判据=脚本docstring才是细则唯一源;0901立check_memory_index.py防截尾,已挂hook双机自动跑
