@@ -109,7 +109,7 @@
 **碰引擎/共享件前必读**：[下游六件抽共享层](downstream-shared-layer-and-token-facts.md)（改真源照该条回归法）· [0727上下文瘦身收官](context-engineering-slimdown-0727.md)（细节已下沉references别抄回）
 - [宣传件渲染链+PDF反查源三指纹(0826)](promo-materials-render-chain.md) — 手改PDF前先三指纹反查源html;馆内海报scale须0.98;海报html已改入库
 - [配套PDF的Type3字体病已修两线(0817)](pdf-type3-fonts-fixed.md) — 装饰图标改纯CSS图形非换emoji;.mark .sym字体栈中间那档雅黑勿删;已装check_type3
-- [外部改稿docx回贴md(0902)](external-docx-backfill-0902.md) — 新增docx_backfill.py(骨架继承+文本整替,自证闸门shadow≡基线);⚠判新旧看措辞不看哈希;外部重做必换动画方案(只数animEffect会误报);示范文三方不同步时PPT与配套同源可作基准;结构变动只报告不自动改;⚠外部pptx入库前必压缩(89%是无损PNG,量化后34%)且压前若已commit须重写未推送提交
+- [外部改稿docx回贴md(0902/0903)](external-docx-backfill-0902.md) — docx_backfill.py骨架继承+文本整替,闸门shadow≡基线;⚠判新旧看措辞不看哈希;外部重做必换动画方案(只数animEffect误报);示范文三方不同步以PPT+配套为基准;⚠取舍权在用户,AI逐条摆冲突不替他驳回;判改写前先读本篇首页[授课提示]
 - [下游六件抽共享层+token账实测](downstream-shared-layer-and-token-facts.md) — 合并skill省不了token;三条真源+薄壳;改真源照该条回归法(PDF比字节数不比md5)
 - [0727上下文瘦身收官](context-engineering-slimdown-0727.md) / [docx引擎标题层版式](docx-engine-title-heading-layout.md) / [引擎冗余审计](docx-engine-redundancy-audit.md) — 细节已下沉references别抄回;评估过拆三脚本→不拆别再重复排查
 - [两个常驻文件的分层重构(0818)](memory-index-structure-over-size-0818.md) — MEMORY真病灶=通则被埋进课次条目;CLAUDE下沉判据=脚本docstring才是细则唯一源;0901立check_memory_index.py防截尾,已挂hook双机自动跑
