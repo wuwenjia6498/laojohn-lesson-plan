@@ -25,6 +25,7 @@ import re
 import time
 from collections import defaultdict, deque
 from pathlib import Path
+from typing import List, Optional
 
 import httpx
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
@@ -215,7 +216,7 @@ def _rate_ok(ip):
 # 判断规则与点评卡要求都从 build_prompt 取，与 Phase 0 的提示词共用同一份措辞。
 # 本文件只负责套上「输出 JSON」这层壳——**不要在这里另写一套判断规则**，
 # 两处各写一份必然分叉，且分叉不报错，只会让加盟商手上那份和线上判得不一样。
-GRADE_RULES = """你是老约翰同步习作课的批改助手。老师会发来一张学生手写稿纸的照片，你按下面的标准判断，输出 JSON。
+GRADE_RULES = """你是老约翰同步习作课的批改助手。老师会发来一个学生手写稿纸的照片（通常一张；写得长的学生会用续页，那就是两三张，按页序发给你，是同一篇作文），你按下面的标准判断，输出 JSON。
 
 ## 一、你的边界（先记住）
 
@@ -242,7 +243,7 @@ GRADE_RULES = """你是老约翰同步习作课的批改助手。老师会发来
 
 {
   "paragraph_count": "稿纸上一共几个自然段，填数字。**先数这个，再往下写 transcript**——一开始转写就顾不上分段了。短得一行都不满的段落最容易漏，开头那一段尤其要看清。",
-  "transcript": "整篇作文的逐字转写。按稿纸原样抄，**包括你认为写错的字**，不要顺手改通顺；看不清的字写成 [?]。**分段必须照抄**：稿纸是方格纸，新起一段有两个看得见的标志——这一段的头一行**空出前两格**，而上一段的末行**右边空着没写满**。见到这两个标志就是新的一段，转写里用空行隔开。**必须分成 paragraph_count 段**——「分段」那一项就是照这里的换行判的，段数点错了，那一项跟着说错。这一项是给程序核对引用用的，不会给老师看。",
+  "transcript": "整篇作文的逐字转写。**有续页时把各页按顺序接着抄成一篇**，页与页之间不要加任何标记。按稿纸原样抄，**包括你认为写错的字**，不要顺手改通顺；看不清的字写成 [?]。**分段必须照抄**：稿纸是方格纸，新起一段有两个看得见的标志——这一段的头一行**空出前两格**，而上一段的末行**右边空着没写满**。见到这两个标志就是新的一段，转写里用空行隔开。**必须分成 paragraph_count 段**——「分段」那一项就是照这里的换行判的，段数点错了，那一项跟着说错。这一项是给程序核对引用用的，不会给老师看。",
   "student_name": "稿纸姓名栏上的名字；栏空着或看不清就填空字符串",
   "unclear": ["看不清的句子，连同上下文；没有就空数组"],
   "checks": [
@@ -297,7 +298,21 @@ ANTI_SAME_TMPL = """
 """
 
 
-def build_messages(pack, image_b64, mime, prev_heads):
+MAX_PAGES = 3   # 稿纸一页 + 续页一页是常态，留一页余量；再多多半是拍错了
+
+MULTI_PAGE_NOTE = (
+    "这一份学生作文共 {n} 页，下面按页序给出。第 2 页起是续页，**接着上一页的末尾往下读，"
+    "是同一篇作文的后半部分，不是另一篇**；续页开头不空两格也不算新起一段。"
+    "姓名以第 1 页姓名栏为准。转写与所有引用都要覆盖全部页。"
+)
+
+
+def build_messages(pack, images, prev_heads):
+    """images：[(base64, mime), ...]，按页序；一页就是长度为 1 的列表。
+
+    ⚠ 0906 起签名从 (pack, image_b64, mime, prev_heads) 改成这样——smoke_real.py 与
+    run_regression.py 都已同步；再有别的调用方，传单张就包成 [(b64, mime)]。
+    """
     # 用 replace 不用 format：输出格式那段里全是 JSON 大括号，format 会把它们当占位符
     sys_prompt = (GRADE_RULES
                   .replace("@PACK@", render_pack(pack))
@@ -306,12 +321,17 @@ def build_messages(pack, image_b64, mime, prev_heads):
     if prev_heads:
         sys_prompt += ANTI_SAME_TMPL.format(
             heads="\n".join(f"- {h}" for h in prev_heads[-12:]))
+    n = len(images)
+    content = [{"type": "text", "text": (
+        "这是一份学生稿纸，按上面的要求批改，只输出 JSON。" if n == 1
+        else MULTI_PAGE_NOTE.format(n=n) + " 按上面的要求批改，只输出 JSON。")}]
+    for i, (b64, mime) in enumerate(images, 1):
+        if n > 1:
+            content.append({"type": "text", "text": f"第 {i} 页："})
+        content.append({"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}})
     return [
         {"role": "system", "content": sys_prompt},
-        {"role": "user", "content": [
-            {"type": "text", "text": "这是一份学生稿纸，按上面的要求批改，只输出 JSON。"},
-            {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{image_b64}"}},
-        ]},
+        {"role": "user", "content": content},
     ]
 
 
@@ -796,23 +816,32 @@ def lesson(lesson_id: str):
 async def grade(request: Request,
                 lesson_id: str = Form(...),
                 prev_heads: str = Form("[]"),
-                image: UploadFile = File(...)):
+                image: Optional[UploadFile] = File(None),
+                images: List[UploadFile] = File([])):
+    # 一份作文可以是多页（稿纸 + 续页）：前端按页序以多个同名 `images` 字段上传。
+    # 旧的单字段 `image` 仍收——两种都给时以 `images` 为准，一个都没给才报错。
     pack = PACKS.get(lesson_id)
     if not pack:
         raise HTTPException(404, "未找到该课次的标准包")
     if not _rate_ok(_client_ip(request)):
         raise HTTPException(429, "本小时批改次数已达上限，请稍后再试（防盗刷限额）")
 
-    raw = await image.read()
-    if len(raw) > CFG["max_image_mb"] * 1024 * 1024:
-        raise HTTPException(413, f'图片超过 {CFG["max_image_mb"]}MB，请压缩后重新上传')
+    pages = images or ([image] if image else [])
+    if not pages:
+        raise HTTPException(400, "没有收到稿纸照片")
+    if len(pages) > MAX_PAGES:
+        raise HTTPException(400, f"一份作文最多 {MAX_PAGES} 页，请检查是否把别人的稿纸拍进来了")
+    raws = [await f.read() for f in pages]
+    # 限的是一份的总量：Vercel 请求体硬限 4.5MB 是按整个请求算的，不是按张算
+    if sum(map(len, raws)) > CFG["max_image_mb"] * 1024 * 1024:
+        raise HTTPException(413, f'照片合计超过 {CFG["max_image_mb"]}MB，请压缩后重新上传')
 
     if MOCK:
         return mock_grade(pack)
 
     heads = json.loads(prev_heads or "[]")
-    b64 = base64.b64encode(raw).decode()
-    msgs = build_messages(pack, b64, image.content_type or "image/jpeg", heads)
+    msgs = build_messages(pack, [(base64.b64encode(r).decode(), f.content_type or "image/jpeg")
+                                 for r, f in zip(raws, pages)], heads)
     out = parse_json(await call_model(msgs))
 
     # 引用一字不差这条不能靠模型自觉：拿它自己的 transcript 把每处引用对回原文，

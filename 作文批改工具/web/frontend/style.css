@@ -143,6 +143,18 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .card .sub{font-size:13px;color:var(--ink-soft);margin-top:2px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card .go{flex:none;color:#C4BDB0;font-size:20px}
+.card{cursor:pointer}   /* 卡片已从 <button> 改成 div（里面要嵌「＋续页」按钮） */
+.card .pages{display:inline-block;margin-left:6px;padding:0 6px;border-radius:10px;
+  font-size:11px;font-weight:700;line-height:17px;vertical-align:2px;
+  background:var(--blue-soft);color:var(--blue-head)}
+.card .addpg{flex:none;padding:4px 8px;border:1px solid var(--line);border-radius:14px;
+  background:var(--paper);color:var(--ink-soft);font-size:12px;line-height:1.2;white-space:nowrap}
+.card .addpg:active{background:var(--brown-cell)}
+
+/* 「每份两页」开关行：默认关。说明文字要一直可见，开关的副作用（错位）不能藏在帮助面板里 */
+.pairrow{display:flex;align-items:flex-start;gap:10px;margin:-4px 2px 14px;font-size:14px}
+.pairrow input{flex:none;width:18px;height:18px;margin-top:1px}
+.pairrow em{display:block;font-style:normal;font-size:12px;color:var(--ink-soft);margin-top:2px;line-height:1.45}
 
 .badge{display:inline-block;padding:1px 8px;border-radius:20px;font-size:12px;font-weight:700}
 .badge.b0{background:#FBF1E3;color:var(--warn)}

@@ -77,7 +77,7 @@ def check_quote(quote, source):
 async def grade_one(pack, img, prev_heads):
     """走与 /api/grade 同一条路：批完立刻做引用校正，回归测的才是线上行为。"""
     b64 = base64.b64encode(img.read_bytes()).decode()
-    msgs = srv.build_messages(pack, b64, "image/jpeg", prev_heads)
+    msgs = srv.build_messages(pack, [(b64, "image/jpeg")], prev_heads)
     r = srv.parse_json(await srv.call_model(msgs))
     r["_fix"] = srv.fix_quotes(r)
     srv.recount_fillers(r)             # 与 /api/grade 同一道后处理，别漏

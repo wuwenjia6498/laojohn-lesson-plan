@@ -54,8 +54,8 @@
 - [审题固化为③开头固定半环](writing-lesson-shenti-bianxi-fixed-half-step.md) / [第2节起步半环·L5–L6改判「定起点」+自由写作≥25分钟(0830)](writing-lesson-destress-onramp.md) / [修改符号自然用不重教](writing-lesson-revision-symbols-natural-use.md)
 - [去先导预设/技法克制](writing-lesson-drop-prelude-preset.md) / [不引读书会书目](writing-lesson-drop-book-club-link.md) / [不写下游ppt提示标签](writing-lesson-no-downstream-ppt-hints.md)
 - [详案出PPTX](writing-lesson-to-pptx.md) / [docx页眉定版](writing-lesson-docx-header.md) / [竞品借鉴清单](writing-lesson-competitor-borrow-backlog.md) — 漏传--header-left/right静默回落读书会页眉;D3-D5/N1待做
-- [作文批改工具(0818立项)](writing-correction-tool-0818.md) — 给加盟商不能做skill;判据从详案抽标准包JSON;错别字层原理上不能做;引用一字不差靠工程不靠提示词;无密钥静默进mock最危险已加LJ_ENV=prod拒启;隐私口径=批语永久留+图只留一天;其余工程细节全在源条
-- [批改工具已部署Vercel(0824)](writing-correction-tool-vercel-deploy-0824.md) — 入口必须是部署根index.py绝不能放api/;.vercelignore必须挡config.json;国内直连vercel.app不通,正式地址grader.skyline666.top;⚠validate全绿证明不了包对;部署/DNS细节在源条
+- [作文批改工具(0818立项)](writing-correction-tool-0818.md) — 给加盟商不能做skill;判据从详案抽标准包JSON;错别字层原理上不能做;引用一字不差靠工程;LJ_ENV=prod拒无密钥启动;隐私=批语永久留+图留一天;0906多页已上(续页按钮+配对开关默认关)
+- [批改工具已部署Vercel(0824)](writing-correction-tool-vercel-deploy-0824.md) — 入口=部署根index.py不能放api/;.vercelignore挡config.json;正式地址grader.skyline666.top(vercel.app国内不通);⚠validate全绿≠包对;部署/DNS细节在源条
 - [配套三侧削页+去逐字稿框架(0803)](writing-materials-pages-trimmed-0803.md) — 家长1页/教师2页;教师侧禁「配合逐字稿」;⚠学生侧0818已回4页｜[配套skill三侧全落地](writing-materials-skill-student-bundle.md) — ⚠页数已被上条覆盖;_shared.py勿复制;家长侧禁虚构作品
 - [手改只改HTML必被重渲冲掉(0821)](writing-materials-handedits-lost-on-rerender.md) — 文字改动一律回写_data.json;只剩产物时PyMuPDF原位抠版式;⚠仓内9课json仍不含那批手改
 - **PPT链**(实现细节全在各源条):[⚠交付边界:本仓止于动画注入·终稿不回仓(0902)](ppt-delivery-boundary-0902.md)(打包不收PPT/压缩降级为>5MB才跑/仓内≈1.5MB而终稿13~22MB;⚠下一课次须确认收到的是初稿不是终稿)· [先读详案再审查再动画(0806)](writing-ppt-review-against-detail-first.md)(⚠机检全过≠审查完成;PPT对详案错勿迁就)· [外部生成+本仓只做动画(0803)](writing-ppt-external-plus-animation.md)· [动画工作单填shape_id非位置索引(0804)](ppt-anim-groups-are-shape-ids.md)· [手工动画被注入器静默清掉(0825)](manhua-laoshi-5a-ppt-chain-state.md)· [重复投放先三项比对判重(0825)](external-pptx-duplicate-drop-0825.md)

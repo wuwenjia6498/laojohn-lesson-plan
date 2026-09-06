@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
-"""真实模型链路自测：拿一张稿纸照片跑一次真调用，把该核的四件当场核给你看。
+"""真实模型链路自测：拿一份稿纸照片跑一次真调用，把该核的四件当场核给你看。
 
-    PYTHONUTF8=1 python 作文批改工具/web/server/smoke_real.py <稿纸照片> [课次id]
+    PYTHONUTF8=1 python 作文批改工具/web/server/smoke_real.py <稿纸照片> [续页照片...] [课次id]
+
+多页作文把各页按顺序都传进来（0906 起支持，与线上 /api/grade 同一条 build_messages 路径）；
+参数里凡是存在的文件都当页，剩下那个当课次 id。
 
 需要先配好密钥（环境变量 AIHUBMIX_API_KEY 或 server/config.json）。
 不启服务、不经前端，直接打模型——排查时先跑它，能把「前端问题」和
@@ -20,7 +23,7 @@ srv = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(srv)
 
 
-async def run(img_path, lesson_id):
+async def run(img_paths, lesson_id):
     if srv.MOCK:
         print("✗ 没读到密钥，现在是 mock 模式，这次自测没意义。")
         print("  先 export AIHUBMIX_API_KEY=... 或填好 server/config.json。")
@@ -30,10 +33,10 @@ async def run(img_path, lesson_id):
         print("✗ 没有这一课的标准包。现有：" + "、".join(srv.PACKS))
         return 1
 
-    raw = Path(img_path).read_bytes()
+    raws = [Path(p).read_bytes() for p in img_paths]
     print(f'课次：{pack["meta"]["topic"]}　模型：{srv.CFG["grade_model"]}　'
-          f'图：{len(raw)/1024:.0f}KB')
-    msgs = srv.build_messages(pack, base64.b64encode(raw).decode(), "image/jpeg", [])
+          f'图：{len(raws)} 页 ' + "+".join(f"{len(r)/1024:.0f}KB" for r in raws))
+    msgs = srv.build_messages(pack, [(base64.b64encode(r).decode(), "image/jpeg") for r in raws], [])
     text = await srv.call_model(msgs)
 
     print("\n—— 原始返回 ——")
@@ -75,4 +78,9 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print(__doc__)
         sys.exit(1)
-    sys.exit(asyncio.run(run(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)))
+    imgs = [a for a in sys.argv[1:] if Path(a).is_file()]
+    rest = [a for a in sys.argv[1:] if not Path(a).is_file()]
+    if not imgs:
+        print("✗ 参数里没有一个是存在的图片文件")
+        sys.exit(1)
+    sys.exit(asyncio.run(run(imgs, rest[0] if rest else None)))

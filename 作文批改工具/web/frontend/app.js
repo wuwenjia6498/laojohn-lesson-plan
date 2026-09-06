@@ -21,8 +21,14 @@ const esc = (s) => String(s == null ? "" : s)
 const S = {
   lessons: [],
   lesson: null,     // 当前课次（精简版标准包）
-  items: [],        // 队列：{id, file, blob, url, status, result, error}
+  // 队列：{id, pages:[{file, blob, url}], status, result, error}
+  // 一份＝一个学生，pages 按页序：稿纸一页是常态，写了续页的两页（0906 起支持多页）。
+  // 每页三件：file 原图（恢复出来的项没有）、blob 压缩图（pump 里补）、url 缩略图链接。
+  items: [],
   seq: 0,
+  pairMode: false,  // 「每份两页」开关：连拍自动两两配对。默认关，且不持久化——
+                    // 开着忘了关，下次班里只有一半人写续页，配对会整体错位。
+  appendTo: null,   // 「＋续页」正在给哪一份补页（item id），选完照片即清
   sid: "",          // 本次会话号，本机暂存用它认领自己的记录
   busy: false,
   mock: false,
@@ -212,10 +218,17 @@ function onIdbFail(e) {
   markDead();
 }
 
+// 存进库的是 blobs 数组（按页序）。读的时候兼容 0906 之前只有单个 blob 的老记录——
+// 那些记录永久留存，不能因为字段改名就让它们变成「照片未保存」。
+const blobsOf = (r) => r.blobs || (r.blob ? [r.blob] : []);
+
+// 有一页压缩图还没补齐就整份不存图：半份图恢复出来批不了，还会让恢复框报错数
+const allShrunk = (it) => it.pages.length > 0 && it.pages.every(p => p.blob);
+
 const recOf = (it) => ({
   key: S.sid + "#" + it.id, sid: S.sid, id: it.id,
   status: it.status, result: it.result, error: it.error,
-  blob: (it.status === "ok" || blobsOff) ? null : (it.blob || null),
+  blobs: (it.status === "ok" || blobsOff || !allShrunk(it)) ? null : it.pages.map(p => p.blob),
   ts: Date.now(),
 });
 
@@ -305,10 +318,10 @@ function draftClearAll() {
 async function sweepOldBlobs() {
   if (dbDead) return;
   const all = (await idbTx("items", "readonly", (s) => s.getAll())) || [];
-  const old = all.filter(r => r.blob && Date.now() - (r.ts || 0) > BLOB_TTL);
+  const old = all.filter(r => blobsOf(r).length && Date.now() - (r.ts || 0) > BLOB_TTL);
   if (!old.length) return;
   idbTx("items", "readwrite", (s) => {
-    old.forEach(r => s.put(Object.assign({}, r, { blob: null })));
+    old.forEach(r => s.put(Object.assign({}, r, { blob: null, blobs: null })));
   });
 }
 
@@ -317,9 +330,15 @@ async function sweepOldBlobs() {
 // 同一个页面里反复恢复、换课、再恢复，那就攒起来了。
 // ⚠ 不要在 renderQueue() 里 revoke——<img> 已经引用它，重渲会裂图。
 function dropItems() {
-  S.items.forEach(it => { if (it.url) { try { URL.revokeObjectURL(it.url); } catch (e) { /* 无所谓 */ } } });
+  S.items.forEach(it => it.pages.forEach(p => {
+    if (p.url) { try { URL.revokeObjectURL(p.url); } catch (e) { /* 无所谓 */ } }
+  }));
   S.items = [];
   S.seq = 0;
+  // 换课／清空时把「每份两页」也关掉：这开关只对「这一班这一次」有意义
+  S.pairMode = false;
+  const pm = $("#pair-mode");
+  if (pm) pm.checked = false;
 }
 
 /* 口令闸。校验通过前一直不 resolve——外面的 loadLessons 就停在这里，
@@ -514,13 +533,22 @@ async function shrink(file, maxSide = 1600, quality = 0.82) {
 }
 
 /* ── 队列 ───────────────────────────────────── */
+const MAX_PAGES = 3;   // 与服务端 MAX_PAGES 一致：稿纸 + 续页是常态，留一页余量
+
+const pageOf = (f) => ({ file: f, blob: null, url: URL.createObjectURL(f) });
+
 $("#file-input").onchange = (e) => {
   const files = [...e.target.files];
   e.target.value = "";
   if (!files.length) return;
-  files.forEach(f => {
+  // 「每份两页」开着就两两配对；最后落单的一张自己成一份，卡片上看得出它只有 1 页。
+  // ⚠ 配对只按拍摄顺序，中间漏拍一张后面就全错位——所以这个开关默认关、每次进页面重置。
+  const groups = S.pairMode
+    ? files.reduce((g, f, i) => { if (i % 2 === 0) g.push([f]); else g[g.length - 1].push(f); return g; }, [])
+    : files.map(f => [f]);
+  groups.forEach(fs => {
     const it = {
-      id: ++S.seq, file: f, blob: null, url: URL.createObjectURL(f),
+      id: ++S.seq, pages: fs.map(pageOf),
       status: "wait", result: null, error: "",
     };
     S.items.push(it);
@@ -530,6 +558,24 @@ $("#file-input").onchange = (e) => {
   });
   renderQueue();
   draftTouch();
+  pump();
+};
+
+$("#pair-mode").onchange = (e) => { S.pairMode = e.target.checked; };
+
+/* 「＋续页」：给已在队列里的某一份再补一页。走一个单选的 file input，
+   用 S.appendTo 记住是给谁补的——点按钮时就定下来，选完照片再读。 */
+$("#page-input").onchange = async (e) => {
+  const f = e.target.files[0];
+  e.target.value = "";
+  const it = S.items.find(x => x.id === S.appendTo);
+  S.appendTo = null;
+  if (!f || !it || it.status === "run" || it.pages.length >= MAX_PAGES) return;
+  if (it.status === "ok") it.result = null;   // 已批过的：重批覆盖，点按钮时已经确认过了
+  it.pages.push(pageOf(f));
+  it.status = "wait"; it.error = "";
+  saveItem(it);
+  renderQueue();
   pump();
 };
 
@@ -550,16 +596,43 @@ function renderQueue() {
       : `<span class="anon">第 ${it.id} 份（未识别姓名）</span>`;
     const sub = it.status === "err" ? esc(it.error)
       : (r ? esc(r.focus || r.teacher_note || "") : "待批改");
-    return `<button class="card" data-id="${it.id}">
-      ${it.url ? `<img class="thumb" src="${it.url}" alt="">`
-              : `<span class="thumb ph">照片<br>未保存</span>`}
-      <div class="mid"><div class="name">${name}</div><div class="sub">${sub}</div></div>
+    const url = it.pages.length ? it.pages[0].url : "";
+    const np = it.pages.length;
+    // 卡片不能再是 <button>：里面要放「＋续页」按钮，button 套 button 是非法嵌套，
+    // 各浏览器会把内层拆到外面去。改 div + role，点击行为不变。
+    // 照片已经清掉的（历史里打开的、或存图失败的）不给补页：没有第 1 页，
+    // 补上的那张会被当成整篇去批。
+    const canAdd = it.status !== "run" && np > 0 && np < MAX_PAGES;
+    return `<div class="card" role="button" data-id="${it.id}">
+      ${url ? `<img class="thumb" src="${url}" alt="">`
+            : `<span class="thumb ph">照片<br>未保存</span>`}
+      <div class="mid"><div class="name">${name}${
+        np > 1 ? `<span class="pages">${np} 页</span>` : ""}</div><div class="sub">${sub}</div></div>
       ${statusCell(it)}
+      ${canAdd ? `<button class="addpg" data-id="${it.id}" title="补拍这一份的续页">＋续页</button>` : ""}
       <span class="go">›</span>
-    </button>`;
+    </div>`;
   }).join("");
   $$("#queue .card").forEach(b => {
     b.onclick = () => openDetail(S.items.find(x => x.id === +b.dataset.id));
+  });
+  $$("#queue .addpg").forEach(b => {
+    b.onclick = async (ev) => {
+      ev.stopPropagation();          // 别顺带触发卡片本身的「打开详情／重试」
+      const it = S.items.find(x => x.id === +b.dataset.id);
+      if (!it) return;
+      if (it.status === "ok") {
+        // 批语可能已经改过；重批会把它整份覆盖。在打开相机**之前**问，
+        // 老师不用白拍一张再被告知要覆盖。
+        const stay = await askSheet(
+          "补上续页后需要重新批改",
+          "这一份将连同新页一起重新批改，<b>已有批语（含手动修改）会被覆盖</b>。",
+          "不补了", "继续补拍");
+        if (stay) return;
+      }
+      S.appendTo = it.id;
+      $("#page-input").click();      // 紧跟着弹框里那次点击，仍在用户手势窗口内，相机能弹出
+    };
   });
   // 暂存的图万一坏了（写到一半被杀、存储层出错），<img> 会显示成裂图——那看起来
   // 像整个工具坏了。换成和「照片没存」一样的占位块，批语该怎么用还怎么用。
@@ -595,15 +668,17 @@ async function pump() {
         // ② 恢复出来的项天生带图，不必再去碰已经不存在的原图；
         // ③ 图在**发起网络请求之前**就落了盘，所以「传到一半被杀」留下的是一条
         //    可以直接重批的完整记录。
-        // ⚠ 守卫必须写 !it.blob，**不能写 it.file**——恢复出来的项 file 是 null，
+        // ⚠ 守卫必须写 !p.blob，**不能写 p.file**——恢复出来的页 file 是 null，
         //    写反了就是 shrink(null)。
-        if (!it.blob) { it.blob = await shrink(it.file); saveItem(it); }
+        for (const p of it.pages) { if (!p.blob) p.blob = await shrink(p.file); }
+        saveItem(it);
         const fd = new FormData();
         fd.append("lesson_id", S.lesson.lesson_id);
         fd.append("prev_heads", JSON.stringify(
           S.items.filter(x => x.result && x.result.parent_card)
                  .map(x => x.result.parent_card.slice(0, 24))));
-        fd.append("image", it.blob, "sheet.jpg");
+        // 多页按页序以同名字段 images 上传，服务端按顺序喂给模型（第 1 页、第 2 页…）
+        it.pages.forEach((p, i) => fd.append("images", p.blob, `sheet-${i + 1}.jpg`));
         it.result = await api("/api/grade", { method: "POST", body: fd });
         it.status = "ok";
       } catch (e) {
@@ -623,9 +698,9 @@ function openDetail(it) {
   saveFlush();   // 上一份的批语可能还在防抖里等着，单槽会被这一份覆盖
   cur = it;
   if (it.status === "err") {
-    // 图没存下来的那种 err 批不动：转 wait → pump → !it.blob 成立 → shrink(null)
-    // → 又回 err，会一直空转。直接说清楚要重拍。
-    if (!it.blob && !it.file) {
+    // 图没存下来的那种 err 批不动：转 wait → pump → !p.blob 成立 → shrink(null)
+    // → 又回 err，会一直空转。直接说清楚要重拍。多页的只要有一页没了就批不成。
+    if (!it.pages.length || it.pages.some(p => !p.blob && !p.file)) {
       it.error = "照片保存失败，请重新拍摄此份";
       renderQueue();
       return;
@@ -1009,12 +1084,12 @@ async function draftBoot(lessonsP) {
 
   // 只有「还批得动的」才值得打扰老师：没批完、且图还在。已经批完的那些进历史，
   // 老师想看自己会去点，不该一开 App 就弹框。
-  const pending = rows.filter(r => r.status !== "ok" && r.blob);
+  const pending = rows.filter(r => r.status !== "ok" && blobsOf(r).length);
   if (!pending.length) return;
 
   // 没有图的 wait/run 是批不动的幽灵——摆进队列只会让老师反复去点。丢掉，
   // 但把数量说给他听：那是诚实且可行动的信息。
-  const ghosts = rows.filter(r => !r.blob && r.status !== "ok" && r.status !== "err");
+  const ghosts = rows.filter(r => !blobsOf(r).length && r.status !== "ok" && r.status !== "err");
   const keep = rows.filter(r => ghosts.indexOf(r) < 0);
   if (ghosts.length) idbTx("items", "readwrite", (s) => { ghosts.forEach(r => s.delete(r.key)); });
 
@@ -1036,9 +1111,11 @@ function openSession(lesson, sid, rows, live) {
   dropItems();
   S.items = rows.map(r => ({
     id: r.id,
-    file: null,                                        // 原图早就不在了，别假装还有
-    blob: r.blob || null,
-    url: r.blob ? URL.createObjectURL(r.blob) : "",    // url 必须重建，存下来的会是死链
+    pages: blobsOf(r).map(b => ({
+      file: null,                       // 原图早就不在了，别假装还有
+      blob: b,
+      url: URL.createObjectURL(b),      // url 必须重建，存下来的会是死链
+    })),
     status: r.status === "run" ? "wait" : r.status,    // 上次正在飞的那份，回到待批
     result: r.result || null,
     error: r.error || "",
