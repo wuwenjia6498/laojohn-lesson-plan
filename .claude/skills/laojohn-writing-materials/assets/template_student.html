@@ -112,7 +112,6 @@
   /* 学习单第二页：flex 列（修改符号表 2026-09-07 已删，稿纸页只剩格子）*/
   .sheet.page2,.sheet.page2b{display:flex;flex-direction:column;}
   /* 续页（备用稿纸，固定骨架，勿改）：不带起笔提示，故格子行数比第 1 页多 */
-  .sheet.page2b .contnote{font-size:11.5px;color:var(--ink-soft);margin:0 0 4mm;}
 
 
   /* ===== 底部能力点条（共用）===== */
@@ -241,7 +240,6 @@
     </div>
   </div>
 
-  <p class="contnote">上一页写满了，就从这里接着往下写；没写满就空着，不用勉强凑。</p>
 
   <div class="writezone">
     <div class="gridwrap"><div class="grid" id="grid2"></div></div>
@@ -401,7 +399,7 @@
     const p1=buildGridOn('.sheet.page2','#grid','#scale',
                          ['.brandbar','.titlewrap','.draftnote','.mod .modhead'],0);
     buildGridOn('.sheet.page2b','#grid2','#scale2',
-                ['.brandbar','.titlewrap','.contnote'],p1);
+                ['.brandbar','.titlewrap'],p1);
   }
 
   window.addEventListener('load',()=>{
