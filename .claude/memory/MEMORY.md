@@ -54,7 +54,7 @@
 - [审题固化为③开头固定半环](writing-lesson-shenti-bianxi-fixed-half-step.md) / [第2节起步半环·L5–L6改判「定起点」+自由写作≥25分钟(0830)](writing-lesson-destress-onramp.md) / [修改符号自然用不重教](writing-lesson-revision-symbols-natural-use.md)
 - [去先导预设/技法克制](writing-lesson-drop-prelude-preset.md) / [不引读书会书目](writing-lesson-drop-book-club-link.md) / [不写下游ppt提示标签](writing-lesson-no-downstream-ppt-hints.md)
 - [详案出PPTX](writing-lesson-to-pptx.md) / [docx页眉定版](writing-lesson-docx-header.md) / [竞品借鉴清单](writing-lesson-competitor-borrow-backlog.md) — 漏传--header-left/right静默回落读书会页眉;D3-D5/N1待做
-- [作文批改工具(0818立项)](writing-correction-tool-0818.md) — 给加盟商不能做skill;判据从详案抽标准包JSON;错别字层原理上不能做;引用一字不差靠工程;隐私=批语永久留+图留一天;0906多页已上;**0907上线闸门:verified_by_human=true才打包,确认走confirm_pack.py**
+- [作文批改工具(0818立项)](writing-correction-tool-0818.md) — 给加盟商不能做skill;判据从详案抽标准包JSON;错别字层原理上不能做;引用一字不差靠工程;隐私=批语永久留+图留一天;0906多页已上;**0907上线闸门:verified_by_human=true才打包,确认走confirm_pack.py;线上12课,三下六/五下八/缩写故事已下线**
 - [批改工具已部署Vercel(0824)](writing-correction-tool-vercel-deploy-0824.md) — 入口=部署根index.py不能放api/;.vercelignore挡config.json;正式地址grader.skyline666.top(vercel.app国内不通);⚠validate全绿≠包对;部署/DNS细节在源条
 - [配套三侧削页+去逐字稿框架(0803)](writing-materials-pages-trimmed-0803.md) — 家长1页/教师2页;教师侧禁「配合逐字稿」;⚠学生侧0818已回4页｜[配套skill三侧全落地](writing-materials-skill-student-bundle.md) — ⚠页数已被上条覆盖;_shared.py勿复制;家长侧禁虚构作品
 - [手改只改HTML必被重渲冲掉(0821)](writing-materials-handedits-lost-on-rerender.md) — 文字改动一律回写_data.json;只剩产物时PyMuPDF原位抠版式;⚠仓内9课json仍不含那批手改
@@ -131,7 +131,7 @@
 - 彼得·潘档案 line23/32 与机读块不一致待清理 — [详情](peterpan-book-profile-state.md)｜封面图缺(汉修先生/呼兰河传/骑鹅旅行记,骑鹅须补图重跑)·快乐王子下游未做·快乐读书吧6本已建2本余4本
 - **⚠四下第八单元现行习作待核实**——定了才能改63→62、序32回填、馆内海报两格重渲;总地图docx原件未换版 — [详情](gushi-xinbian-5a-unit-move-0828.md)
 - 《推荐一个好地方》两处详案↔PPT微差未拍板 · writing 竞品借鉴 D3–D5/N1 待做 · ppt-profile Phase3 待办
-- **⚠批改工具上线闸门已装(0907)·待用户逐包确认后部署**:10包判据已对齐现行详案(对照表=标准包核对清单/_判据对齐记录-20260907.md),12课可确认;五上三/三下六/五下八/旧题缩写不确认即下线 — [详情](correction-tool-upload-hold-0907.md)
+
 - **⚠L5-L6起步0830改判「定起点」后,存量6篇五年级稿未回改**(自由写作均低于25分钟新下限;《缩写故事》属篇幅例外) — [详情](writing-lesson-destress-onramp.md)
 ## 已交付归档
 全部课次/书目状态钩子已移至[归档索引](memory-index-archived-deliveries.md),排新课次前按需打开;教训:事务性话术是跨书查重高发位,下一本L2三形态必须换。

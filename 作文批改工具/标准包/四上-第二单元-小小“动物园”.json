@@ -9,7 +9,10 @@
     "detail_plan": "写作课详案输出/四上-第二单元-小小“动物园”-写作课详案.md",
     "student_bundle": "写作配套输出/四上-第二单元-小小“动物园”/四上-第二单元-小小“动物园”-学生用_data.json",
     "extracted_on": "2026-08-21",
-    "verified_by_human": false
+    "verified_by_human": true,
+    "verified_by": "wuwenjia6498",
+    "verified_on": "2026-09-07",
+    "verified_note": "09-07 按_判据对齐记录核过"
   },
   "meta": {
     "grade_volume": "四年级上册",
