@@ -80,6 +80,17 @@
   .plan .fill{height:62px;background:#fff;}  /* 每行书写空间；2026-08-05 由 52px 略调高，5 行表也不至于太空 */
   .plan tr:nth-child(even) .fill{background:var(--zebra);}
 
+  /* ===== 学习单：提纲表（可选第二张表 · 2026-09-07 增）=====
+     详案里「先列整篇提纲、再用构思表细化中间」两步走的课（如五上四《二十年后的家乡》）
+     需要两张表：本表管全篇框架，构思表管中间段落。由 worksheet.outline_rows 触发，
+     不写该字段的课渲染结果与此前一字不变。两表同页时统一走 .compact 压行高。 */
+  .plan .fill.prefilled{padding:9px;color:var(--brown-deep);font-size:11.5px;font-weight:600;
+    background:var(--brown-cell);}
+  .compact .plan .fill{height:52px;}
+  .compact .mod{margin-bottom:5mm;}
+  .compact .modhead{margin-bottom:2.5mm;}
+  .plan.multicol .rowlabel{width:10%;text-align:center;padding:9px 4px;}  /* 只作用于多列那张表 */
+
   .draftnote{font-size:10.5px;color:var(--ink-soft);margin-bottom:2mm;}
 
   /* ===== 姓名栏（固定骨架，勿改）=====
@@ -178,6 +189,20 @@
     <p class="lead" id="ws-lead"></p>
   </div>
 
+  <!-- 提纲表：仅当 worksheet.outline_rows 存在时显示（2026-09-07 增，可选区块） -->
+  <div class="mod" id="mod-outline" style="display:none">
+    <div class="modhead">
+      <span class="step">1</span>
+      <h2 id="outline-title">搭框架 · 写作提纲</h2>
+      <span class="hint" id="outline-hint"></span>
+    </div>
+    <table class="plan">
+      <tbody id="outline-body">
+        <tr><th style="width:34%">哪一部分</th><th id="outline-th2">写什么</th></tr>
+      </tbody>
+    </table>
+  </div>
+
   <div class="mod">
     <div class="modhead">
       <span class="step">1</span>
@@ -186,7 +211,7 @@
     </div>
     <table class="plan">
       <tbody id="plan-body">
-        <tr><th style="width:34%">想清楚这一步</th><th>写下你的关键词</th></tr>
+        <tr id="plan-head"><th style="width:34%">想清楚这一步</th><th>写下你的关键词</th></tr>
       </tbody>
     </table>
   </div>
@@ -339,16 +364,35 @@
     /* 学习单 */
     const w=d.worksheet;
     document.getElementById('ws-lead').textContent=w.lead;
-    const tbody=document.getElementById('plan-body');
-    w.plan_rows.forEach(r=>{
+    /* 行渲染：label 列 + 若干书写格。cells 为多列表（本课三列构思表）逐格给值，
+       缺省仍是单格，既有课次渲染结果不变。 */
+    const planRow=r=>{
       const tr=document.createElement('tr');
       const lab='<td class="rowlabel">'+esc(r.label)+(r.note?'<small>'+esc(r.note)+'</small>':'')+'</td>';
-      const fillTd=r.prefill
-        ?'<td class="fill" style="padding:9px;color:var(--ink-soft);font-size:11.5px">'+esc(r.prefill)+'</td>'
-        :'<td class="fill"></td>';
-      tr.innerHTML=lab+fillTd;
-      tbody.appendChild(tr);
-    });
+      const cell=v=>v?'<td class="fill prefilled">'+esc(v)+'</td>':'<td class="fill"></td>';
+      const body=Array.isArray(r.cells)?r.cells.map(cell).join('')
+                :r.prefill?'<td class="fill" style="padding:9px;color:var(--ink-soft);font-size:11.5px">'+esc(r.prefill)+'</td>'
+                :'<td class="fill"></td>';
+      tr.innerHTML=lab+body;
+      return tr;
+    };
+    /* 提纲表（可选）：有 outline_rows 才出，两表同页时整页压行高 */
+    if(w.outline_rows && w.outline_rows.length){
+      document.getElementById('mod-outline').style.display='';
+      document.querySelector('.pg-ws1').classList.add('compact');
+      if(w.outline_hint) document.getElementById('outline-hint').textContent=w.outline_hint;
+      const ob=document.getElementById('outline-body');
+      w.outline_rows.forEach(r=>ob.appendChild(planRow(r)));
+    }
+    const tbody=document.getElementById('plan-body');
+    /* 构思表表头：plan_cols 可覆盖成多列（缺省＝想清楚这一步/写下你的关键词） */
+    if(Array.isArray(w.plan_cols) && w.plan_cols.length){
+      const w0=w.plan_cols.length>2?'10%':'34%';   /* 多列表首列只放序号，让出书写宽度 */
+      document.getElementById('plan-head').innerHTML=
+        w.plan_cols.map((c,i)=>'<th'+(i===0?' style="width:'+w0+'"':'')+'>'+esc(c)+'</th>').join('');
+      if(w.plan_cols.length>2) tbody.parentElement.classList.add('multicol');
+    }
+    w.plan_rows.forEach(r=>tbody.appendChild(planRow(r)));
     document.getElementById('ws-skills').innerHTML=rich(w.skills);
     document.getElementById('ws2-lead').textContent=w.page2_lead;
     document.getElementById('ws-draftnote').textContent=w.draftnote;
