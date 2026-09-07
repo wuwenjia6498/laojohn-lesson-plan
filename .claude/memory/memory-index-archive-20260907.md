@@ -1,5 +1,5 @@
 # Project Memory: laojohn-lesson-plan
-> **索引维护规则(0818立·0901补)**:①新增课次/单本书状态→进[归档索引](memory-index-archived-deliveries.md),不占索引行;②横向通则→各线「跨课次通则」块,不埋进课次条目;③未决/交付风险→「未决事项」块,做完即删;④优先级集中在各区头行;⑤行数≤150、单条钩子≤200字符、细节下沉主题文件,超限先归档,机检挂SessionStart hook自动跑;压缩前快照=[0907](memory-index-archive-20260907.md)
+> **索引维护规则(0818立·0901补)**:①新增课次/单本书状态→进[归档索引](memory-index-archived-deliveries.md),不占索引行;②横向通则→各线「跨课次通则」块,不埋进课次条目;③未决/交付风险→「未决事项」块,做完即删;④优先级集中在各区头行;⑤行数≤150、单条钩子≤200字符、细节下沉主题文件,超限先归档,机检挂SessionStart hook自动跑;压缩前快照=[0901](memory-index-archive-20260901.md)
 ## 用户偏好
 - 中文回复;简洁直接不堆客套;重要决策先列选项让用户拍板;视觉迭代常用截图反馈
 - **问「有没有做到X」时是要判断、不是指出问题**——先自己核查给结论,别把判断权反问回去
@@ -10,8 +10,8 @@
 - [真实情境先查官方锚点·兑现必须课内闭环](real-situation-official-anchor-first.md) — 别自造载体(标「已自含」的尤其);没有「下次课读上次稿」;承诺全班读到就得兑现
 - [评价机制禁靠学生自报弱点(0803)](no-self-report-mechanisms.md) — 「我是蒙的」没人会说,判定开关空转;改客观结果自证｜[合集新亚型:有班底无情节主线(0807)](collection-with-cast-no-plotline.md) — 「人物贯穿≠情节贯穿」+封死全书级工具;多出「辑内」层｜[0726审查三项拍板](skills-audit-fixes-0726.md) — 改AI腔检核/两线checklist前必读
 ## 架构速览（骨架事实 · 细节在各 SKILL）
-- 主链与平行分支见 CLAUDE.md §2｜每课时双产出中间稿+讲稿页序1:1;页号唯一口径=中间稿P号==讲稿##第N页==详案页标〖PPT第N页〗;PPT不标页码角标;中间稿不写师话(师话→讲稿);眉标禁写课型
-- **双人协作(0820)**:口径见 CLAUDE.md §9;记忆事实源=仓内 .claude/memory/,用户目录那份是目录联接 — [详情](two-person-sync-0820.md)
+- 主链与平行分支见 CLAUDE.md §2;PPT契约/页型/字段细则唯一源=laojohn-ppt architecture.md｜每课时双产出中间稿+讲稿页序1:1;页号唯一口径=中间稿P号==讲稿##第N页==详案页标〖PPT第N页〗;PPT不标页码角标;中间稿不写师话(师话→讲稿);眉标禁写课型
+- **双人协作(0820)**:口径见 CLAUDE.md §9;记忆事实源=仓内 .claude/memory/,用户目录那份是目录联接 — [详情](two-person-sync-0820.md)｜目录口径(0723后):读书会线顶层目录带「读书会」前缀;写作课件三目录独立分线;旧名作废 — [详情](bookclub-materials-dir-consolidation.md)
 ## 写作课（writing-lesson）
 **写任何一篇前必读**:[⚠文风定盘](writing-style-two-directions-conflict-0831.md) · [例子四判据](writing-lesson-example-must-be-unique-anchor.md) · [比喻反刻板](writing-lesson-metaphor-antistereotype.md) · [电报体红线](writing-lesson-telegraphese-and-coinage-redline.md) · 下方「跨课次通则」整块
 ### 跨课次通则(写同类题目直接适用 · 展开见各源条)
@@ -23,10 +23,10 @@
 - **教材换版(题目没变、题面/课文换掉)=第三形态,连改9处但course-map与文件名全不动**:三上四单元实做;教师侧配套2页是硬闸门,示范文变长须回压旁注 — [源](textbook-revision-same-title-new-page-0902.md)
 - **教材换题=重写不是改稿,第0步是改事实源**:archive零命中就动笔=伪造官方条款;五处连改(archive/index/course-map/锚点表/unit-texts);文体线链一改既有详案提纲表第3行静默过期 — [源](wodejiaren-4a-lesson-state.md)｜跨册迁移改9处不是5处;题面与指导件是两层 — [源2](gushi-xinbian-5a-unit-move-0828.md)
 - **「倒过来写」指构思顺序不指成文顺序**:新技法与既有铁律冲突,先分清管构思还是成文 — [源](wodejiaren-4a-lesson-state.md)｜**`参考：`里的学生答案过一遍「多数人家真会这样吗」**,编得巧但生活不常有=空转 — [源](wodejiaren-4a-lesson-state.md)
-- **教材照片与教参对不上时,称谓/数字/篇名逐项复核**,别一笔归为「版本差异」;以用户最新教材为准,改前先问 — [源](wodejiaren-4a-lesson-state.md)
+- **教材照片与教参对不上时,称谓/数字/篇名逐字项逐项复核**,别一笔归为「版本差异」(姥爷/爷爷两次翻转,现行=姥爷,以用户最新教材为准改前先问) — [源](wodejiaren-4a-lesson-state.md)
 - **教材自带提纲/范例=必须落实的知识点,自创工具只能细化不能顶替**;否定反例精确落到「缺了什么」 — [源](twentyyears-hometown-5a-lesson-state.md)
 - **点名「可行做法」只点一种=指定默认款**:硬要求但解法开放处写清单不写单例 — [源](writing-lesson-stage7-interaction-form-gap.md)
-- **换掉/改长教师示范文=四处下游连改**:详案12处/配套两侧json/批改标准包进提示词/PPT六类页外部重做;须回看③反例是否撞车;⚠变长还会顶爆配套页数闸门 — [源](model-essay-swap-downstream-chain.md)
+- **换掉/改长教师示范文=四处下游连改**:详案12处/配套两侧json/批改标准包进提示词/PPT六类页外部重做;须回看③反例是否撞车;⚠变长还会顶爆配套页数闸门(0904已把范文页段距改0.5mm) — [源](model-essay-swap-downstream-chain.md)
 ### 规则与体例
 - [⚠文风定盘0831·0901收敛一主三从](writing-style-two-directions-conflict-0831.md) — 方向=向规范书面靠;AI痕迹=破折号/导演腔/省主语/术语漂移;**PassC已撤别重开**;主判据唯一源style-criteria+执行位在PassB;改写工序跑完必看--baseline方向指标;批量修文件脚本每步立即写盘
 - [配套三侧文案0901起桥接style-criteria](writing-materials-style-bridge-0901.md) — 此前只有0803单边去AI腔、方向反;SKILL红线拆两条+§四认领+§二.1回填8对;picture-materials仍真空(补时桥它自己线§13)
@@ -42,7 +42,7 @@
 - [⑦交流评议连撞四人小组根因(0817)](writing-lesson-stage7-interaction-form-gap.md) — 一推一放;已改四处规则
 - [技法N件套须练全N件](technique-set-practice-all-parts.md) — 定稿前做「每件×是否产出过」对账;机检与checklist都抓不到
 - [开场钩子先行·单元交代后置(0801)](writing-lesson-opening-hook-before-unit.md) — 禁上来报「今天写第X单元习作」｜[参考标签纪律+术语首现权+追问链](writing-lesson-label-and-turn-discipline.md) — `参考：`只装学生话;括号按「做/读」分家族
-- [行文正样本+去AI味单边化根因(0804)](writing-lesson-prose-style-benchmark-0804.md) — pools「宁可重复不许自造」裁决序;⚠方言词表已被实测否掉
+- [行文正样本+去AI味单边化根因(0804)](writing-lesson-prose-style-benchmark-0804.md) — pools「宁可重复不许自造」裁决序;短句占比INFO线13%;⚠方言词表已被实测否掉
 - [导演腔第三层反同质化(池6/7)](writing-lesson-director-tone-antihomogenization.md) — 根因=生成侧金句写死;已验完
 - [重建台账前先查缺指纹的篇(0819)](ledger-rebuild-drops-fingerprintless.md) — 先grep -L回写再重建,否则静默抹行
 - [指纹块14字段+装置粒度门槛](writing-lesson-fingerprint-fields-revised.md) / [反同质化四项升级](writing-lesson-antihomogenization-upgrade.md) — 装置判据=当场演过一件事;⚠12字段说法已过时
@@ -50,15 +50,15 @@
 - [进阶线全覆盖63任务+填空位必须全角＿＿(0802)](writing-progression-chain-full-coverage.md) — 总地图由md反向回写(全仓唯一);半角横线填空会被docx引擎当加粗吃掉｜[文件名/目录名加「第N单元」段(0802)](writing-line-filename-unit-segment.md) — 标识=<年级册>-第N单元-<题目>;⚠「PPT纯题目」半条0826已推翻
 - [写作课线三项命名/结构调整(0826)](writing-line-naming-flattened-0826.md) — 配套-X用/打包单层平铺/PPT带课次段;⚠pptx与anim.json必须同批改名否则防覆盖闸门静默失效;⚠Windows取目录名一律pathlib .name
 - [标题与环节命名定稿](writing-lesson-title-naming.md) — 唯一源=title-naming.md;改体例前全skill搜一遍
-- [首页无区头单表6行+两行文案体例(现行)](writing-lesson-front-page-single-table.md) — 0831两行体例推翻0828:目标行一句话说清学会写哪类文章;技法行首句固定「使用+构思工具名」且与正文一字一致;写详案或改style_front_page前必读
+- [首页无区头单表6行+两行文案体例(现行)](writing-lesson-front-page-single-table.md) — 0831两行体例推翻0828:目标行一句话说清学会写哪类文章;技法行首句固定「使用+构思工具名」且与正文一字一致;写详案或改style_front_page前必读(前身两版已作废)
 - [审题固化为③开头固定半环](writing-lesson-shenti-bianxi-fixed-half-step.md) / [第2节起步半环·L5–L6改判「定起点」+自由写作≥25分钟(0830)](writing-lesson-destress-onramp.md) / [修改符号自然用不重教](writing-lesson-revision-symbols-natural-use.md)
 - [去先导预设/技法克制](writing-lesson-drop-prelude-preset.md) / [不引读书会书目](writing-lesson-drop-book-club-link.md) / [不写下游ppt提示标签](writing-lesson-no-downstream-ppt-hints.md)
 - [详案出PPTX](writing-lesson-to-pptx.md) / [docx页眉定版](writing-lesson-docx-header.md) / [竞品借鉴清单](writing-lesson-competitor-borrow-backlog.md) — 漏传--header-left/right静默回落读书会页眉;D3-D5/N1待做
-- [作文批改工具(0818立项)](writing-correction-tool-0818.md) — 给加盟商不能做skill;判据从详案抽标准包JSON;错别字层原理上不能做;引用一字不差靠工程;**0907上线闸门:verified_by_human=true才打包(confirm_pack.py);线上12课,下线名单见源条**
-- [批改工具已部署Vercel(0824)](writing-correction-tool-vercel-deploy-0824.md) — 入口=部署根index.py不能放api/;.vercelignore挡config.json;正式地址grader.skyline666.top;⚠validate全绿≠包对
-- [配套三侧削页+去逐字稿框架(0803)](writing-materials-pages-trimmed-0803.md) — 家长1页/教师2页/学生4页(0818回调);教师侧禁「配合逐字稿」｜[配套skill三侧全落地](writing-materials-skill-student-bundle.md)
-- [手改只改HTML必被重渲冲掉(0821)](writing-materials-handedits-lost-on-rerender.md) — 文字改动一律回写_data.json;⚠仓内9课json仍不含那批手改
-- **PPT链**:[⚠交付边界:止于动画注入·终稿不回仓(0902)](ppt-delivery-boundary-0902.md)· [先读详案再审查再动画(0806)](writing-ppt-review-against-detail-first.md)· [外部生成+本仓只做动画(0803)](writing-ppt-external-plus-animation.md)· [动画填shape_id(0804)](ppt-anim-groups-are-shape-ids.md)· [手工动画被注入器清掉(0825)](manhua-laoshi-5a-ppt-chain-state.md)· [重复投放三项比对(0825)](external-pptx-duplicate-drop-0825.md) — 打包不收PPT;⚠机检全过≠审查完成;PPT对详案错勿迁就
+- [作文批改工具(0818立项)](writing-correction-tool-0818.md) — 给加盟商不能做skill;判据从详案抽标准包JSON;错别字层原理上不能做;引用一字不差靠工程;隐私=批语永久留+图留一天;0906多页已上;**0907上线闸门:verified_by_human=true才打包,确认走confirm_pack.py;线上12课,三下六/五下八/缩写故事已下线**
+- [批改工具已部署Vercel(0824)](writing-correction-tool-vercel-deploy-0824.md) — 入口=部署根index.py不能放api/;.vercelignore挡config.json;正式地址grader.skyline666.top(vercel.app国内不通);⚠validate全绿≠包对;部署/DNS细节在源条
+- [配套三侧削页+去逐字稿框架(0803)](writing-materials-pages-trimmed-0803.md) — 家长1页/教师2页;教师侧禁「配合逐字稿」;⚠学生侧0818已回4页｜[配套skill三侧全落地](writing-materials-skill-student-bundle.md) — ⚠页数已被上条覆盖;_shared.py勿复制;家长侧禁虚构作品
+- [手改只改HTML必被重渲冲掉(0821)](writing-materials-handedits-lost-on-rerender.md) — 文字改动一律回写_data.json;只剩产物时PyMuPDF原位抠版式;⚠仓内9课json仍不含那批手改
+- **PPT链**(实现细节全在各源条):[⚠交付边界:本仓止于动画注入·终稿不回仓(0902)](ppt-delivery-boundary-0902.md)(打包不收PPT/压缩降级为>5MB才跑/仓内≈1.5MB而终稿13~22MB;⚠下一课次须确认收到的是初稿不是终稿)· [先读详案再审查再动画(0806)](writing-ppt-review-against-detail-first.md)(⚠机检全过≠审查完成;PPT对详案错勿迁就)· [外部生成+本仓只做动画(0803)](writing-ppt-external-plus-animation.md)· [动画工作单填shape_id非位置索引(0804)](ppt-anim-groups-are-shape-ids.md)· [手工动画被注入器静默清掉(0825)](manhua-laoshi-5a-ppt-chain-state.md)· [重复投放先三项比对判重(0825)](external-pptx-duplicate-drop-0825.md)
 ## 看图写话（picture-writing）
 **排新课或出图前必读**:[总地图v5](picture-writing-course-map-v5-0728.md) · [角色口径](picture-writing-character-roster-policy.md) · [三图位两道硬门](picture-writing-three-image-slots.md) · [写规格判据](picture-writing-imgspec-writing-lessons.md) · 下方通则整块
 ### 跨课次通则(排同类课次直接适用 · 展开见各源条)
@@ -119,10 +119,10 @@
 - [Write吞弯引号→必跑fix_quotes](write-tool-normalizes-curly-quotes.md) / [下游JSON引号统一弯引号禁「」](json-materials-curly-quotes.md) / [雅黑弯引号显示半角](curly-quotes-render-halfwidth-yahei.md) — 含引号段落Edit改用无引号锚点;字符层U+201C已对别改JSON,靠模板unicode-range落宋体
 - [配图工具：多页道具须定妆件+示范文的「我」是大人(0903)](imgtool-prop-consistency-and-owner-0903.md) — 帆布包三错同根因;道具定妆必开去人物条目;款式写到托特/书包这一级
 - [桌面插图批量去豆包水印管线](doubao-watermark-removal-pipeline.md) — 106张已交付;脚本在记忆目录;输入glob必须排除产物
-- **PPT引擎**:[第三profile宣讲(0824)](ppt-promo-profile-0824.md)· [按profile分层·原语不fork](ppt-profile-seam-architecture.md)· [中文变Calibri:latin须在ea前](ppt-font-ea-latin-order.md)· [表格自适应](ppt-table-autofit.md)/[原文齐读自适应](ppt-quote-autofit.md)(存量须重烘)· [阅读单页型已下线](ppt-reading-sheet-page.md)
+- **PPT引擎**:[第三profile宣讲(0824)](ppt-promo-profile-0824.md)· [按profile分层](ppt-profile-seam-architecture.md)(底层原语不fork)· [中文变Calibri修复](ppt-font-ea-latin-order.md)(latin须在ea前)· [表格自适应](ppt-table-autofit.md) / [原文齐读自适应](ppt-quote-autofit.md)(存量重烘才生效)· [阅读单页型已下线](ppt-reading-sheet-page.md)
 - **PPT 视觉**：[副标题克制电报体](ppt-subtitle-no-telegraphese.md) / [参考答案红字上屏](ppt-reference-answer-on-slide.md) / [逐条点击动画](ppt-click-reveal-animation.md) / [四图网格](ppt-four-image-grid.md) / [逐页讲稿新增docx](lecture-notes-docx.md) — 末条:打包只收docx
 - **工程坑**:题目带全角＿＿则place_pptx必认领失败须手工归位;配图空占位机检查不出须肉眼看 — [源](woheguoyitian-4a-ppt-chain-state.md)
-- 阅读单线:[skill固化](reading-sheet-skill.md)/[模板18个](reading-sheet-template-expansion-18.md)/[默认同出PPTX](reading-sheet-always-pptx.md)/[可编辑PPTX](reading-sheet-editable-pptx.md)/[合订PDF不打ZIP](reading-sheet-no-auto-zip.md)/[鱼骨图横置](reading-sheet-fishbone-landscape.md)/[维恩图双椭圆](reading-sheet-venn-ellipse-rewrite.md) — 改几何只动#canvas内坐标并同步render_pptx
+- [阅读单skill固化](reading-sheet-skill.md) / [模板库18个](reading-sheet-template-expansion-18.md) / [默认同出PPTX](reading-sheet-always-pptx.md) / [原生可编辑PPTX](reading-sheet-editable-pptx.md) / [不打ZIP要合订PDF](reading-sheet-no-auto-zip.md)｜[鱼骨图竖纸旋转90°](reading-sheet-fishbone-landscape.md) / [维恩图双长椭圆](reading-sheet-venn-ellipse-rewrite.md) — 改几何只动#canvas内坐标并同步render_pptx
 - [测评卷SKILL状态](reading-assessment-skill-state.md) / [测评事实以详案为准](assessment-facts-follow-lesson-plan.md) — 详案升深度蓝本(事实仍锁档案);与SKILL默认相反遇分叉先确认
 - [阅读指南拓展栏点名具体书/影片](reading-guide-extension-concrete-titles.md) — 仅此栏放宽红线,吃不准就不写｜[目录口径大改名已收官](bookclub-materials-dir-consolidation.md) — 读书会线顶层目录加前缀、两线课件目录拆分
 ## 未决事项与交付风险（做完即删）
@@ -131,6 +131,7 @@
 - 彼得·潘档案 line23/32 与机读块不一致待清理 — [详情](peterpan-book-profile-state.md)｜封面图缺(汉修先生/呼兰河传/骑鹅旅行记,骑鹅须补图重跑)·快乐王子下游未做·快乐读书吧6本已建2本余4本
 - **⚠四下第八单元现行习作待核实**——定了才能改63→62、序32回填、馆内海报两格重渲;总地图docx原件未换版 — [详情](gushi-xinbian-5a-unit-move-0828.md)
 - 《推荐一个好地方》两处详案↔PPT微差未拍板 · writing 竞品借鉴 D3–D5/N1 待做 · ppt-profile Phase3 待办
+
 - **⚠L5-L6起步0830改判「定起点」后,存量6篇五年级稿未回改**(自由写作均低于25分钟新下限;《缩写故事》属篇幅例外) — [详情](writing-lesson-destress-onramp.md)
 ## 已交付归档
 全部课次/书目状态钩子已移至[归档索引](memory-index-archived-deliveries.md),排新课次前按需打开;教训:事务性话术是跨书查重高发位,下一本L2三形态必须换。
