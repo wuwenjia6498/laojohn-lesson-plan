@@ -338,11 +338,25 @@ def check_pack(path, srv, bp, sents_cache):
     if not re.match(r"^\d{4}-\d{2}-\d{2}$", str(src.get("extracted_on") or "")):
         rep.fail("E25", "source.extracted_on 应为 YYYY-MM-DD，实为 "
                  + str(src.get("extracted_on")))
+    # E26/E27：verified_by_human=true 自 2026-09-07 起兼有「允许上线」之义
+    # （build_deploy.py 只打包 true 的包），所以 true 必须带凭据与留痕；
+    # 翻它只走 confirm_pack.py，手改 JSON 漏掉确认人/日期在这里被拦。
     if src.get("verified_by_human") is True:
         stem = path.stem
         if not (CHECKLIST_DIR / (stem + "-核对清单.md")).exists():
             rep.fail("E26", "verified_by_human 标了 true，但找不到对应核对清单，"
                      "无凭据不许标已核")
+        if not str(src.get("verified_by") or "").strip():
+            rep.fail("E26", "verified_by_human 标了 true，但 verified_by（确认人）为空，"
+                     "请用 confirm_pack.py 确认而不是手改")
+        if not re.match(r"^\d{4}-\d{2}-\d{2}$", str(src.get("verified_on") or "")):
+            rep.fail("E26", "verified_by_human 标了 true，但 verified_on 不是 YYYY-MM-DD，实为 "
+                     + str(src.get("verified_on")))
+    else:
+        leftover = [k for k in ("verified_by", "verified_on") if src.get(k)]
+        if leftover:
+            rep.warn("E27", "verified_by_human 不是 true 却带着 " + "、".join(leftover)
+                     + "（撤销没撤干净？用 confirm_pack.py --revoke 清）")
     return rep
 
 
