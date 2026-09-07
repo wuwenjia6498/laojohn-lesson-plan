@@ -85,45 +85,35 @@
   /* ===== 姓名栏（固定骨架，勿改）=====
      批改工具按固定位置定位这一行来归属作业，勿移动、勿改三栏顺序。
      ⚠ 必须与 h1 同行（.titlerow 内），不可拆成独立一行——独立成行会吃掉一行格子
-     （实测一行 15 字），且须同步计入 buildGrid() 的 used 列表。现挂在 .titlewrap 内，
+     （实测一行 16 字），且须同步计入 buildGrid() 的 used 列表。现挂在 .titlewrap 内，
      高度已随 .titlewrap 一并计入，buildGrid 不需要单列。 */
   .titlerow{display:flex;align-items:baseline;justify-content:space-between;gap:8mm;}
   .namebar{display:flex;gap:6mm;font-size:12px;color:var(--brown-deep);flex:0 0 88mm;}
   .namebar span{display:flex;align-items:baseline;gap:1.5mm;flex:1;white-space:nowrap;}
   .namebar i{flex:1;border-bottom:1px solid var(--brown-line);height:1em;}
 
-  /* ===== 格子稿纸（固定骨架，勿改）：左刻度 + 中格子 + 右批改栏 ===== */
+  /* ===== 格子稿纸（固定骨架，勿改）：中格子 + 右批改栏（字数刻度挂在批改栏左缘，2026-09-07 由左侧挪入）===== */
   .writezone{display:flex;align-items:stretch;gap:0;margin-bottom:2mm;}
-  .scale{width:34px;flex-shrink:0;position:relative;}
-  .scale .tick{position:absolute;right:4px;font-size:9px;color:var(--blue-deep);font-weight:700;
+  .scale{position:absolute;left:0;top:0;bottom:0;width:100%;pointer-events:none;}
+  .scale .tick{position:absolute;left:9px;font-size:9px;color:var(--blue-deep);font-weight:700;
     white-space:nowrap;transform:translateY(-50%);}
-  .scale .tickline{position:absolute;right:0;width:6px;height:0;border-top:1.5px solid var(--blue-head);}
-  .gridwrap{flex:0 0 82%;}
-  .grid{display:grid;grid-template-columns:repeat(15,1fr);gap:0;border:1.5px solid var(--blue-line);
+  .scale .tickline{position:absolute;left:0;width:6px;height:0;border-top:1.5px solid var(--blue-head);}
+  .gridwrap{flex:0 0 87.5%;}  /* 2026-09-07：原 82% 放 15 格 + 左刻度列 34px；刻度并入右栏后 16 格同尺寸 */
+  .grid{display:grid;grid-template-columns:repeat(16,1fr);gap:0;border:1.5px solid var(--blue-line);
     overflow:hidden;}
   .grid .cell{aspect-ratio:1/1;border-right:1px solid var(--grid-line);border-bottom:1px solid var(--grid-line);}
-  .grid .cell:nth-child(15n){border-right:none;}
+  .grid .cell:nth-child(16n){border-right:none;}
   .writezone .grid{border-radius:3px 0 0 3px;}
-  .correctcol{flex:1;border:1.5px solid var(--blue-line);border-left:none;border-radius:0 3px 3px 0;
+  .correctcol{flex:1;position:relative;border:1.5px solid var(--blue-line);border-left:none;border-radius:0 3px 3px 0;
     padding:3mm 2mm 0;display:flex;align-items:flex-start;justify-content:center;background:#FCFBF9;}
   .correctcol .label{font-size:10px;color:var(--brown-deep);letter-spacing:1px;
     font-weight:600;text-align:center;}
 
-  /* 学习单第二页：flex 列，把改一改推到底 */
+  /* 学习单第二页：flex 列（修改符号表 2026-09-07 已删，稿纸页只剩格子）*/
   .sheet.page2,.sheet.page2b{display:flex;flex-direction:column;}
-  .sheet.page2 .mod-marks{margin-top:auto;}
-  /* 续页（备用稿纸，固定骨架，勿改）：不带起笔提示与修改符号表，故格子行数比第 1 页多 */
+  /* 续页（备用稿纸，固定骨架，勿改）：不带起笔提示，故格子行数比第 1 页多 */
   .sheet.page2b .contnote{font-size:11.5px;color:var(--ink-soft);margin:0 0 4mm;}
 
-  /* ===== 修改符号表（固定骨架，勿改）===== */
-  .marks{background:var(--blue-soft);border:1px solid var(--blue-line);border-radius:5px;padding:4mm 5mm;}
-  .marks-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:3mm 7mm;}
-  .mark{display:flex;align-items:baseline;gap:8px;font-size:11.5px;}
-  /* 字体栈中间必须留 Microsoft YaHei：Courier New 缺的字（∨、数据层塞进来的汉字）否则会落到
-     系统回退字体，被 Chromium 打成 Type3、PDF 编辑器拒编。勿删中间那档。 */
-  .mark .sym{font-family:"Courier New","Microsoft YaHei",monospace;font-weight:800;color:var(--blue-deep);
-    font-size:14px;min-width:34px;}
-  .mark .desc{color:var(--ink);}
 
   /* ===== 底部能力点条（共用）===== */
   .footer-skill{
@@ -225,29 +215,11 @@
     </div>
     <p class="draftnote" id="ws-draftnote"></p>
     <div class="writezone">
-      <div class="scale" id="scale"></div>
       <div class="gridwrap"><div class="grid" id="grid"></div></div>
-      <div class="correctcol"><span class="label">老师批改</span></div>
+      <div class="correctcol"><span class="label">老师批改</span><div class="scale" id="scale"></div></div>
     </div>
   </div>
 
-  <!-- 修改符号表（固定骨架，勿改） -->
-  <div class="mod mod-marks">
-    <div class="modhead">
-      <span class="step">3</span>
-      <h2>改一改 · 修改符号</h2>
-      <span class="hint">写完读一遍，用这些符号改</span>
-    </div>
-    <div class="marks">
-      <div class="marks-grid" id="marks-grid">
-        <!-- 缺省四条通用符号；详案教了具体修改符号的课，由 data.worksheet.marks 覆盖 -->
-        <div class="mark"><span class="sym">○</span><span class="desc">用错或多余的字，圈起来</span></div>
-        <div class="mark"><span class="sym">∨</span><span class="desc">漏了字，在下面尖尖处补上</span></div>
-        <div class="mark"><span class="sym">——</span><span class="desc">写得好的句子，在下面画一横</span></div>
-        <div class="mark"><span class="sym">/</span><span class="desc">要删掉的，斜线划去</span></div>
-      </div>
-    </div>
-  </div>
 
 </div>
 
@@ -272,9 +244,8 @@
   <p class="contnote">上一页写满了，就从这里接着往下写；没写满就空着，不用勉强凑。</p>
 
   <div class="writezone">
-    <div class="scale" id="scale2"></div>
     <div class="gridwrap"><div class="grid" id="grid2"></div></div>
-    <div class="correctcol"><span class="label">老师批改</span></div>
+    <div class="correctcol"><span class="label">老师批改</span><div class="scale" id="scale2"></div></div>
   </div>
 
 </div>
@@ -352,16 +323,7 @@
     document.getElementById('ws-skills').innerHTML=rich(w.skills);
     document.getElementById('ws2-lead').textContent=w.page2_lead;
     document.getElementById('ws-draftnote').textContent=w.draftnote;
-    // 修改符号：详案教了具体符号的课覆盖缺省四条（须与课堂教的一致）
-    if(w.marks && w.marks.length){
-      const mg=document.getElementById('marks-grid');
-      mg.innerHTML='';
-      w.marks.forEach(mk=>{
-        const div=document.createElement('div'); div.className='mark';
-        div.innerHTML='<span class="sym">'+esc(mk.sym)+'</span><span class="desc">'+esc(mk.desc)+'</span>';
-        mg.appendChild(div);
-      });
-    }
+    // worksheet.marks 已废弃（2026-09-07 稿纸页删修改符号表），存量 data.json 里的字段忽略
 
     /* 范文页 */
     const e=d.essay;
@@ -384,13 +346,13 @@
   }
 
   /* ---------- 格子稿纸（固定骨架版式，勿改逻辑）----------
-     两页稿纸共用本函数：第 1 页（.page2）带起笔提示与修改符号表；
+     两页稿纸共用本函数：第 1 页（.page2）带起笔提示；
      第 2 页（.page2b）是备用续页、只有格子，故可用高度更大、行数更多。
      startCount = 前面各页累计格数，续页的字数刻度据此接着往下标（不从 100 重来）。
      ⚠ usedSels 必须列全该页里挤占格子高度的元素，漏一个就会算多行、页面溢出；
        末尾的收敛环只是兜底，别指望它——每减一行都要整页重排一次。 */
   function buildGridOn(sheetSel, gridSel, scaleSel, usedSels, startCount){
-    const cols=15;
+    const cols=16;
     const sheet=document.querySelector(sheetSel);
     if(!sheet) return 0;
     const grid=sheet.querySelector(gridSel);
@@ -411,7 +373,7 @@
     function renderRows(n){
       grid.innerHTML='';
       for(let i=0;i<cols*n;i++){const c=document.createElement('div');c.className='cell';grid.appendChild(c);}
-      // 刻度：每行15字（2026-09-07 由 18 改 15），标在累计字数最接近100/200/300…的行末；续页接着上一页的字数往后标
+      // 刻度：每行16字（2026-09-07 由 18 改 15 再改 16：左刻度列并入格子区多放一格），标在累计字数最接近100/200/300…的行末；续页接着上一页的字数往后标
       scale.innerHTML='';
       const border=1.5;
       const firstHundred=Math.floor(startCount/100)*100+100;
@@ -430,12 +392,14 @@
     // 收敛环：估算余量不够精确时（导语/起笔提示行数因课而异），实测超一页高就减行重排
     const A4_H=1123; // 297mm @96dpi
     while(rows>5 && sheet.offsetHeight>A4_H){ rows--; renderRows(rows); }
+    // 反向试探（2026-09-07 加）：余量估算偏保守时再往上加行，装得下就多一行、装不下回退
+    while(rows<40){ renderRows(rows+1); if(sheet.offsetHeight>A4_H){ renderRows(rows); break; } rows++; }
     return rows*cols;
   }
 
   function buildGrid(){
     const p1=buildGridOn('.sheet.page2','#grid','#scale',
-                         ['.brandbar','.titlewrap','.draftnote','.mod .modhead','.mod-marks'],0);
+                         ['.brandbar','.titlewrap','.draftnote','.mod .modhead'],0);
     buildGridOn('.sheet.page2b','#grid2','#scale2',
                 ['.brandbar','.titlewrap','.contnote'],p1);
   }
