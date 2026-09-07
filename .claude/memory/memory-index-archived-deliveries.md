@@ -18,3 +18,7 @@ metadata:
 ## 已废止/被覆盖的历史条目（0902 从 MEMORY.md 外移 · 别当垃圾删）
 - 历史条目(主体已废止别当垃圾删):[核心素养四维](writing-lesson-core-literacy-goals.md)(提纲表结构/H1体例仍有效) / [配套曾两轮清空](writing-materials-tools-removed.md)(仍有效=写作配套独立原则)
 - 历史条目(排期已被v5覆盖,【图位:编号】硬契约仍有效):[v4](picture-writing-course-map-v4-0723.md) / [v6](picture-writing-24-stages-v6.md) / [v3](picture-writing-course-map-v3.md) / [20期制](picture-writing-20-stages-expansion.md)
+
+**跨书查重教训（0907 由 MEMORY.md 索引区移入）**：事务性话术是跨书查重高发位，下一本 L2 的三形态必须换。
+
+**五上·三《故事新编》· 冷审已交付（2026-09-07）**：Pass A／B 两遍并行跑完（并行做法见 [[detail-review-cold-start]]），共改 95 处，tone_gate 全绿、两节各 45 分钟、docx 已重渲。用户拍板 B1(a) 砍掉 ⑤「两种写法二选一」整步、B2(a) 即时反馈改只念改动那一段；其余由 AI 定夺：技法件数三处统一成旁批表四条、第六格补铺垫且横线固定第六格、① 两问维持不改、③ 教材情节清单改为两组念完后再投屏。**第 1 节压时间已于同日定案**（用户否掉「等试讲」）：⑤ 整篇由通读两遍改为出示即带三项任务默读一次，③ 「各自说改哪一处」改同桌同时说＋抽两位、评委式二选一限三位各一句；标称配时 5/6/14/9/11 → **4/6/15/8/12**（仍 45），实估降至约 44.0。一个教学步骤都没删，做法与判据见 [[lesson-timing-overrun-cut-repeats-not-steps]]。连带已追：删段落后「那三样」指代改指旁批表，指纹块三字段与 `variation-ledger.md` 同步。

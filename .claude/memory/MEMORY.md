@@ -26,6 +26,7 @@
 - **教材照片与教参对不上时,称谓/数字/篇名逐项复核**,别一笔归为「版本差异」;以用户最新教材为准,改前先问 — [源](wodejiaren-4a-lesson-state.md)
 - **教材自带提纲/范例=必须落实的知识点,自创工具只能细化不能顶替**;否定反例精确落到「缺了什么」 — [源](twentyyears-hometown-5a-lesson-state.md)
 - **点名「可行做法」只点一种=指定默认款**:硬要求但解法开放处写清单不写单例 — [源](writing-lesson-stage7-interaction-form-gap.md)
+- **某节超时先砍重复不砍步骤**:同一材料读两遍/同一功能两处落点是首选压缩位;标称配时对齐逐环节实估、别平均摊(0907故事新编①②④富余2.8全压在③⑤) — [源](lesson-timing-overrun-cut-repeats-not-steps.md)
 - **换掉/改长教师示范文=四处下游连改**:详案12处/配套两侧json/批改标准包进提示词/PPT六类页外部重做;须回看③反例是否撞车;⚠变长还会顶爆配套页数闸门 — [源](model-essay-swap-downstream-chain.md)
 ### 规则与体例
 - [⚠文风定盘0831·0901收敛一主三从](writing-style-two-directions-conflict-0831.md) — 方向=向规范书面靠;AI痕迹=破折号/导演腔/省主语/术语漂移;**PassC已撤别重开**;主判据唯一源style-criteria+执行位在PassB;改写工序跑完必看--baseline方向指标;批量修文件脚本每步立即写盘
@@ -57,8 +58,9 @@
 - [作文批改工具(0818立项)](writing-correction-tool-0818.md) — 给加盟商不能做skill;判据从详案抽标准包JSON;错别字层原理上不能做;引用一字不差靠工程;**0907上线闸门:verified_by_human=true才打包(confirm_pack.py);线上12课,下线名单见源条**
 - [批改工具已部署Vercel(0824)](writing-correction-tool-vercel-deploy-0824.md) — 入口=部署根index.py不能放api/;.vercelignore挡config.json;正式地址grader.skyline666.top;⚠validate全绿≠包对
 - [配套三侧削页+去逐字稿框架(0803)](writing-materials-pages-trimmed-0803.md) — 家长1页/教师2页/学生4页(0818回调);教师侧禁「配合逐字稿」｜[配套skill三侧全落地](writing-materials-skill-student-bundle.md)
+- [配套json富文本标记只有部分字段解析(0907)](writing-materials-richtext-field-scope.md) — 教师materials/家长oneline走textContent,写{b}会印成(b);⚠溢出/页数/Type3三道机检全绿也抓不到,渲完正则扫一遍PDF文本
 - [手改只改HTML必被重渲冲掉(0821)](writing-materials-handedits-lost-on-rerender.md) — 文字改动一律回写_data.json;⚠仓内9课json仍不含那批手改
-- **PPT链**:[⚠交付边界:止于动画注入·终稿不回仓(0902)](ppt-delivery-boundary-0902.md)· [先读详案再审查再动画(0806)](writing-ppt-review-against-detail-first.md)· [外部生成+本仓只做动画(0803)](writing-ppt-external-plus-animation.md)· [动画填shape_id(0804)](ppt-anim-groups-are-shape-ids.md)· [手工动画被注入器清掉(0825)](manhua-laoshi-5a-ppt-chain-state.md)· [重复投放三项比对(0825)](external-pptx-duplicate-drop-0825.md) — 打包不收PPT;⚠机检全过≠审查完成;PPT对详案错勿迁就
+- **PPT链**(六条细节→[链索引](ppt-chain-index.md)):⚠本仓止于动画注入·终稿不回仓(0902,打包不收PPT,下一课次先确认收到的是初稿)｜⚠先读详案再审查再动画(0806,机检全过≠审查完成;PPT对详案错勿迁就)
 ## 看图写话（picture-writing）
 **排新课或出图前必读**:[总地图v5](picture-writing-course-map-v5-0728.md) · [角色口径](picture-writing-character-roster-policy.md) · [三图位两道硬门](picture-writing-three-image-slots.md) · [写规格判据](picture-writing-imgspec-writing-lessons.md) · 下方通则整块
 ### 跨课次通则(排同类课次直接适用 · 展开见各源条)
@@ -109,7 +111,7 @@
 **碰引擎/共享件前必读**：[下游六件抽共享层](downstream-shared-layer-and-token-facts.md)（改真源照该条回归法）· [0727上下文瘦身收官](context-engineering-slimdown-0727.md)（细节已下沉references别抄回）
 - [宣传件渲染链+PDF反查源三指纹(0826)](promo-materials-render-chain.md) — 手改PDF前先三指纹反查源html;馆内海报scale须0.98;海报html已改入库
 - [配套PDF的Type3字体病已修两线(0817)](pdf-type3-fonts-fixed.md) — 装饰图标改纯CSS图形非换emoji;.mark .sym字体栈中间那档雅黑勿删;已装check_type3
-- [外部改稿docx回贴md(0902-0904)](external-docx-backfill-0902.md) — docx_backfill.py骨架继承+文本整替,闸门shadow≡基线;⚠判新旧看措辞不看哈希;⚠外部说「只改了X」先互比外部目录历次版本定基线(0904藏了一版没回贴过的);回退vs真改写要分开报数交用户拍板;示范文三方不同步以PPT+配套为基准;⚠取舍权在用户,AI逐条摆冲突不替他驳回;判改写前先读本篇首页[授课提示]
+- [外部改稿docx回贴md(0902-0907)](external-docx-backfill-0902.md) — docx_backfill.py骨架继承+文本整替,闸门shadow≡基线;⚠判新旧看措辞不看哈希;⚠外部说「只改了X」先互比外部目录历次版本定基线;⚠**清扫排版噪音的正则禁用\s(含换行,会吃空行塌全篇),用[ 　]字符类**;示范文三方不同步以PPT+配套为基准;⚠取舍权在用户,AI逐条摆冲突不替他驳回;判改写前先读本篇首页[授课提示]
 - [下游六件抽共享层+token账实测](downstream-shared-layer-and-token-facts.md) — 合并skill省不了token;三条真源+薄壳;改真源照该条回归法(PDF比字节数不比md5)
 - [0727上下文瘦身收官](context-engineering-slimdown-0727.md) / [docx引擎标题层版式](docx-engine-title-heading-layout.md) / [引擎冗余审计](docx-engine-redundancy-audit.md) — 细节已下沉references别抄回;评估过拆三脚本→不拆别再重复排查
 - [两个常驻文件的分层重构(0818)](memory-index-structure-over-size-0818.md) — MEMORY真病灶=通则被埋进课次条目;CLAUDE下沉判据=脚本docstring才是细则唯一源;0901立check_memory_index.py防截尾,已挂hook双机自动跑
@@ -133,4 +135,4 @@
 - 《推荐一个好地方》两处详案↔PPT微差未拍板 · writing 竞品借鉴 D3–D5/N1 待做 · ppt-profile Phase3 待办
 - **⚠L5-L6起步0830改判「定起点」后,存量6篇五年级稿未回改**(自由写作均低于25分钟新下限;《缩写故事》属篇幅例外) — [详情](writing-lesson-destress-onramp.md)
 ## 已交付归档
-全部课次/书目状态钩子已移至[归档索引](memory-index-archived-deliveries.md),排新课次前按需打开;教训:事务性话术是跨书查重高发位,下一本L2三形态必须换。
+全部课次/书目状态钩子已移至[归档索引](memory-index-archived-deliveries.md),排新课次前按需打开。

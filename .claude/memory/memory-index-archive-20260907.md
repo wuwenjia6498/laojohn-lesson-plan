@@ -23,7 +23,7 @@
 - **教材换版(题目没变、题面/课文换掉)=第三形态,连改9处但course-map与文件名全不动**:三上四单元实做;教师侧配套2页是硬闸门,示范文变长须回压旁注 — [源](textbook-revision-same-title-new-page-0902.md)
 - **教材换题=重写不是改稿,第0步是改事实源**:archive零命中就动笔=伪造官方条款;五处连改(archive/index/course-map/锚点表/unit-texts);文体线链一改既有详案提纲表第3行静默过期 — [源](wodejiaren-4a-lesson-state.md)｜跨册迁移改9处不是5处;题面与指导件是两层 — [源2](gushi-xinbian-5a-unit-move-0828.md)
 - **「倒过来写」指构思顺序不指成文顺序**:新技法与既有铁律冲突,先分清管构思还是成文 — [源](wodejiaren-4a-lesson-state.md)｜**`参考：`里的学生答案过一遍「多数人家真会这样吗」**,编得巧但生活不常有=空转 — [源](wodejiaren-4a-lesson-state.md)
-- **教材照片与教参对不上时,称谓/数字/篇名逐字项逐项复核**,别一笔归为「版本差异」(姥爷/爷爷两次翻转,现行=姥爷,以用户最新教材为准改前先问) — [源](wodejiaren-4a-lesson-state.md)
+- **教材照片与教参对不上时,称谓/数字/篇名逐字项逐项复核**,别一笔归为「版本差异」(姥爷实为爷爷曾错到32处) — [源](wodejiaren-4a-lesson-state.md)
 - **教材自带提纲/范例=必须落实的知识点,自创工具只能细化不能顶替**;否定反例精确落到「缺了什么」 — [源](twentyyears-hometown-5a-lesson-state.md)
 - **点名「可行做法」只点一种=指定默认款**:硬要求但解法开放处写清单不写单例 — [源](writing-lesson-stage7-interaction-form-gap.md)
 - **换掉/改长教师示范文=四处下游连改**:详案12处/配套两侧json/批改标准包进提示词/PPT六类页外部重做;须回看③反例是否撞车;⚠变长还会顶爆配套页数闸门(0904已把范文页段距改0.5mm) — [源](model-essay-swap-downstream-chain.md)
@@ -54,7 +54,7 @@
 - [审题固化为③开头固定半环](writing-lesson-shenti-bianxi-fixed-half-step.md) / [第2节起步半环·L5–L6改判「定起点」+自由写作≥25分钟(0830)](writing-lesson-destress-onramp.md) / [修改符号自然用不重教](writing-lesson-revision-symbols-natural-use.md)
 - [去先导预设/技法克制](writing-lesson-drop-prelude-preset.md) / [不引读书会书目](writing-lesson-drop-book-club-link.md) / [不写下游ppt提示标签](writing-lesson-no-downstream-ppt-hints.md)
 - [详案出PPTX](writing-lesson-to-pptx.md) / [docx页眉定版](writing-lesson-docx-header.md) / [竞品借鉴清单](writing-lesson-competitor-borrow-backlog.md) — 漏传--header-left/right静默回落读书会页眉;D3-D5/N1待做
-- [作文批改工具(0818立项)](writing-correction-tool-0818.md) — 给加盟商不能做skill;判据从详案抽标准包JSON;错别字层原理上不能做;引用一字不差靠工程;隐私=批语永久留+图留一天;0906多页已上;**0907上线闸门:verified_by_human=true才打包,确认走confirm_pack.py;线上12课,三下六/五下八/缩写故事已下线**
+- [作文批改工具(0818立项)](writing-correction-tool-0818.md) — 给加盟商不能做skill;判据从详案抽标准包JSON;错别字层原理上不能做;引用一字不差靠工程;LJ_ENV=prod拒无密钥启动;隐私=批语永久留+图留一天;0906多页已上(续页按钮+配对开关默认关)
 - [批改工具已部署Vercel(0824)](writing-correction-tool-vercel-deploy-0824.md) — 入口=部署根index.py不能放api/;.vercelignore挡config.json;正式地址grader.skyline666.top(vercel.app国内不通);⚠validate全绿≠包对;部署/DNS细节在源条
 - [配套三侧削页+去逐字稿框架(0803)](writing-materials-pages-trimmed-0803.md) — 家长1页/教师2页;教师侧禁「配合逐字稿」;⚠学生侧0818已回4页｜[配套skill三侧全落地](writing-materials-skill-student-bundle.md) — ⚠页数已被上条覆盖;_shared.py勿复制;家长侧禁虚构作品
 - [手改只改HTML必被重渲冲掉(0821)](writing-materials-handedits-lost-on-rerender.md) — 文字改动一律回写_data.json;只剩产物时PyMuPDF原位抠版式;⚠仓内9课json仍不含那批手改
@@ -131,7 +131,6 @@
 - 彼得·潘档案 line23/32 与机读块不一致待清理 — [详情](peterpan-book-profile-state.md)｜封面图缺(汉修先生/呼兰河传/骑鹅旅行记,骑鹅须补图重跑)·快乐王子下游未做·快乐读书吧6本已建2本余4本
 - **⚠四下第八单元现行习作待核实**——定了才能改63→62、序32回填、馆内海报两格重渲;总地图docx原件未换版 — [详情](gushi-xinbian-5a-unit-move-0828.md)
 - 《推荐一个好地方》两处详案↔PPT微差未拍板 · writing 竞品借鉴 D3–D5/N1 待做 · ppt-profile Phase3 待办
-
 - **⚠L5-L6起步0830改判「定起点」后,存量6篇五年级稿未回改**(自由写作均低于25分钟新下限;《缩写故事》属篇幅例外) — [详情](writing-lesson-destress-onramp.md)
 ## 已交付归档
 全部课次/书目状态钩子已移至[归档索引](memory-index-archived-deliveries.md),排新课次前按需打开;教训:事务性话术是跨书查重高发位,下一本L2三形态必须换。
