@@ -5,7 +5,10 @@
     "detail_plan": "写作课详案输出/三上-第四单元-我来编童话-写作课详案.md",
     "student_bundle": "写作配套输出/三上-第四单元-我来编童话/三上-第四单元-我来编童话-学生用_data.json",
     "extracted_on": "2026-09-02",
-    "verified_by_human": false
+    "verified_by_human": true,
+    "verified_by": "wuwenjia6498",
+    "verified_on": "2026-09-07",
+    "verified_note": "09-07 按_判据对齐记录核过"
   },
   "meta": {
     "grade_volume": "三年级上册",
@@ -88,7 +91,7 @@
   },
   "revision_marks": [],
   "model_essay_anchor_sentences": [
-    "眼看就要到了——就在这时，书包被人碰了一下，盖子“啪”地合了下来，差一点把铅笔夹在中间。",
+    "眼看就要到了——就在这时，睡在床上的小主人翻了个身，胳膊碰到了床头柜上的书包。",
     "木屑落下来，像下了一场小小的雪。",
     "回到文具盒里，橡皮身上多了一道深深的印子。"
   ],

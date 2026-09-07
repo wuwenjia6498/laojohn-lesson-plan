@@ -10,7 +10,7 @@ data.json -> HTML（3 个 A4 sheet）-> 多页 A4 PDF
     <基名>.pdf    打印件（预期 4 页：构思表1 + 稿纸2（含备用续页）+ 范文1）
 
 自检（_shared.render 内置溢出/页数核验，此处附加格子稿纸检查）:
-    - 两页稿纸格子数均须为 18 的倍数且 >=5 行；续页不带起笔提示与符号表，行数应不少于第 1 页
+    - 两页稿纸格子数均须为 16 的倍数且 >=5 行；续页不带起笔提示，行数应不少于第 1 页
 """
 import argparse
 from _shared import ASSETS, render
@@ -25,8 +25,8 @@ def grid_checks(page):
     p1 = cells(".sheet.page2")
     p2 = cells(".sheet.page2b")
     for name, n in (("稿纸", p1), ("续页", p2)):
-        ok = n % 18 == 0 and n // 18 >= 5
-        print(f"格子自检: {name} {n} 格({n // 18} 行) {'OK' if ok else '!! 异常'}")
+        ok = n % 16 == 0 and n // 16 >= 5
+        print(f"格子自检: {name} {n} 格({n // 16} 行) {'OK' if ok else '!! 异常'}")
     # 续页无起笔提示、无修改符号表，可用高度更大；若反而更少，说明 usedSels 漏列或版式塌了
     if p2 < p1:
         print(f"!! 格子自检: 续页 {p2} 格少于第1页 {p1} 格——检查 buildGridOn 的 usedSels")
