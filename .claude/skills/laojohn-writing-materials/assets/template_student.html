@@ -85,7 +85,7 @@
   /* ===== 姓名栏（固定骨架，勿改）=====
      批改工具按固定位置定位这一行来归属作业，勿移动、勿改三栏顺序。
      ⚠ 必须与 h1 同行（.titlerow 内），不可拆成独立一行——独立成行会吃掉一行格子
-     （实测 18 字），且须同步计入 buildGrid() 的 used 列表。现挂在 .titlewrap 内，
+     （实测一行 15 字），且须同步计入 buildGrid() 的 used 列表。现挂在 .titlewrap 内，
      高度已随 .titlewrap 一并计入，buildGrid 不需要单列。 */
   .titlerow{display:flex;align-items:baseline;justify-content:space-between;gap:8mm;}
   .namebar{display:flex;gap:6mm;font-size:12px;color:var(--brown-deep);flex:0 0 88mm;}
@@ -99,10 +99,10 @@
     white-space:nowrap;transform:translateY(-50%);}
   .scale .tickline{position:absolute;right:0;width:6px;height:0;border-top:1.5px solid var(--blue-head);}
   .gridwrap{flex:0 0 82%;}
-  .grid{display:grid;grid-template-columns:repeat(18,1fr);gap:0;border:1.5px solid var(--blue-line);
+  .grid{display:grid;grid-template-columns:repeat(15,1fr);gap:0;border:1.5px solid var(--blue-line);
     overflow:hidden;}
   .grid .cell{aspect-ratio:1/1;border-right:1px solid var(--grid-line);border-bottom:1px solid var(--grid-line);}
-  .grid .cell:nth-child(18n){border-right:none;}
+  .grid .cell:nth-child(15n){border-right:none;}
   .writezone .grid{border-radius:3px 0 0 3px;}
   .correctcol{flex:1;border:1.5px solid var(--blue-line);border-left:none;border-radius:0 3px 3px 0;
     padding:3mm 2mm 0;display:flex;align-items:flex-start;justify-content:center;background:#FCFBF9;}
@@ -390,7 +390,7 @@
      ⚠ usedSels 必须列全该页里挤占格子高度的元素，漏一个就会算多行、页面溢出；
        末尾的收敛环只是兜底，别指望它——每减一行都要整页重排一次。 */
   function buildGridOn(sheetSel, gridSel, scaleSel, usedSels, startCount){
-    const cols=18;
+    const cols=15;
     const sheet=document.querySelector(sheetSel);
     if(!sheet) return 0;
     const grid=sheet.querySelector(gridSel);
@@ -411,7 +411,7 @@
     function renderRows(n){
       grid.innerHTML='';
       for(let i=0;i<cols*n;i++){const c=document.createElement('div');c.className='cell';grid.appendChild(c);}
-      // 刻度：每行18字，标在累计字数最接近100/200/300…的行末；续页接着上一页的字数往后标
+      // 刻度：每行15字（2026-09-07 由 18 改 15），标在累计字数最接近100/200/300…的行末；续页接着上一页的字数往后标
       scale.innerHTML='';
       const border=1.5;
       const firstHundred=Math.floor(startCount/100)*100+100;
