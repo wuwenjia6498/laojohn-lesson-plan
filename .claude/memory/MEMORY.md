@@ -133,6 +133,6 @@
 - 彼得·潘档案 line23/32 与机读块不一致待清理 — [详情](peterpan-book-profile-state.md)｜封面图缺(汉修先生/呼兰河传/骑鹅旅行记,骑鹅须补图重跑)·快乐王子下游未做·快乐读书吧6本已建2本余4本
 - **⚠四下第八单元现行习作待核实**——定了才能改63→62、序32回填、馆内海报两格重渲;总地图docx原件未换版 — [详情](gushi-xinbian-5a-unit-move-0828.md)
 - 《推荐一个好地方》两处详案↔PPT微差未拍板 · writing 竞品借鉴 D3–D5/N1 待做 · ppt-profile Phase3 待办
-- **⚠L5-L6起步0830改判「定起点」后,存量6篇五年级稿未回改**(自由写作均低于25分钟新下限;《缩写故事》属篇幅例外) — [详情](writing-lesson-destress-onramp.md)
+- **⚠L5-L6起步0830改判「定起点」后,余4篇五年级稿未回改**(自由写作均低于25分钟新下限;故事新编0908已回改、缩写故事已下线) — [详情](writing-lesson-destress-onramp.md)
 ## 已交付归档
 全部课次/书目状态钩子已移至[归档索引](memory-index-archived-deliveries.md),排新课次前按需打开。
