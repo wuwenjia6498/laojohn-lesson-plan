@@ -34,6 +34,18 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='repla
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 SKILLS = os.path.join(ROOT, '.claude', 'skills')
+SKILLS_PARKED = os.path.join(ROOT, '.claude', 'skills-parked')
+
+
+def _skill_path(name, *parts):
+    """定位 skill 内文件：先找 .claude/skills/<name>，停用归档后再找 .claude/skills-parked/<name>。
+    2026-09-10 起读书会/看图写话线 skill 停用归档到 skills-parked（见 CLAUDE.md §3）；两处都没有就
+    返回 skills 下的路径，交由调用方的 except OSError 走既有回落。"""
+    for base in (SKILLS, SKILLS_PARKED):
+        cand = os.path.join(base, name, *parts)
+        if os.path.exists(cand):
+            return cand
+    return os.path.join(SKILLS, name, *parts)
 
 FOUR_DIM_TAGS = ['【语言运用】', '【思维能力】', '【审美创造】', '【文化自信】']
 
@@ -170,7 +182,7 @@ PIC_FORBIDDEN_REF = ['四个都用上了', '都用上了——']  # 另有「是
 
 def load_terminology_words():
     """解析 picture terminology.md 硬替换表第一列（单一源，不在脚本双写）。"""
-    path = os.path.join(SKILLS, 'laojohn-picture-writing', 'references', 'terminology.md')
+    path = _skill_path('laojohn-picture-writing', 'references', 'terminology.md')
     words = []
     try:
         text = open(path, encoding='utf-8').read()
@@ -295,7 +307,7 @@ def load_forbidden_phrases():
     取 单片段 ≥8 字 ＋ 相邻片段拼接 ≥8 字 作核心短语（近似命中口径）——
     6~7 字单片段（「遇到不会写的字」「听得见的东西」等）过泛，实测误报，弃用。
     「学生互动分享…」条属跨篇形态要求（单篇一次不违规），整条跳过、归人工 G 组。"""
-    path = os.path.join(SKILLS, 'laojohn-writing-lesson', 'references', 'variation-pools.md')
+    path = _skill_path('laojohn-writing-lesson', 'references', 'variation-pools.md')
     needles = {}
     try:
         text = open(path, encoding='utf-8').read()
@@ -324,7 +336,7 @@ def load_forbidden_phrases():
 
 
 def _pools_text():
-    path = os.path.join(SKILLS, 'laojohn-writing-lesson', 'references', 'variation-pools.md')
+    path = _skill_path('laojohn-writing-lesson', 'references', 'variation-pools.md')
     try:
         return open(path, encoding='utf-8').read()
     except OSError:
@@ -368,7 +380,7 @@ def load_pool6_words():
 def load_redline_ban_words():
     """解析 lesson-structure §三「语言风格红线」第六条①的禁用词枚举行（顿号分隔、句号收尾）。
     ⚠ 体例锚＝`**禁用词(出现即改)**：…。`，改红线第六条的写法须同步本正则。"""
-    path = os.path.join(SKILLS, 'laojohn-writing-lesson', 'references', 'lesson-structure.md')
+    path = _skill_path('laojohn-writing-lesson', 'references', 'lesson-structure.md')
     try:
         text = open(path, encoding='utf-8').read()
     except OSError:
