@@ -27,6 +27,7 @@
 - **教材自带提纲/范例=必须落实的知识点,自创工具只能细化不能顶替**;否定反例精确落到「缺了什么」 — [源](twentyyears-hometown-5a-lesson-state.md)
 - **点名「可行做法」只点一种=指定默认款**:硬要求但解法开放处写清单不写单例 — [源](writing-lesson-stage7-interaction-form-gap.md)
 - **某节超时先砍重复不砍步骤**:同一材料读两遍/同一功能两处落点是首选压缩位;标称配时对齐逐环节实估、别平均摊(0907故事新编①②④富余2.8全压在③⑤) — [源](lesson-timing-overrun-cut-repeats-not-steps.md)
+- **示范文的可数断言（共几段/哪段最长/只用两三句）必须脚本实测**:意图与成品会漂移,通读看不出、学生一数就露;优先压示范文不优先改师话;⚠冷审改完须复跑机检(新写的师话会带回刚删的毛病) — [源](model-essay-countable-claims-must-be-measured.md)
 - **换掉/改长教师示范文=四处下游连改**:详案12处/配套两侧json/批改标准包进提示词/PPT六类页外部重做;须回看③反例是否撞车;⚠变长还会顶爆配套页数闸门 — [源](model-essay-swap-downstream-chain.md)
 ### 规则与体例
 - [⚠文风定盘0831·0901收敛一主三从](writing-style-two-directions-conflict-0831.md) — 方向=向规范书面靠;AI痕迹=破折号/导演腔/省主语/术语漂移;**PassC已撤别重开**;主判据唯一源style-criteria+执行位在PassB;改写工序跑完必看--baseline方向指标;批量修文件脚本每步立即写盘
