@@ -106,6 +106,13 @@ class Report:
     def info(self, title, detail_lines):
         self.infos.append((title, detail_lines))
 
+    def items(self):
+        """给外部脚本（polish_writing 等）取已收集的结果：[(kind, title, lines)]，
+        kind ∈ {'FAIL','INFO'}；FAIL 的 lines 是 [(行号, 行)]，INFO 的 lines 是 [str]。"""
+        out = [('FAIL', rule, hits) for rule, hits in self.fails]
+        out += [('INFO', title, det) for title, det in self.infos]
+        return out
+
     def dump(self):
         for rule, hits in self.fails:
             print(f'[FAIL] {rule}（{len(hits)} 处）')
@@ -559,6 +566,55 @@ def _is_shihua(ln):
     return ln.strip().startswith(SHIHUA_PREFIX)
 
 
+# 可改层四种起首：师话、教师总结、舞台提示 `[…]`、应答标签 `〔应答·…〕`。其余一律保护。
+EDITABLE_PREFIX = SHIHUA_PREFIX + ('[', '〔应答')
+_PROTECT_PREFIX = ('#', '|', '>', '〖', '参考：', '【教师示范文】',
+                   '本课完。', '全课完。', '本环节完。')
+
+
+def writing_protected_lines(lines, in_outline):
+    """写作线「保护区」：返回 0 基行号集合，自动润色 / 方向指标计数**一律不碰**这些行。
+    （2026-09-11 立 · polish_writing 与 report_direction 共用同一口径，勿各写一份。）
+
+    立此函数的依据＝2026-09-01 网页端润色回贴的实证：148 段改动里越界 47 段——
+    `参考：` 行 13（学生话轮书面化）、表格 15、页标 11、附录体例 3、示范文风格 4。
+    前三类纯机械可挡，就是这里挡的。判据与 style-criteria §三保留边界、
+    batch_ngram_scan.load_lines 的剥除口径对齐（那边是横审计数面，这边是改写面）。
+
+    进保护区的行：
+      - load_body 已置空的行（<!-- --> 注释块 / 指纹块 / 代码围栏）与空行、纯分隔线；
+      - `## 教案提纲表` 节内（in_outline 为 True；体例归 lesson-structure §四）；
+      - 行首 `#` 标题、`|` 表格、`>` 引块（示范文）、`〖` 页标、`参考：` 学生话轮、
+        `【教师示范文】`、`本课完。/全课完。/本环节完。`；
+      - 行首 `〔` 且不是 `〔应答`（〔教师示范·〕/〔图意〕/〔材料〕/〔三档标准·教师掌握〕/
+        〔修改符号说明·教师掌握〕 都是老师「读」的信息或机检认的固定串）；
+      - 含全角占位横线 `＿＿＿` 的行（讲评占位槽须保持书面规范）；
+      - **兜底**：凡不以 EDITABLE_PREFIX（师：/（教师总结）/[/〔应答）起首的行也进保护区——
+        未知体例宁可不改。
+    """
+    prot = set()
+    for i, ln in enumerate(lines):
+        s = ln.strip()
+        if not s or in_outline[i]:
+            prot.add(i)
+            continue
+        if set(s) <= set('-–—=·*'):
+            prot.add(i)
+            continue
+        if s.startswith(_PROTECT_PREFIX):
+            prot.add(i)
+            continue
+        if s.startswith('〔') and not s.startswith('〔应答'):
+            prot.add(i)
+            continue
+        if '＿＿＿' in s:
+            prot.add(i)
+            continue
+        if not s.startswith(EDITABLE_PREFIX):
+            prot.add(i)
+    return prot
+
+
 def scan_lead_in_dash(lines):
     """引出式破折号候选（2026-08-31 立 · style-criteria §二.2「AI 痕迹头号形态」）。
 
@@ -871,7 +927,7 @@ def check_writing(lines, in_outline, rep):
     det = []
     # 池6 与空夸词只扫师话层（2026-09-01 收窄）：此前全文 count，「先别急」落在示范文
     #   正文与旁批表被计入，measurement-ledger 数据点 10/11/12 三次记录同一误报——
-    #   「有牙齿但咬错地方」。口径同红线 6① 机检（lesson-structure L201）。
+    #   「有牙齿但咬错地方」。口径同红线 6① 机检（lesson-structure §三红线第 6 条①）。
     shihua = [ln for ln in lines if ln and ln.strip().startswith(SHIHUA_PREFIX)]
     for w in load_pool6_words():
         c = sum(ln.count(w) for ln in shihua)
@@ -932,8 +988,9 @@ def check_writing(lines, in_outline, rep):
 # 它不判定单个词该不该留，只回答「这一轮整体朝哪个方向走」。同一批词，当禁令表无效、
 # 当方向指标有效——同仓内既有判据「这类病征依赖语境，只有密度指标能分开两组」。
 #
-# 实测校准（2026-09-01 复测 · 现行 21 词表＋剥注释/引块/参考行的计数面；
-#   ⚠ 词表或计数面再变动时须重测本块，过期快照曾在 0901 审计被点名）：
+# 实测校准（2026-09-01 复测 · 当时 21 词表＋剥注释/引块/参考行的计数面；
+#   ⚠ 2026-09-11 词表补 4 词、计数面改为保护区口径，复测数据见本块末尾「0911 复测」；
+#   词表或计数面再变动时须重测本块，过期快照曾在 0901 审计被点名）：
 #   《猜猜他是谁》网页端润色     22 → 6   ✓ 下降 73%
 #   《漫画的启示》Pass C         32 → 22  ✓ 下降 31%
 #   《我的心爱之物》网页端回贴   30 → 5   ✓ 下降 83%
@@ -946,26 +1003,53 @@ def check_writing(lines, in_outline, rep):
 COLLOQUIAL_WORDS = ['这会儿', '哪儿', '那儿', '咱们', '干什么', '一回', '几回', '念',
                     '块钱', '挺', '里头', '有的是', '说说看', '点子上', '搁',
                     # ↓ 2026-09-01 从 framework §7.8 机械自检清单收编
-                    '宝贝', '玩意儿', '待会儿', '等会儿', '脑子里', '蹦出']
+                    '宝贝', '玩意儿', '待会儿', '等会儿', '脑子里', '蹦出',
+                    # ↓ 2026-09-11 补：七轮人工润色统计里的四个最大宗（你们→大家 121 处/10 篇、
+                    #   挑→选 36、别→不要 22、跟→和 25）此前不在表内，方向指标「双降」与
+                    #   「你们 18 处仍在」曾并存——指标测不到它们，就等于没测。
+                    '你们', '挑', '别', '跟']
+
+# 多义字的计数排除（只管方向指标的计数，不是改写规则；改写规则的排除表见 polish_rules.py）
+_COLLOQUIAL_EXCLUDE = {
+    '别': re.compile(r'别(?=[的人处出致名号称样扭针])|(?<=[区差特个类级性告各派])别'),
+    '跟': re.compile(r'跟(?=[着上前读进随头脚])'),
+    '挑': re.compile(r'挑(?=[战剔起动担刺衅明食])|(?<=专)挑'),
+}
 
 
-def report_direction(md_path, baseline_path):
-    """把「改前 vs 改后」的方向指标打出来。只报数不 fail——判据仍是人读，
-    但方向反了必须显眼，否则会像 2026-08-31 那次一样被「机检全绿」盖过去。"""
-    def _countable(path):
-        # 计数面与 style-criteria §三保留边界对齐（2026-09-01）：剥 <!-- --> 注释块、
-        # `> ` 引块（示范文）、`参考：` 学生话轮——那三处的口语是设计要求，计入会把
-        # 合规保留变成「永不下降」，或诱导改写越界。
-        t = io.open(path, encoding='utf-8').read()
-        t = re.sub(r'<!--.*?-->', '', t, flags=re.S)
-        keep = [ln for ln in t.splitlines()
-                if not ln.strip().startswith(('>', '参考：'))]
-        return chr(10).join(keep)
-    cur = _countable(md_path)
-    base = _countable(baseline_path)
+def _count_colloquial(text):
+    n = 0
+    for w in COLLOQUIAL_WORDS:
+        c = text.count(w)
+        ex = _COLLOQUIAL_EXCLUDE.get(w)
+        if ex is not None:
+            c -= len(ex.findall(text))
+        n += max(c, 0)
+    return n
+
+
+def report_direction(md_path, baseline_path, do_print=True):
+    """把「改前 vs 改后」的方向指标打出来，并返回 (rows, warn)。只报数不 fail——判据仍是人读，
+    但方向反了必须显眼，否则会像 2026-08-31 那次一样被「机检全绿」盖过去。
+
+    计数面（2026-09-11 起）＝ writing_protected_lines 之外的行（师话/教师总结/舞台提示/应答标签），
+    与 polish_writing 的改写面同一口径：此前只剥注释、`> ` 引块、`参考：` 行，**表格与页标不剥**，
+    自动润色若误改了表格里的口语词，方向指标会把越界当成绩。
+    第三指标「保护区改动行数」逐行比对 base/cur 的保护行，须为 0——它答的是「有没有碰禁区」，
+    与前两项答的「朝哪个方向走」互补；两份文件行数不等时按较短者比、差额计入。
+    """
+    def _load(path):
+        lines, in_outline = load_body(path)
+        prot = writing_protected_lines(lines, in_outline)
+        raw = io.open(path, encoding='utf-8').read().splitlines()
+        return lines, prot, raw
+    cur_lines, cur_prot, cur_raw = _load(md_path)
+    base_lines, base_prot, base_raw = _load(baseline_path)
+    cur = chr(10).join(ln for i, ln in enumerate(cur_lines) if i not in cur_prot)
+    base = chr(10).join(ln for i, ln in enumerate(base_lines) if i not in base_prot)
     rows, warn = [], False
     for label, fn in (
-        ('口语词合计', lambda t: sum(t.count(w) for w in COLLOQUIAL_WORDS)),
+        ('口语词合计', _count_colloquial),
         ('破折号 ——', lambda t: t.count('——')),
     ):
         b, a = fn(base), fn(cur)
@@ -977,12 +1061,35 @@ def report_direction(md_path, baseline_path):
         else:
             verdict = '持平'
         rows.append(f'{label}：改前 {b} → 改后 {a}　{verdict}')
-    head = '方向指标（vs %s）' % os.path.basename(baseline_path)
-    if warn:
-        head += ' ⚠ **有指标不降反升——这一轮的改写方向可能反了，逐处复看再交付**'
-    print('[INFO] ' + head)
-    for r in rows:
-        print('    ' + r)
+    # 第三指标：保护区改动行数——把两稿的保护行各取成序列做 SequenceMatcher 对齐，
+    # 只数对不上的保护行（改写/删除/新增），可改层插入或删除行不会连累它
+    #（2026-09-11 改：此前按行号硬对齐，可改层多插三行就把后面全部保护行报成改动）。
+    import difflib as _difflib
+    base_idx = sorted(base_prot)
+    base_p = [base_raw[i] for i in base_idx if i < len(base_raw)]
+    cur_p = [cur_raw[i] for i in sorted(cur_prot) if i < len(cur_raw)]
+    sm = _difflib.SequenceMatcher(None, base_p, cur_p, autojunk=False)
+    changed, extra = [], 0
+    for tag, i1, i2, j1, j2 in sm.get_opcodes():
+        if tag == 'equal':
+            continue
+        changed.extend(base_idx[k] + 1 for k in range(i1, i2) if k < len(base_idx))
+        extra += max(0, (j2 - j1) - (i2 - i1))
+    total = len(changed) + extra
+    if total:
+        warn = True
+        note = f'⚠ 非 0（改前行 {", ".join(map(str, changed[:8]))}' + ('…' if len(changed) > 8 else '') +                (f'；新增保护行 {extra}' if extra else '') + '）'
+    else:
+        note = '✓ 0'
+    rows.append(f'保护区改动行数：{total}　{note}')
+    if do_print:
+        head = '方向指标（vs %s）' % os.path.basename(baseline_path)
+        if warn:
+            head += ' ⚠ **有指标不降反升或碰了保护区——这一轮的改写方向可能反了，逐处复看再交付**'
+        print('[INFO] ' + head)
+        for r in rows:
+            print('    ' + r)
+    return rows, warn
 
 
 def main():
