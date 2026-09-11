@@ -37,7 +37,7 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 
 ## 3. 共享资产 · 单一事实源（禁副本）
 
-**停用归档（2026-09-10 立）**：读书会线 11 个＋看图写话线 3 个 skill 已整目录移到 **`.claude\skills-parked\`**（Claude Code 只加载 `.claude\skills\` 一级子目录，停用件不进上下文、不触发），清单与恢复口令见该目录 `README.md`，恢复＝整目录移回。**`laojohn-lesson-plan` 与 `laojohn-ppt-draft` 虽属读书会线但没有停用、也禁止移进去**——前者 `assets\` 是 docx 引擎三件套，后者 `pageback_annotate.py` 与 `writing-mode.md` 是写作课 PPT 链的执行体与唯一源。下表里宿主为 `book-profile`／`book-card`／`reading-guide`／`reading-sheet` 的四行，停用期间路径一律读作 `skills-parked`。活线侧指向停用件的引用（根 `tone_gate.py`、`课件配图工具\scripts\imgclient.py`、`laojohn-detail-review\SKILL.md`）已改成两处都找，恢复时不必改回；`.gitignore` 针对 `laojohn-picture-writing/assets/` 的规则已改 `skills*` 通配，两处同时生效。
+**skill 停用归档已撤回（2026-09-10 立、09-11 撤）**：曾把读书会 11 个＋看图写话 3 个 skill 移到 `.claude\skills-parked\` 以省常驻上下文，实测只省 description 合计约 2.8k 字符（窗口的 0.2%），而误触发方向反了（无 laojohn skill 可接时易落到官方 docx/pptx skill），故全部移回、目录删除，**别再重做**。三处遗留无害、保留不改：根 `tone_gate.py`、`课件配图工具\scripts\imgclient.py`、`laojohn-detail-review\SKILL.md` 仍是「`skills/` 与 `skills-parked/` 两处都找」；`.gitignore` 针对 `laojohn-picture-writing/assets/` 的规则仍是 `skills*` 通配。
 
 新增/换图一律改这里，不要在 skill 内另存副本：
 

@@ -12,7 +12,7 @@
 ## 架构速览（骨架事实 · 细节在各 SKILL）
 - 主链与平行分支见 CLAUDE.md §2｜每课时双产出中间稿+讲稿页序1:1;页号唯一口径=中间稿P号==讲稿##第N页==详案页标〖PPT第N页〗;PPT不标页码角标;中间稿不写师话(师话→讲稿);眉标禁写课型
 - **双人协作(0820)**:口径见 CLAUDE.md §9;记忆事实源=仓内 .claude/memory/,用户目录那份是目录联接;看板与commit前缀0911已取消 — [详情](two-person-sync-0820.md)
-- **skill停用归档(0910)**:读书会11+看图写话3个skill在.claude/skills-parked/,不进上下文;lesson-plan/ppt-draft是写作线硬依赖不许停;要用先移回再提交 — [详情](skills-parked-0910.md)
+- **skill停用归档0910立·0911撤回**:只省description 2.8k字符(窗口0.2%),误触发方向反;22个全部在架,别再重做;活线两处查找与gitignore skills*通配保留无害 — [详情](skills-parked-0910.md)
 ## 写作课（writing-lesson）
 **写任何一篇前必读**:[⚠文风定盘](writing-style-two-directions-conflict-0831.md) · [例子四判据](writing-lesson-example-must-be-unique-anchor.md) · [比喻反刻板](writing-lesson-metaphor-antistereotype.md) · [电报体红线](writing-lesson-telegraphese-and-coinage-redline.md) · 下方「跨课次通则」整块
 ### 跨课次通则(写同类题目直接适用 · 展开见各源条)
