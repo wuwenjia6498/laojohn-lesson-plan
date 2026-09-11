@@ -33,7 +33,7 @@
 - **换掉/改长教师示范文=四处下游连改**:详案12处/配套两侧json/批改标准包进提示词/PPT六类页外部重做;须回看③反例是否撞车;⚠变长还会顶爆配套页数闸门 — [源](model-essay-swap-downstream-chain.md)
 ### 规则与体例
 - [⚠0911换靶:生成侧语体=规范教案·瘦身41%来历下沉·polish_writing机械层·PassB四个不执行机制](generation-retarget-0911.md) — 生成只读简报§一.7+prose-exemplars;避让卡替代整读pools/ledger;A/B待做
-- [⚠文风定盘0831·0901收敛一主三从](writing-style-two-directions-conflict-0831.md) — 方向=向规范书面靠;AI痕迹=破折号/导演腔/省主语/术语漂移;**PassC已撤别重开**;主判据唯一源style-criteria+执行位在PassB;改写工序跑完必看--baseline方向指标;批量修文件脚本每步立即写盘
+- [⚠文风定盘0831·0901收敛一主三从](writing-style-two-directions-conflict-0831.md) — 方向=向规范书面靠;AI痕迹=破折号/导演腔/省主语/术语漂移;**PassC已撤别重开**;主判据唯一源style-criteria+执行位在PassB;改写工序跑完必看--baseline方向指标;批量修文件脚本每步立即写盘;⚠方言词表已实测否掉勿加回
 - [配套三侧文案0901起桥接style-criteria](writing-materials-style-bridge-0901.md) — 此前只有0803单边去AI腔、方向反;SKILL红线拆两条+§四认领+§二.1回填8对;picture-materials仍真空(补时桥它自己线§13)
 - [横审报告曾被页标淹没(0831)](batch-ngram-scan-pagemark-noise-0831.md) — 页标须正则剥;白名单只收体例层;⚠逐字复用基线40已过时实测48
 - [教师自拟例子四条硬判据(0817)](writing-lesson-example-must-be-unique-anchor.md) — 独一份/夸张≠计数/样板不低于例句/一篇内锚点不复用;管全篇例子不只示范文
@@ -41,16 +41,12 @@
 - [③引本单元课文佐证技法·匹配则引(0821)](writing-lesson-cite-unit-text-0821.md) — 不配就不引不许硬上;判据=有一篇「最突出的写法」正是本课这一招;判不引≠欠账;事实源unit-texts.md先联网核实后落笔;口径=禁指向动作不禁指代进度
 - [教学指令一律正向表述(0824)](writing-lesson-positive-framing-not-prohibition.md) — 写法偏好类不判对错走三步对比,题目要求类可判;五落点(提纲表技法行/③④⑥/⑦最易漏);最大复发路径=档案自己写「避免笼统地说…」;反向刹车见源条
 - [电报体/生造词红线第7条(0731/0819)](writing-lesson-telegraphese-and-coinage-redline.md) — 五形态自查(省主语/名词压缩/电报短语/生造词/中心宾语残缺);补宾语只在定义句补一次
-- [师话必须接住上一轮真实产出(0803)](writing-lesson-shihua-must-follow-real-turn.md) — 假转折/假情境/假引文;三关全漏只有通读语感抓得到
 - [学段口气全线没分级(0817)](writing-lesson-grade-tone-not-differentiated.md) — 判断分三层(用词/技法深度/思维层级);判据=降两级反问;0828复发:并列短语重难点只落实一半,拆开逐个问落点
 - [「话轮骨架」层=池9+指纹第15字段(0817)](writing-turn-skeleton-layer-pool9.md) — 冷审打散措辞打散不掉同构;--focus/--against机检进checklist E组;⚠池9编号在后但属零件层
 - [技法N件套须练全N件](technique-set-practice-all-parts.md) — 定稿前做「每件×是否产出过」对账;机检与checklist都抓不到
-- [开场钩子先行·单元交代后置(0801)](writing-lesson-opening-hook-before-unit.md) — 禁上来报「今天写第X单元习作」｜[参考标签纪律+术语首现权+追问链](writing-lesson-label-and-turn-discipline.md) — `参考：`只装学生话;括号按「做/读」分家族
-- [行文正样本+去AI味单边化根因(0804)](writing-lesson-prose-style-benchmark-0804.md) — pools「宁可重复不许自造」裁决序;⚠方言词表已被实测否掉
 - [重建台账前先查缺指纹的篇(0819)](ledger-rebuild-drops-fingerprintless.md) — 先grep -L回写再重建,否则静默抹行
 - [指纹块14字段+装置粒度门槛](writing-lesson-fingerprint-fields-revised.md) / [反同质化四项升级](writing-lesson-antihomogenization-upgrade.md) — 装置判据=当场演过一件事;⚠12字段说法已过时
 - [正文标点全角+方括号提示体例](writing-lesson-fullwidth-punct-bracket.md) / [风格红线覆盖后续改写](style-redline-covers-edits.md) / [交付前通读语感扫](writing-lesson-naturalness-readthrough.md) — 生造/别扭须纯语感通读
-- [进阶线全覆盖63任务+填空位必须全角＿＿(0802)](writing-progression-chain-full-coverage.md) — 总地图由md反向回写(全仓唯一);半角横线填空会被docx引擎当加粗吃掉｜[文件名/目录名加「第N单元」段(0802)](writing-line-filename-unit-segment.md) — 标识=<年级册>-第N单元-<题目>;⚠「PPT纯题目」半条0826已推翻
 - [写作课线三项命名/结构调整(0826)](writing-line-naming-flattened-0826.md) — 配套-X用/打包单层平铺/PPT带课次段;⚠pptx与anim.json必须同批改名否则防覆盖闸门静默失效;⚠Windows取目录名一律pathlib .name
 - [标题与环节命名定稿](writing-lesson-title-naming.md) — 唯一源=title-naming.md;改体例前全skill搜一遍
 - [首页无区头单表6行+两行文案体例(现行)](writing-lesson-front-page-single-table.md) — 0831两行体例推翻0828:目标行一句话说清学会写哪类文章;技法行首句固定「使用+构思工具名」且与正文一字一致;写详案或改style_front_page前必读
@@ -58,7 +54,6 @@
 - [详案出PPTX](writing-lesson-to-pptx.md) / [docx页眉定版](writing-lesson-docx-header.md) / [竞品借鉴清单](writing-lesson-competitor-borrow-backlog.md) — 漏传--header-left/right静默回落读书会页眉;D3-D5/N1待做
 - [作文批改工具(0818立项)](writing-correction-tool-0818.md) — 给加盟商不能做skill;判据从详案抽标准包JSON;错别字层原理上不能做;引用一字不差靠工程;**0907上线闸门:verified_by_human=true才打包(confirm_pack.py);线上12课,下线名单见源条**
 - [批改工具已部署Vercel(0824)](writing-correction-tool-vercel-deploy-0824.md) — 入口=部署根index.py不能放api/;.vercelignore挡config.json;正式地址grader.skyline666.top;⚠validate全绿≠包对
-- [配套三侧削页+去逐字稿框架(0803)](writing-materials-pages-trimmed-0803.md) — 家长1页/教师2页/学生4页(0818回调);教师侧禁「配合逐字稿」
 - [配套json富文本标记只有部分字段解析(0907)](writing-materials-richtext-field-scope.md) — 教师materials/家长oneline走textContent,写{b}会印成(b);⚠溢出/页数/Type3三道机检全绿也抓不到,渲完正则扫一遍PDF文本
 - [手改只改HTML必被重渲冲掉(0821)](writing-materials-handedits-lost-on-rerender.md) — 文字改动一律回写_data.json;⚠仓内9课json仍不含那批手改
 - **PPT链**(六条细节→[链索引](ppt-chain-index.md)):⚠本仓止于动画注入·终稿不回仓(0902,打包不收PPT,下一课次先确认收到的是初稿)｜⚠先读详案再审查再动画(0806,机检全过≠审查完成;PPT对详案错勿迁就)
