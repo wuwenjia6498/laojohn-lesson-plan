@@ -45,3 +45,8 @@ metadata:
 - **产物不同步会被误读成「同步坏了」**：对方审改后推上来的只有 `.md`，最新 docx 得自己重渲（必带 `--header-left/--header-right`）。
 
 规则落点：`CLAUDE.md` §8（入库口径）与 §9（协作硬线）、`docs\协作同步说明.md`（给人看的操作规程）。相关：[[bash-heredoc-file-writing-pitfalls]]、[[memory-index-structure-over-size-0818]]、[[lesson-plan-book-illustration-chain]]。
+
+## 0911 从 CLAUDE.md §8/§9 下沉的历史细节
+- 网盘方案先后试过 OneDrive（上文②）与坚果云（需另装客户端），均否；最终判断仓库私有、仅两人可访问，git 是唯一已跑通通道。
+- 三类大件 0820 入库时合计 79.5MB（最大单文件 13.6MB，远低于 GitHub 100MB 硬限）。但外部平台重做的 pptx 每份 13~22MB（本仓 `build_ppt.py` 烘焙的约 1MB），0902 一轮 7 份即 125.5MB；`.git` 达 689MB、远程 549MB，GitHub 软建议 1GB，git 只进不出。由此 0902 拍板「本仓工序止于动画注入、终稿不回仓」，压缩工序降级为仅当单份 >5MB，详见 [[ppt-delivery-boundary-0902]]。
+
