@@ -13,6 +13,7 @@ T1–T5 五项、以及整课跑批查出的 A/B 两条，全部是在豆包上�
   · Gemini：`AIHUBMIX_API_KEY`；本仓早有此约定（见 CLAUDE.md §1「密钥承载约定」），
     故若本工具的 .env 里没有，会**显式提示着**回退到
     `.claude/skills/laojohn-picture-writing/scripts/imggen.config.json`（同一个账号的 key，
+    停用归档后在 `.claude/skills-parked/` 下，两处都会找；
     已 gitignored）。回退时一定打印来源——静默回退会在那个文件被挪走时变成难查的故障。
 """
 import base64
@@ -27,7 +28,10 @@ import requests
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 REPO = ROOT.parent
-PW_CONFIG = REPO / ".claude/skills/laojohn-picture-writing/scripts/imggen.config.json"
+# 2026-09-10 起看图写话 skill 停用归档到 .claude/skills-parked/（见 CLAUDE.md §3），两处都试、取先存在的
+_PW_CANDIDATES = [REPO / f".claude/{d}/laojohn-picture-writing/scripts/imggen.config.json"
+                  for d in ("skills", "skills-parked")]
+PW_CONFIG = next((c for c in _PW_CANDIDATES if c.exists()), _PW_CANDIDATES[0])
 
 
 def load_dotenv(path=None):
