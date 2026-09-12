@@ -32,3 +32,7 @@ metadata:
 ## How to apply
 
 写示范文＝先读 §四之三（含第五条）定调 → 写完过 §五 五问＋§六 七问 → 跑机检 E 看 ②③④ 是否为零、① 实数回填师话。冷审端 rubric 维三三条与 §六 第 7 问互指。相关：[[model-essay-countable-claims-must-be-measured]]、[[model-essay-swap-downstream-chain]]、[[writing-lesson-example-must-be-unique-anchor]]、[[zhang-zuqing-on-writing-line-0912]]。
+
+## 0913 补（通读审计后）
+- 旁批表双标准去掉「表末写明为什么不收」出路（以 rubric 维三为准）：最见功夫两句必入表，model-essay §五 4 与 checklist D 同步。
+- essay_audit.py 改为收全部 `> 【教师示范文】` 块：① 按最长块报，②③④ 对并集比对（《故事新编》《多彩的活动》片段＋整篇并存，旧版误报 149 字／1 段）；⑤ 交代段只报句数、不再带「一句到一句半」数值线（用户 0912 定「第 1 条交代段限长不新增」，脚本曾单方面留着）。

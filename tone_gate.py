@@ -38,9 +38,9 @@ SKILLS_PARKED = os.path.join(ROOT, '.claude', 'skills-parked')
 
 
 def _skill_path(name, *parts):
-    """定位 skill 内文件：先找 .claude/skills/<name>，停用归档后再找 .claude/skills-parked/<name>。
-    2026-09-10 起读书会/看图写话线 skill 停用归档到 skills-parked（见 CLAUDE.md §3）；两处都没有就
-    返回 skills 下的路径，交由调用方的 except OSError 走既有回落。"""
+    """定位 skill 内文件：先找 .claude/skills/<name>，再找 .claude/skills-parked/<name>。
+    2026-09-10 曾把读书会/看图写话线 skill 停用归档到 skills-parked，次日撤回（见 CLAUDE.md §3）；
+    第二处查找保留无害。两处都没有就返回 skills 下的路径，交由调用方的 except OSError 走既有回落。"""
     for base in (SKILLS, SKILLS_PARKED):
         cand = os.path.join(base, name, *parts)
         if os.path.exists(cand):
@@ -284,7 +284,7 @@ POOL7_FAMILIES = [
 POOL7_PER_ITEM_CAP = 2   # pools 池7 硬规则：单篇同一说法至多两次
 # PRAISE_WORDS 有意保留硬编码：pools 池6 硬规则里它嵌在散文句「空夸词(说得好/太妙了/太棒了)
 # 单篇最多出现一次」中，不是结构化清单，抠词解析脆弱（改一字即静默变空）。
-# ⚠ 双写位置＝variation-pools.md 池6「### 硬规则」第 2 条，改那里须同步这里。
+# ⚠ 双写位置＝variation-pools.md 池6「### 硬规则」第 2 条「④ 反馈语不进轮换」（那条括注已回指本处），改那里须同步这里。
 PRAISE_WORDS = ['说得好', '太妙了', '太棒了']
 PRAISE_CAP = 1
 MECH_WORDS = ['A 档', 'A档', '降压', '兜底', '锚点', '指纹', '台账', '零件', '定起点']
@@ -902,6 +902,8 @@ def check_writing(lines, in_outline, rep):
              grep(lines, re.compile(r'[,:?!;()]'), exempt=_punct_exempt))
     # 禁止逐字复用清单（运行时解析 variation-pools）
     needles = load_forbidden_phrases()
+    if not needles:
+        print('[WARN] 「禁止逐字复用」清单解析为 0 条——variation-pools.md 的节标题「## 已知「禁止逐字复用」」或止于「### 教师「导演腔」」的锚可能被改，本项机检等于没跑')
     hits = []
     for i, ln in enumerate(lines):
         if not ln:

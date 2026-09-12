@@ -8,30 +8,57 @@
   ① 示范文篇幅：总字数、段数、各段字数、最长段（对 §三 A 表区间；师话里「共几段／哪段最长／一句带过」等可数断言据此核）
   ② 引文逐字审计：示范文引块之外、引号内 ≥6 字的句子，若与示范文高度相似却不逐字相同 → 报「疑似改写」；
      完全找不到相似片段的只计数（多半引的是别的材料，如③两段对照）。截断可接受、改写须打回。
-  ③ 旁批表逐行比对：表头含「示范文／原文／句子」的表，其引句列每格须是示范文的子串。
-  ④ 笔法锚点复用：§四之三 两段风格示例的题材词与整句不得出现在示范文里。
-  ⑤ 交代段粗筛：逐段句数与首句，供人判「来历／外形／功能」是否超过一句到一句半（不立规则、只报数）。
+  ③ 旁批表逐行比对：表头含「示范文／原文／句子」的表，其引句列每格须是示范文的子串；格内「……／、／；」与并列引语按片段顺序比对，内层引号剥掉。核 0 格打 [WARN]。
+  ④ 笔法锚点复用：§四之三 两段风格示例的题材词与整句不得出现在示范文里（锚点句运行时从 model-essay.md 切出，题材词硬编码 ≥3 字）。
+  ⑤ 交代段粗筛：逐段句数与首句，供人核 §六 第 7 问（来历／交代／外形段是否自犯本课反例的病）；只报数、不立数值线。
+  示范文块：`> 【教师示范文】` 引块可能不止一个（§三 B 单点示范段 + A 整篇并存）；① 取最长的一块为整篇，②③④ 对全部块的并集比对。
   ⑥ 师话可数断言行：把含「几段／最长／最短／一句带过／两三句／几处」的 师： 行列出来，配 ① 的实数人工核。
 
 设计约束：与 tone_gate 同款定位（[INFO] 通道），永不 exit 1；不解析 pools／rubric；不 import 任何 skill 私有模块。
 """
 import re, sys, pathlib
 
-ANCHOR_TOPICS = ['系鞋带', '自行车', '车把', '后座', '车铃', '光着袜子', '拎在手里', '缠的胶布', '钉的']
-ANCHOR_SENTS = ['两根带子在他手里绕了三圈', '这回成了个疙瘩', '铃还响，还是从前那个声音', '把车挪正了些']
+ANCHOR_TOPICS = ['系鞋带', '光着袜子', '拎在手里', '缠的胶布', '车把上', '后座那块木板', '按了一下车铃', '把车挪正']
 GRADE_RANGE = {'一': 'L1 50–150', '二': 'L2 50–150', '三': 'L3 300 左右', '四': 'L4 400 左右', '五': 'L5 450–500', '六': 'L6 500–600+'}
 CLAIM_PAT = re.compile(r'几段|最长|最短|一句带过|两三句|几句|几处|多少字|第.段')
+FRAG_SPLIT = re.compile(r'……|…|、|；|;')
+INNER_QUOTES = re.compile(r'[“”‘’"\'「」]')
 
 def strip_ws(s):
     return re.sub(r'[\s　]', '', s)
 
-def main(path):
-    text = pathlib.Path(path).read_text(encoding='utf-8')
-    body = re.sub(r'<!--.*?-->', '', text, flags=re.S)
-    lines = body.split('\n')
-    start = next((i for i, l in enumerate(lines) if l.lstrip().startswith('>') and '【教师示范文】' in l), None)
-    if start is None:
-        print('[INFO] 未找到 `> 【教师示范文】` 引块，示范文机检跳过'); return
+def load_anchor_sents():
+    """运行时从 model-essay.md §四之三 两个 `>` 引块切句（≥6 字），锚点句不再硬编码；读不到就返回空。"""
+    p = pathlib.Path(__file__).resolve().parent.parent / 'references' / 'model-essay.md'
+    try:
+        text = p.read_text(encoding='utf-8')
+    except OSError:
+        return []
+    m = re.search(r'## 四之三.*?(?=\n## )', text, re.S)
+    if not m:
+        return []
+    sents = []
+    for q in re.findall(r'^> (.+)$', m.group(0), re.M):
+        for s in re.split(r'[。！？，,]', q):
+            s = strip_ws(s)
+            if len(s) >= 6:
+                sents.append(s)
+    return sents
+
+def frags_in_order(cell, hay):
+    """格内容按「……／…／、／；」切片、剥内引号，各片段须按顺序逐字见于 hay（截断可、改写不可）。"""
+    cell = re.sub(r'[”’]\s*[“‘]', '、', cell)   # 两段引语并列（“…”“…”）视作两个片段
+    frags = [strip_ws(f) for f in FRAG_SPLIT.split(INNER_QUOTES.sub('', cell)) if strip_ws(f)]
+    pos = 0
+    for f in frags:
+        k = hay.find(f, pos)
+        if k < 0:
+            return False
+        pos = k + len(f)
+    return True
+
+def collect_block(lines, start):
+    """从 start（`> 【教师示范文】` 行）起收一整块引文，返回 (end, 段列表)。"""
     i = start + 1; ess_lines = []
     while i < len(lines):
         l = lines[i]
@@ -45,9 +72,33 @@ def main(path):
             if j < len(lines) and lines[j].lstrip().startswith('>') and not lines[j].lstrip().startswith('> 【'):
                 i = j; continue
         break
-    end = i
-    paras = [p for p in ess_lines if p]
-    essay = ''.join(paras); essay_ws = strip_ws(essay)
+    return i, [p for p in ess_lines if p]
+
+def main(path):
+    text = pathlib.Path(path).read_text(encoding='utf-8')
+    # 注释块只清空内容、不删行，行号与源文件一致
+    body = re.sub(r'<!--.*?-->', lambda m: '\n' * m.group(0).count('\n'), text, flags=re.S)
+    lines = body.split('\n')
+    starts = [i for i, l in enumerate(lines) if l.lstrip().startswith('>') and '【教师示范文】' in l]
+    if not starts:
+        stray = [i + 1 for i, l in enumerate(lines) if '【教师示范文】' in l]
+        print(f'[WARN] 未找到 `> 【教师示范文】` 引块，示范文机检跳过——标注不在 `>` 引块里（lesson-structure 要求示范文用引块）'
+              + (f'；非引块的 【教师示范文】 在行 {stray}' if stray else '；全文无此标注'))
+        return
+    blocks = []  # (start, end, paras)
+    for s in starts:
+        if blocks and s < blocks[-1][1]:
+            continue
+        e, ps = collect_block(lines, s)
+        blocks.append((s, e, ps))
+    # ① 以最长的一块为整篇；②③④ 对全部块的并集比对（§三 B 单点示范段与 A 整篇可并存）
+    main_blk = max(blocks, key=lambda b: len(strip_ws(''.join(b[2]))))
+    start, end, paras = main_blk
+    essay = ''.join(paras)
+    essay_ws = strip_ws(''.join(''.join(b[2]) for b in blocks))
+    in_block = lambda n: any(b[0] <= n < b[1] for b in blocks)
+    if len(blocks) > 1:
+        print(f'[INFO] 示范文引块 {len(blocks)} 个（行 {"、".join(str(b[0] + 1) for b in blocks)}）；① 按最长块（行{start + 1}）报，②③④ 对全部块并集比对')
     m = re.search(r'([一二三四五六])[上下]-', pathlib.Path(path).name); grade = m.group(1) if m else '?'
     print(f'== 示范文机检 E · {pathlib.Path(path).name} ==')
     lens = [len(strip_ws(p)) for p in paras]
@@ -62,12 +113,14 @@ def main(path):
     quote_pat = re.compile(r'“([^”]{6,})”')
     rewritten, unmatched = [], 0
     for n, l in enumerate(lines):
-        if start <= n < end or l.lstrip().startswith('>'):
+        if in_block(n) or l.lstrip().startswith('>'):
             continue
         for q in quote_pat.findall(l):
             qs = strip_ws(q)
-            if qs in essay_ws:
+            if qs in essay_ws or frags_in_order(q, essay_ws):
                 continue
+            if len(qs) < 10:
+                unmatched += 1; continue   # 短引句与示范文偶合 6 字即误报，不判改写
             best = 0
             for a in range(len(qs)):
                 b = a + best + 1
@@ -99,19 +152,17 @@ def main(path):
             cell = strip_ws(cells[col_idx]).strip('“”"')
             if len(cell) < 4: continue
             checked += 1
-            # 「……」表示省略中段：各片段须按顺序逐字见于示范文（截断可、改写不可）
-            frags = [f for f in cell.split('……') if f]
-            pos, ok = 0, True
-            for f in frags:
-                k = essay_ws.find(f, pos)
-                if k < 0: ok = False; break
-                pos = k + len(f)
-            if not ok: misses.append((n, cells[col_idx][:40]))
-    print(f'[INFO] ③ 旁批表引句列比对：核 {checked} 格，不是示范文子串的 {len(misses)} 格（改写须打回）')
+            # 「……」表示省略中段、「、；」表示并列片段：各片段须按顺序逐字见于示范文（截断可、改写不可）
+            if not frags_in_order(cells[col_idx], essay_ws): misses.append((n, cells[col_idx][:40]))
+    if checked == 0:
+        print('[WARN] ③ 旁批表引句列比对：核 0 格——没找到表头含「示范文／原文／句子」的表；引句若走 `参考：` 行由 ② 覆盖，否则须人工核旁批表')
+    else:
+        print(f'[INFO] ③ 旁批表引句列比对：核 {checked} 格，不是示范文子串的 {len(misses)} 格（改写须打回）')
     for n, c in misses: print(f'      行{n}: {c}')
-    hits = [w for w in ANCHOR_TOPICS + ANCHOR_SENTS if strip_ws(w) in essay_ws]
-    print(f'[INFO] ④ 笔法锚点题材／整句复用：{len(hits)} 处 {hits if hits else ""}（model-essay §四之三 硬规则：对齐笔法不对齐内容）')
-    print('[INFO] ⑤ 交代段粗筛（人判：来历／外形／功能合计是否超过一句到一句半；只报数不立规则）')
+    anchor_sents = load_anchor_sents()
+    hits = [w for w in ANCHOR_TOPICS + anchor_sents if strip_ws(w) in essay_ws]
+    print(f'[INFO] ④ 笔法锚点题材／整句复用：{len(hits)} 处 {hits if hits else ""}（锚点句 {len(anchor_sents)} 条运行时取自 model-essay §四之三；对齐笔法不对齐内容）')
+    print('[INFO] ⑤ 交代段粗筛（逐段句数与首句，供人核 model-essay §六 第 7 问；只报数、不立数值线）')
     for k, p in enumerate(paras, 1):
         sents = [s for s in re.split(r'[。！？]', p) if s.strip()]
         print(f'      第{k}段 {len(sents)} 句 ｜ 首句：{sents[0][:30] if sents else ""}')
