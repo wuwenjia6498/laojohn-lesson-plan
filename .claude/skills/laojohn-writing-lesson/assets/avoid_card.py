@@ -90,10 +90,17 @@ def load_pieces(d):
     return out
 
 
+def nt(s):
+    """题名归一：全角下划线＿与半角 _ 视为同一字符。
+    命名口径与指纹块用全角（＿＿让生活更美好），situation-anchors.md 全表用半角（__让生活更美好），
+    不归一就会「锚点表未命中」而静默退到池 0 兜底，丢掉官方情境与官方反馈活动。"""
+    return (s or "").replace("＿", "_")
+
+
 def anchor_row(task):
     text = read(REF / "situation-anchors.md")
     for ln in text.splitlines():
-        if ln.startswith("|") and task in ln.split("|")[1]:
+        if ln.startswith("|") and nt(task) in nt(ln.split("|")[1]):
             cells = [c.strip() for c in ln.strip().strip("|").split("|")]
             if len(cells) >= 5 and cells[0] != "任务":
                 return cells
@@ -147,7 +154,7 @@ def main():
         if fp.get("_nofp"):
             nofp.append(fp["file"])
             continue
-        if a.task and a.task in (fp.get("题目") or ""):
+        if a.task and nt(a.task) in nt(fp.get("题目")):
             continue
         pg = grade_of(fp.get("册级"))
         same_genre = a.genre in (fp.get("文体") or "")
@@ -166,7 +173,7 @@ def main():
         L(f"- {fp.get('册级','—')}《{fp.get('题目','—')}》[{short(fp.get('文体'),12)}]：{parts}")
 
     L("")
-    same = sorted([fp for fp in pieces if not fp.get("_nofp") and a.genre in (fp.get("文体") or "") and a.task not in (fp.get("题目") or "")],
+    same = sorted([fp for fp in pieces if not fp.get("_nofp") and a.genre in (fp.get("文体") or "") and nt(a.task) not in nt(fp.get("题目"))],
                   key=lambda x: x["mtime"], reverse=True)[:2]
     L("## 同文体最近 2 篇的话轮骨架（③④⑦ 三串至少换一串的序列形态）")
     if not same:
