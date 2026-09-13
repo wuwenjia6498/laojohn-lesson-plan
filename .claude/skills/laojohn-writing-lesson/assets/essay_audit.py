@@ -48,6 +48,7 @@ def load_anchor_sents():
 def frags_in_order(cell, hay):
     """格内容按「……／…／、／；」切片、剥内引号，各片段须按顺序逐字见于 hay（截断可、改写不可）。"""
     cell = re.sub(r'[”’]\s*[“‘]', '、', cell)   # 两段引语并列（“…”“…”）视作两个片段
+    hay = INNER_QUOTES.sub('', hay)              # 片段剥了内引号，示范文侧同样剥，否则含引语的格永远判不成子串
     frags = [strip_ws(f) for f in FRAG_SPLIT.split(INNER_QUOTES.sub('', cell)) if strip_ws(f)]
     pos = 0
     for f in frags:
