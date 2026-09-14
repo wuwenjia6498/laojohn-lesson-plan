@@ -36,6 +36,7 @@
 - **半命题多话题题目：例子覆盖事与品质两类、品质类判归因不判换词、含蓄≠不点题**:「美好」二字跟着这件事就是点题、跟着口号句才是口号;判据分路要落在每一处用到它的地方 — [源](halftitle-abstract-vs-concrete-topics-0914.md)
 - **换掉/改长教师示范文=四处下游连改**:详案12处/配套两侧json/批改标准包进提示词/PPT六类页外部重做;须回看③反例是否撞车;⚠变长还会顶爆配套页数闸门 — [源](model-essay-swap-downstream-chain.md)
 ### 规则与体例
+- [⚠规则效力评估0915:素材层做到了·咬合三条零落地](model-essay-rules-effect-eval-0915.md) — 四篇同尺盲评;0912够得着需与0914叠加才判得出丙;C2旁批表双标准四篇全未达标;根因=checklist把三条压进同一个勾;要领数上限缺「补进核心技法行」出口;机检②③④全绿≠合格
 - [示范文规则0912补五条+机检E+瘦身](model-essay-rules-supplement-0912.md) — 够得着上限=优等学生;旁批表最见功夫两句必入表;不教第四招;起笔不与③反例同型;§六第7问;essay_audit.py每份必跑;⚠已拆条文+history,生成只读顶部一屏卡,别把来历写回条文
 - [张祖庆视角接入写作课线(0912)](zhang-zuqing-on-writing-line-0912.md) — 三处落位:生成侧generation-brief§一.8减法三问/冷审rubric跨维九+维三三问/示范文链;体系审计8条已拍板采5不采3(讲评按需·审题依需·三档表);话语比不能当判据;三档优先级标记不推广
 - [⚠0911换靶:生成侧语体=规范教案·瘦身41%来历下沉·polish_writing机械层·PassB四个不执行机制](generation-retarget-0911.md) — 生成只读简报§一.7+prose-exemplars;避让卡替代整读pools/ledger;A/B待做
@@ -129,5 +130,6 @@
 - **⚠故事新编PPT三处待外部改+批改标准包未开工** — [详情](gushi-xinbian-5a-unit-move-0828.md)｜我来编童话PPT六类页须外部重做+Vercel未重部署 — [详情](textbook-revision-same-title-new-page-0902.md)｜漫画老师0820对方改动未合入 — [详情](manhua-laoshi-5a-lesson-state.md)
 - **⚠L5-L6起步0830改判「定起点」后,余4篇五年级稿未回改**(自由写作均低于25分钟新下限;故事新编0908已回改、缩写故事已下线) — [详情](writing-lesson-destress-onramp.md)
 - 六上一变形记·六上二多彩的活动0914均已重生成+两遍冷审落定+docx已渲+台账已登(下游配套/标准包/PPT未做·0913–0914改动均未提交git);下一篇六上稿须避⑦「请停笔…已写出来的部分」/结课「写给…的人读的」/⑥「三种起笔」三处第三次复现 — [详情](liushang-6a-two-lessons-state.md)
+- 六上四笔尖流出的故事0914晚从零重写+两遍冷审落定+docx已渲+台账已登(旧稿0911已删;下游配套/标准包/PPT未做·未提交git);下一篇六上稿须避⑦停笔句「写到哪里」骨架/⑥「先定两件事」/「优先请没发过言的」/审题辨析引入句同款 — [详情](bijian-liuchu-6a-lesson-state.md)
 ## 已交付归档
 全部课次/书目状态钩子已移至[归档索引](memory-index-archived-deliveries.md),排新课次前按需打开;已落地/已验完的规则历史条目在[规则归档](memory-index-archived-rules.md)。
