@@ -131,6 +131,6 @@
 - 《推荐一个好地方》两处详案↔PPT微差未拍板 · writing 竞品借鉴 D3–D5/N1 待做 · ppt-profile Phase3 待办
 - **⚠故事新编PPT三处待外部改+批改标准包未开工** — [详情](gushi-xinbian-5a-unit-move-0828.md)｜我来编童话PPT六类页须外部重做+Vercel未重部署 — [详情](textbook-revision-same-title-new-page-0902.md)｜漫画老师0820对方改动未合入 — [详情](manhua-laoshi-5a-lesson-state.md)
 - **⚠L5-L6起步0830改判「定起点」后,余4篇五年级稿未回改**(自由写作均低于25分钟新下限;故事新编0908已回改、缩写故事已下线) — [详情](writing-lesson-destress-onramp.md)
-- **⚠六上两篇下游全空**(变形记/多彩的活动:配套·标准包·PPT均未做;多彩的活动另欠冷审,排在配套前) — [详情](liushang-6a-two-lessons-state.md)
+- 六上一变形记0914已重生成+冷审落定(下游未做·未提交);六上二多彩的活动下游全空(配套·标准包·PPT均未做)且欠冷审,冷审排在配套前 — [详情](liushang-6a-two-lessons-state.md)
 ## 已交付归档
 全部课次/书目状态钩子已移至[归档索引](memory-index-archived-deliveries.md),排新课次前按需打开;已落地/已验完的规则历史条目在[规则归档](memory-index-archived-rules.md)。
