@@ -14,7 +14,7 @@
 - **双人协作(0820)**:口径见 CLAUDE.md §9;记忆事实源=仓内 .claude/memory/,用户目录那份是目录联接;看板与commit前缀0911已取消 — [详情](two-person-sync-0820.md)
 - **skill停用归档0910立·0911撤回**:只省description 2.8k字符(窗口0.2%),误触发方向反;22个全部在架,别再重做;活线两处查找与gitignore skills*通配保留无害 — [详情](skills-parked-0910.md)
 ## 写作课（writing-lesson）
-**写任何一篇前必读**:[0911换靶](generation-retarget-0911.md) · [文风定盘](writing-style-two-directions-conflict-0831.md) · [例子四判据](writing-lesson-example-must-be-unique-anchor.md) · [比喻反刻板](writing-lesson-metaphor-antistereotype.md) · [电报体红线](writing-lesson-telegraphese-and-coinage-redline.md) · 下方「跨课次通则」整块
+**写任何一篇前必读**:[0911换靶](generation-retarget-0911.md) · [文风定盘](writing-style-two-directions-conflict-0831.md) · [例子四判据](writing-lesson-example-must-be-unique-anchor.md) · [比喻反刻板](writing-lesson-metaphor-antistereotype.md) · [电报体红线](writing-lesson-telegraphese-and-coinage-redline.md) · [示范文「我」同龄](model-essay-persona-student-age-0914.md) · 下方「跨课次通则」整块
 ### 跨课次通则(写同类题目直接适用 · 展开见各源条)
 - **开场姿态**:教具别编「本想做却没做成」的懊恼由头(学生看得出假),坦白说特意准备 — [源](guanchariji-4a-lesson-state.md)
 - **官方情境在机构班不可兑现→把限制变成设定,不退回自造情境**:自带物品类→实物不在场稿子顶替;同班互认的猜人反馈→换掉「猜」保留内核 — [源1](xinaizhiwu-5a-lesson-state.md)/[源2](manhua-laoshi-5a-lesson-state.md)
@@ -22,6 +22,9 @@
 - **外部件「示范文里的句子」类表格逐行与示范文逐字比对**:截断可接受、改写必须打回;已五次出现(0902第五次:改示范文必连查同篇表格列) — [源](woheguoyitian-4a-ppt-chain-state.md)
 - **往「禁止逐字复用」清单补串一个串一条bullet**:tone_gate每条只取第一个串,并列写的第二个串永不报警;清单运行时解析补bullet即进机检 — [源](twentyyears-hometown-5a-lesson-state.md)
 - **教材换版(题目没变、题面/课文换掉)=第三形态,连改9处但course-map与文件名全不动**:三上四单元实做;教师侧配套2页是硬闸门,示范文变长须回压旁注 — [源](textbook-revision-same-title-new-page-0902.md)
+- **给学生的筛素材判据须拿档案话题表逐类过一遍**:半命题观点文分三型(事情类问「离了它还会不会发生」/品质类问「哪一刻你本来可以不这么做」/大词类先缩切口);正反例与示范文题材不得全落同一类 — [源](selection-criterion-must-cover-all-topics-0914.md)
+- **含蓄叙事≠完全不点题;过犹不及型技法须演三档**:判掉过度形态必须同组给适度正样(完全不做／适度／过头),并点明判的是哪几句;收尾改两选一 — [源](model-essay-moderate-tier-not-two-extremes-0914.md)
+- **示范文的「我」＝与学生同龄、过学生当下的日子**:红线禁的是署名不是视角;成人当下生活不作主素材(学生照着找只能编),教师童年事是例外不是默认;已复发两次 — [源](model-essay-persona-student-age-0914.md)
 - **教材换题=重写不是改稿,第0步是改事实源**:archive零命中就动笔=伪造官方条款;五处连改(archive/index/course-map/锚点表/unit-texts);文体线链一改既有详案提纲表第3行静默过期 — [源](wodejiaren-4a-lesson-state.md)｜跨册迁移改9处不是5处;题面与指导件是两层 — [源2](gushi-xinbian-5a-unit-move-0828.md)
 - **「倒过来写」指构思顺序不指成文顺序**:新技法与既有铁律冲突,先分清管构思还是成文 — [源](wodejiaren-4a-lesson-state.md)｜**`参考：`里的学生答案过一遍「多数人家真会这样吗」**,编得巧但生活不常有=空转 — [源](wodejiaren-4a-lesson-state.md)
 - **教材照片与教参对不上时,称谓/数字/篇名逐项复核**,别一笔归为「版本差异」;以用户最新教材为准,改前先问 — [源](wodejiaren-4a-lesson-state.md)
@@ -124,6 +127,8 @@
 - [阅读指南拓展栏点名具体书/影片](reading-guide-extension-concrete-titles.md) — 仅此栏放宽红线,吃不准就不写
 ## 未决事项与交付风险（做完即删）
 - 六上三《＿＿让生活更美好》0914 按用户四点意见定向修订（②改诚信找理由／品质类判归因分路／示范文与版二补点题／⑤加梦想·科技两段教师片段；配时 4/9/12/9/11；archive「集邮」→「科技」）、复审后 docx 已重渲、台账已同步；下游配套/标准包/PPT 未做；0913–0914 改动均未提交 git
+- **0914 双机同日改同一问题，口径已对齐**：本机改规则层（选材三分型／示范文「我」同龄／红线第10条三档），另一机改六上三详案（品质类判归因分路／补点题）；品质类测法统一采详案已落地的「把它拿掉，美好的结果还在不在」，规则层已同步改写
+- **⚠ 示范文「我」视角普查·全部未回改**：**确证越界 3 课**（五上一心爱之物 原＋优化版「我上班第一年」、三下六有特点的人「你去上班」、六上三走楼梯「我下班」仍在）、**存疑 1 课**（四上一推荐一个好地方）、**示范文未用 `>` 引块致机检扫不到 2 课**（五上四二十年后的家乡、四上三写观察日记）。换示范文＝model-essay §七 十二处连改，须拍板后再动 — [源](model-essay-persona-student-age-0914.md)
 - 写作线 0913 通读审计第四档（多处完整判据去重、technique-levels/SKILL/rubric 九来历下沉）未做，等两三篇新稿后再清 — [清单](writing-line-audit-0913-remaining.md)
 - **⚠ 神笔马良 插-24 页码未裁，不得对外交付** — [详情](shenbi-maliang-lesson-plan-state.md)
 - **⚠ 阅读单线 18 份 PDF 的 Type3 字体遗留未修** — [详情](pdf-type3-fonts-fixed.md)
