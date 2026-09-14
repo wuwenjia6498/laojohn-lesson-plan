@@ -1,5 +1,5 @@
 # Project Memory: laojohn-lesson-plan
-> **索引维护规则(0818立·0901补)**:①新增课次/单本书状态→进[归档索引](memory-index-archived-deliveries.md),不占索引行;②横向通则→各线「跨课次通则」块,不埋进课次条目;③未决/交付风险→「未决事项」块,做完即删;④优先级集中在各区头行;⑤行数≤150、单条钩子≤200字符、细节下沉主题文件,超限先归档,机检挂SessionStart hook自动跑;⑥CLAUDE.md只写现行规则,来历/日期/旧口径进记忆;压缩前快照=[0914](memory-index-archive-20260914.md)
+> **索引维护规则(0818立·0901补)**:①新增课次/单本书状态→进[归档索引](memory-index-archived-deliveries.md),不占索引行;②横向通则→各线「跨课次通则」块,不埋进课次条目;③未决/交付风险→「未决事项」块,做完即删;④优先级集中在各区头行;⑤行数≤150、单条钩子≤200字符、细节下沉主题文件,超限先归档,机检挂SessionStart hook自动跑;⑥CLAUDE.md只写现行规则,来历/日期/旧口径进记忆;压缩前快照=[0911-2](memory-index-archive-20260911-2.md)
 ## 用户偏好
 - 中文回复;简洁直接不堆客套;重要决策先列选项让用户拍板;视觉迭代常用截图反馈
 - **问「有没有做到X」时是要判断、不是指出问题**——先自己核查给结论,别把判断权反问回去
@@ -40,6 +40,8 @@
 - [张祖庆视角接入写作课线(0912)](zhang-zuqing-on-writing-line-0912.md) — 三处落位:生成侧generation-brief§一.8减法三问/冷审rubric跨维九+维三三问/示范文链;体系审计8条已拍板采5不采3(讲评按需·审题依需·三档表);话语比不能当判据;三档优先级标记不推广
 - [⚠0911换靶:生成侧语体=规范教案·瘦身41%来历下沉·polish_writing机械层·PassB四个不执行机制](generation-retarget-0911.md) — 生成只读简报§一.7+prose-exemplars;避让卡替代整读pools/ledger;A/B待做
 - [⚠文风定盘0831·0901收敛一主三从](writing-style-two-directions-conflict-0831.md) — 方向=向规范书面靠;AI痕迹=破折号/导演腔/省主语/术语漂移;**PassC已撤别重开**;主判据唯一源style-criteria+执行位在PassB;改写工序跑完必看--baseline方向指标;批量修文件脚本每步立即写盘;⚠方言词表已实测否掉勿加回
+- [配套三侧文案0901起桥接style-criteria](writing-materials-style-bridge-0901.md) — 此前只有0803单边去AI腔、方向反;SKILL红线拆两条+§四认领+§二.1回填8对;picture-materials仍真空(补时桥它自己线§13)
+- [横审报告曾被页标淹没(0831)](batch-ngram-scan-pagemark-noise-0831.md) — 页标须正则剥;白名单只收体例层;⚠逐字复用基线40已过时实测48
 - [教师自拟例子四条硬判据(0817)](writing-lesson-example-must-be-unique-anchor.md) — 独一份/夸张≠计数/样板不低于例句/一篇内锚点不复用;管全篇例子不只示范文
 - [比喻类写人反刻板+示范材料不绑老师真实生活(0802/0817)](writing-lesson-metaphor-antistereotype.md) — 「先想只有他家才有的画面再找动物」做成课堂明线;例子不落老师家人;默认措辞不强断言老师当下生活事实
 - [⚠2026秋第三例换题·一次五处(0914)](textbook-2026-five-retitles-0914.md) — 四上六/七八互换/五上七/六上七八;事实源七文件+宣传件四份+存量三份详案已全改齐;全新题archive零命中不得动笔;迁册降级须重标;宣传件四份全过期未改(样课举例印着已删题)
@@ -48,8 +50,16 @@
 - [教学指令一律正向表述(0824)](writing-lesson-positive-framing-not-prohibition.md) — 写法偏好类不判对错走三步对比,题目要求类可判;五落点(提纲表技法行/③④⑥/⑦最易漏);最大复发路径=档案自己写「避免笼统地说…」;反向刹车见源条
 - [电报体/生造词红线第7条(0731/0819)](writing-lesson-telegraphese-and-coinage-redline.md) — 五形态自查(省主语/名词压缩/电报短语/生造词/中心宾语残缺);补宾语只在定义句补一次
 - [学段口气全线没分级(0817)](writing-lesson-grade-tone-not-differentiated.md) — 判断分三层(用词/技法深度/思维层级);判据=降两级反问;0828复发:并列短语重难点只落实一半,拆开逐个问落点
+- [「话轮骨架」层=池9+指纹第15字段(0817)](writing-turn-skeleton-layer-pool9.md) — 冷审打散措辞打散不掉同构;--focus/--against机检进checklist E组;⚠池9编号在后但属零件层
 - [技法N件套须练全N件](technique-set-practice-all-parts.md) — 定稿前做「每件×是否产出过」对账;机检与checklist都抓不到
+- [重建台账前先查缺指纹的篇(0819)](ledger-rebuild-drops-fingerprintless.md) — 先grep -L回写再重建,否则静默抹行
+- [指纹块14字段+装置粒度门槛](writing-lesson-fingerprint-fields-revised.md) / [反同质化四项升级](writing-lesson-antihomogenization-upgrade.md) — 装置判据=当场演过一件事;⚠12字段说法已过时
+- [正文标点全角+方括号提示体例](writing-lesson-fullwidth-punct-bracket.md) / [风格红线覆盖后续改写](style-redline-covers-edits.md) / [交付前通读语感扫](writing-lesson-naturalness-readthrough.md) — 生造/别扭须纯语感通读
+- [写作课线三项命名/结构调整(0826)](writing-line-naming-flattened-0826.md) — 配套-X用/打包单层平铺/PPT带课次段;⚠pptx与anim.json必须同批改名否则防覆盖闸门静默失效;⚠Windows取目录名一律pathlib .name
+- [标题与环节命名定稿](writing-lesson-title-naming.md) — 唯一源=title-naming.md;改体例前全skill搜一遍
 - [首页无区头单表6行+两行文案体例(现行)](writing-lesson-front-page-single-table.md) — 0831两行体例推翻0828:目标行一句话说清学会写哪类文章;技法行首句固定「使用+构思工具名」且与正文一字一致;写详案或改style_front_page前必读
+- [审题固化为③开头固定半环](writing-lesson-shenti-bianxi-fixed-half-step.md) / [第2节起步半环·L5–L6改判「定起点」+自由写作≥25分钟(0830)](writing-lesson-destress-onramp.md) / [修改符号自然用不重教](writing-lesson-revision-symbols-natural-use.md)
+- [详案出PPTX](writing-lesson-to-pptx.md) / [docx页眉定版](writing-lesson-docx-header.md) / [竞品借鉴清单](writing-lesson-competitor-borrow-backlog.md) — 漏传--header-left/right静默回落读书会页眉;D3-D5/N1待做
 - [作文批改工具(0818立项)](writing-correction-tool-0818.md) — 给加盟商不能做skill;判据从详案抽标准包JSON;错别字层原理上不能做;引用一字不差靠工程;**0907上线闸门:verified_by_human=true才打包(confirm_pack.py);线上12课,下线名单见源条**
 - [批改工具已部署Vercel(0824)](writing-correction-tool-vercel-deploy-0824.md) — 入口=部署根index.py不能放api/;.vercelignore挡config.json;正式地址grader.skyline666.top;⚠validate全绿≠包对
 - [配套json富文本标记只有部分字段解析(0907)](writing-materials-richtext-field-scope.md) — 教师materials/家长oneline走textContent,写{b}会印成(b);⚠溢出/页数/Type3三道机检全绿也抓不到,渲完正则扫一遍PDF文本
@@ -104,6 +114,7 @@
 - [配套PDF的Type3字体病已修两线(0817)](pdf-type3-fonts-fixed.md) — 装饰图标改纯CSS图形非换emoji;.mark .sym字体栈中间那档雅黑勿删;已装check_type3
 - [外部改稿docx回贴md(0902-0907)](external-docx-backfill-0902.md) — docx_backfill.py骨架继承+文本整替;⚠判新旧看措辞不看哈希;⚠先互比外部目录历次版本定基线;⚠**清扫排版噪音的正则禁用\s,用[ 　]字符类**;示范文三方不同步以PPT+配套为基准;取舍权在用户;先读首页[授课提示]
 - [下游六件抽共享层+token账实测](downstream-shared-layer-and-token-facts.md) — 合并skill省不了token;三条真源+薄壳;改真源照该条回归法(PDF比字节数不比md5)
+- [0727上下文瘦身收官](context-engineering-slimdown-0727.md) / [docx引擎标题层版式](docx-engine-title-heading-layout.md) / [引擎冗余审计](docx-engine-redundancy-audit.md) — 细节已下沉references别抄回;拆三脚本已评估→不拆
 - [两个常驻文件的分层重构(0818)](memory-index-structure-over-size-0818.md) — MEMORY真病灶=通则被埋进课次条目;CLAUDE下沉判据=脚本docstring才是细则唯一源;机检脚本见L2
 - [读书会详案原书插图链路(0730)](lesson-plan-book-illustration-chain.md) — 详案写【图位:插-01｜图注】禁md图语法;⚠PROFILES字段CLI默认值一律None;PPT与阅读单吃图未做
 - [官方skill环境事实+禁令理由(0824)](office-skills-env-facts-0824.md) / [md里HTML标签会原样印进docx](md-html-tags-leak-into-docx.md) — 新建路径跑得通、禁令只靠纪律;转PDF/PNG只有Office COM用shot_assets.py;行内强调只用成对**
@@ -128,6 +139,6 @@
 - 《推荐一个好地方》两处详案↔PPT微差未拍板 · writing 竞品借鉴 D3–D5/N1 待做 · ppt-profile Phase3 待办
 - **⚠故事新编PPT三处待外部改+批改标准包未开工** — [详情](gushi-xinbian-5a-unit-move-0828.md)｜我来编童话PPT六类页须外部重做+Vercel未重部署 — [详情](textbook-revision-same-title-new-page-0902.md)｜漫画老师0820对方改动未合入 — [详情](manhua-laoshi-5a-lesson-state.md)
 - **⚠L5-L6起步0830改判「定起点」后,余4篇五年级稿未回改**(自由写作均低于25分钟新下限;故事新编0908已回改、缩写故事已下线) — [详情](writing-lesson-destress-onramp.md)
-- 六上一变形记·六上二多彩的活动0914均已重生成+两遍冷审落定+docx已渲+台账已登(下游配套/标准包/PPT未做·0913–0914改动均未提交git);下一篇六上稿须避⑦「请停笔…已写出来的部分」/结课「写给…的人读的」/⑥「三种起笔」三处第三次复现 — [详情](liushang-6a-two-lessons-state.md)
+- 六上一变形记0914已重生成+冷审落定(下游未做·未提交);六上二多彩的活动0914旧稿已删待从零重写(情境/装置/示范文一概不沿用;台账指纹行已抽;重写后补台账→冷审→配套) — [详情](liushang-6a-two-lessons-state.md)
 ## 已交付归档
 全部课次/书目状态钩子已移至[归档索引](memory-index-archived-deliveries.md),排新课次前按需打开;已落地/已验完的规则历史条目在[规则归档](memory-index-archived-rules.md)。
