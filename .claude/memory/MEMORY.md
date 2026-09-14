@@ -41,6 +41,7 @@
 - [横审报告曾被页标淹没(0831)](batch-ngram-scan-pagemark-noise-0831.md) — 页标须正则剥;白名单只收体例层;⚠逐字复用基线40已过时实测48
 - [教师自拟例子四条硬判据(0817)](writing-lesson-example-must-be-unique-anchor.md) — 独一份/夸张≠计数/样板不低于例句/一篇内锚点不复用;管全篇例子不只示范文
 - [比喻类写人反刻板+示范材料不绑老师真实生活(0802/0817)](writing-lesson-metaphor-antistereotype.md) — 「先想只有他家才有的画面再找动物」做成课堂明线;例子不落老师家人;默认措辞不强断言老师当下生活事实
+- [⚠动笔前按最新版教材核单元课文(0914)](textbook-latest-edition-verify-first-0914.md) — 六上2026秋换版:一删花之歌/二灯光移五单元/四略读定金色的鱼钩/七八换课换题;篇目/题目先查仓内textbook-2026梳理PDF(四至六上全),要素与题面靠用户实物页;四上六/七/八·五上七·六上七/八习作换题course-map待拍板
 - [③引本单元课文佐证技法·匹配则引(0821)](writing-lesson-cite-unit-text-0821.md) — 不配就不引不许硬上;判据=有一篇「最突出的写法」正是本课这一招;判不引≠欠账;事实源unit-texts.md先联网核实后落笔;口径=禁指向动作不禁指代进度
 - [教学指令一律正向表述(0824)](writing-lesson-positive-framing-not-prohibition.md) — 写法偏好类不判对错走三步对比,题目要求类可判;五落点(提纲表技法行/③④⑥/⑦最易漏);最大复发路径=档案自己写「避免笼统地说…」;反向刹车见源条
 - [电报体/生造词红线第7条(0731/0819)](writing-lesson-telegraphese-and-coinage-redline.md) — 五形态自查(省主语/名词压缩/电报短语/生造词/中心宾语残缺);补宾语只在定义句补一次
@@ -132,6 +133,6 @@
 - 《推荐一个好地方》两处详案↔PPT微差未拍板 · writing 竞品借鉴 D3–D5/N1 待做 · ppt-profile Phase3 待办
 - **⚠故事新编PPT三处待外部改+批改标准包未开工** — [详情](gushi-xinbian-5a-unit-move-0828.md)｜我来编童话PPT六类页须外部重做+Vercel未重部署 — [详情](textbook-revision-same-title-new-page-0902.md)｜漫画老师0820对方改动未合入 — [详情](manhua-laoshi-5a-lesson-state.md)
 - **⚠L5-L6起步0830改判「定起点」后,余4篇五年级稿未回改**(自由写作均低于25分钟新下限;故事新编0908已回改、缩写故事已下线) — [详情](writing-lesson-destress-onramp.md)
-- 六上一变形记0914已重生成+冷审落定(下游未做·未提交);六上二多彩的活动下游全空(配套·标准包·PPT均未做)且欠冷审,冷审排在配套前 — [详情](liushang-6a-two-lessons-state.md)
+- 六上一变形记0914已重生成+冷审落定(下游未做·未提交);六上二多彩的活动0914旧稿已删待从零重写(情境/装置/示范文一概不沿用;台账指纹行已抽;重写后补台账→冷审→配套) — [详情](liushang-6a-two-lessons-state.md)
 ## 已交付归档
 全部课次/书目状态钩子已移至[归档索引](memory-index-archived-deliveries.md),排新课次前按需打开;已落地/已验完的规则历史条目在[规则归档](memory-index-archived-rules.md)。
