@@ -19,4 +19,5 @@ metadata:
 - **素材对标问**（checklist D 组／rubric 维三）：本班学生照这篇去找自己的素材，**找得到，还是只能编一个？**
 - 机检 `essay_audit.py` ⑦ 扫示范文块内成人生活词（强信号带「我」前缀，弱信号只报数——「爸爸下班」是学生视角的正常内容）。**词表零命中≠视角没问题**，「成年人才有的感慨」抓不到。
 - **已复发两次**：0903 心爱之物（连带配图画错，[[imgtool-prop-consistency-and-owner-0903]]）、0913 走楼梯。
+- **0915 六上三第三次重写已按本条落地**（《诚信让生活更美好》：六年级的「我」借同学的书弄脏后坦白，essay_audit ⑦ 强弱信号均 0，冷审素材对标通过）— [[shenghuo-meihao-6a-lesson-state]]。
 - 落位：`model-essay.md` §二＋一屏卡第9条＋§四之三④分层；workflow④出示话术；checklist D 组；rubric 维三。来历在 `history/model-essay-history.md` 末节。相关：[[model-essay-rules-supplement-0912]]、[[selection-criterion-must-cover-all-topics-0914]]
