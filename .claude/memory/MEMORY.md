@@ -95,7 +95,7 @@
 - [学生课前已人手一本书](students-already-have-book.md) / [教室无黑板白板](classroom-no-blackboard.md) / [详案禁ASCII图用表格](lesson-plan-no-ascii-diagram-use-table.md) — 禁假悬念;检索黑板/板书/白板应零;工具一律MD表格
 - [思维工具讲解从简](lesson-plan-tool-intro-concise.md) / [师话比喻须配得上学段](lesson-plan-metaphor-age-fit.md) — 禁标「首次出现」,判据=结构绕不绕;比喻判据「给三年级讲是否一模一样」
 - [SKILL通读审计A-D闭环](lesson-plan-skill-audit-fixes.md) / [阅读计划表不算可视化工具](reading-plan-not-vistool.md) — 判据数字唯一源=checklist;与rubric有意重叠不得互删
-- [详案复盘冷启动化](detail-review-cold-start.md) / [复盘三文件去冗余](review-rubric-single-source-dedup.md) — 派fresh子agent冷审;review-rubric是五维/协议唯一源
+- [详案复盘冷启动化](detail-review-cold-start.md) / [复盘三文件去冗余](review-rubric-single-source-dedup.md) — 派fresh子agent冷审;review-rubric是五维/协议唯一源｜[冷审报告可删·台账分层0915](cold-review-report-retention-0915.md) — 三件齐即删报告;判读表≤250字符/行,明细进detail档;阈值8按31点定案维持(外部生成稿不适用)
 - [PPT链产出后详案页标回注必做](ppt-draft-pageback-mandatory.md) / [ppt-draft参考答案上屏从宽](ppt-draft-reference-answer-generous.md) — 〖PPT第N页〗必做并重渲docx(docx常被WPS锁须先关)
 ## 建档（book-profile）
 **给任何书建档前必读**：[全文通读红线](book-profile-full-read-redline.md) · [插图前置到建档阶段](book-profile-read-images-during-profiling.md)
@@ -125,7 +125,7 @@
 ## 未决事项与交付风险（做完即删）
 - 六上三让生活更美好 0915 重写落定＋同日张祖庆视角两轮（减法:两把尺并一句·③九轮砍五轮·表四格；逻辑六处:假选择/朗读范围/先写哪格分路/纸面标记/②收束留口/换事记第二格；docx已重渲·台账已重建；workflow③「三分型」实例仍写两把尺未改；下游配套/标准包/PPT未做·未提交git）— [详情](shenghuo-meihao-6a-lesson-state.md)
 - **0914 双机同日改同一问题，口径已对齐**：本机改规则层（选材三分型／示范文「我」同龄／红线第10条三档），另一机改六上三详案（品质类判归因分路／补点题）；品质类测法统一采详案已落地的「把它拿掉，美好的结果还在不在」，规则层已同步改写
-- **⚠ 示范文「我」视角普查·全部未回改**：**确证越界 3 课（六上三 0915 已按同龄「我」重写落定，余 2 课未改）**（五上一心爱之物 原＋优化版「我上班第一年」、三下六有特点的人「你去上班」仍在）、**存疑 1 课**（四上一推荐一个好地方）、**示范文未用 `>` 引块致机检扫不到 2 课**（五上四二十年后的家乡、四上三写观察日记）。换示范文＝model-essay §七 十二处连改，须拍板后再动 — [源](model-essay-persona-student-age-0914.md)
+- **⚠ 示范文「我」视角普查·全部未回改**：**确证越界 3 课（六上三 0915 已按同龄「我」重写落定，余 2 课未改）**（五上一心爱之物「我上班第一年」、三下六有特点的人「你去上班」仍在）、**存疑 1 课**（四上一推荐一个好地方）、**示范文未用 `>` 引块致机检扫不到 2 课**（五上四二十年后的家乡、四上三写观察日记）。换示范文＝model-essay §七 十二处连改，须拍板后再动 — [源](model-essay-persona-student-age-0914.md)
 - 写作线 0913 通读审计第四档（多处完整判据去重、technique-levels/SKILL/rubric 九来历下沉）未做，等两三篇新稿后再清 — [清单](writing-line-audit-0913-remaining.md)
 - **⚠ 神笔马良 插-24 页码未裁，不得对外交付** — [详情](shenbi-maliang-lesson-plan-state.md)
 - **⚠ 阅读单线 18 份 PDF 的 Type3 字体遗留未修** — [详情](pdf-type3-fonts-fixed.md)
