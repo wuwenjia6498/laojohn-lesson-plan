@@ -21,3 +21,4 @@ metadata:
 - **已复发两次**：0903 心爱之物（连带配图画错，[[imgtool-prop-consistency-and-owner-0903]]）、0913 走楼梯。
 - **0915 六上三第三次重写已按本条落地**（《诚信让生活更美好》：六年级的「我」借同学的书弄脏后坦白，essay_audit ⑦ 强弱信号均 0，冷审素材对标通过）— [[shenghuo-meihao-6a-lesson-state]]。
 - 落位：`model-essay.md` §二＋一屏卡第9条＋§四之三④分层；workflow④出示话术；checklist D 组；rubric 维三。来历在 `history/model-essay-history.md` 末节。相关：[[model-essay-rules-supplement-0912]]、[[selection-criterion-must-cover-all-topics-0914]]
+- **0915 订正一处普查表述**：「五上四二十年后的家乡示范文未用 `>` 引块」不准确——它的正文一直是 `>` 引块，缺的是**标注 `【教师示范文】` 本身没在引块里**，而 `essay_audit.py` 认的正是 `> 【教师示范文】`，于是整篇机检被跳过。修好后该篇 ①②③④⑦ 一次全过（⑦ 强弱信号均 0），**视角判定＝不越界**：本题的「我」必然是三十岁的成年人，但素材全落在小河／母校操场／奶奶抓药这类学生够得着的生活面，不是 §二 禁的「成人当下生活作主素材」。同批的四上三《写观察日记》须照此重判，别照旧表述找 `>`。

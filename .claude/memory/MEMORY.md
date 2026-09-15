@@ -9,6 +9,7 @@
 - [机构课·没有课本没有校内作息](venue-is-institution-not-school.md) — 「校内同步」只指跟教材进度不指地点;禁「翻开课本/晨读/课间」,教材图一律投屏;与[教室无黑板](classroom-no-blackboard.md)同族
 - [真实情境先查官方锚点·兑现必须课内闭环](real-situation-official-anchor-first.md) — 别自造载体(标「已自含」的尤其);没有「下次课读上次稿」;承诺全班读到就得兑现
 - [评价机制禁靠学生自报弱点(0803)](no-self-report-mechanisms.md) — 「我是蒙的」没人会说,判定开关空转;改客观结果自证｜[合集新亚型:有班底无情节主线(0807)](collection-with-cast-no-plotline.md) — 「人物贯穿≠情节贯穿」+封死全书级工具;多出「辑内」层｜[0726审查三项拍板](skills-audit-fixes-0726.md) — 改AI腔检核/两线checklist前必读
+- [⚠改已定稿详案三坑(0915)](revise-finalized-lesson-plan-pitfalls-0915.md) — PPT改页清单左栏=pptx现状非详案旧状(误读会撤回有效批评);新写师话先grep下游`参考：`行防剧透;重跑docx第一步会冲掉style_front_page;三样都静默、机检抓不到
 ## 架构速览（骨架事实 · 细节在各 SKILL）
 - 主链与平行分支见 CLAUDE.md §2｜每课时双产出中间稿+讲稿页序1:1;页号唯一口径=中间稿P号==讲稿##第N页==详案页标〖PPT第N页〗;PPT不标页码角标;中间稿不写师话(师话→讲稿);眉标禁写课型
 - **双人协作(0820)**:口径见 CLAUDE.md §9;记忆事实源=仓内 .claude/memory/,用户目录那份是目录联接;看板与commit前缀0911已取消 — [详情](two-person-sync-0820.md)
@@ -16,6 +17,7 @@
 ## 写作课（writing-lesson）
 **写任何一篇前必读**:[0911换靶](generation-retarget-0911.md) · [文风定盘](writing-style-two-directions-conflict-0831.md) · [例子四判据](writing-lesson-example-must-be-unique-anchor.md) · [比喻反刻板](writing-lesson-metaphor-antistereotype.md) · [电报体红线](writing-lesson-telegraphese-and-coinage-redline.md) · [示范文「我」同龄](model-essay-persona-student-age-0914.md) · 下方「跨课次通则」整块
 ### 跨课次通则(写同类题目直接适用 · 展开见各源条)
+- **开场三问:这人这事学生当场能不能验证／反例署谁的名(答:不署,叫「一段很常见的开头」)／提问跟本课技法对不对位**:治「没画面」就直接问画面,绕道问年份会被材料字面反噬;改钩子＝改一条链,先搜回指词(还是/刚才/开场) — [源](opening-no-offstage-third-party.md)
 - **课上说「两种写法都对、自己选」，六处口径必须同样认下两种**:提纲表技法行/教师总结/⑦修改清单/三档标准优秀档/附录选稿最易写成单一必做,明线给自由暗尺只认一条＝「假选择」 — [源](blessed-options-must-pass-rubric-0915.md)
 - **反馈装置三处对齐:朗读范围盖得住判据·口头判据与纸面标记一字同·参考答案里不许有装置自己造成的失败**:限定「只读某段」前先对判据成分;纸上留空会让学生抄近路绕过口头判据 — [源](feedback-device-three-way-consistency-0915.md)
 - **教材页示例（思维泡/范例气泡）只作打开思路，不当评判对象**:「这三位你信谁」是硬造的伪问题;判断靶子只能是教师自拟对照段或同学自己的习作;开场问句判据=学生凭自己答得出吗 — [源](textbook-examples-not-judgement-targets-0915.md)
@@ -49,7 +51,7 @@
 - [教师自拟例子四条硬判据(0817)](writing-lesson-example-must-be-unique-anchor.md) — 独一份/夸张≠计数/样板不低于例句/一篇内锚点不复用;管全篇例子不只示范文
 - [比喻类写人反刻板+示范材料不绑老师真实生活(0802/0817)](writing-lesson-metaphor-antistereotype.md) — 「先想只有他家才有的画面再找动物」做成课堂明线;例子不落老师家人;默认措辞不强断言老师当下生活事实
 - [⚠2026秋第三例换题·一次五处(0914)](textbook-2026-five-retitles-0914.md) — 四上六/七八互换/五上七/六上七八;事实源七文件+宣传件四份+存量三份详案已全改齐;全新题archive零命中不得动笔;迁册降级须重标;宣传件四份全过期未改(样课举例印着已删题)
-- [⚠动笔前按最新版教材核单元课文(0914)](textbook-latest-edition-verify-first-0914.md) — 六上2026秋换版:一删花之歌/二灯光移五单元/四略读定金色的鱼钩/七八换课换题;篇目/题目先查仓内textbook-2026梳理PDF(四至六上全),要素与题面靠用户实物页;四上六/七/八·五上七·六上七/八习作换题course-map待拍板
+- [⚠动笔前按最新版教材核单元课文(0914)](textbook-latest-edition-verify-first-0914.md) — 六上2026秋换版;篇目/题目先查仓内textbook-2026梳理PDF,要素与题面靠用户实物页;⚠标「已逐字核对」的旧实拍记录同样会过期(五上四0915照出四处错·已进师话);四上六/七/八·五上七·六上七/八习作换题course-map待拍板
 - [③引本单元课文佐证技法·匹配则引(0821)](writing-lesson-cite-unit-text-0821.md) — 不配就不引不许硬上;判据=有一篇「最突出的写法」正是本课这一招;判不引≠欠账;事实源unit-texts.md先联网核实后落笔;口径=禁指向动作不禁指代进度
 - [教学指令一律正向表述(0824)](writing-lesson-positive-framing-not-prohibition.md) — 写法偏好类不判对错走三步对比,题目要求类可判;五落点(提纲表技法行/③④⑥/⑦最易漏);最大复发路径=档案自己写「避免笼统地说…」;反向刹车见源条
 - [电报体/生造词红线第7条(0731/0819)](writing-lesson-telegraphese-and-coinage-redline.md) — 五形态自查(省主语/名词压缩/电报短语/生造词/中心宾语残缺);补宾语只在定义句补一次
@@ -88,7 +90,7 @@
 **碰引擎/共享件前必读**：[下游六件抽共享层](downstream-shared-layer-and-token-facts.md)（改真源照该条回归法）· [0727上下文瘦身收官](context-engineering-slimdown-0727.md)（细节已下沉references别抄回）
 - [宣传件渲染链+PDF反查源三指纹(0826)](promo-materials-render-chain.md) — 手改PDF前先三指纹反查源html;馆内海报scale须0.98;海报html已改入库
 - [配套PDF的Type3字体病已修两线(0817)](pdf-type3-fonts-fixed.md) — 装饰图标改纯CSS图形非换emoji;.mark .sym字体栈中间那档雅黑勿删;已装check_type3
-- [外部改稿docx回贴md(0902-0907)](external-docx-backfill-0902.md) — docx_backfill.py骨架继承+文本整替;⚠判新旧看措辞不看哈希;⚠先互比外部目录历次版本定基线;⚠**清扫排版噪音的正则禁用\s,用[ 　]字符类**;示范文三方不同步以PPT+配套为基准;取舍权在用户;先读首页[授课提示]
+- [外部改稿docx回贴md(0902-0915)](external-docx-backfill-0902.md) — 骨架继承+文本整替;⚠判新旧看措辞不看哈希;⚠先互比外部历次版本(同晚两份或是平行方案须问采哪份);⚠外部统一术语会并掉配套上两样东西;⚠清扫噪音正则禁\s用[ 　];三方不同步以PPT+配套为基准;取舍权在用户;先读首页[授课提示]
 - [下游六件抽共享层+token账实测](downstream-shared-layer-and-token-facts.md) — 合并skill省不了token;三条真源+薄壳;改真源照该条回归法(PDF比字节数不比md5)
 - [两个常驻文件的分层重构(0818)](memory-index-structure-over-size-0818.md) — MEMORY真病灶=通则被埋进课次条目;CLAUDE下沉判据=脚本docstring才是细则唯一源;机检脚本见L2
 - [读书会详案原书插图链路(0730)](lesson-plan-book-illustration-chain.md) — 详案写【图位:插-01｜图注】禁md图语法;⚠PROFILES字段CLI默认值一律None;PPT与阅读单吃图未做
@@ -103,8 +105,9 @@
 - [测评卷SKILL状态](reading-assessment-skill-state.md) / [测评事实以详案为准](assessment-facts-follow-lesson-plan.md) — 详案升深度蓝本(事实仍锁档案);与SKILL默认相反遇分叉先确认
 - [阅读指南拓展栏点名具体书/影片](reading-guide-extension-concrete-titles.md) — 仅此栏放宽红线,吃不准就不写
 ## 未决事项与交付风险（做完即删）
+- 开场「不在场第三人」另2课待回改(用户定本次只改五上四):四上一推荐一个好地方L27-31「一位朋友带孩子来玩」+老师替他读心(改它须重找判据载体,非换几句话)、三下六L44敲门送伞的孩子 — [详情](opening-no-offstage-third-party.md)
 - 六上三让生活更美好：workflow③「三分型」实例仍写两把尺未改（详案已按一把尺落定） — [详情](shenghuo-meihao-6a-lesson-state.md)
-- **⚠ 示范文「我」视角普查·全部未回改**：**确证越界 3 课（六上三 0915 已按同龄「我」重写落定，余 2 课未改）**（五上一心爱之物「我上班第一年」、三下六有特点的人「你去上班」仍在）、**存疑 1 课**（四上一推荐一个好地方）、**示范文未用 `>` 引块致机检扫不到 2 课**（五上四二十年后的家乡、四上三写观察日记）。换示范文＝model-essay §七 十二处连改，须拍板后再动 — [源](model-essay-persona-student-age-0914.md)
+- **⚠ 示范文「我」视角普查·全部未回改**：**确证越界 3 课（六上三 0915 已按同龄「我」重写落定，余 2 课未改）**（五上一心爱之物「我上班第一年」、三下六有特点的人「你去上班」仍在）、**存疑 1 课**（四上一推荐一个好地方）、**标注未进引块致机检扫不到 1 课**（四上三写观察日记；五上四 0915 已修并判不越界）。换示范文＝model-essay §七 十二处连改，须拍板后再动 — [源](model-essay-persona-student-age-0914.md)
 - 写作线 0913 通读审计第四档（多处完整判据去重、technique-levels/SKILL/rubric 九来历下沉）未做，等两三篇新稿后再清 — [清单](writing-line-audit-0913-remaining.md)
 - **⚠ 神笔马良 插-24 页码未裁，不得对外交付** — [详情](shenbi-maliang-lesson-plan-state.md)
 - **⚠ 阅读单线 18 份 PDF 的 Type3 字体遗留未修** — [详情](pdf-type3-fonts-fixed.md)
@@ -112,7 +115,8 @@
 - **⚠三处「单元被搬空」待核实**:四下八、五下七、六下五(课程表与馆内海报均已标「待定」占位,63总数不变);两道全新题《我最喜爱的季节》《传承好家风》archive零命中、文体暂判,待教材页;总地图docx原件仍是换新前口径 — [详情](textbook-2026-five-retitles-0914.md)
 - 《推荐一个好地方》两处详案↔PPT微差未拍板 · writing 竞品借鉴 D3–D5/N1 待做 · ppt-profile Phase3 待办
 - **⚠故事新编PPT三处待外部改+批改标准包未开工** — [详情](gushi-xinbian-5a-unit-move-0828.md)｜我来编童话PPT六类页须外部重做+Vercel未重部署 — [详情](textbook-revision-same-title-new-page-0902.md)｜漫画老师0820对方改动未合入 — [详情](manhua-laoshi-5a-lesson-state.md)
-- **⚠L5-L6起步0830改判「定起点」后,余4篇五年级稿未回改**(自由写作均低于25分钟新下限;故事新编0908已回改、缩写故事已下线) — [详情](writing-lesson-destress-onramp.md)
+- **⚠L5-L6起步0830改判「定起点」后,余3篇五年级稿未回改**(自由写作均低于25分钟新下限;故事新编0908·二十年后0915已回改,缩写故事已下线) — [详情](writing-lesson-destress-onramp.md)
+- **五年级存量四篇按现行写作线回改（0915 起·用户点名的「存量不回溯」例外）**：五上四《二十年后的家乡》已完成（详案＋配套两侧重渲＋PPT 外部改页清单 9 页待外部改）；余五上一、五上二、五下八 — [详情](twentyyears-hometown-5a-lesson-state.md)
 - **六上四篇下游**：六上一变形记 PPT 链 0915 已走完（动画注入版入库）＋配套三侧 json 已出，其余三篇配套物料/批改标准包/PPT 均未做；四篇的⑥⑦避让串与结课句模已下沉 `variation-pools` 清单＋tone_gate 导演腔组（0915，机检已拦）
 ## 已交付归档
 全部课次/书目状态钩子已移至[归档索引](memory-index-archived-deliveries.md),排新课次前按需打开;已落地/已验完的规则历史条目在[规则归档](memory-index-archived-rules.md)。
