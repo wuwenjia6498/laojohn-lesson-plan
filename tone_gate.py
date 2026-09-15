@@ -844,6 +844,8 @@ def check_writing(lines, in_outline, rep):
              grep(lines, re.compile(r'平时不[太常爱]\S{0,4}举手')))
     rep.fail('导演腔：「今天不是完成一篇作文,是要…」对举句',
              grep(lines, re.compile(r'不是[^\n。]{0,10}完成一篇作文')))
+    rep.fail('导演腔：结课总结「（教师总结）三篇里/三篇看下来…」起手（2026-09-15 立·六上四篇全中）',
+             grep(lines, re.compile(r'（教师总结）\s*三篇[里中看]')))
     rep.fail('机构拟人（老约翰说/老约翰老师）',
              grep(lines, re.compile(r'老约翰说|老约翰老师|我是老约翰')))
     # 内部机制名（只扫师话/参考话轮）

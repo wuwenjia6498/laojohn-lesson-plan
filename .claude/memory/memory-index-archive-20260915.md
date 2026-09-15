@@ -62,7 +62,28 @@
 - [手改只改HTML必被重渲冲掉(0821)](writing-materials-handedits-lost-on-rerender.md) — 文字改动一律回写_data.json;⚠仓内9课json仍不含那批手改
 - **PPT链**(六条细节→[链索引](ppt-chain-index.md)):⚠本仓止于动画注入·终稿不回仓(0902,打包不收PPT,下一课次先确认收到的是初稿)｜⚠先读详案再审查再动画(0806,机检全过≠审查完成;PPT对详案错勿迁就)
 ## 看图写话（picture-writing）
-整区（跨课次通则＋规则体例）已外移 → **[看图写话线记忆](memory-index-picture-writing.md)**，排新课次或出图前打开；该线当前无未决项。
+**排新课或出图前必读**:[总地图v5](picture-writing-course-map-v5-0728.md) · [角色口径](picture-writing-character-roster-policy.md) · [三图位两道硬门](picture-writing-three-image-slots.md) · [写规格判据](picture-writing-imgspec-writing-lessons.md) · 下方通则整块
+### 跨课次通则(排同类课次直接适用 · 展开见各源条)
+- **课上不安排拼贴/剪裁/涂胶**(0805推翻背靠背贴):双面卡课前印好直接发,当堂翻面承载;发卡落点紧挨用卡那步 — [源](picture-writing-2a-lesson3-state.md)
+- **示范例文念两版**:先念缺新学的那版让学生自己听出缺口,第二版才添 — [源](picture-writing-2a-lesson3-state.md)｜**详案写了「人人开口」就逐环节数谁真开了口**(举手答/个别说/三人朗读不算) — [源](picture-writing-2a-lesson3-state.md)
+- **表情类结果词禁令**:「露出上排牙齿」是结果词;低龄欢快靠眯眼弯月+腮红+动作,闭嘴笑最稳 — [源](picture-writing-1a-lesson2-state.md)
+- **五官类返工回生成端改规格重出**,别在脚本--edit耗轮次(两次实测失效) — [源](picture-writing-1a-lesson2-state.md)
+- **参考图带不住左右与地点**:辨识锚改位置式,左右不作验收项;组内同地点逐件重写标志物 — [源](picture-writing-1a-lesson3-state.md)
+- **出图两判据**:同类物件常态与异常会被合并(拉距离+各给颜色);改参考图须正向逐项点名 — [源](picture-writing-2a-lesson3-state.md)
+### 规则与体例
+- [全64课主角角色口径(0804)](picture-writing-character-roster-policy.md) — 情境图课次必用班底+必填定妆参考;44课已全表排定照取不自拟｜[总地图v5·0728重排期(现行)](picture-writing-course-map-v5-0728.md) — 24方法课次坐标全改+四问拆两问
+- [一课三图位+意外点两道选图硬门](picture-writing-three-image-slots.md) — 三图必交齐(纯口头课不豁免);四问类主图无意外点=一票否决
+- [写图位规格根因级判据](picture-writing-imgspec-writing-lessons.md) / [朝向类必须写四件几何](picture-writing-orientation-must-be-geometric.md) — 约束身体朝向非脸朝向;「看着X」须写转角+瞳孔+连线+高度;已提进image-spec §A模板
+- [B级链+比例唯一控制点=定妆图(0730)](picture-writing-b-level-char-ref-landed.md) — 比例只能靠改定妆图调(提示词数值/禁令实证无效勿加回);A级锚图链已摘除
+- [画风靠锚图锁定](picture-writing-image-style-lock.md) / [全局两档令牌](picture-writing-global-style-tokens.md) — 现行三处令牌须一字一致;厚涂改造已终止勿重启
+- [角色册已落盘assets](picture-writing-character-sheet-landed.md) — 事实源=assets/角色册/角色设定.md｜[详案输出一课次一目录(0803)](picture-writing-detail-dir-per-lesson.md) — 图位路径未变;image_dir旧布局回落分支不可删
+- [详案标题三行体例](picture-writing-title-naming.md) / [提纲页行名教研通用词(两线)](outline-row-names-teaching-terms.md) — 七行新名=style_front_page PROFILES键,改md必同步脚本
+- [首页定版三区提纲页](picture-writing-front-page-3zones.md) / [删四维目标节](picture-writing-opening-simplified.md) — 「（本课）」标记必留;style_front_page.py必跑
+- [骨架A/B两层工作流](ability-ladder-AB-layer-workflow.md) / [索引三个坑](ability-ladder-index-reading-pitfalls.md) — B层定稿后回录只抄不设计;冲突以course-map为事实源
+- [去AI味五类语言肌理](deai-language-rules-solidified.md) — 规则=lesson-structure §13;判据=读出声像不像真老师顺嘴讲｜[0804审计docx落地+立正样本](picture-writing-prose-style-benchmark-0804.md) — 意见有牙齿的才被执行;⚠二上两篇已失效勿改;⚠短句占比本线不可作筛查线
+- [细节四方向→细节四问](picture-writing-sifang-renamed-siwen.md) / [两项全仓术语统一](terminology-unified-image-and-model-essay.md) — 下水文→示范文、锚图→主图
+- [附录两节包注释不进docx](picture-writing-appendix-comment-wrap.md) — 生图工单/自检整区包注释;正文禁悬空转引
+- [配套物料skill落地](picture-materials-skill-created.md) — 薄shim复用writing _shared.py;家长页禁虚构学生作品
 ## 读书会详案（lesson-plan）
 **写详案前必读**：[逐环节装载量双向核查](lesson-plan-per-step-load-audit.md) · [创意环节正向标准三件套](lesson-plan-positive-standard-over-negative.md) · [环节标题三段式](lesson-plan-step-title-format.md)
 - [环节标题=功能·内容三段式(0807)](lesson-plan-step-title-format.md) — 功能名≤10字、同课时内不重复;规则在style-and-format+checklist
@@ -102,7 +123,8 @@
 - [测评卷SKILL状态](reading-assessment-skill-state.md) / [测评事实以详案为准](assessment-facts-follow-lesson-plan.md) — 详案升深度蓝本(事实仍锁档案);与SKILL默认相反遇分叉先确认
 - [阅读指南拓展栏点名具体书/影片](reading-guide-extension-concrete-titles.md) — 仅此栏放宽红线,吃不准就不写
 ## 未决事项与交付风险（做完即删）
-- 六上三让生活更美好：workflow③「三分型」实例仍写两把尺未改（详案已按一把尺落定） — [详情](shenghuo-meihao-6a-lesson-state.md)
+- 六上三让生活更美好 0915 重写落定＋同日张祖庆视角两轮（减法:两把尺并一句·③九轮砍五轮·表四格；逻辑六处:假选择/朗读范围/先写哪格分路/纸面标记/②收束留口/换事记第二格；docx已重渲·台账已重建；workflow③「三分型」实例仍写两把尺未改；下游配套/标准包/PPT未做·未提交git）— [详情](shenghuo-meihao-6a-lesson-state.md)
+- **0914 双机同日改同一问题，口径已对齐**：本机改规则层（选材三分型／示范文「我」同龄／红线第10条三档），另一机改六上三详案（品质类判归因分路／补点题）；品质类测法统一采详案已落地的「把它拿掉，美好的结果还在不在」，规则层已同步改写
 - **⚠ 示范文「我」视角普查·全部未回改**：**确证越界 3 课（六上三 0915 已按同龄「我」重写落定，余 2 课未改）**（五上一心爱之物「我上班第一年」、三下六有特点的人「你去上班」仍在）、**存疑 1 课**（四上一推荐一个好地方）、**示范文未用 `>` 引块致机检扫不到 2 课**（五上四二十年后的家乡、四上三写观察日记）。换示范文＝model-essay §七 十二处连改，须拍板后再动 — [源](model-essay-persona-student-age-0914.md)
 - 写作线 0913 通读审计第四档（多处完整判据去重、technique-levels/SKILL/rubric 九来历下沉）未做，等两三篇新稿后再清 — [清单](writing-line-audit-0913-remaining.md)
 - **⚠ 神笔马良 插-24 页码未裁，不得对外交付** — [详情](shenbi-maliang-lesson-plan-state.md)
@@ -112,6 +134,7 @@
 - 《推荐一个好地方》两处详案↔PPT微差未拍板 · writing 竞品借鉴 D3–D5/N1 待做 · ppt-profile Phase3 待办
 - **⚠故事新编PPT三处待外部改+批改标准包未开工** — [详情](gushi-xinbian-5a-unit-move-0828.md)｜我来编童话PPT六类页须外部重做+Vercel未重部署 — [详情](textbook-revision-same-title-new-page-0902.md)｜漫画老师0820对方改动未合入 — [详情](manhua-laoshi-5a-lesson-state.md)
 - **⚠L5-L6起步0830改判「定起点」后,余4篇五年级稿未回改**(自由写作均低于25分钟新下限;故事新编0908已回改、缩写故事已下线) — [详情](writing-lesson-destress-onramp.md)
-- **六上四篇下游均未做**（配套物料/批改标准包/PPT）；四篇的⑥⑦避让串与结课句模已下沉 `variation-pools` 清单＋tone_gate 导演腔组（0915，机检已拦）
+- 六上一变形记·六上二多彩的活动0914均已重生成+两遍冷审落定+docx已渲+台账已登(下游配套/标准包/PPT未做·0913–0914改动均未提交git);下一篇六上稿须避⑦「请停笔…已写出来的部分」/结课「写给…的人读的」/⑥「三种起笔」三处第三次复现 — [详情](liushang-6a-two-lessons-state.md)
+- 六上四笔尖流出的故事0914晚从零重写+两遍冷审落定+0915张祖庆试审A5B4条已落改+docx已渲+台账已登(旧稿0911已删;下游配套/标准包/PPT未做·未提交git);下一篇六上稿须避⑦停笔句「写到哪里」骨架/⑥「先定两件事」/「优先请没发过言的」/审题辨析引入句同款 — [详情](bijian-liuchu-6a-lesson-state.md)
 ## 已交付归档
 全部课次/书目状态钩子已移至[归档索引](memory-index-archived-deliveries.md),排新课次前按需打开;已落地/已验完的规则历史条目在[规则归档](memory-index-archived-rules.md)。
