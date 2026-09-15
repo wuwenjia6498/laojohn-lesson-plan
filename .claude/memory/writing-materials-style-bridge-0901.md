@@ -8,6 +8,8 @@ metadata:
   modified: 2026-09-01T10:28:10.840Z
 ---
 
+> ⚠ **2026-09-15 起本条「生成时通读 style-criteria 对照表自查」的口径已作废**，配套侧与详案线同步换靶（样本定调 + polish_materials.py 机械层），现行口径见 [[writing-materials-retarget-0915]]；本条只留 0901 来历。
+
 **事实**：2026-09-01 用户拷回《推荐一个好地方》三侧 `_data.json` 的人工润色版（方向＝向规范书面靠：那儿→那里、挑→选、头一句→第一句、东西→事物、别→不要），问配套文案有无文风约定。查实 writing-materials 只有 SKILL.md 红线一条 0803「去 AI 腔／像真老师顺嘴讲」，方向单边且与 [[writing-style-two-directions-conflict-0831]] 的 0831 定盘（去口语化＋去 AI 痕迹并用）相反；style-criteria §四执行位也没列配套——两边都不认领，配套文案曾是文风治理真空区。
 
 **已修（守 0901 一主三从，不新增规则文件）**：
