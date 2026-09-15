@@ -32,6 +32,7 @@
 - **教材换题=重写不是改稿,第0步是改事实源**:archive零命中就动笔=伪造官方条款;五处连改(archive/index/course-map/锚点表/unit-texts);文体线链一改既有详案提纲表第3行静默过期 — [源](wodejiaren-4a-lesson-state.md)｜跨册迁移改9处不是5处;题面与指导件是两层 — [源2](gushi-xinbian-5a-unit-move-0828.md)
 - **「倒过来写」指构思顺序不指成文顺序**:新技法与既有铁律冲突,先分清管构思还是成文 — [源](wodejiaren-4a-lesson-state.md)｜**`参考：`里的学生答案过一遍「多数人家真会这样吗」**,编得巧但生活不常有=空转 — [源](wodejiaren-4a-lesson-state.md)
 - **教材照片与教参对不上时,称谓/数字/篇名逐项复核**,别一笔归为「版本差异」;以用户最新教材为准,改前先问 — [源](wodejiaren-4a-lesson-state.md)
+- **反例必须自足到能被判、且不与正教的技法撞车**:摘一段做反例先问「放回整篇它是不是正是我下一步要夸的句子」;口号式结尾的病是「换个活动也能用」不是「内容离题」 — [源](counterexample-must-be-self-sufficient-0915.md)
 - **教材自带提纲/范例=必须落实的知识点,自创工具只能细化不能顶替**;否定反例精确落到「缺了什么」 — [源](twentyyears-hometown-5a-lesson-state.md)
 - **点名「可行做法」只点一种=指定默认款**:硬要求但解法开放处写清单不写单例 — [源](writing-lesson-stage7-interaction-form-gap.md)
 - **自由写作页固定按两页写页码**(教师每次自插一页学生稿纸截图);区间页标`第23-24页`引擎不认须单号＋括注 — [源](writing-freewrite-two-pages-0911.md)
@@ -60,7 +61,7 @@
 - [⚠配套三侧文风0915与详案线同步换靶](writing-materials-retarget-0915.md) — 生成读三侧定稿样本不读对照表;polish_materials.py机检D每份必跑(同一张polish_rules,禁副本);存量42份已过一轮;样本卡=现行json快照,--check-exemplars防漂移(抄样本抄现行文件别抄git diff);⚠配套--all --dry-run是共享规则表第二回归面,首跑照出4条排除漏洞
 - [配套json富文本标记只有部分字段解析(0907)](writing-materials-richtext-field-scope.md) — 教师materials/家长oneline走textContent,写{b}会印成(b);⚠溢出/页数/Type3三道机检全绿也抓不到,渲完正则扫一遍PDF文本
 - [手改只改HTML必被重渲冲掉(0821)](writing-materials-handedits-lost-on-rerender.md) — 文字改动一律回写_data.json;⚠仓内9课json仍不含那批手改
-- **PPT链**(六条细节→[链索引](ppt-chain-index.md)):⚠本仓止于动画注入·终稿不回仓(0902,打包不收PPT,下一课次先确认收到的是初稿)｜⚠先读详案再审查再动画(0806,机检全过≠审查完成;PPT对详案错勿迁就)
+- **PPT链**(八条细节→[链索引](ppt-chain-index.md)):⚠本仓止于动画注入·终稿不回仓(0902,打包不收PPT,下一课次先确认收到的是初稿)｜⚠先读详案再审查再动画(0806,机检全过≠审查完成;PPT对详案错勿迁就)｜⚠[表头重影层每次顺手清·删在注入前(0915)](ppt-header-ghost-image-0915.md)｜⚠[动画禁由下向上(0915)](ppt-anim-no-upward-jump-0915.md) — 撤销0804「哪怕跳回顶部」;表格按行揭示;页脚条载任务指令须上移先出;交付前必跑回跳校验
 ## 看图写话（picture-writing）
 整区（跨课次通则＋规则体例）已外移 → **[看图写话线记忆](memory-index-picture-writing.md)**，排新课次或出图前打开；该线当前无未决项。
 ## 读书会详案（lesson-plan）
@@ -112,6 +113,6 @@
 - 《推荐一个好地方》两处详案↔PPT微差未拍板 · writing 竞品借鉴 D3–D5/N1 待做 · ppt-profile Phase3 待办
 - **⚠故事新编PPT三处待外部改+批改标准包未开工** — [详情](gushi-xinbian-5a-unit-move-0828.md)｜我来编童话PPT六类页须外部重做+Vercel未重部署 — [详情](textbook-revision-same-title-new-page-0902.md)｜漫画老师0820对方改动未合入 — [详情](manhua-laoshi-5a-lesson-state.md)
 - **⚠L5-L6起步0830改判「定起点」后,余4篇五年级稿未回改**(自由写作均低于25分钟新下限;故事新编0908已回改、缩写故事已下线) — [详情](writing-lesson-destress-onramp.md)
-- **六上四篇下游均未做**（配套物料/批改标准包/PPT）；四篇的⑥⑦避让串与结课句模已下沉 `variation-pools` 清单＋tone_gate 导演腔组（0915，机检已拦）
+- **六上四篇下游**：六上一变形记 PPT 链 0915 已走完（动画注入版入库）＋配套三侧 json 已出，其余三篇配套物料/批改标准包/PPT 均未做；四篇的⑥⑦避让串与结课句模已下沉 `variation-pools` 清单＋tone_gate 导演腔组（0915，机检已拦）
 ## 已交付归档
 全部课次/书目状态钩子已移至[归档索引](memory-index-archived-deliveries.md),排新课次前按需打开;已落地/已验完的规则历史条目在[规则归档](memory-index-archived-rules.md)。
