@@ -4,6 +4,7 @@ polish_materials —— 同步习作配套三侧 `_data.json` 文案「确定性
 
     PYTHONUTF8=1 python .claude/skills/laojohn-writing-materials/scripts/polish_materials.py <xx-学生用_data.json> [--dry-run] [--tier B] [--rules 1,2] [--plan <详案.md>] [--render]
     PYTHONUTF8=1 python .claude/skills/laojohn-writing-materials/scripts/polish_materials.py --all [--dry-run]     # 写作配套输出/ 下全部 42 份
+    PYTHONUTF8=1 python .claude/skills/laojohn-writing-materials/scripts/polish_materials.py --check-exemplars [样本卡.md]   # 样本卡防漂移：每段须逐字等于源 json 某字段
 
 做什么：对三侧 json 里**派生文案**字段跑 `laojohn-writing-lesson/assets/polish_rules.py` 的机械替换
 （你们→大家、念→读、引出式破折号→冒号、这儿→这里、挑→选、跟→和、别→不要、教师侧 老师→教师……），
@@ -27,6 +28,10 @@ polish_materials —— 同步习作配套三侧 `_data.json` 文案「确定性
 产物：备份 `<课次目录>/_polish/<文件名>.bak`；报告 `<课次目录>/_润色报告-<文件 stem>.md`（含残余候选清单：
 口语词逐词位置、剩余 `——`、内部黑话命中）——**残余清单是给人看的，判断类（生造术语／导演腔／升华式收尾）机器不判**。
 两类产物已 gitignore，不进仓。
+
+样本卡防漂移（--check-exemplars · 2026-09-15 立）：`references/prose-exemplars-materials.md` 的每一段都必须逐字等于
+卡头点名课次三侧 json 的某个派生文案字段（样本＝现行 json 的快照，json 改一处样本同步）。0915 首版就抄了 0901 旧版、
+2 段过期（「范文」未随 d40204d 改「示范文」、draftnote 低段句未随 55aceba 删），此后靠这条机检。
 
 红线：
   - 只改 json 源；PDF/HTML 由各 render_*.py 重渲（`--render` 可顺手跑，页数／溢出告警照旧由 _shared 报）。
@@ -323,6 +328,63 @@ def run_render(json_path):
     return r.returncode, warns, out
 
 
+# ---------- 样本卡防漂移 ----------
+
+CARD_DEFAULT = os.path.join(HERE, '..', 'references', 'prose-exemplars-materials.md')
+
+
+def card_segments(card_text):
+    """正文（首个 --- 之后）逐行切段：跳过标题/括注/空行；去掉行首〔…〕标签；按全角「／」再切。"""
+    body = card_text.split('\n---\n', 1)[1] if '\n---\n' in card_text else card_text
+    segs = []
+    for ln in body.splitlines():
+        t = ln.strip()
+        if not t or t.startswith(('#', '（', '>')):
+            continue
+        t = re.sub(r'^〔[^〕]*〕', '', t)
+        segs += [x.strip() for x in t.split('／') if x.strip()]
+    return segs
+
+
+def check_exemplars(card_path):
+    card_path = os.path.abspath(card_path)
+    text = io.open(card_path, encoding='utf-8').read()
+    m = re.search(r'《([^》]+)》', text)
+    if not m:
+        print('[check-exemplars] 卡头未点名课次（须有《<年级册>-第N单元-<题目>》）'); return 1
+    course = m.group(1)
+    files = sorted(glob.glob(os.path.join(OUT_ROOT, course, '*_data.json')))
+    if not files:
+        print('[check-exemplars] 找不到课次目录或 json：%s' % os.path.join(OUT_ROOT, course)); return 1
+    values = {}
+    for f in files:
+        side = side_of(f)
+        obj, _, _, _ = read_json(f)
+        for path, _layer in SIDES[side]['edit']:
+            for cont, k, fp in iter_leaves(obj, path):
+                if isinstance(cont[k], str):
+                    values.setdefault(cont[k], '%s侧 %s' % (side, fp))
+    segs = card_segments(text)
+    drift = []
+    for x in segs:
+        if x in values:
+            continue
+        near = [(v, w) for v, w in values.items() if v[:10] == x[:10]]
+        drift.append((x, near[0] if near else None))
+    print('== check-exemplars · %s ==' % os.path.basename(card_path))
+    print('  课次 %s；样本段 %d；源字段 %d' % (course, len(segs), len(values)))
+    if not drift:
+        print('  ✓ 零漂移：每段都逐字等于源 json 某字段'); return 0
+    for x, near in drift:
+        print('  ⚠ 漂移 样本段：%s' % x[:60])
+        if near:
+            print('           现行 %s：%s' % (near[1], near[0][:60]))
+        else:
+            print('           现行：找不到同起首字段（该段可能被删或改了开头）')
+    print('  共 %d 段漂移——样本＝现行 json 快照，改 json 须同步样本卡（或反之）' % len(drift))
+    return 1
+
+
 # ---------- 单份处理 ----------
 
 def process(json_path, args):
@@ -417,7 +479,12 @@ def main():
     ap.add_argument('--rules', help='只跑这些规则 id，逗号分隔')
     ap.add_argument('--plan', help='指定详案 .md 取术语串（默认按课次目录名自动定位）')
     ap.add_argument('--render', action='store_true', help='落盘后顺手重渲该侧 PDF 并转报自检告警')
+    ap.add_argument('--check-exemplars', nargs='?', const=CARD_DEFAULT, metavar='样本卡.md',
+                    help='样本卡防漂移：每段须逐字等于卡头课次三侧 json 的某派生字段；漂移 exit 1')
     args = ap.parse_args()
+
+    if args.check_exemplars:
+        sys.exit(check_exemplars(args.check_exemplars))
 
     if args.all:
         files = sorted(glob.glob(os.path.join(OUT_ROOT, '*', '*_data.json')))

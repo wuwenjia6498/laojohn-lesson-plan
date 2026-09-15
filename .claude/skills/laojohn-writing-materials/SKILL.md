@@ -74,10 +74,10 @@ description: 把一份「老约翰」同步习作写作课详案(.md)转成三�
 | `scripts/render_student.py` | 学生用入口（附加格子稿纸自检） |
 | `scripts/render_teacher.py` | 教师用入口 |
 | `scripts/render_parent.py` | 家长用入口 |
-| `scripts/polish_materials.py` | 机检 D 确定性润色门：三侧 json 派生文案跑详案线 `polish_rules.py`（单一源，import 不复制）＋保护字段／方向指标验收＋残余候选报告；`--all` 扫全部课次。**单向依赖** `../laojohn-writing-lesson/assets/polish_rules.py`、`polish_writing.term_strings` 与仓根 `tone_gate.py`，改那三件须回归本脚本 `--all --dry-run` |
+| `scripts/polish_materials.py` | 机检 D 确定性润色门：三侧 json 派生文案跑详案线 `polish_rules.py`（单一源，import 不复制）＋保护字段／方向指标验收＋残余候选报告；`--all` 扫全部课次；`--check-exemplars` 核样本卡每段是否逐字等于源 json 字段（样本＝现行 json 快照，改任一侧须同步、漂移 exit 1）。**单向依赖** `../laojohn-writing-lesson/assets/polish_rules.py`、`polish_writing.term_strings` 与仓根 `tone_gate.py`，改那三件须回归本脚本 `--all --dry-run` |
 | `references/data_schema.md` | 学生用字段契约 + 详案锚点映射（抽学生侧前必读） |
 | `references/data_schema_teacher.md` | 教师用字段契约 + 详案锚点映射（抽教师侧前必读） |
 | `references/data_schema_parent.md` | 家长用字段契约 + 详案锚点映射（抽家长侧前必读） |
-| `references/prose-exemplars-materials.md` | 三侧文案语体样本（生成时唯一的行文参照，取自 0901 用户认可的《推荐一个好地方》三侧定稿；只借语体不借内容） |
+| `references/prose-exemplars-materials.md` | 三侧文案语体样本（生成时唯一的行文参照；来历与维护纪律见卡头；只借语体不借内容；改《推荐一个好地方》三侧 json 后必跑 `polish_materials.py --check-exemplars` 同步） |
 
 新增侧/新模板时：从桌面模板取骨架须把手工仿制 CSS logo 换成 `__LOGO_SRC__` 真图注入（单一源 `品牌资产\logo.png`），渲染一律走 `_shared.py`，勿复制管线逻辑。
