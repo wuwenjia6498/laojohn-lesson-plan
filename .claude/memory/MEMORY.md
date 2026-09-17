@@ -25,10 +25,12 @@
 - **开场姿态**:教具别编「本想做却没做成」的懊恼由头(学生看得出假),坦白说特意准备 — [源](guanchariji-4a-lesson-state.md)
 - **官方情境在机构班不可兑现→把限制变成设定,不退回自造情境**:自带物品类→实物不在场稿子顶替;同班互认的猜人反馈→换掉「猜」保留内核 — [源1](xinaizhiwu-5a-lesson-state.md)/[源2](manhua-laoshi-5a-lesson-state.md)
 - **「当场换人试装」装置**:念完当场换人名再念,学生自己听出垮在哪;写人物特点/身份感的题目可照搬,成败标准「换名字一字不用改=没写成」一并复用 — [源](woheguoyitian-4a-lesson-state.md)
-- **外部件「示范文里的句子」类表格逐行与示范文逐字比对**:截断可接受、改写必须打回;已五次出现(0902第五次:改示范文必连查同篇表格列) — [源](woheguoyitian-4a-ppt-chain-state.md)
+- **外部件凡出现示范文处一律与详案逐字比对**(不只那张引句表):截断可接受、改写必须打回;已六次,0916第六次是**整篇被改写**、光查表查不到(仓内pptx与详案九处不一致,连课上要学生回文找的那句都换了) — [源](woheguoyitian-4a-ppt-chain-state.md)
 - **往「禁止逐字复用」清单补串一个串一条bullet**:tone_gate每条只取第一个串,并列写的第二个串永不报警;清单运行时解析补bullet即进机检 — [源](twentyyears-hometown-5a-lesson-state.md)
 - **教材换版(题目没变、题面/课文换掉)=第三形态,连改9处但course-map与文件名全不动**:三上四单元实做;教师侧配套2页是硬闸门,示范文变长须回压旁注 — [源](textbook-revision-same-title-new-page-0902.md)
+- **逐类过判据时连「落在哪一层」一起过**:同一句尺落在「事」上对全部话题成立,移到「特点」层就对抽象类失效(戴眼镜/性子急换谁都说得通);诊断法＝教师示范填的那张卡靠什么过关,靠具体就说明判据移错层 — [源](selection-criterion-must-cover-all-topics-0914.md)
 - **给学生的筛素材判据须拿档案话题表逐类过一遍**:半命题观点文分三型(事情类问「离了它还会不会发生」/品质类问「哪一刻你本来可以不这么做」/大词类先缩切口);正反例与示范文题材不得全落同一类 — [源](selection-criterion-must-cover-all-topics-0914.md)
+- **判据还要拿教材页自列的每个选项过一遍；投屏教材页含「先设想→再看示例」两段的须分次揭**：「结尾看出新结局不一样」判死教材自列的「乌龟又赢了」（结局同来路变）;课上放行「可再加一处」而六处暗尺只认一处＝反向假选择;含＿＿的师话行会被tone_gate当占位槽整行保护 — [源](gushi-xinbian-5a-unit-move-0828.md)
 - **含蓄叙事≠完全不点题;过犹不及型技法须演三档**:判掉过度形态必须同组给适度正样(完全不做／适度／过头),并点明判的是哪几句;收尾改两选一 — [源](model-essay-moderate-tier-not-two-extremes-0914.md)
 - **示范文的「我」＝与学生同龄、过学生当下的日子**:红线禁的是署名不是视角;成人当下生活不作主素材(学生照着找只能编),教师童年事是例外不是默认;已复发两次 — [源](model-essay-persona-student-age-0914.md)
 - **教材换题=重写不是改稿,第0步是改事实源**:archive零命中就动笔=伪造官方条款;五处连改(archive/index/course-map/锚点表/unit-texts);文体线链一改既有详案提纲表第3行静默过期 — [源](wodejiaren-4a-lesson-state.md)｜跨册迁移改9处不是5处;题面与指导件是两层 — [源2](gushi-xinbian-5a-unit-move-0828.md)
@@ -58,9 +60,10 @@
 - [学段口气全线没分级(0817)](writing-lesson-grade-tone-not-differentiated.md) — 判断分三层(用词/技法深度/思维层级);判据=降两级反问;0828复发:并列短语重难点只落实一半,拆开逐个问落点
 - [技法N件套须练全N件](technique-set-practice-all-parts.md) — 定稿前做「每件×是否产出过」对账;机检与checklist都抓不到
 - [首页无区头单表6行+两行文案体例(现行)](writing-lesson-front-page-single-table.md) — 0831两行体例推翻0828:目标行一句话说清学会写哪类文章;技法行首句固定「使用+构思工具名」且与正文一字一致;写详案或改style_front_page前必读
-- [作文批改工具(0818立项)](writing-correction-tool-0818.md) — 给加盟商不能做skill;判据从详案抽标准包JSON;错别字层原理上不能做;引用一字不差靠工程;**0907上线闸门:verified_by_human=true才打包(confirm_pack.py);线上12课,下线名单见源条**
+- [作文批改工具(0818立项)](writing-correction-tool-0818.md) — 给加盟商不能做skill;判据从详案抽标准包JSON;错别字层原理上不能做;引用一字不差靠工程;**0907上线闸门:verified_by_human=true才打包(confirm_pack.py);线上12课**;**0917四连改:判松根因=不做全篇盘点→survey先数再判+四道兜底+回炉;主模型换doubao-2-1-pro(代码默认值,必带thinking=disabled);错别字层已做(typos只给老师看,LJ_PROOFREAD开关,换回gpt-4o必关);回归与线上同走grade_pipeline**
 - [批改工具已部署Vercel(0824)](writing-correction-tool-vercel-deploy-0824.md) — 入口=部署根index.py不能放api/;.vercelignore挡config.json;正式地址grader.skyline666.top;⚠validate全绿≠包对
 - [⚠配套三侧文风0915与详案线同步换靶](writing-materials-retarget-0915.md) — 生成读三侧定稿样本不读对照表;polish_materials.py机检D每份必跑(同一张polish_rules,禁副本);存量42份已过一轮;样本卡=现行json快照,--check-exemplars防漂移(抄样本抄现行文件别抄git diff);⚠配套--all --dry-run是共享规则表第二回归面,首跑照出4条排除漏洞
+- ⚠**学生单上印的工具名必须和教师口头说的一致(0916)**:详案叫「人物特点卡」、学生单模板写死「构思表」,学生对不上号;`template_student.html` 45份共用**禁直接改词**,改法=加可选字段`worksheet.plan_name`不传则沿用旧词;⚠**PPT里的稿纸页就是学生用第2页的截图**,配套一改那张图就过期 — [源](manhua-laoshi-5a-lesson-state.md)
 - [配套json富文本标记只有部分字段解析(0907)](writing-materials-richtext-field-scope.md) — 教师materials/家长oneline走textContent,写{b}会印成(b);⚠溢出/页数/Type3三道机检全绿也抓不到,渲完正则扫一遍PDF文本
 - [手改只改HTML必被重渲冲掉(0821)](writing-materials-handedits-lost-on-rerender.md) — 文字改动一律回写_data.json;⚠仓内9课json仍不含那批手改
 - **PPT链**(八条细节→[链索引](ppt-chain-index.md)):⚠本仓止于动画注入·终稿不回仓(0902,打包不收PPT,下一课次先确认收到的是初稿)｜⚠先读详案再审查再动画(0806,机检全过≠审查完成;PPT对详案错勿迁就)｜⚠[表头重影层每次顺手清·删在注入前(0915)](ppt-header-ghost-image-0915.md)｜⚠[动画禁由下向上(0915)](ppt-anim-no-upward-jump-0915.md) — 撤销0804「哪怕跳回顶部」;表格按行揭示;页脚条载任务指令须上移先出;交付前必跑回跳校验
@@ -102,6 +105,7 @@
 - **PPT引擎**:[第三profile宣讲(0824)](ppt-promo-profile-0824.md) / [按profile分层·原语不fork](ppt-profile-seam-architecture.md) / [中文变Calibri:latin须在ea前](ppt-font-ea-latin-order.md) / [表格](ppt-table-autofit.md)·[原文齐读](ppt-quote-autofit.md)自适应(存量须重烘) / [阅读单页型已下线](ppt-reading-sheet-page.md)
 - **PPT 视觉**：[副标题克制电报体](ppt-subtitle-no-telegraphese.md) / [参考答案红字上屏](ppt-reference-answer-on-slide.md) / [逐条点击动画](ppt-click-reveal-animation.md) / [四图网格](ppt-four-image-grid.md) / [逐页讲稿新增docx](lecture-notes-docx.md) — 末条:打包只收docx
 - **工程坑**:题目带全角＿＿则place_pptx必认领失败须手工归位;配图空占位机检查不出须肉眼看 — [源](woheguoyitian-4a-ppt-chain-state.md)
+- ⚠[改外部pptx三个静默坑(0916)](pptx-text-edit-three-silent-traps-0916.md) — 重复shape id／timing空容器／endParaRPr不在段末;三者python-pptx全读得出、PowerPoint一律拒开且不说是哪条;工具已固化`laojohn-ppt/tools/pptx_text_edit.py`,收尾必调prune_timing+normalize_paragraphs
 - [测评卷SKILL状态](reading-assessment-skill-state.md) / [测评事实以详案为准](assessment-facts-follow-lesson-plan.md) — 详案升深度蓝本(事实仍锁档案);与SKILL默认相反遇分叉先确认
 - [阅读指南拓展栏点名具体书/影片](reading-guide-extension-concrete-titles.md) — 仅此栏放宽红线,吃不准就不写
 ## 未决事项与交付风险（做完即删）
@@ -114,9 +118,9 @@
 - 彼得·潘档案 line23/32 与机读块不一致待清理 — [详情](peterpan-book-profile-state.md)｜封面图缺(汉修先生/呼兰河传/骑鹅旅行记,骑鹅须补图重跑)·快乐王子下游未做·快乐读书吧6本已建2本余4本
 - **⚠三处「单元被搬空」待核实**:四下八、五下七、六下五(课程表与馆内海报均已标「待定」占位,63总数不变);两道全新题《我最喜爱的季节》《传承好家风》archive零命中、文体暂判,待教材页;总地图docx原件仍是换新前口径 — [详情](textbook-2026-five-retitles-0914.md)
 - 《推荐一个好地方》两处详案↔PPT微差未拍板 · writing 竞品借鉴 D3–D5/N1 待做 · ppt-profile Phase3 待办
-- **⚠故事新编PPT三处待外部改+批改标准包未开工** — [详情](gushi-xinbian-5a-unit-move-0828.md)｜我来编童话PPT六类页须外部重做+Vercel未重部署 — [详情](textbook-revision-same-title-new-page-0902.md)｜漫画老师0820对方改动未合入 — [详情](manhua-laoshi-5a-lesson-state.md)
-- **⚠L5-L6起步0830改判「定起点」后,余2篇五年级稿未回改**(自由写作均低于25分钟新下限;故事新编0908·二十年后0915·心爱之物0916已回改,缩写故事已下线) — [详情](writing-lesson-destress-onramp.md)
-- **五年级存量四篇按现行写作线回改（0915 起·用户点名的「存量不回溯」例外）**：五上四《二十年后的家乡》已完成（详案＋配套两侧重渲＋PPT 外部改页清单 9 页待外部改）；五上一《我的心爱之物》0916 已完成（示范文用户拍板不动；配套三侧重渲＋PPT 改页清单 18 页待外部改，仓内 pptx 示范文引句还是旧版）；余五上二、五下八 — [详情](twentyyears-hometown-5a-lesson-state.md)
+- **五上三故事新编 PPT 0917 改页清单 20 页已全部改到桌面终稿（含示范文四页改回详案版·逐字比对通过）+ 批改标准包未开工**；⚠清单页号≠桌面页号（换算表在清单顶部）、桌面缺《习作讲评》页 — [详情](gushi-xinbian-5a-unit-move-0828.md)｜我来编童话PPT六类页须外部重做+Vercel未重部署 — [详情](textbook-revision-same-title-new-page-0902.md)｜漫画老师0820对方改动未合入 — [详情](manhua-laoshi-5a-lesson-state.md)
+- **⚠L5-L6起步0830改判「定起点」后,余1篇五年级稿未回改**(自由写作低于25分钟新下限;故事新编0908·二十年后0915·心爱之物0916·漫画老师0916已回改,缩写故事已下线) — [详情](writing-lesson-destress-onramp.md)
+- **五年级存量四篇按现行写作线回改（0915 起·用户点名的「存量不回溯」例外）**：五上四《二十年后的家乡》已完成（详案＋配套两侧重渲＋PPT 外部改页清单 9 页待外部改）；五上一《我的心爱之物》0917 已走完外部回贴闭环（示范文用户拍板不动；0916 清单 18 项外部执行 17 项、只 P14 术语有意不改并反过来定了详案口径；0917 外部 docx 8 处措辞层已回贴，「厚→详细」连改四处含配套两侧重渲；`_须外部改页清单-20260917.md` 的唯一须改项 P20 已由本仓改进桌面终稿、备份同目录）；五上二《“漫画”老师》0916 已完成（示范文同样拍板不动；详案＋docx＋配套三侧重渲；**PPT 13 页已直接改在桌面终稿上**，改前备份同目录，清单已转存档态——⚠桌面终稿32页与清单的29页版页号对不上、示范文九处其实早已同步、桌面多出的教材页是清单盲区）；五上三《故事新编》0917 已完成（示范文不动；配套三侧重渲＋**PPT 20 页已全部改到桌面终稿**，含示范文四页改回详案版，⚠桌面页号与清单差一页、外部删了习作讲评页）；余五下八 — [详情](twentyyears-hometown-5a-lesson-state.md)｜[五上二状态](manhua-laoshi-5a-lesson-state.md)
 - **六上四篇下游**：六上一变形记 PPT 链 0915 已走完（动画注入版入库）＋配套三侧 json 已出，其余三篇配套物料/批改标准包/PPT 均未做；四篇的⑥⑦避让串与结课句模已下沉 `variation-pools` 清单＋tone_gate 导演腔组（0915，机检已拦）
 ## 已交付归档
 全部课次/书目状态钩子已移至[归档索引](memory-index-archived-deliveries.md),排新课次前按需打开;已落地/已验完的规则历史条目在[规则归档](memory-index-archived-rules.md)。
