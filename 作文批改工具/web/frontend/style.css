@@ -189,6 +189,9 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .check .ev{margin:6px 0 0 27px;padding:7px 11px;background:var(--blue-soft);
   border-left:3px solid var(--blue-line);border-radius:0 7px 7px 0;font-size:14px}
 .check .cm{margin:6px 0 0 27px;font-size:14px;color:var(--ink-soft)}
+/* 怎么改：判没达成时给老师的改法，跟引用块（蓝底）分开，用左侧棕线 */
+.check .advice{margin:8px 0 0 27px;padding:6px 11px;border-left:3px solid var(--brown-cell);font-size:14px;line-height:1.6}
+.check .advice b{display:block;font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:2px}
 
 textarea{
   width:100%;border:1px solid var(--line);border-radius:9px;padding:10px 12px;

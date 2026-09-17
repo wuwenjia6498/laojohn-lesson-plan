@@ -509,7 +509,8 @@ function renderBrief() {
     <ul class="checks">
       ${l.three_checks.map(c => `<li><span>${c.no}</span>${esc(c.display_text || c.text)}</li>`).join("")}
     </ul>
-    <div class="nis">不在批改范围：${esc(l.not_in_scope.join("、"))}——该层请教师当面看稿。</div>`;
+    <div class="nis">错别字不计入判据与档位，另列在结果页「错别字」栏供参考；不在批改范围：${
+      esc(l.not_in_scope.filter(x => x !== "错别字").join("、"))}——该层请教师当面看稿。</div>`;
 }
 
 /* ── 图片压缩 ───────────────────────────────── */
@@ -783,6 +784,36 @@ function renderDetail() {
     + (lg.overall ? `<div class="wp"><div class="h"><span class="t">表达</span><span class="what">句式、用词与描写方式</span></div>
         <div class="cm">${esc(lg.overall)}</div></div>` : "");
 
+  // 错别字（老师参考）。只在服务端真跑过校对（有 typos_check）时才渲染——
+  // 改前的旧存档、关了校对（LJ_PROOFREAD=0）的记录没有这个字段，硬显示「没查出」就是假话。
+  // 「没跑成」与「没查出」必须分得开：前者要老师自己看稿，后者是工具看过了。
+  const tc = r.typos_check;
+  let typoBlock = "";
+  if (tc) {
+    const list = Array.isArray(r.typos) ? r.typos : [];
+    const sure = list.filter(x => x.sure), unsure = list.filter(x => !x.sure);
+    const item = (x, sus) => `<div class="wp"><div class="h"><span class="t">「${esc(x.wrong || "")}」→「${
+      esc(x.right || "")}」</span><span class="what">${esc(x.kind || "")}</span></div><div class="ev${
+      sus ? " sus" : ""}">${esc(x.sentence || "")}</div></div>`;
+    let aside, body;
+    if (tc.status !== "ok") {
+      aside = "这次没跑成";
+      body = `<div class="wp"><div class="cm sus-note">这次错别字校对没跑成——不是「没有错别字」。可重批一次，或自己看稿。</div></div>`;
+    } else if (!list.length) {
+      aside = "没查出 · 只给老师看";
+      body = `<div class="wp"><div class="hint">没查出错别字（潦草但没写错的字不算；漏报可能有，不作定论）。</div></div>`;
+    } else {
+      aside = `确定 ${sure.length} · 待核 ${unsure.length} · 只给老师看`;
+      body = sure.map(x => item(x, false)).join("")
+        + (unsure.length
+          ? `<div class="wp"><div class="cm sus-note">以下几处工具拿不准，对着稿纸看一眼。</div></div>`
+            + unsure.map(x => item(x, true)).join("")
+          : "")
+        + `<div class="wp"><div class="row"><button class="ghost" id="btn-copy-typos">复制错别字清单</button></div></div>`;
+    }
+    typoBlock = `<details class="sec fold"><summary>错别字<span class="aside">${esc(aside)}</span></summary>${body}</details>`;
+  }
+
   const checks = (r.checks || []).map(c => `
     <div class="check">
       <div class="h">
@@ -792,7 +823,11 @@ function renderDetail() {
       </div>
       ${c.evidence ? `<div class="ev${c.evidence_suspect ? " sus" : ""}">${esc(c.evidence)}${
         c.evidence_suspect ? '<span class="sustag">与原稿不符，请核对</span>' : ""}</div>` : ""}
+      ${(c.quotes || []).map((q, i) => (q && q !== c.evidence) ? `<div class="ev${
+        (c.quotes_suspect || [])[i] ? " sus" : ""}">${esc(q)}${
+        (c.quotes_suspect || [])[i] ? '<span class="sustag">与原稿不符，请核对</span>' : ""}</div>` : "").join("")}
       ${c.comment ? `<div class="cm">${esc(c.comment)}</div>` : ""}
+      ${c.advice ? `<div class="advice"><b>怎么改</b>${esc(c.advice)}</div>` : ""}
     </div>`).join("");
 
   const unclear = (r.unclear || []).length ? `
@@ -826,6 +861,7 @@ function renderDetail() {
       <summary>语言表达<span class="aside">不计入档位 · 教师参考</span></summary>
       ${lgBody}
     </details>
+    ${typoBlock}
     <div class="sec">
       <h3>稿纸批语<span class="aside">誊写至稿纸「老师批改」栏 · 30 字以内</span></h3>
       <textarea id="ta-note" rows="2">${esc(r.teacher_note || "")}</textarea>
@@ -836,6 +872,8 @@ function renderDetail() {
       <h3>家长点评卡<span class="aside">确认文字后生成图片</span></h3>
       ${r.quoted_sentence_suspect ? `<div class="unclear"><b>点评卡引用与原稿不符</b>
         引用内容：${esc(r.quoted_sentence || "")}<br>发送前请对照原稿核对。</div>` : ""}
+      ${(r.quote_check && r.quote_check.pinyin_left && r.quote_check.pinyin_left.length) ? `<div class="unclear"><b>点评卡里还有孩子用拼音代的字</b>
+        ${esc(r.quote_check.pinyin_left.join("、"))}——工具拿不准是哪个字，没替它猜，生成图片前请你手改成正字。</div>` : ""}
       <textarea id="ta-card" rows="7">${esc(r.parent_card || "")}</textarea>
       <div class="count" id="cnt-card"></div>
       <div class="row">
@@ -857,8 +895,17 @@ function renderDetail() {
   $("#in-name").oninput = (e) => { cur.result.student_name = e.target.value; saveItemSoon(cur); };
   $("#ta-note").oninput = (e) => { cur.result.teacher_note = e.target.value; saveItemSoon(cur); };
   $("#btn-copy-note").onclick = () => copy($("#ta-note").value, $("#btn-copy-note"));
+  const btnTypos = $("#btn-copy-typos");
+  if (btnTypos) btnTypos.onclick = () => copy(typoText(cur.result), btnTypos);
   $("#btn-copy-card").onclick = () => copy(ta.value, $("#btn-copy-card"));
   $("#btn-make").onclick = makeCard;
+}
+
+// 错别字清单的纯文本（复制用）：确定在前、待核在后，每行「错」→「对」＋所在句
+function typoText(r) {
+  const list = Array.isArray(r && r.typos) ? r.typos : [];
+  const line = (x) => `${x.sure ? "" : "（待核）"}「${x.wrong || ""}」→「${x.right || ""}」　${x.sentence || ""}`;
+  return list.filter(x => x.sure).concat(list.filter(x => !x.sure)).map(line).join("\n");
 }
 
 async function copy(text, btn) {

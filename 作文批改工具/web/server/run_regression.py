@@ -5,13 +5,14 @@
 
 先跑 make_test_sheets.py 生成稿纸。不启服务、直接打模型，跑完不留文件。
 
-核五件（前三件是硬线，红了就是不合格）：
+核六件（前三件是硬线，红了就是不合格）：
 1. **引用逐字校验** —— evidence / quoted_sentence / highlights[].quote 必须
    逐字出现在原文里。找不到＝编造，这是真实性红线在批改工具上的落点。
 2. **判据方向** —— 三篇是刻意设计的三种形态，判反了说明判断层不可用。
 3. **depends_on** —— A 篇①不成立时，②必须记「不适用」而不是硬判。
 4. 点评卡开头是否撞套路（防同质化那道防线在真实模型上还灵不灵）。
-5. 有没有越界提错别字（素材里埋了两处「经长」）。
+5. 有没有越界提错别字（主批改的批语里仍一个字不许提）。
+6. 错别字校对层：A 篇两处「经长」都抓到、B/C 篇零误报、三篇都跑成（0917 加）。
 """
 import asyncio
 import base64
@@ -44,6 +45,8 @@ PUNCT = re.compile(r"[\s，。、；：？！“”‘’（）《》…—·,.;
 
 # 素材里埋的错别字，模型读稿时**必然**读成正字（这正是「错别字层不做」的原因）。
 # 比对引用前先按这张表把原文规范化，否则会把预期行为误判成编造。
+# ⚠ 0917 补：这条「必然」只对 gpt-4o 成立。豆包 doubao-seed 系列读的是学生写下的字
+# （经长／kù子原样保留），所以原文与引用两边都要归一，见 check_quote。
 TYPO_READ = {"经长": "经常"}
 
 # 固定起手式：一个班二三十份发同一个群，起手动词一样就是一个模子。
@@ -64,6 +67,10 @@ def norm(s):
 
 def check_quote(quote, source):
     """返回 ok / loose / bad —— 严格逐字、去标点后一致、查无此句。"""
+    # 引用也过一遍 TYPO_READ：保真的模型（豆包）会把「经长」原样抄下来，
+    # 只归一原文不归一引用，会把它判成「编造」——两种读法都算对（0917）
+    for wrong, right in TYPO_READ.items():
+        quote = quote.replace(wrong, right)
     q = str(quote or "").strip()
     if not q:
         return "ok"
@@ -75,15 +82,14 @@ def check_quote(quote, source):
 
 
 async def grade_one(pack, img, prev_heads):
-    """走与 /api/grade 同一条路：批完立刻做引用校正，回归测的才是线上行为。"""
+    """走与 /api/grade **同一个函数**，回归测的才是线上行为。
+
+    此前这里手抄了一份后处理链，几个月下来悄悄少了六道兜底（focus/concrete/order/
+    cap_band/回炉/拼音），回归绿着、线上却不是那回事。0917 起统一走 grade_pipeline。"""
     b64 = base64.b64encode(img.read_bytes()).decode()
-    msgs = srv.build_messages(pack, [(b64, "image/jpeg")], prev_heads)
-    r = srv.parse_json(await srv.call_model(msgs))
-    r["_fix"] = srv.fix_quotes(r)
-    srv.recount_fillers(r)             # 与 /api/grade 同一道后处理，别漏
-    srv.check_paragraphs(r)
-    srv.trim_verdict_tail(r)
-    srv.enforce_grade_rules(pack, r)
+    r = await srv.grade_pipeline(pack, [(b64, "image/jpeg")], prev_heads)
+    qc = r.get("quote_check") or {}
+    r["_fix"] = (qc.get("fixed", 0), qc.get("suspect", 0))
     return r
 
 
@@ -102,6 +108,7 @@ async def main():
             print(f"缺 {img.name}，先跑 make_test_sheets.py")
             return 1
         name, body = sheets.PIECES[key]
+        body_raw = body                             # 未归一的原文：错别字层要对着它核
         for wrong, right in TYPO_READ.items():      # 见 TYPO_READ 注释
             body = body.replace(wrong, right)
         try:
@@ -131,10 +138,19 @@ async def main():
                 elif "not" in rule and v in rule["not"]:
                     flag = f"  ✗ 不应判「{v}」"
                     fails.append(f"{key}篇第{no}条不该判「{v}」")
-            print(f"  ①②③"[no] + f" {v}{flag}")
+            # 序号取 [no-1]：原先写成 "  ①②③"[no]，两个前导空格把标签整体错了一位——
+            # 屏幕上的「①」其实是第②条，第①条印成空白。fails 里的序号一直是对的，只是眼睛看错。
+            # 判没达成的必须给怎么改（0917 加）：老师要的不是结论，是改哪句、怎么改
+            derived = any(pc.get("no") == no and pc.get("check_kind") == "derived"
+                          for pc in pack.get("three_checks") or [])
+            if v in ("部分达成", "未达成") and not derived and not str(c.get("advice") or "").strip():
+                flag += "  ✗ 没给怎么改"
+                fails.append(f"{key}篇第{no}条判「{v}」却没给 advice")
+            print("  " + "①②③"[no - 1] + f" {v}{flag}")
 
         # 2 引用逐字校验
         quotes = [("evidence", c.get("evidence")) for c in r.get("checks", [])]
+        quotes += [("quotes", q) for c in r.get("checks", []) for q in (c.get("quotes") or [])]
         quotes += [("quoted_sentence", r.get("quoted_sentence"))]
         quotes += [("highlight", h.get("quote")) for h in (r.get("highlights") or [])]
         # 语言毛病可以引原句（结构四项不引），引了就同样受逐字铁律管
@@ -205,9 +221,36 @@ async def main():
         # 5 越界提错别字
         card_all = " ".join(str(r.get(k, "")) for k in
                             ("parent_card", "teacher_note", "focus"))
-        if "经长" in card_all or "错别字" in card_all or "别字" in card_all:
+        # 只认「评论错别字」的词，不认「经长」这个串本身：保真模型引用学生原句时
+        # 会原样带出「经长」，那是「一字不差」的本义，不是越界（0917 换豆包后照出来的误报）
+        if any(w in card_all for w in ("错别字", "别字", "写错", "错字", "应为")):
             fails.append(f"{key} 篇提到了错别字（越界，那一层归老师）")
             print("  ✗ 提到了错别字——越界")
+
+        # 6 错别字校对层：A 篇两处「经长」要都抓到，B/C 篇一处不许报，三篇都得跑成。
+        #   误报比漏报伤——报到老师那里的每一条他都要对着稿纸核。
+        tc = r.get("typos_check") or {}
+        ty = r.get("typos") or []
+        if tc.get("status") != "ok":
+            fails.append(f"{key} 篇错别字校对没跑成（{tc.get('reason', '?')}）")
+            print("  ✗ 错别字校对没跑成")
+        else:
+            off = [t for t in ty if norm(t.get("sentence", "")) not in norm(body_raw)]
+            if off:
+                fails.append(f"{key} 篇错别字条目对不回原文：" + "、".join(str(t.get("sentence", ""))[:15] for t in off))
+                print("  ✗ 错别字条目对不回原文")
+            shown = "、".join(f'{t.get("wrong")}→{t.get("right")}' + ("" if t.get("sure") else "(待核)") for t in ty) or "无"
+            if key == "A":
+                hit = {norm(t.get("sentence", "")) for t in ty if "经长" in str(t.get("wrong", ""))}
+                print(f"  错别字：报 {len(ty)} 处（{shown}）｜「经长」命中 {len(hit)}/2")
+                if len(hit) < 2:
+                    fails.append(f"A 篇「经长」两处只抓到 {len(hit)} 处")
+                    print("  ✗ 「经长」没抓全")
+            else:
+                print(f"  错别字：报 {len(ty)} 处（期望 0）：{shown}")
+                if ty:
+                    fails.append(f"{key} 篇错别字误报 {len(ty)} 条：{shown}")
+                    print("  ✗ 错别字误报")
 
     # 4 点评卡开头撞不撞
     print("\n" + "=" * 62)
@@ -260,7 +303,7 @@ async def main():
         for f in fails:
             print(f"  · {f}")
     else:
-        print("\n五项全过。")
+        print("\n六项全过。")
     print("\n机器判不了、要你自己看的：批语像不像人话；"
           "是对家长说话还是对学生说话；下次方向具不具体到能做。")
     return 1 if fails else 0

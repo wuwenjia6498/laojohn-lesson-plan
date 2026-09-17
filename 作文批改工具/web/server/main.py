@@ -17,6 +17,7 @@
 
 无密钥时自动进 mock 模式：接口照常返回结构完整的假数据，供前端跑通流程。
 """
+import asyncio
 import base64
 import importlib.util
 import json
@@ -43,11 +44,21 @@ FRONTEND = HERE.parent / "frontend"
 BUNDLE = HERE.parent / "_bundle"
 
 
+# 0917 起主模型换成豆包（用户拍板）。同一张真稿 + 三篇基准实测：判据方向全对、引用逐字全中、
+# 姓名全对、盘点方面数与人工一致；gpt-4o 会把稿纸上没有的东西脑补进转写。
+# ⚠ doubao-seed 系列默认开思考——一篇 3000～6000 推理 token、2-1-pro 直接超时，
+# 必须带 thinking=disabled；换回非豆包模型时把 model_extra 清成 {}，别把这个键发给别家。
+DEFAULT_MODEL = "doubao-seed-2-1-pro"
+DEFAULT_MODEL_EXTRA = {"thinking": {"type": "disabled"}}
+
+
 def load_config():
     cfg = {
         "api_key": "",
         "base_url": "https://aihubmix.com/v1",
-        "grade_model": "gpt-4o",
+        "grade_model": DEFAULT_MODEL,
+        "model_extra": dict(DEFAULT_MODEL_EXTRA),
+        "proofread": True,   # 独立错别字校对层（只给老师看）。换回会自动纠错的模型（gpt-4o）必须关
         "rate_limit_per_hour": 120,
         "max_image_mb": 4,   # 别调过 4：Vercel 函数请求体硬限 4.5MB（含 multipart
                              # 开销），超过在平台层就 413，我们的提示轮不到。
@@ -60,6 +71,11 @@ def load_config():
                     if not k.startswith("_")})
     if os.environ.get("AIHUBMIX_API_KEY"):
         cfg["api_key"] = os.environ["AIHUBMIX_API_KEY"]
+    # 线上没有 config.json，模型也得有环境变量入口；模型专属参数走 LJ_MODEL_EXTRA（见 model_extra）
+    if os.environ.get("LJ_GRADE_MODEL", "").strip():
+        cfg["grade_model"] = os.environ["LJ_GRADE_MODEL"].strip()
+    if os.environ.get("LJ_PROOFREAD", "").strip().lower() in ("0", "false", "no", "off"):
+        cfg["proofread"] = False
     # 线上不放 config.json（密钥只走环境变量），所以 trust_proxy 也得有个环境变量
     # 入口，否则托管平台上它永远是 false。⚠ 只在确知前面有反代时才开，见 _client_ip。
     if os.environ.get("LJ_TRUST_PROXY", "").strip().lower() in ("1", "true", "yes"):
@@ -69,6 +85,10 @@ def load_config():
 
 CFG = load_config()
 MOCK = not CFG["api_key"]
+# 错别字校对层开关。它建立在「模型读稿保真」之上（0917 豆包 2-1-pro 实测成立），
+# gpt-4o 会把自己脑补出来的字报成学生的错——模型能用 LJ_GRADE_MODEL 随手换，这层就得能随手关。
+PROOFREAD = bool(CFG.get("proofread", True)) and not MOCK
+PROOF_WAIT = 60      # 主批改回来之后最多再等校对多少秒（正常 15 秒左右就完了）
 
 # 生产环境必须显式声明 LJ_ENV=prod。
 # 无密钥时自动进 mock 在本地开发很方便，部署时却是最危险的一处：忘配密钥，
@@ -220,7 +240,7 @@ GRADE_RULES = """你是老约翰同步习作课的批改助手。老师会发来
 
 ## 一、你的边界（先记住）
 
-1. **不批错别字、不批标点、不批卷面。** 你读照片时会不自觉地把写错的字读通顺（学生写“高心”你会读成“高兴”），所以字词与格式这一层一个字也不要提，交给老师当面看稿。
+1. **不批错别字、不批标点、不批卷面。** 稿纸上写错的字、用拼音代替的字，转写和引用里**照原样抄**，但在任何批语、点评卡、亮点说明里**一个字都不要提**——这一层归老师当面看稿，不归你。
 2. **不许编造学生没写的内容。** 凡是你引用的句子，必须与稿纸一字不差；哪里看不清就放进 unclear，不要替他补一个通顺的说法。
 3. **不打分、不排名。** band 只是内部参考档位，不出现在给家长的文案里。
 4. 三条判据只用下面第二节列出的那三条，不要自己另立标准。
@@ -246,21 +266,32 @@ GRADE_RULES = """你是老约翰同步习作课的批改助手。老师会发来
   "transcript": "整篇作文的逐字转写。**有续页时把各页按顺序接着抄成一篇**，页与页之间不要加任何标记。按稿纸原样抄，**包括你认为写错的字**，不要顺手改通顺；看不清的字写成 [?]。**分段必须照抄**：稿纸是方格纸，新起一段有两个看得见的标志——这一段的头一行**空出前两格**，而上一段的末行**右边空着没写满**。见到这两个标志就是新的一段，转写里用空行隔开。**必须分成 paragraph_count 段**——「分段」那一项就是照这里的换行判的，段数点错了，那一项跟着说错。这一项是给程序核对引用用的，不会给老师看。",
   "student_name": "稿纸姓名栏上的名字；栏空着或看不清就填空字符串",
   "unclear": ["看不清的句子，连同上下文；没有就空数组"],
+  "pinyin_fixes": [{"pinyin": "稿纸上用拼音代替汉字的那一处，照原样抄（含声调，如 kù）", "char": "按上下文应该是哪个字（如 裤）", "sure": true}],
+  "survey": {
+    "aspects": [{"name": "方面名，如「跑步快」「外貌」「借笔给我」", "sentences": 0}],
+    "total_sentences": 0,
+    "scenes": [{"what": "哪个方面的哪件事", "quote": "最像画面的那一句，一字不差",
+                "has": ["动作", "神态", "对话", "声音", "前后变化"]}],
+    "topic_sequence": ["按稿纸上的句序，一句一项，写这句讲的是哪个方面（用上面的方面名）。**照原文的先后抄，不许把同一个方面的句子归并到一处、也不许重排成顺的**——这一串就是用来看他有没有说到别处又折回来的"]
+  },
   "checks": [
     {"no": 1, "verdict": "达成｜部分达成｜未达成｜不适用",
-     "evidence": "学生原文里的句子，一字不差", "comment": "一句话说清为什么这样判"}
+     "evidence": "学生原文里最像的那一句，一字不差",
+     "quotes": ["再列 1～3 句原文，一字不差：判达成列做到了的句子，判没达成列出问题的那几句（写散了的、只有结论没画面的）"],
+     "comment": "一句话说清为什么这样判",
+     "advice": "怎么改。只在部分达成／未达成时写：哪几句该删、压成一句或挪到结尾带一笔，哪一处该展开，用课上讲的哪种写法展开，末尾给一句为这个孩子写的示范（≤40 字，前面标「比如可以写成：」）。达成留空；不适用只写「先把第 N 条做到」"}
   ],
   "whole_piece": {
     "completeness": {"verdict": "完整｜基本完整｜未写完｜仅有开头", "note": "20字内。判得不好说**断在哪一句**；判「完整」说**具体怎么完整的**，如「开头点出人物，中间一件事，结尾收住」"},
     "order":        {"verdict": "清晰｜有跳跃｜混乱", "note": "20字内。判得不好说**哪一处跳了**；判「清晰」说**怎么个清楚法**，如「按事情发生的先后讲，没有跳」"},
-    "paragraph":    {"verdict": "清晰｜该分未分｜通篇一段", "note": "20字内。判得不好说**该在哪儿另起一段**；判「清晰」说**怎么分的**，如「一段一件事」。**不要报具体段数**，你常数错"},
+    "paragraph":    {"verdict": "清晰｜该分未分｜通篇一段（数不准时程序会改成「不适用」）", "note": "20字内。判得不好说**该在哪儿另起一段**；判「清晰」说**怎么分的**，如「一段一件事」。**不要报具体段数**，你常数错"},
     "detail":       {"verdict": "重点突出｜主次平均｜重点过简｜不适用", "note": "20字内，写重点几句、写别处几句"},
     "flow":         {"verdict": "通顺｜个别不畅｜多处不通", "note": "20字内。判得不好说**绕的是哪一句**；判「通顺」说**怎么个顺法**，如「短句为主，一句一件事」"}
   },
   "language": {
     "issues": [
       {"kind": "同起头｜口水词｜动词笼统",
-       "detail": "连着哪几句／全篇几次；要有数字",
+       "detail": "连着哪几句／全篇几次；要有数字。口水词**只数规则里给的那五个词**，不许自己扩表（「他／她」尤其不算——本来就要求全篇只用「他／她」）",
        "quote": "原句一字不差。口水词类给次数即可，这里留空；引不出来也留空，不要硬造"}
     ],
     "overall": "一句话、30字内，只说这三样：句子长短／爱用哪个词／有没有写到对话和动作。**不许评通顺不通顺**（那是上一行的事，重复说等于没说），也不许写「读起来轻松愉快」这类观感。**生动、优美、细腻、流畅、活泼、精彩、丰富、到位、感染力，这些词一个都不许出现，换近义词绕开也不行**；说不出具体的就写「就是平常说话的样子，没什么大毛病」"
@@ -270,17 +301,30 @@ GRADE_RULES = """你是老约翰同步习作课的批改助手。老师会发来
      "kind": "好词｜句式｜修辞｜观察｜真心话"}
   ],
   "band": "三档标准里的档位名之一",
-  "focus": "这一篇最值得跟家长说的那一件事，一句话",
+  "focus": "给老师的综合评价，两三句、60～90 字：这篇总体写成了什么样、最拿得出手的是哪一处（点原句或原处）、整体最大的短板。不复述判据栏的逐条结论，短板只说整体形态、不再列方面清单。**生动、优美、细腻、流畅、活泼、精彩、丰富、到位、感染力这些词一个都不许出现**，换近义词绕开也不行",
   "teacher_note": "建议写进稿纸「老师批改」栏的一句话，30 字以内",
   "showcase": {"suitable": true, "paragraph": "适合当范例念的那一段原文", "point": "用来讲哪一点"},
   "quoted_sentence": "点评卡里引用的那一句，与稿纸一字不差",
   "parent_card": "给家长的点评卡文案，150 字以内"
 }
 
+**survey 是判三条判据的依据，先写它、再写 checks，不给老师看。**
+aspects 要把全文写到的方面一个不漏地列出来（哪怕只有半句也算一个）；
+sentences 是这个方面占了几句，加起来该与 total_sentences 相当。
+scenes 只收**真有画面**的：“她跑步很快”“她很热心”这类结论句不是画面，不许列；
+has 里只填这一处**真有**的那几样，一样都没有就给空数组——
+把结论句当画面列进来，第②条就会跟着判松，这是本工具最常见的判错。
+
+pinyin_fixes 只收稿纸上**确实写成拼音**的字，没有就空数组；拿不准是哪个字的 sure 填 false。
+它**只用于给家长的点评卡把拼音换回正字**（家长看不懂孩子写的 kù子），不进任何批语，
+转写与老师看的引用仍照原样保留拼音。写错的汉字（别字）不在此列，不要写进来。
+
 highlights 可以是空数组——这一篇确实没有出彩的地方，就空着，不要硬凑。
 whole_piece 那五项**一项都不能少，verdict 与 note 都必填**（漏掉整项，老师那一行就成了「—」）。
 判得好的项也要写 note，说清好在哪儿——**不许留空**。
 whole_piece 与 language **都不影响 band**，band 只由三条判据定。
+**有任何一条判据不是「达成」，就不能给最高那一档**——有一条只判到「部分达成」还给最高档，
+等于自己说自己的话不算数。（程序会按这条核一遍，不合就给你降下来。）
 language.issues 可以是空数组——这一篇没毛病就空着，凑毛病比不判还糟。
 
 **先写 transcript，再判断**。后面所有引用都必须能在 transcript 里**逐字找到**——
@@ -321,18 +365,24 @@ def build_messages(pack, images, prev_heads):
     if prev_heads:
         sys_prompt += ANTI_SAME_TMPL.format(
             heads="\n".join(f"- {h}" for h in prev_heads[-12:]))
+    return [
+        {"role": "system", "content": sys_prompt},
+        {"role": "user", "content": _pages_content(images, "按上面的要求批改，只输出 JSON。")},
+    ]
+
+
+def _pages_content(images, lead_text):
+    """user 消息里「多页说明 + 逐页图」这一段。主批改与错别字校对共用，
+    多页稿纸的口径（续页接着读、姓名以第 1 页为准）两边才一致。"""
     n = len(images)
     content = [{"type": "text", "text": (
-        "这是一份学生稿纸，按上面的要求批改，只输出 JSON。" if n == 1
-        else MULTI_PAGE_NOTE.format(n=n) + " 按上面的要求批改，只输出 JSON。")}]
+        "这是一份学生稿纸，" + lead_text if n == 1
+        else MULTI_PAGE_NOTE.format(n=n) + " " + lead_text)}]
     for i, (b64, mime) in enumerate(images, 1):
         if n > 1:
             content.append({"type": "text", "text": f"第 {i} 页："})
         content.append({"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}})
-    return [
-        {"role": "system", "content": sys_prompt},
-        {"role": "user", "content": content},
-    ]
+    return content
 
 
 DIAGNOSE_RULES = """你是老约翰同步习作课的教研助手。下面是一个班这次习作的批改结果汇总。
@@ -379,6 +429,19 @@ DIAGNOSE_RULES = """你是老约翰同步习作课的教研助手。下面是一
 
 # max_tokens 要给足：gemini-2.5-flash 一类 thinking 模型的思考 token 也计入 completion，
 # 0820 实测批一篇正文 1390 token、思考另占 1785，3000 就会从 JSON 中间断掉。
+def model_extra():
+    raw = os.environ.get("LJ_MODEL_EXTRA")
+    if raw:
+        try:
+            v = json.loads(raw)
+            if isinstance(v, dict):
+                return v
+        except json.JSONDecodeError:
+            pass
+    v = CFG.get("model_extra")
+    return v if isinstance(v, dict) else {}
+
+
 async def call_model(messages, max_tokens=8000):
     url = CFG["base_url"].rstrip("/") + "/chat/completions"
     payload = {
@@ -388,10 +451,27 @@ async def call_model(messages, max_tokens=8000):
         "temperature": 0.7,
         "response_format": {"type": "json_object"},
     }
+    # 模型专属参数原样并进请求体。0917 评估豆包时的发现：doubao-seed 系列默认开思考，
+    # 一篇 3000～6000 个推理 token、批一篇要 40～120 秒，2-1-pro/turbo 干脆超时；
+    # 带上 {"thinking": {"type": "disabled"}} 就回到 18～38 秒。这类开关各家名字不同，
+    # 所以不写死，跟 grade_model 一样放 config；环境变量 LJ_MODEL_EXTRA（JSON）优先，
+    # 给回归脚本换着试用。
+    payload.update(model_extra())
     headers = {"Authorization": f'Bearer {CFG["api_key"]}',
                "Content-Type": "application/json"}
+    # 0917 实测网关偶发 SSL: UNEXPECTED_EOF（连着几次并发时），重试一下就过；
+    # 只重试「没连上」这一类，模型答了但答错的不重试（那是内容问题，重试是撞运气）
     async with httpx.AsyncClient(timeout=180) as cli:
-        r = await cli.post(url, json=payload, headers=headers)
+        # 0917 回归里主批改连着 3 次 ConnectError（SSL EOF 是一阵一阵的），3/6 秒的退避不够跨过去；
+        # 改 4 次、退避 3/6/12 秒。只对「没连上」重试，模型答了但答错的不重试。
+        for attempt in range(4):
+            try:
+                r = await cli.post(url, json=payload, headers=headers)
+                break
+            except (httpx.ConnectError, httpx.RemoteProtocolError, httpx.ReadTimeout) as e:
+                if attempt == 3:
+                    raise HTTPException(502, f"模型网关连不上（已重试 4 次）：{type(e).__name__}")
+                await asyncio.sleep(3 * 2 ** attempt)
         if r.status_code != 200:
             raise HTTPException(502, f"模型网关返回 {r.status_code}：{r.text[:300]}")
         data = r.json()
@@ -411,10 +491,17 @@ def parse_json(text):
     try:
         return json.loads(t)
     except json.JSONDecodeError:
-        m = re.search(r"\{.*\}", t, flags=re.S)
-        if not m:
-            raise HTTPException(502, "模型未返回可解析的 JSON：" + t[:300])
-        return json.loads(m.group(0))
+        pass
+    # 0917 实测豆包偶尔连着吐两个 JSON 对象（{...}{...}），贪婪正则一把抓到「Extra data」；
+    # 改用 raw_decode 从第一个 { 起取第一个完整对象，后面多出来的一律不要。
+    i = t.find("{")
+    if i < 0:
+        raise HTTPException(502, "模型未返回可解析的 JSON：" + t[:300])
+    try:
+        obj, _ = json.JSONDecoder().raw_decode(t[i:])
+        return obj
+    except json.JSONDecodeError as e:
+        raise HTTPException(502, f"模型返回的 JSON 解析失败（{e.msg}）：" + t[:300])
 
 
 # ---------------------------------------------------------------------------
@@ -511,6 +598,17 @@ def fix_quotes(d):
 
     for c in d.get("checks") or []:
         one(c, "evidence")
+        # quotes 是并列的几句原文，逐句校对；对不上的在 quotes_suspect 同位标 True 交前端标红
+        qs = c.get("quotes")
+        if isinstance(qs, list):
+            out, flags = [], []
+            for q in qs:
+                if not isinstance(q, str) or not q.strip():
+                    continue
+                tmp = {"q": q.strip()}
+                one(tmp, "q")
+                out.append(tmp["q"]); flags.append(bool(tmp.get("q_suspect")))
+            c["quotes"], c["quotes_suspect"] = out, flags
     for h in d.get("highlights") or []:
         one(h, "quote")
     for g in (d.get("language") or {}).get("issues") or []:
@@ -547,6 +645,15 @@ def recount_fillers(d):
     if not t or not isinstance(lg, dict):
         return
     counts = {w: t.count(w) for w in FILLERS}
+
+    # 模型会自己往口水词表里加词：实测 0917 把「她」报成口水词（全篇 9 次）——
+    # 而这一课恰恰要求全篇只用「他／她」，等于把作业要求判成毛病。表是固定的五个词，
+    # 不在表里的一律清掉（计数既然由程序做，词表也由程序说了算）。
+    issues0 = lg.get("issues")
+    if isinstance(issues0, list):
+        lg["issues"] = [x for x in issues0
+                        if not (isinstance(x, dict) and x.get("kind") == "口水词"
+                                and not any(w in str(x.get("detail") or "") for w in FILLERS))]
 
     # 数到线了就由程序把这条毛病补上，不等模型报。实测它数得出「然后 4 次」、
     # 甚至在整体评价里写「多用“然后”串联」，却照样把 issues 留空——判定和计数
@@ -591,10 +698,14 @@ def check_paragraphs(d):
         return
 
     if got != n:
-        w["paragraph"]["suspect"] = True
-        w["paragraph"]["note"] = (f"（它数到 {n} 段，转写却只分出 {got} 段，"
-                                  f"这一项没把握，你对着原稿看一眼。）"
-                                  + str(w["paragraph"].get("note") or ""))
+        # 两处数不一致＝这一项它没数准。原先把「它数到 N 段、转写只分出 M 段」原样写给老师、
+        # 请他对着原稿核——实测那就是一行红字噪音：分段老师一眼就看见，不需要工具提醒他去看，
+        # 而「没把握」三个字还会连累旁边几项的可信度。
+        # 改成不判段数，给内容上的建议：几个方面就该分几段，方面数取自 survey 的话题序列
+        # （话题它数得准，段数它数不准——判定就落在数得准的那个上）。
+        # 不报数字：方面个数判据①已经说过一次，这里再报一个（且常常对不上）只会自相矛盾；
+        # 也不说「一个方面一段」——对一篇本该压到一两个特点的作文，那是反向建议。
+        w["paragraph"] = {"verdict": "不适用", "note": "分段看原稿；一件事一段，说完一件再另起。"}
 
 
 def trim_verdict_tail(d):
@@ -625,6 +736,278 @@ def trim_verdict_tail(d):
             v["note"] = body[:i] + "。"
 
 
+FOCUS_MIN_ASPECTS = 3      # 方面到这个数就不可能是「围绕一条线写」了
+FOCUS_MAX_SHARE = 0.5      # 写得最多的那个方面占不到全篇一半，就不是主次分明
+
+
+def _survey_stats(d):
+    """从 survey 里算出：方面个数、写得最多的那个占多少。算不出就返回 None。"""
+    sv = d.get("survey")
+    if not isinstance(sv, dict):
+        return None
+    asp = [a for a in (sv.get("aspects") or []) if isinstance(a, dict)]
+    if len(asp) < 2:
+        return None
+
+    def n(a):
+        try:
+            return int(a.get("sentences") or 0)
+        except (TypeError, ValueError):
+            return 0
+
+    counts = [n(a) for a in asp]
+    if max(counts) <= 0:
+        return None
+    try:
+        total = int(sv.get("total_sentences") or 0)
+    except (TypeError, ValueError):
+        total = 0
+    total = max(total, sum(counts))          # 它自报的总句数偏小时以分项之和为准
+    top = max(counts)
+    return {"n": len(asp), "top": top, "total": total, "share": top / total,
+            "top_name": str(asp[counts.index(top)].get("name") or "").strip(),
+            "names": [str(a.get("name") or "").strip() for a in asp]}
+
+
+def enforce_focus_check(pack, d):
+    """标了 check_kind="focus" 的那条判据（问「集中不集中」的），按它自己数的盘点兜底。
+
+    实测 0917 真稿：一篇写了外貌、爱笑、识字少、跑步快、上课积极、调皮、乐于助人
+    七个方面的作文，模型照样把「主特点明确集中」判成达成，理由是「跑步快多次提到」——
+    找到一处支持证据就不回头看全篇了。judge_by 里明写「并列罗列视为没抓住」也拦不住，
+    因为这不是判据没写清，是执行时不做全篇盘点。方面个数与句数它已经数在 survey 里，
+    判定就照它自己的数字来——与 recount_fillers 同一个判断：能算出来的别交给模型。
+
+    只降一档到「部分达成」、不直接判未达成：盘点的数字出自模型，宁可保守，
+    同时打 suspect 让老师对着原稿看一眼。
+    """
+    st = _survey_stats(d)
+    if not st or st["n"] < FOCUS_MIN_ASPECTS or st["share"] >= FOCUS_MAX_SHARE:
+        return
+    nos = {c["no"] for c in pack.get("three_checks") or []
+           if c.get("check_kind") == "focus"}
+    if not nos:
+        return
+    for c in d.get("checks") or []:
+        if not isinstance(c, dict) or c.get("no") not in nos:
+            continue
+        if c.get("verdict") != "达成":
+            continue
+        c["verdict"] = "部分达成"
+        c["suspect"] = True
+        head = "、".join(x for x in st["names"][:4] if x)
+        # 不点「写得最多的是哪个方面」——模型判的主特点常是另一个，点了名老师会看糊涂；
+        # 老师要的信息是「铺了几个方面、没有哪个占住全篇」。
+        c["comment"] = (f'（全篇写到 {st["n"]} 个方面：{head}……，'
+                        f'占得最多的一个也才 {st["top"]}／{st["total"]} 句，算不上集中。）'
+                        + str(c.get("comment") or ""))
+
+
+VERDICT_ORDER = ("未达成", "部分达成", "达成")
+
+
+def enforce_concrete_check(pack, d):
+    """标了 check_kind="concrete" 的判据（问「写没写具体」的），按盘点里真有画面的处数封顶。
+
+    判据的 judge_by 早就写着门槛（一处也没有→未达成；只有一处且没展开→部分达成），
+    模型照旧放宽：0917 两次回归里 B 篇「只有一处、一两句带过」一次判部分达成、
+    一次判达成——同一份稿纸、同一套规则，全看这一轮它怎么想。画面处数已经数在
+    survey.scenes 里（结论句不许列、一问一答只算一处，都在提示词里说死了），
+    照它自己数的封顶即可。
+
+    只封顶、不抬升：它判得比门槛还低是它自己的判断，不动。
+    """
+    nos = {c["no"] for c in pack.get("three_checks") or []
+           if c.get("check_kind") == "concrete"}
+    sv = d.get("survey")
+    if not nos or not isinstance(sv, dict) or not isinstance(sv.get("scenes"), list):
+        return
+    good = [[h for h in (x.get("has") or []) if str(h).strip()]
+            for x in sv["scenes"] if isinstance(x, dict)]
+    good = [h for h in good if h]
+    if len(good) >= 2:
+        return
+    # 只有一处、但这一处动作／神态／对话凑齐了三样以上＝「一处写透了」，
+    # 各课 judge_by 都认这是达成，不封
+    if len(good) == 1 and len(set(good[0])) >= 3:
+        return
+    cap = "未达成" if not good else "部分达成"
+    for c in d.get("checks") or []:
+        if not isinstance(c, dict) or c.get("no") not in nos:
+            continue
+        v = c.get("verdict")
+        # 「不适用」（依赖的那条没成立）不在这个梯子上，不碰
+        if v not in VERDICT_ORDER or VERDICT_ORDER.index(v) <= VERDICT_ORDER.index(cap):
+            continue
+        c["verdict"] = cap
+        c["suspect"] = True
+        c["comment"] = (f'（全篇真有画面的地方只有 {len(good)} 处。）'
+                        + str(c.get("comment") or ""))
+
+
+def check_order_by_sequence(d):
+    """叙述顺序照 survey 那串话题序列核：说到别处又回头讲同一个方面，就是有跳跃。
+
+    实测 0917：模型自己把序列列成 外貌→性格→跑步快→性格→乐于助人，回头仍判「清晰」，
+    note 还写「按外貌、性格、特长、品质顺序清晰展开」——序列里明明折回去过。
+    序列既然已经列出来了，查重复是纯算术，不该再交给它。
+
+    末项不参与查重：结尾回扣开头（写完事再点一句题）是首尾呼应，不是跳跃。
+    """
+    seq = [str(x).strip() for x in ((d.get("survey") or {}).get("topic_sequence") or [])
+           if str(x).strip()]
+    w = d.get("whole_piece")
+    if len(seq) < 3 or not isinstance(w, dict) or not isinstance(w.get("order"), dict):
+        return
+    if w["order"].get("verdict") != "清晰":
+        return
+    compact = [t for i, t in enumerate(seq) if i == 0 or t != seq[i - 1]]
+    body = compact[:-1]          # 末项是结尾，回扣开头算呼应
+    back = next((t for i, t in enumerate(body) if t in body[:i]), None)
+    if not back:
+        return
+    w["order"]["verdict"] = "有跳跃"
+    w["order"]["suspect"] = True
+    w["order"]["note"] = f"说到别处又回头讲{back}，同一件事该写在一处。"
+
+
+def cap_band(pack, d):
+    """档位不得高于三条判据撑得住的高度。
+
+    三档标准的文字本身就是判据达成度的描述（最高档＝特点非常突出、有具体的画面或小事），
+    所以判据只判到「部分达成」却给最高档，是自相矛盾。实测 0917：三条判松了不算，
+    band 还给了最高档，老师一眼看去像是这篇没问题。
+    """
+    names = list(pack.get("bands") or {})
+    if len(names) < 2 or not d.get("band"):
+        return
+    verdicts = [c.get("verdict") for c in (d.get("checks") or []) if isinstance(c, dict)]
+    if "未达成" in verdicts:
+        cap = 0
+    elif "部分达成" in verdicts:
+        cap = len(names) - 2
+    else:
+        return
+    if d["band"] in names and names.index(d["band"]) > cap:
+        d["band"] = names[cap]
+
+
+# 给人看的成句文案，空夸词最爱长在这几处（whole_piece 的 note 另有 trim_verdict_tail 管）
+NL2 = chr(10) * 2
+
+EMPTY_FIELDS = ("focus", "teacher_note", "parent_card")
+
+REPAIR_RULES = """你是老约翰习作批改助手的文字校对。下面每一条都是刚写好的批语，
+里面用了空夸词（生动、优美、细腻、流畅、活泼、精彩、内容丰富、到位、感染力）——
+这类词安在谁身上都成立，写了等于没写。把每一条改写一遍：
+
+- **只改用了空词的那半句**，其余一字不动；
+- 把空词换成**具体说的是哪一句、哪一处**（哪个动作、哪句对话、哪个画面）；
+  说不出具体的就把那半句删掉，宁可短——**换个近义词绕开不算改**
+  （漂亮、传神、鲜活、栩栩如生同样不许）；
+- **引号里的句子是学生原文，一个字都不许动**，加字、改标点都不行；
+- **parent_card 里引的那句学生原话必须原样留着**，不许删、不许换成别的句子；
+- 字数不许超过原文；parent_card 仍是跟家长说话的口气，不出现档位、分数。
+
+原样返回一个 JSON 对象：键用我给你的那几个键，值是改写后的文案，一个键都不许少。"""
+
+
+def _empty_hits(text):
+    return [w for w in EMPTY_WORDS if w in str(text or "")]
+
+
+def collect_empty_words(d):
+    """把命中空夸词的字段收成 {路径: 原文}，路径用点号，回写时照原路找回去。"""
+    out = {}
+    for k in EMPTY_FIELDS:
+        if _empty_hits(d.get(k)):
+            out[k] = d[k]
+    sc = d.get("showcase")
+    if isinstance(sc, dict) and _empty_hits(sc.get("point")):
+        out["showcase.point"] = sc["point"]
+    for i, h in enumerate(d.get("highlights") or []):
+        if isinstance(h, dict) and _empty_hits(h.get("why")):
+            out[f"highlights.{i}.why"] = h["why"]
+    return out
+
+
+def _purpose(d, path):
+    """这条批语是写给谁看的、干什么用的。键名（highlights.0.why）看着像代码，
+    不说清用途模型会整条跳过——0917 实测漏的就是它。"""
+    if path == "focus":
+        return "给老师看的「本篇讲评要点」，两三句的综合评价：总体怎么样、最拿得出手的一处、整体最大的短板"
+    if path == "teacher_note":
+        return "抄进稿纸「老师批改」栏的一句话，30 字以内，说给学生看的"
+    if path == "parent_card":
+        return "发到家长群的点评卡，跟家长说话的口气，150 字以内"
+    if path == "showcase.point":
+        return "这一段拿到讲评课上范读，用来讲哪一点"
+    if path.startswith("highlights."):
+        i = int(path.split(".")[1])
+        q = ((d.get("highlights") or [{}])[i] or {}).get("quote") or ""
+        return "说明学生这一句好在哪——他写的原句是「" + q + "」，就照着这一句说具体"
+    return "给老师看的一句批语"
+
+
+def _write_back(d, path, val):
+    if path in EMPTY_FIELDS:
+        d[path] = val
+    elif path == "showcase.point":
+        d["showcase"]["point"] = val
+    elif path.startswith("highlights."):
+        d["highlights"][int(path.split(".")[1])]["why"] = val
+
+
+async def repair_empty_words(d):
+    """空夸词命中就把那几句发回模型重写一遍——只重写这几句，不重批整篇。
+
+    为什么非得加这一道：规则里从 0827 起就写着这些词一个都不许出现，0917 又把它从
+    「整篇语言那一栏」升成管全部字段的铁律，实测照样漏（基准 C 篇的点评卡写出
+    「生动地写出了他的慌乱」「栩栩如生」）。夸人的话是模型最难忍住不套模板的地方，
+    提示词治不住；这里又不能像口水词那样由程序算——删掉那个词句子就不通了。
+    所以走「命中再回炉」：一次纯文本调用、几百 token，只在真命中时才发生。
+
+    两轮：第一轮常漏掉 highlights 里那句短评（键名看着像代码，它整条跳过），
+    带上用途再问一次就改了。两轮还改不掉就原样留着——坏文案好过乱改，
+    更好过空着一栏。
+    """
+    if MOCK:
+        return 0
+    ref = str(d.get("quoted_sentence") or "")
+    n = 0
+    for _ in range(2):
+        hits = collect_empty_words(d)
+        if not hits:
+            break
+        payload = {path: {"这一条是干什么的": _purpose(d, path), "现在写的": text}
+                   for path, text in hits.items()}
+        user = json.dumps(payload, ensure_ascii=False, indent=1)
+        if ref:
+            user += NL2 + "（这篇引用的学生原句是：" + ref + "　——它一个字都不能动。）"
+        try:
+            got = parse_json(await call_model(
+                [{"role": "system", "content": REPAIR_RULES},
+                 {"role": "user", "content": user}], max_tokens=2000))
+        except Exception:      # noqa: BLE001 —— 校对失败不该连累整篇批改
+            return n
+        changed = 0
+        for path, val in (got or {}).items():
+            if isinstance(val, dict):     # 它照着我给的结构回了一层，取里面那句
+                val = val.get("现在写的") or val.get("改写后") or ""
+            if not (path in hits and isinstance(val, str) and val.strip()
+                    and not _empty_hits(val)):
+                continue
+            # 点评卡里那句学生原话是整张卡的立身之本，回炉把它改没了就宁可不改——
+            # 带一个空夸词的卡，好过一张引不出原文的卡（smoke_real 第 2 件核的就是它）。
+            if path == "parent_card" and ref and _bare(ref)[:12] not in _bare(val):
+                continue
+            _write_back(d, path, val.strip())
+            changed += 1
+        n += changed
+        if not changed:                   # 一轮一处没改动，再问也是同样的答案
+            break
+    return n
+
 def enforce_grade_rules(pack, d):
     """按学段强制覆写模型判不得的项。
 
@@ -637,6 +1020,324 @@ def enforce_grade_rules(pack, d):
     w = d.get("whole_piece")
     if isinstance(w, dict):
         w["detail"] = {"verdict": "不适用", "note": "本学段不评。"}
+
+
+PINYIN_TOKEN = re.compile(r"[A-Za-züüÜāáǎàēéěè"
+                          r"īíǐìōóǒòūúǔù"
+                          r"ǖǘǚǜ]+")
+CJK = re.compile(r"^[一-鿿]{1,2}$")
+
+
+def apply_pinyin_fixes(d):
+    """家长侧（parent_card / quoted_sentence）把学生用拼音代替的字换回正字。
+
+    0917 换豆包后引用真的一字不差了，于是点评卡上会印出「粉色的kù子」——对老师这是
+    保真，对家长是看不懂。用户拍板：**只在家长侧、只换拼音代字**；别字（经长）不动，
+    老师看的 evidence / highlights / showcase 仍照原样。
+    换哪个字由模型给（pinyin_fixes），换不换、换在哪由程序定：只换 sure=true 的、
+    拼音串真在转写里出现过的、正字是 1～2 个汉字的——三道都过才动手。
+    """
+    fixes = d.get("pinyin_fixes")
+    t = d.get("transcript") or ""
+    if not isinstance(fixes, list) or not t:
+        return 0
+    pairs = []
+    for f in fixes:
+        if not isinstance(f, dict) or f.get("sure") is False:
+            continue
+        py, ch = str(f.get("pinyin") or "").strip(), str(f.get("char") or "").strip()
+        if not py or not ch or not PINYIN_TOKEN.fullmatch(py) or not CJK.match(ch) or py not in t:
+            continue
+        pairs.append((py, ch))
+    if not pairs:
+        return 0
+    pairs.sort(key=lambda x: -len(x[0]))          # 长串先换，免得 zěn 吃掉 zěnme 的一半
+    n = 0
+    for key in ("parent_card", "quoted_sentence"):
+        v = d.get(key)
+        if not isinstance(v, str) or not v:
+            continue
+        new = v
+        for py, ch in pairs:
+            new = new.replace(py, ch)
+        if new != v:
+            d[key] = new
+            n += 1
+    return n
+
+
+# ---------------------------------------------------------------------------
+# 独立错别字校对层（0917 立）
+#
+# 与主批改分开发一次纯校对调用，同一张图、各自的 system prompt，并发跑。
+# 为什么不并进主批改：主批改的边界第 1 条是「批语里一个字不提错别字」，那条要继续守；
+# 校对层的产物只给老师看，走自己的字段 typos，不进判据、档位、批语、点评卡。
+# 为什么现在能做：豆包 2-1-pro 读的是学生写下的字（kù子、经长原样），埋字稿 8/8、0 误报；
+# gpt-4o 会把自己脑补的字报成学生的错，所以这层跟着 PROOFREAD 开关走，换模型先关它。
+# ---------------------------------------------------------------------------
+
+TYPO_KINDS = ("别字", "拼音代字", "的地得")
+_HAS_CJK = re.compile(r"[\u4e00-\u9fff]")
+_CLAUSE_SPLIT = re.compile(r"[。！？；\n]")
+
+PROOF_RULES = """你是小学语文老师的助手，只做一件事：核对学生手写稿纸上的错别字。不评价内容，不评价写法。
+
+第一步，把全文逐字转写：照稿纸原样抄，写错的字、用拼音代替的字、的地得用错的地方都原样保留，
+看不清的字写成 [?]；有续页就接着上一页抄成一篇。
+
+第二步，逐句挑错，**只收下面三类**：
+- 别字：写成了另一个字（座在→坐在、蓝球→篮球、以经→已经）；
+- 拼音代字：不会写、用拼音代了汉字（kù子→裤子）；
+- 的地得：三个字用混了（跑的很快→跑得很快）。
+
+**标点、格式、空格、繁简、语句通不通顺，一律不报**——那些不归你。
+
+纪律：
+- 宁可漏报，不许把写得潦草但其实没错的字报成错字；看不清的字不报；
+- 拿不准是哪个字的，照样列出来，sure 填 false；
+- wrong 与 right 都给**词组**而不是单字（「跑的」→「跑得」，不要「的」→「得」），拼音代字的 wrong 照抄拼音含声调；
+- sentence 是这一处所在的整句，与稿纸一字不差。
+
+只输出一个 JSON 对象，不要任何解释：
+{"transcript": "全文逐字转写", "typos": [{"kind": "别字｜拼音代字｜的地得", "sentence": "所在整句原样", "wrong": "稿纸上写的", "right": "应写的", "sure": true}]}
+没有错别字就 "typos": []。"""
+
+
+async def proofread_typos(images):
+    """独立的一次纯校对调用。**任何失败都吞掉**、返回 status=failed——校对层是附加的，
+    不许连累主批改；只放行取消（主批改失败时会取消它）。"""
+    msgs = [{"role": "system", "content": PROOF_RULES},
+            {"role": "user", "content": _pages_content(images, "只做错别字校对，只输出 JSON。")}]
+    try:
+        d = parse_json(await call_model(msgs, max_tokens=4000))
+    except asyncio.CancelledError:
+        raise
+    except Exception as e:      # noqa: BLE001
+        return {"status": "failed", "reason": type(e).__name__}
+    items = None
+    if isinstance(d, list):
+        items = d
+    elif isinstance(d, dict):
+        for k in ("typos", "errors", "items"):
+            if isinstance(d.get(k), list):
+                items = d[k]
+                break
+    # 它明确回了、只是没有列表：算 ok 且空，不算失败
+    return {"status": "ok", "items": items or []}
+
+
+def _sure_flag(v):
+    if isinstance(v, bool):
+        return v
+    t = str(v if v is not None else "").strip().lower()
+    if t in ("true", "1", "确定", "是", "yes", "sure"):
+        return True
+    return False          # 缺省也算拿不准：宁可多进「待核」，不许把拿不准的当确定
+
+
+def _clause_with(text, needle):
+    for c in _CLAUSE_SPLIT.split(text):
+        if needle in c:
+            return c.strip()
+    return None
+
+
+def verify_typos(d):
+    """把校对层的原始结果守门成老师能直接用的清单。三道门：只收三类、句子必须对回转写、
+    错字必须真在那句里。对不上的丢、计数进 dropped，不替它猜。
+
+    放在 postprocess 里 transcript 被 pop 之前调用。
+    """
+    chk = d.get("typos_check")
+    if not isinstance(chk, dict):
+        return
+    if chk.get("status") != "ok":
+        d["typos"] = None
+        return
+    t = d.get("transcript") or ""
+    raw = d.get("typos")
+    if not t:
+        d["typos"] = None
+        chk.update(status="failed", reason="no_transcript")
+        return
+    if not isinstance(raw, list):
+        raw = []
+    kept, dropped, seen = [], 0, set()
+    for x in raw:
+        if not isinstance(x, dict) or x.get("kind") not in TYPO_KINDS:
+            dropped += 1
+            continue
+        wrong = str(x.get("wrong") or "").strip()
+        right = str(x.get("right") or "").strip()
+        if (not wrong or not right or _bare(wrong) == _bare(right)
+                or len(wrong) > 8 or len(right) > 8
+                or not (_HAS_CJK.search(wrong + right) or PINYIN_TOKEN.search(wrong))):
+            dropped += 1
+            continue
+        sent = str(x.get("sentence") or "").strip()
+        real = (_locate(sent, t) or _locate_fuzzy(sent, t)) if sent else None
+        if not real:
+            # 句子对不回去，但错字串本身在转写里只出现一次：拿它所在的小句救场
+            real = _clause_with(t, wrong) if (len(wrong) >= 2 and t.count(wrong) == 1) else None
+        if not real:
+            dropped += 1
+            continue
+        if wrong.lower() not in real.lower():
+            dropped += 1
+            continue
+        if len(real) > 60:
+            real = _clause_with(real, wrong) or real
+        key = (real, wrong, right)
+        if key in seen:
+            continue
+        seen.add(key)
+        kept.append({"kind": x["kind"], "sentence": real, "wrong": wrong, "right": right,
+                     "sure": _sure_flag(x.get("sure"))})
+    sure = [k for k in kept if k["sure"]]
+    unsure = [k for k in kept if not k["sure"]]
+    d["typos"] = (sure + unsure)[:20]
+    chk.update(dropped=dropped, sure=len(sure), unsure=len(unsure))
+
+
+_DANGLING_EXAMPLE = re.compile(r"[，。；\s]*(比如可以写成|可以写成|比如)[：:]\s*$")
+
+
+def ensure_checks(pack, d):
+    """三条判据一条不能少。0917 真稿实测：①判了未达成，模型就把②③整个省掉了——
+    界面上那两行会消失，老师以为工具只有一条判据。缺的按标准包补：依赖的那条没成立就记
+    「不适用」（这本来就是规则），否则记「不适用」并说明这次没判到，让老师知道是漏而不是无。"""
+    have = {c.get("no"): c for c in (d.get("checks") or []) if isinstance(c, dict)}
+    out = []
+    for pc in pack.get("three_checks") or []:
+        no = pc["no"]
+        if no in have:
+            out.append(have[no])
+            continue
+        if pc.get("check_kind") == "derived":
+            out.append({"no": no, "verdict": "", "evidence": "", "comment": "", "advice": ""})
+            continue
+        dep = pc.get("depends_on")
+        dep_v = (have.get(dep) or {}).get("verdict") if dep else None
+        if dep and dep_v in ("未达成", "部分达成", "不适用"):
+            out.append({"no": no, "verdict": "不适用", "evidence": "",
+                        "comment": f"第 {dep} 条没成立，本条不适用。", "advice": f"先把第 {dep} 条做到。"})
+        else:
+            out.append({"no": no, "verdict": "不适用", "evidence": "",
+                        "comment": "这一条模型这次没判到（不是「没问题」），重批一次或自己看稿。",
+                        "advice": "", "suspect": True})
+    d["checks"] = out
+
+
+def derive_checks(pack, d):
+    """标了 check_kind="derived" 的判据（judge_by 写着「前两条的结果检验，不单独判」）由程序推：
+    取其它判据里最低的一档（未达成＜部分达成＜达成，「不适用」跳过；一档都没有就未达成）。
+    0917 真稿实测：让模型自己判，它要么整条省掉，要么硬拿结尾套话「你们猜猜她是谁？」当依据——
+    一条本来就不该单独判的尺子，交给它只会多出一处不稳。放在 focus/concrete 兜底之后、cap_band 之前，
+    这样推出来的档跟着已经压过的①②走。"""
+    kinds = {c["no"]: c.get("check_kind") for c in pack.get("three_checks") or []}
+    checks = [c for c in (d.get("checks") or []) if isinstance(c, dict)]
+    src = [c for c in checks if kinds.get(c.get("no")) != "derived"]
+    for c in checks:
+        if kinds.get(c.get("no")) != "derived":
+            continue
+        rated = [c2.get("verdict") for c2 in src if c2.get("verdict") in VERDICT_ORDER]
+        worst = min(rated, key=VERDICT_ORDER.index) if rated else "未达成"
+        desc = "、".join("①②③"[int(c2.get("no", 1)) - 1] + str(c2.get("verdict") or "")
+                        for c2 in src if c2.get("verdict"))
+        c.update(verdict=worst, evidence="", quotes=[], quotes_suspect=[], advice="",
+                 comment=f"由前两条推出（{desc}），不单独判。")
+        c.pop("suspect", None)
+
+
+def tidy_advice(pack, d):
+    """把 checks[].advice 整成老师能直接看的样子，规则都是确定性的：
+    达成的不该有 advice（有就清掉）；不适用的缺 advice 就按 depends_on 补一句「先把第 N 条做到」；
+    末尾挂着「比如可以写成：」却没写示范句的（0917 真稿实测出现过一次），把那截空承诺剥掉——
+    留着一个冒号在屏幕上，比没有示范句更难看。"""
+    dep = {c["no"]: c.get("depends_on") for c in pack.get("three_checks") or []}
+    for c in d.get("checks") or []:
+        if not isinstance(c, dict):
+            continue
+        v, adv = c.get("verdict"), str(c.get("advice") or "").strip()
+        if v == "达成":
+            adv = ""
+        elif v == "不适用" and not adv:
+            n = dep.get(c.get("no"))
+            adv = f"先把第 {n} 条做到。" if n else ""
+        adv = _DANGLING_EXAMPLE.sub("", adv).rstrip("，；, ")
+        if adv and not adv.endswith(("。", "！", "？", "”", "」")):
+            adv += "。"
+        c["advice"] = adv
+
+
+async def postprocess(pack, d):
+    """批完之后的整条后处理链（/api/grade 与 smoke_real.py 共用这一份）。
+
+    抽出来是因为自测脚本原先只看模型原始返回：那不是老师看到的东西，几道兜底
+    都在这条链上。两处各写一遍链，迟早改一处忘另一处，自测就测不到真实结果。
+    顺序有讲究：引用先对回原文（后面几道要拿它当依据），再按盘点降判据、
+    按判据压档位，最后才是空夸词回炉——回炉会动到文案，所以完了要重校一次引用。
+    """
+    fixed, suspect = fix_quotes(d)
+    recount_fillers(d)          # 这两道都必须在 transcript 被 pop 掉之前
+    check_paragraphs(d)
+    trim_verdict_tail(d)
+    enforce_grade_rules(pack, d)
+    ensure_checks(pack, d)           # 三条一条不能少，缺的按标准包补
+    enforce_focus_check(pack, d)     # 先按盘点把判据降下来
+    enforce_concrete_check(pack, d)  # 写没写具体，按盘点里真有画面的处数封顶
+    derive_checks(pack, d)           # 结果检验型判据由①②推出，跟着压过的档走
+    check_order_by_sequence(d)       # 叙述顺序照话题序列核一遍
+    cap_band(pack, d)                # 再按判据把档位压下来，顺序不能反
+    if await repair_empty_words(d):
+        f2, s2 = fix_quotes(d)       # 回炉可能碰到引号里的原文（fix_quotes 幂等）
+        fixed, suspect = fixed + f2, suspect + s2
+    tidy_advice(pack, d)             # 判据「怎么改」整形：达成清空、不适用补句、剥掉空承诺
+    verify_typos(d)                  # 错别字清单守门，要用 transcript，得在 pop 之前
+    d["quote_check"] = {"fixed": fixed, "suspect": suspect,
+                        "pinyin_fixed": apply_pinyin_fixes(d)}   # 家长侧拼音换正字，放在所有引用校对之后
+    # 模型拿不准（sure=false）的拼音会留在卡上——不替它猜字（猜错等于把一个字安到孩子头上），
+    # 但要让老师在点「生成图片」前看见：这一处得他手改
+    left = PINYIN_TOKEN.findall(str(d.get("parent_card") or ""))
+    if left:
+        d["quote_check"]["pinyin_left"] = left
+    # transcript 只用于校验，不下发——老师手上有原稿，不需要看打字版；
+    # survey 是判判据的依据，判完就没用了
+    for k in ("transcript", "paragraph_count", "survey", "pinyin_fixes"):
+        d.pop(k, None)
+    return d
+
+
+async def grade_pipeline(pack, images, heads, on_raw=None):
+    """一份稿纸从发模型到老师能看的整条链：主批改 + 并发的错别字校对 + postprocess。
+
+    /api/grade、run_regression.py、smoke_real.py 三处都走这一个函数——run_regression 此前
+    手抄了一份后处理链，几个月下来悄悄少了六道兜底，回归测的早就不是线上行为了。
+
+    并发不用 gather：主批改 3 秒就 502 的时候，不该陪着校对再等十几秒；
+    所以先起校对 task，等主批改，主批改失败就取消校对再抛。
+    """
+    msgs = build_messages(pack, images, heads)
+    task = asyncio.create_task(proofread_typos(images)) if PROOFREAD else None
+    try:
+        raw = await call_model(msgs)
+    except BaseException:
+        if task:
+            task.cancel()
+        raise
+    if on_raw:
+        on_raw(raw)
+    out = parse_json(raw)
+    if task:
+        try:
+            proof = await asyncio.wait_for(task, PROOF_WAIT)
+        except Exception as e:      # noqa: BLE001 —— 含超时；校对失败不连累主批改
+            proof = {"status": "failed", "reason": type(e).__name__}
+        out["typos"] = proof.get("items")
+        out["typos_check"] = {"status": proof.get("status", "failed"),
+                              **({"reason": proof["reason"]} if proof.get("reason") else {})}
+    await postprocess(pack, out)
+    return out
 
 
 _MOCK_N = {"i": 0}
@@ -659,7 +1360,12 @@ def mock_grade(pack):
             v = "不适用"
         checks.append({"no": c["no"], "verdict": v,
                        "evidence": anchors[c["no"] % len(anchors)],
-                       "comment": f'（mock）第{c["no"]}条「{c.get("display_text") or c["text"]}」的判断说明。'})
+                       "quotes": [anchors[(c["no"] + 1) % len(anchors)]],
+                       "comment": f'（mock）第{c["no"]}条「{c.get("display_text") or c["text"]}」的判断说明。',
+                       "advice": ("" if v == "达成" else
+                                  f'先把第{c["depends_on"]}条做到' if v == "不适用" and c.get("depends_on") else
+                                  f'（mock）「{anchors[(c["no"] + 1) % len(anchors)][:12]}…」这一句只是结论，'
+                                  f'围绕它补一个看得见的动作。比如可以写成：他一听下课铃就蹿了出去。')})
     bands = list(pack.get("bands", {}).keys()) or ["基础过关"]
     q = anchors[i % len(anchors)]
 
@@ -714,7 +1420,7 @@ def mock_grade(pack):
         "language": language,
         "highlights": highlights,
         "band": bands[i % len(bands)],
-        "focus": "（mock）这一篇最值得说的是他写的那个动作细节。",
+        "focus": "（mock）整篇能看出他在围绕一个特点写，最拿得出手的是那个动作细节；短板是别的段落还停在结论句上，没把画面写出来。",
         "teacher_note": "（mock）这处细节写得实在，再多写一件事就更好了。",
         "showcase": {"suitable": i % 3 == 0, "paragraph": q, "point": "写具体"},
         "quoted_sentence": q,
@@ -722,6 +1428,16 @@ def mock_grade(pack):
                         "这一句好在没有停在结论上，而是把当时的样子写了出来，"
                         "正是这次课上练的那一招。下次可以试着再为这个地方补一件小事，"
                         "人物就更立得住了。"),
+        # 错别字校对层三态轮换 + 每五份一次「没跑成」，前端四种形态都能看到
+        "typos": (None if i % 5 == 0 else
+                  [] if i % 3 == 0 else
+                  [{"kind": "别字", "sentence": anchors[0], "wrong": "座", "right": "坐", "sure": True}]
+                  if i % 3 == 1 else
+                  [{"kind": "别字", "sentence": anchors[0], "wrong": "以经", "right": "已经", "sure": True},
+                   {"kind": "拼音代字", "sentence": anchors[1 % len(anchors)], "wrong": "kù", "right": "裤", "sure": True},
+                   {"kind": "的地得", "sentence": anchors[2 % len(anchors)], "wrong": "跑的", "right": "跑得", "sure": False}]),
+        "typos_check": ({"status": "failed", "reason": "mock"} if i % 5 == 0
+                        else {"status": "ok", "dropped": 0}),
         "_mock": True,
     }
 
@@ -840,21 +1556,9 @@ async def grade(request: Request,
         return mock_grade(pack)
 
     heads = json.loads(prev_heads or "[]")
-    msgs = build_messages(pack, [(base64.b64encode(r).decode(), f.content_type or "image/jpeg")
-                                 for r, f in zip(raws, pages)], heads)
-    out = parse_json(await call_model(msgs))
-
-    # 引用一字不差这条不能靠模型自觉：拿它自己的 transcript 把每处引用对回原文，
-    # 对不上的标 suspect 交给老师留意（见 fix_quotes 的注释）。
-    fixed, suspect = fix_quotes(out)
-    recount_fillers(out)          # 这两道都必须在 transcript 被 pop 掉之前
-    check_paragraphs(out)
-    trim_verdict_tail(out)
-    enforce_grade_rules(pack, out)
-    out["quote_check"] = {"fixed": fixed, "suspect": suspect}
-    # transcript 只用于校验，不下发——老师手上有原稿，不需要看打字版
-    out.pop("transcript", None)
-    out.pop("paragraph_count", None)   # 与 transcript 同样只用于校验，不下发
+    images = [(base64.b64encode(r).decode(), f.content_type or "image/jpeg")
+              for r, f in zip(raws, pages)]
+    out = await grade_pipeline(pack, images, heads)
 
     # 原图与 base64 到此为止：不落盘、不进日志
     return out

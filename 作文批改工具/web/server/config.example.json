@@ -2,8 +2,16 @@
   "_说明": "复制为 config.json 后填写。密钥优先读环境变量 AIHUBMIX_API_KEY，其次读本文件的 api_key。config.json 已 gitignore，禁止提交密钥。",
   "api_key": "",
   "base_url": "https://aihubmix.com/v1",
-  "grade_model": "gpt-4o",
-  "_备注_模型": "走 OpenAI 兼容 /v1/chat/completions 多模态。gpt-4o 是 0820 用 run_regression.py 三篇基准实测选定的；换模型只改这一行、不动代码，但**换完必须重跑 run_regression.py**——引用准确率与判据方向在不同模型上差别很大。",
+  "grade_model": "doubao-seed-2-1-pro",
+  "_备注_模型": "0917 用户拍板换成豆包 2-1-pro（此前 gpt-4o，0820 定）。同一张真稿 + 三篇基准实测：判据方向全对、引用逐字全中、三个姓名全对、盘点方面数与人工一致；gpt-4o 会把稿纸上没有的内容脑补进转写。换模型只改这一行，但**换完必须重跑 run_regression.py**。",
+  "model_extra": {
+    "thinking": {
+      "type": "disabled"
+    }
+  },
+  "_备注_model_extra": "原样并进每次请求体的模型专属参数。豆包 doubao-seed 系列默认开思考（一篇 3000～6000 推理 token、40～120 秒，2-1-pro/turbo 会超时），所以必须是 {\"thinking\": {\"type\": \"disabled\"}}；换回非豆包模型时清成 {}，别把这个键发给别家。环境变量 LJ_MODEL_EXTRA（JSON）优先于本项。",
+  "proofread": true,
+  "_备注_proofread": "独立错别字校对层（只给老师看，不进判据/档位/批语/点评卡），每篇多一次带图调用。建立在「模型读稿保真」之上（0917 豆包 2-1-pro 实测成立）；换回 gpt-4o 必须关——它会把自己脑补的字报成学生的错。环境变量 LJ_PROOFREAD=0 优先关闭。",
   "rate_limit_per_hour": 120,
   "_备注_限额": "按客户端 IP 计的每小时批改次数上限。一个班 30 份、老师一次批完＝30 次，120 够一天四个班。防的是密钥被盗刷，不是防老师。生产环境应换成按校区账号计。",
   "max_image_mb": 8
