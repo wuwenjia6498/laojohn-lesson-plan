@@ -113,3 +113,11 @@ vercel --prod
 
 机制与三条坑见 [[writing-correction-tool-0818]] 末节与 `标准包抽取规程.md` §十。
 ⚠ `verified_by_human` 现在是 **15 个全 false**（新包也没人逐句核过）。
+
+## 0917 切到 Git 集成（用户拍板）
+
+- 此前是 CLI `vercel --prod` 上传本地工作树：没提交也能上线、线上对不到 commit、双人各自上传会静默互相覆盖。用户看出「没 push 怎么部署上去的」后拍板切换。
+- 落地：`vercel git connect` 接 `wuwenjia6498/laojohn-lesson-plan`；Root Directory 经 API `PATCH /v9/projects/{id}` 设为 `作文批改工具/web`（**中文路径 Vercel 接受**）；`web/.gitignore` 放开 `_bundle/`，`_packs.json` 与 `_build_prompt.py` 入库——线上只看仓库，不入库就没课、没规则；`git log -- _bundle/_packs.json` 即发布记录。
+- 口径：**push 到 main 就是发布**；`vercel --prod` 只留紧急兜底，用了必须立刻把同样改动提交推上去，否则下次 push 冲掉。环境变量（LJ_ENV/LJ_ACCESS_CODE/AIHUBMIX_API_KEY）仍在 Vercel 项目里，与部署方式无关。
+- CLI 凭证在 `%APPDATA%/xdg.data/com.vercel.cli/auth.json`（不是官方文档说的 Config 目录）。
+
