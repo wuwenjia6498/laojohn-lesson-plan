@@ -1,6 +1,8 @@
 .vercel
 .env*
 
-# build_deploy.py 的产物：由「标准包 + build_prompt.py」重生成，不入库（§8）。
+# _bundle/ 自 2026-09-17 起**入库**：切到 Vercel Git 集成后线上只看仓库，
+# _packs.json（已确认的标准包合集）与 _build_prompt.py（build_prompt.py 的副本）
+# 不进仓库线上就没有课、没有判断规则。它们仍是 build_deploy.py 的产物——
+# 改了标准包先跑 build_deploy.py 再提交，提交 _packs.json 就是「发布了哪些课」的记录。
 # index.py（部署入口）是源，要入库。
-_bundle/
