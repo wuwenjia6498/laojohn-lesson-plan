@@ -391,7 +391,12 @@
       notes.appendChild(div);
     });
     document.getElementById('es-method').innerHTML=rich(e.method);
-    document.getElementById('es-footer').innerHTML=rich(e.footer);
+    /* footer 为空时整块隐藏（含“读范文是为了”标签）：示范文较长的课次用它腾版面 */
+    if(e.footer && e.footer.trim()){
+      document.getElementById('es-footer').innerHTML=rich(e.footer);
+    }else{
+      document.getElementById('es-footer').closest('.footer-skill').style.display='none';
+    }
   }
 
   /* ---------- 格子稿纸（固定骨架版式，勿改逻辑）----------
