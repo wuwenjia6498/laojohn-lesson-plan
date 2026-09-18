@@ -286,13 +286,16 @@ GRADE_RULES = """你是老约翰同步习作课的批改助手。老师会发来
     "order":        {"verdict": "清晰｜有跳跃｜混乱", "note": "20字内。判得不好说**哪一处跳了**；判「清晰」说**怎么个清楚法**，如「按事情发生的先后讲，没有跳」"},
     "paragraph":    {"verdict": "清晰｜该分未分｜通篇一段（数不准时程序会改成「不适用」）", "note": "20字内。判得不好说**该在哪儿另起一段**；判「清晰」说**怎么分的**，如「一段一件事」。**不要报具体段数**，你常数错"},
     "detail":       {"verdict": "重点突出｜主次平均｜重点过简｜不适用", "note": "20字内，写重点几句、写别处几句"},
-    "flow":         {"verdict": "通顺｜个别不畅｜多处不通", "note": "20字内。判得不好说**绕的是哪一句**；判「通顺」说**怎么个顺法**，如「短句为主，一句一件事」"}
+    "flow":         {"verdict": "通顺｜个别不畅｜多处不通", "note": "20字内。判得不好说**绕的是哪一句**；判「通顺」说**怎么个顺法**，照这一篇的样子说（一句一件事／爱用「因为……所以」／长短句搭着来），**别每篇都写「短句为主，一句一句顺下来」**",
+                     "demo_from": "原文里连着的一段，一字不差、不拼接：有不通的句子就抄那一句；都通但通篇短句就抄两三句连着的短句（≤50 字）；本来就长短搭着来可留空",
+                     "demo_to": "把 demo_from 改写后的样子：不通的改顺；短句连成一个长句（用「一边……一边」「……的时候」「因为……所以」「……得……」，或把动作、样子、心情并进一句）。只说他原来那个意思，不添情节，≤60 字，不出现空夸词。demo_from 空则这里也空"}
   },
   "language": {
     "issues": [
-      {"kind": "同起头｜口水词｜动词笼统",
-       "detail": "连着哪几句／全篇几次；要有数字。口水词**只数规则里给的那五个词**，不许自己扩表（「他／她」尤其不算——本来就要求全篇只用「他／她」）",
-       "quote": "原句一字不差。口水词类给次数即可，这里留空；引不出来也留空，不要硬造"}
+      {"kind": "口水词｜用词重复｜同起头｜动词笼统",
+       "detail": "连着哪几句／全篇几次；要有数字，格式如「“开心”4 次」。口水词**只数规则里给的那五个词**；用词重复是五个之外的实词，人称、人名、「的」「了」「是」这类虚词不算（程序会拿转写重数一遍，数不够 3 次的整条删）",
+       "quote": "原句一字不差。口水词与用词重复引**用得最密的那一句**；引不出来就留空，不要硬造",
+       "fix": "这条毛病怎么改，用这孩子自己的句子示范：口水词→那一句去掉口水词重写；用词重复→给两三个替换词、并把一处改成样子；同起头→把两三句换成不同开头；动词笼统→把那个动作或样子写具体。写成「可以改成：……」，改后句 40 字以内，不出现空夸词"}
     ],
     "overall": "一句话、30字内，只说这三样：句子长短／爱用哪个词／有没有写到对话和动作。**不许评通顺不通顺**（那是上一行的事，重复说等于没说），也不许写「读起来轻松愉快」这类观感。**生动、优美、细腻、流畅、活泼、精彩、丰富、到位、感染力，这些词一个都不许出现，换近义词绕开也不行**；说不出具体的就写「就是平常说话的样子，没什么大毛病」"
   },
@@ -617,6 +620,9 @@ def fix_quotes(d):
     sc = d.get("showcase") or {}
     if sc:
         one(sc, "paragraph")
+    fl = (d.get("whole_piece") or {}).get("flow")
+    if isinstance(fl, dict):
+        one(fl, "demo_from")     # 语句示范的「原句」是连着的两三句，同样要逐字对得上
     return fixed, suspect
 
 
@@ -668,7 +674,70 @@ def recount_fillers(d):
         issues.insert(0, {"kind": "口水词",
                           "detail": "、".join(f"“{w}”{n} 次" for w, n in over)
                                     + "——一篇里反复用同一个词",
-                          "quote": ""})
+                          "quote": "", "fix": ""})    # 程序补的这条没有改法：不替模型编一句
+
+
+# 「用词重复」不算这些：人称、人名之外最常见的虚词。模型报「他」「我」「的」这类就是把
+# 作业要求或语法本身判成毛病，与口水词表里「不许报『她』」同一个道理。
+REPEAT_STOP = set("他她它我你您的了着过是在有和与跟把被给也都又还就很非常特别然后这那个一不没")
+REPEAT_STOP |= {"我们", "他们", "她们", "你们", "它们", "咱们", "这个", "那个", "这样", "那样",
+                "自己", "什么", "因为", "所以", "但是", "可是", "虽然", "如果", "一个", "一下"}
+REPEAT_MIN = 3
+REPEAT_MIN_SINGLE = 5   # 单字（“好”“笑”）在别的词里到处出现，转写里数出 3 次多半是「很好」「好人」凑的，门槛提高
+_QUOTED_WORD = re.compile(r"[“「\"']([^“”「」\"']{1,6})[”」\"']")
+
+
+def verify_repeats(d):
+    """「用词重复」那一类由程序复核：模型报的词拿 transcript 重数，数不够 3 次、
+    或落在人称／虚词／学生姓名上的，整条删掉；数得够的把 detail 里的次数换成程序数的。
+
+    与 recount_fillers 同一个判断：能算出来的别交给模型。口水词那五个词是封闭表，
+    程序能自己补条目；重复实词是开放集，程序补不了、但能核——所以这里只做减法。"""
+    t = d.get("transcript") or ""
+    lg = d.get("language")
+    if not t or not isinstance(lg, dict) or not isinstance(lg.get("issues"), list):
+        return
+    name = str(d.get("student_name") or "").strip()
+    keep = []
+    for x in lg["issues"]:
+        if not (isinstance(x, dict) and x.get("kind") == "用词重复"):
+            keep.append(x)
+            continue
+        m = _QUOTED_WORD.search(str(x.get("detail") or ""))
+        w = m.group(1).strip() if m else ""
+        if (not w or w in REPEAT_STOP or w in FILLERS or (name and w in name)
+                or not _HAS_CJK.search(w)):
+            continue
+        n = t.count(w)
+        if n < (REPEAT_MIN_SINGLE if len(w) == 1 else REPEAT_MIN):
+            continue
+        x["detail"] = f"“{w}”全篇 {n} 次"
+        keep.append(x)
+    lg["issues"] = keep
+
+
+def tidy_language(d):
+    """语言块整形，都是确定性的：每条毛病的 fix 剥掉「可以改成：」后面空着的空承诺；
+    语句示范 demo_from／demo_to 缺一半就两个一起清（只剩原句等于没示范，只剩改句对不上原稿）。"""
+    lg = d.get("language")
+    if isinstance(lg, dict) and isinstance(lg.get("issues"), list):
+        for x in lg["issues"]:
+            if not isinstance(x, dict):
+                continue
+            fx = _DANGLING_EXAMPLE.sub("", str(x.get("fix") or "").strip()).rstrip("，；, ")
+            fx = re.sub(r"^(可以改成|可以写成|改成)[：:]\s*$", "", fx)
+            if fx and not fx.endswith(("。", "！", "？", "”", "」")):
+                fx += "。"
+            x["fix"] = fx
+    fl = (d.get("whole_piece") or {}).get("flow")
+    if isinstance(fl, dict):
+        a, b = str(fl.get("demo_from") or "").strip(), str(fl.get("demo_to") or "").strip()
+        if not a or not b or fl.get("demo_from_suspect"):
+            # 原句对不上转写就整个示范不要：示范的前提是老师能在稿纸上找到那几句
+            for k in ("demo_from", "demo_to", "demo_from_suspect"):
+                fl.pop(k, None)
+        else:
+            fl["demo_from"], fl["demo_to"] = a, b
 
 
 def check_paragraphs(d):
@@ -928,6 +997,12 @@ def collect_empty_words(d):
     for i, h in enumerate(d.get("highlights") or []):
         if isinstance(h, dict) and _empty_hits(h.get("why")):
             out[f"highlights.{i}.why"] = h["why"]
+    for i, g in enumerate((d.get("language") or {}).get("issues") or []):
+        if isinstance(g, dict) and _empty_hits(g.get("fix")):
+            out[f"language.issues.{i}.fix"] = g["fix"]
+    fl = (d.get("whole_piece") or {}).get("flow")
+    if isinstance(fl, dict) and _empty_hits(fl.get("demo_to")):
+        out["whole_piece.flow.demo_to"] = fl["demo_to"]
     return out
 
 
@@ -946,6 +1021,14 @@ def _purpose(d, path):
         i = int(path.split(".")[1])
         q = ((d.get("highlights") or [{}])[i] or {}).get("quote") or ""
         return "说明学生这一句好在哪——他写的原句是「" + q + "」，就照着这一句说具体"
+    if path.startswith("language.issues."):
+        i = int(path.split(".")[2])
+        g = ((d.get("language") or {}).get("issues") or [{}])[i] or {}
+        return ("给老师看的改法示范：这孩子的毛病是「" + str(g.get("kind") or "") + "：" + str(g.get("detail") or "")
+                + "」，用他自己的句子改一遍，写成「可以改成：……」")
+    if path == "whole_piece.flow.demo_to":
+        q = ((d.get("whole_piece") or {}).get("flow") or {}).get("demo_from") or ""
+        return "把学生原句「" + q + "」改顺、或连成一个长句的示范，只说他原来那个意思"
     return "给老师看的一句批语"
 
 
@@ -956,6 +1039,10 @@ def _write_back(d, path, val):
         d["showcase"]["point"] = val
     elif path.startswith("highlights."):
         d["highlights"][int(path.split(".")[1])]["why"] = val
+    elif path.startswith("language.issues."):
+        d["language"]["issues"][int(path.split(".")[2])]["fix"] = val
+    elif path == "whole_piece.flow.demo_to":
+        d["whole_piece"]["flow"]["demo_to"] = val
 
 
 async def repair_empty_words(d):
@@ -1280,6 +1367,7 @@ async def postprocess(pack, d):
     """
     fixed, suspect = fix_quotes(d)
     recount_fillers(d)          # 这两道都必须在 transcript 被 pop 掉之前
+    verify_repeats(d)           # 「用词重复」拿转写重数，数不够的删
     check_paragraphs(d)
     trim_verdict_tail(d)
     enforce_grade_rules(pack, d)
@@ -1293,6 +1381,7 @@ async def postprocess(pack, d):
         f2, s2 = fix_quotes(d)       # 回炉可能碰到引号里的原文（fix_quotes 幂等）
         fixed, suspect = fixed + f2, suspect + s2
     tidy_advice(pack, d)             # 判据「怎么改」整形：达成清空、不适用补句、剥掉空承诺
+    tidy_language(d)                 # 毛病改法与语句示范整形：剥空承诺、示范缺一半就整个不要
     verify_typos(d)                  # 错别字清单守门，要用 transcript，得在 pop 之前
     d["quote_check"] = {"fixed": fixed, "suspect": suspect,
                         "pinyin_fixed": apply_pinyin_fixes(d)}   # 家长侧拼音换正字，放在所有引用校对之后
@@ -1385,7 +1474,9 @@ def mock_grade(pack):
                    ["重点突出", "主次平均", "重点过简"][i % 3],
                    "note": "（mock）本学段不评。" if low else
                            "（mock）重点 6 句，别处 3 句。"},
-        "flow": {"verdict": ["通顺", "个别不畅", "多处不通"][(i + 1) % 3],
+        "flow": {"demo_from": q if i % 3 != 1 else "",
+                 "demo_to": "（mock）他一边把笔往我桌上推，一边头也不抬地说。" if i % 3 != 1 else "",
+                 "verdict": ["通顺", "个别不畅", "多处不通"][(i + 1) % 3],
                  "note": "（mock）短句为主，一句一件事。" if (i + 1) % 3 == 0
                  else "（mock）“又回来了又跑过去”这句绕。"},
     }
@@ -1397,8 +1488,10 @@ def mock_grade(pack):
     # 与空亮点那篇错开，好让「有亮点无毛病」「无亮点有毛病」两种组合都被看到。
     language = {
         "issues": [] if i % 3 == 1 else [
-            {"kind": "口水词", "detail": "（mock）“然后”全篇 5 次", "quote": ""},
-            {"kind": "动词笼统", "detail": "（mock）这一处本可以写出具体动作", "quote": q},
+            {"kind": "口水词", "detail": "（mock）“然后”全篇 5 次", "quote": q,
+             "fix": "（mock）可以改成：把“然后”去掉，让先后顺序自己带出来。"},
+            {"kind": "动词笼统", "detail": "（mock）这一处本可以写出具体动作", "quote": q,
+             "fix": "（mock）可以改成：他把那支笔往我桌上一推，头也不抬。"},
         ][: 1 + i % 2],
         "overall": ["（mock）就是平常说话的样子，没什么大毛病。",
                     "（mock）句子偏短，一句一件事，读着利索。",

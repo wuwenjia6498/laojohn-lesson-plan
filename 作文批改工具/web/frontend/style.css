@@ -303,6 +303,11 @@ textarea:focus{outline:0;border-color:var(--blue-line)}
 .sustag{display:block;margin-top:4px;font-size:12px;font-weight:700;color:var(--bad)}
 /* 分段这一项测不准时的提示。错结论比没结论更伤，所以要显眼 */
 .wp .cm.sus-note{color:var(--bad);font-weight:700}
+/* 语言块里的改法示范：每条毛病下面「可以这样改」、语句行下面「示范」。
+   与判据的 .check .advice 同一种左线样式、字号压一档——它是参考层，不该比主判据的怎么改更显眼 */
+.wp .fix{margin:6px 0 0;padding:5px 9px;border-left:3px solid var(--brown-cell);font-size:13px;line-height:1.6;color:var(--ink)}
+.wp .fix b{display:block;font-size:11px;font-weight:700;color:var(--ink-soft);margin-bottom:2px}
+.wp .fix .from{display:block;color:var(--ink-soft);margin-bottom:2px}
 
 /* 选课页：课次会长到 63 课 / 8 个年级册，平铺成一条流水线老师每次都要滚半天。
    但只有两三课时又不该摆折叠面板——分组是 renderLessons 里按数量动态决定的。 */
