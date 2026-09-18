@@ -86,6 +86,13 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
   - **须防触发词撞车**：官方 pptx 的 description 明写「凡用户提到 deck／slides／presentation 或点到 .pptx 文件名就触发，不问他接下来要干什么」，docx 亦覆盖 report／memo／letter／template；而本仓天天说 PPT、课件、docx。**凡涉及本仓产出，一律以 laojohn-* skill 为准**，官方件不得抢活。
   - **环境上官方 skill 的新建路径现在跑得通**（node/npm、python-docx/pptx、openpyxl、pypdf、pywin32 与 Office 本体都在，只缺 LibreOffice/pandoc/markitdown，明细见记忆 office-skills-env-facts-0824），挡住它的只剩纪律——禁令理由是产出不带品牌版式、绕过页眉参数与闸门，与环境无关，别因「能跑了」就用，也别为跑通 pandoc 路径去装 LibreOffice。docx/pptx 转 PDF/PNG 只有 Office COM 一条路，已封装在 `laojohn-ppt\tools\shot_assets.py`，直接用它，三个 COM 坑见其头注释。
 
+- **带 `anthropic-skills:` 前缀的 `laojohn-writing-lesson` / `laojohn-lesson-plan` / `laojohn-lesson-mindmap` 一律不得使用（2026-09-18 查实）**。**仓内没有第二份 skill，多出来的那份在仓外**——是 2026-06 上传到 claude.ai「My Uploads」后经账号级同步拉回本机的旧快照，落在 `C:\Users\69491\.claude\skills\synced\<同步 id>\`（同目录另有官方 docx/pptx/pdf/xlsx 等，会话里凡带 `anthropic-skills:` 前缀的都来自这里）。**内容分别冻结于 06-12／06-08／06-06，此后从未跟着项目演进**：写作课那份项目版 32,902 字节、16 份 references，旧快照 7,277 字节、4 份 references。
+  - **冲突是方向性的，不只是缺功能**：旧快照自称「课外培训班」课、带「先导红线」**明令禁止引单元课文**，而现行规则要求「匹配则引」且指定 `unit-texts.md` 为唯一事实源（§4 与 `writing-lesson/references/unit-texts.md`）；它还写已废弃的 `【PPT换页-PXX】`、产物落已废弃目录 `写作课输出\`、文件名无 `-第N单元-` 段、导 docx 不带 `--header-left/--header-right`、无避让卡与指纹台账、无五道机检、无冷启动复盘。
+  - **没有任何配置能仲裁**：项目与用户级 settings 均无 skill 优先级字段，前缀让两者被当成两个并存的 skill 而非互相覆盖，选哪个全凭模型读 description 自选；**而旧快照的触发面反而更宽**（多「写话课」、多两个题目例子、多一句兜底例句「即使用户只说『帮我备一节三年级写人的作文课』也应触发」）。
+  - ⚠ **误用自查点**：产物落到 `写作课输出\` 而非 `写作课详案输出\`，或文件名缺 `-第N单元-` 段——**命中即停手重做**。旧快照产出的详案结构上看着完全正常（同样两节连排 45 分钟、同样有作前作中作后与教师示范文），不盯路径不会当场发现，往往要到出配套或打包才炸。
+  - **日常规避**：新窗口一律用斜杠命令 `/laojohn-writing-lesson`（不带前缀）显式点名，不靠自然语言让模型自选；`/laojohn-lesson-plan`、`/laojohn-lesson-mindmap` 同理。**根治**须由用户到 claude.ai 的 Skills 里删掉那几份上传，删后本机 `synced\` 目录会自动清空（不影响 `laojohn-daily-post`、`picture-book-recommend` 这类仓内没有、确由云端提供的件）。
+  - **`anthropic-skills:laojohn-lesson-polish` 未裁决、先别用**：仓内没有对应物、CLAUDE.md 未收录，而它声明会**在原文件上直接修改**详案/课案/docx，绕过仓内确定性润色规则表 `polish_rules.py` 与机检 A/C 的回滚门。要用须先明确作用域与先后顺序。
+
 - **`【PPT换页-PXX】` 已废弃**（lesson-plan、writing-lesson 详案均不再写）。分页权归 `laojohn-ppt-draft`，由它按"教学节拍"自行切页；详案只需 `## 第N课时 · 课型` 划课时、`### 一、xx` 划环节。
 - docx 引擎仍把残留换页点渲染成橙色，**仅为向后兼容旧 docx**，新稿一律不产出。
 
