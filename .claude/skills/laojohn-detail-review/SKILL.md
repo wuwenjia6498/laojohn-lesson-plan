@@ -36,7 +36,7 @@ description: 对一份已成稿的「老约翰」详案(.md)做独立·冷启动
 | 信号 | 判为 | 加载的 rubric（唯一源） | 事实核对源 |
 |---|---|---|---|
 | 文件名 `*-课案详案.md`；正文有 `## 第N课时 · 课型`、`阅读策略`、`可视化工具`、`思辨` | **整本书阅读详案** | `.claude/skills/laojohn-lesson-plan/references/review-rubric.md` | 书籍档案 `读书会书籍档案\<书名>书籍档案.md`；**若正文有 `【图位:插-NN】` 占位**（原书插图配图版，2026-07-30 起支持）另核 `读书会原书插图\<书名>\_图单.md` 与该目录真图，判据见 `laojohn-lesson-plan/references/checklist.md`「原书插图」节 |
-| 文件名 `*-写作课详案.md`；正文有「两节连排 / 45 分钟 / 全感官唤醒 / 构思支架 / 【教师示范文】」 | **校内同步习作（写作课）详案** | `.claude/skills/laojohn-writing-lesson/references/review-rubric.md` | 习作档案 `laojohn-writing-lesson/references/archive/`（按册检索 index.md） |
+| 文件名 `*-写作课详案.md`；正文有「两节连排 / 45 分钟 / 全感官唤醒 / 构思支架 / 【教师示范文】」 | **校内同步习作（写作课）详案** | `.claude/skills/laojohn-writing-lesson/references/review-rubric.md` | 习作档案 `laojohn-writing-lesson/references/archive/`（按册检索 index.md）；**教材事实**（单元语文要素／习作题面／「梳理与交流」与「初试身手」原句／例文旁批）另核 `laojohn-writing-lesson/references/unit-texts.md` 该单元条目——条目是实物页的逐字转录，**冷审核对到条目为止、不开 `写作课教材插图\` 的图**（读图口径见该表用法段第 5 条）；**仅当正文有 `【图位:插-NN】` 占位**（教材图配图版）才另核该课次目录的 `_图单.md` 与真图 |
 | 文件名为课次口径 `<年级册>（季）第 N 次 · <课型>.md`（位于 `看图写话详案输出\<课次>\`，一课次一目录、目录名＝文件 stem；旧稿或为 `*-看图写话详案.md`）；正文有 `【图位:编号】` 占位、文末有「生图工单」与 ` ```imgspec ` 块 | **低年级看图写话详案** | `.claude/skills/laojohn-picture-writing/references/review-rubric.md` | **三处并用**（详见该 rubric「事实核对源」节）：① 文末生图工单各图「必须可见元素清单」＝画面事实唯一源；② `laojohn-picture-writing/references/curriculum-archive.md`＝教材锚点唯一源；③ `course-map.md`（§四 64 课次表＋§五 24 方法内部编号表）／`ability-ladder.md`＝课次与不可越阶；已回插时另核真图 `看图写话详案输出\<详案stem>\图位\*.png` |
 
 - 三类信号都不明显或冲突时，**停下问用户**这是哪类详案，不要猜。
