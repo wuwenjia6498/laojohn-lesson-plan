@@ -156,6 +156,8 @@ async def main():
         # 语言毛病可以引原句（结构四项不引），引了就同样受逐字铁律管
         quotes += [("语言毛病", g.get("quote"))
                    for g in ((r.get("language") or {}).get("issues") or []) if g.get("quote")]
+        if ((r.get("whole_piece") or {}).get("flow") or {}).get("demo_from"):
+            quotes += [("语句示范原句", r["whole_piece"]["flow"]["demo_from"])]
         w = r.get("whole_piece") or {}   # 结构四项不举原文，不参与引用校验
         bad = loose = 0
         for label, q in quotes:
@@ -203,6 +205,26 @@ async def main():
               + "｜语言毛病:" + ("／".join(g.get("kind", "?")
                                           for g in (lang.get("issues") or [])) or "无"))
         kinds = [g.get("kind") for g in (lang.get("issues") or [])]
+        # 每条毛病都得带改法（0918 加）。程序补的那条口水词没有改法（detail 带「——一篇里反复用同一个词」），豁免
+        for g in lang.get("issues") or []:
+            if str(g.get("detail") or "").endswith("一篇里反复用同一个词"):
+                continue
+            if not str(g.get("fix") or "").strip():
+                fails.append(f"{key} 篇语言毛病「{g.get('kind')}」没给改法 fix")
+                print(f"  ✗ 毛病「{g.get('kind')}」没给改法")
+            elif [x for x in EMPTY_WORDS if x in str(g.get("fix"))]:
+                fails.append(f"{key} 篇语言毛病「{g.get('kind')}」的改法带空夸词：{g.get('fix')}")
+            if g.get("kind") == "用词重复":
+                print(f"  · 用词重复（程序已复核）：{g.get('detail')}")
+        # 语句一栏的示范：不通就改顺，通篇短句就连成长句；判「通顺」且 note 说的是短句却没示范，报
+        fl = w.get("flow") or {}
+        if fl.get("demo_from") and fl.get("demo_to"):
+            print(f"  语句示范：「{fl['demo_from']}」→「{fl['demo_to']}」")
+            if [x for x in EMPTY_WORDS if x in str(fl["demo_to"])]:
+                fails.append(f"{key} 篇语句示范带空夸词：{fl['demo_to']}")
+        elif fl.get("verdict") in ("个别不畅", "多处不通") or "短句" in str(fl.get("note") or ""):
+            fails.append(f"{key} 篇语句判「{fl.get('verdict')}」／note「{fl.get('note')}」却没给示范")
+            print(f"  ✗ 语句没给示范：{fl.get('verdict')}／{fl.get('note')}")
         over = [w for w in srv.FILLERS if body.count(w) >= 3]
         if over and "口水词" not in kinds:
             fails.append(f"{key} 篇「{over[0]}」用了 {body.count(over[0])} 次却没报口水词"

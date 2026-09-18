@@ -776,11 +776,20 @@ function renderDetail() {
             ? `<div class="cm">${esc(x.kind || "")}${x.kind && x.detail ? "：" : ""}${
                 esc(x.detail || "")}</div>` : ""}${
             x.quote ? `<div class="ev${x.quote_suspect ? " sus" : ""}">${esc(x.quote)}${
-              x.quote_suspect ? '<span class="sustag">与原稿不符，请核对</span>' : ""}</div>` : ""}`
+              x.quote_suspect ? '<span class="sustag">与原稿不符，请核对</span>' : ""}</div>` : ""}${
+            x.fix ? `<div class="fix"><b>可以这样改</b>${esc(x.fix)}</div>` : ""}`
           ).join("")
         : `<div class="hint">无明显问题。</div>`
     }</div>`
-    + LANG_ROWS.map(wpRow).join("")
+    // 语句：判定＋说明之外，多一处示范——不通的句子改顺了是什么样、通篇短句连成长句是什么样。
+    // 原句（demo_from）与判据引用一样过了逐字校对，对不上的服务端已整个删掉，这里不用再标红。
+    + (() => {
+        const base = LANG_ROWS.map(wpRow).join(""), f = wp.flow || {};
+        if (!(f.demo_from && f.demo_to)) return base;
+        const demo = `<div class="fix"><b>示范</b><span class="from">原句：${esc(f.demo_from)}</span>可以写成：${esc(f.demo_to)}</div>`;
+        const i = base.lastIndexOf("</div>");
+        return base.slice(0, i) + demo + base.slice(i);
+      })()
     + (lg.overall ? `<div class="wp"><div class="h"><span class="t">表达</span><span class="what">句式、用词与描写方式</span></div>
         <div class="cm">${esc(lg.overall)}</div></div>` : "");
 
