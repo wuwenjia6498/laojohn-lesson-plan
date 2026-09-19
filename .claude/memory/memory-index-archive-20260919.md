@@ -1,5 +1,7 @@
+# MEMORY.md 压缩前快照 · 2026-09-19（写作课「跨课次通则」整块外移前）
+
 # Project Memory: laojohn-lesson-plan
-> **索引维护规则(0818立·0901补)**:①新增课次/单本书状态→进[归档索引](memory-index-archived-deliveries.md),不占索引行;②横向通则→各线「跨课次通则」块,不埋进课次条目;③未决/交付风险→「未决事项」块,做完即删;④优先级集中在各区头行;⑤行数≤150、单条钩子≤200字符、细节下沉主题文件,超限先归档,机检挂SessionStart hook自动跑;⑥CLAUDE.md只写现行规则,来历/日期/旧口径进记忆;压缩前快照=[0919](memory-index-archive-20260919.md)
+> **索引维护规则(0818立·0901补)**:①新增课次/单本书状态→进[归档索引](memory-index-archived-deliveries.md),不占索引行;②横向通则→各线「跨课次通则」块,不埋进课次条目;③未决/交付风险→「未决事项」块,做完即删;④优先级集中在各区头行;⑤行数≤150、单条钩子≤200字符、细节下沉主题文件,超限先归档,机检挂SessionStart hook自动跑;⑥CLAUDE.md只写现行规则,来历/日期/旧口径进记忆;压缩前快照=[0918](memory-index-archive-20260918.md)
 ## 用户偏好
 - 中文回复;简洁直接不堆客套;重要决策先列选项让用户拍板;视觉迭代常用截图反馈
 - **问「有没有做到X」时是要判断、不是指出问题**——先自己核查给结论,别把判断权反问回去
@@ -15,8 +17,37 @@
 - **双人协作(0820)**:口径见 CLAUDE.md §9;记忆事实源=仓内 .claude/memory/,用户目录那份是目录联接;看板与commit前缀0911已取消 — [详情](two-person-sync-0820.md)
 - **skill停用归档0910立·0911撤回**:只省description 2.8k字符(窗口0.2%),误触发方向反;22个全部在架,别再重做;活线两处查找与gitignore skills*通配保留无害 — [详情](skills-parked-0910.md)
 ## 写作课（writing-lesson）
-**写任何一篇前必读**:[0911换靶](generation-retarget-0911.md) · [文风定盘](writing-style-two-directions-conflict-0831.md) · [例子四判据](writing-lesson-example-must-be-unique-anchor.md) · [比喻反刻板](writing-lesson-metaphor-antistereotype.md) · [电报体红线](writing-lesson-telegraphese-and-coinage-redline.md) · [示范文「我」同龄](model-essay-persona-student-age-0914.md) · [跨课次通则子索引](memory-index-writing-lesson-rules.md) 整块
-### 跨课次通则 → 已外移 [写作课跨课次通则子索引](memory-index-writing-lesson-rules.md)（0919，排新课次前整块打开；新通则加进那里、不回本文件）
+**写任何一篇前必读**:[0911换靶](generation-retarget-0911.md) · [文风定盘](writing-style-two-directions-conflict-0831.md) · [例子四判据](writing-lesson-example-must-be-unique-anchor.md) · [比喻反刻板](writing-lesson-metaphor-antistereotype.md) · [电报体红线](writing-lesson-telegraphese-and-coinage-redline.md) · [示范文「我」同龄](model-essay-persona-student-age-0914.md) · 下方「跨课次通则」整块
+### 跨课次通则(写同类题目直接适用 · 展开见各源条)
+- **开场三问:这人这事学生当场能不能验证／反例署谁的名(答:不署,叫「一段很常见的开头」)／提问跟本课技法对不对位**:治「没画面」就直接问画面,绕道问年份会被材料字面反噬;改钩子＝改一条链,先搜回指词(还是/刚才/开场) — [源](opening-no-offstage-third-party.md)
+- **课上说「两种写法都对、自己选」，六处口径必须同样认下两种**:提纲表技法行/教师总结/⑦修改清单/三档标准优秀档/附录选稿最易写成单一必做,明线给自由暗尺只认一条＝「假选择」 — [源](blessed-options-must-pass-rubric-0915.md)
+- **反馈装置三处对齐:朗读范围盖得住判据·口头判据与纸面标记一字同·参考答案里不许有装置自己造成的失败**:限定「只读某段」前先对判据成分;纸上留空会让学生抄近路绕过口头判据 — [源](feedback-device-three-way-consistency-0915.md)
+- **教材页示例（思维泡/范例气泡）只作打开思路，不当评判对象**:「这三位你信谁」是硬造的伪问题;判断靶子只能是教师自拟对照段或同学自己的习作;开场问句判据=学生凭自己答得出吗 — [源](textbook-examples-not-judgement-targets-0915.md)
+- **预告的判据必须与⑦兑现的那把尺一字同;热身演活的那组人物要有下游(热身用A组示范用B组则末尾补一句交出去);③④⑤讲同一套技法时④⑤只留本环节才看得出的新东西** — [源](bijian-liuchu-6a-lesson-state.md)
+- **开场姿态**:教具别编「本想做却没做成」的懊恼由头(学生看得出假),坦白说特意准备 — [源](guanchariji-4a-lesson-state.md)
+- **官方情境在机构班不可兑现→把限制变成设定,不退回自造情境**:自带物品类→实物不在场稿子顶替;同班互认的猜人反馈→换掉「猜」保留内核 — [源1](xinaizhiwu-5a-lesson-state.md)/[源2](manhua-laoshi-5a-lesson-state.md)
+- **「当场换人试装」装置**:念完当场换人名再念,学生自己听出垮在哪;写人物特点/身份感的题目可照搬,成败标准「换名字一字不用改=没写成」一并复用 — [源](woheguoyitian-4a-lesson-state.md)
+- **外部件凡出现示范文处一律与详案逐字比对**(不只那张引句表):截断可接受、改写必须打回;已六次,0916第六次是**整篇被改写**、光查表查不到(仓内pptx与详案九处不一致,连课上要学生回文找的那句都换了) — [源](woheguoyitian-4a-ppt-chain-state.md)
+- **往「禁止逐字复用」清单补串一个串一条bullet**:tone_gate每条只取第一个串,并列写的第二个串永不报警;清单运行时解析补bullet即进机检 — [源](twentyyears-hometown-5a-lesson-state.md)
+- **描述教材图画面必先开原图目视，不得照抄图单/unit-texts 的文字转述(0918)**:图单文字本身会错(生活万花筒「接力赛举彩球」实为跑步赛挥小旗手花),错会顺链进投屏提示/师话/参考七处;发现即回改图单与 unit-texts 并标日期 — [源](textbook-image-desc-must-be-eyeballed-0918.md)
+- **教材换版(题目没变、题面/课文换掉)=第三形态,连改9处但course-map与文件名全不动**:三上四单元实做;教师侧配套2页是硬闸门,示范文变长须回压旁注 — [源](textbook-revision-same-title-new-page-0902.md)
+- **逐类过判据时连「落在哪一层」一起过**:同一句尺落在「事」上对全部话题成立,移到「特点」层就对抽象类失效(戴眼镜/性子急换谁都说得通);诊断法＝教师示范填的那张卡靠什么过关,靠具体就说明判据移错层 — [源](selection-criterion-must-cover-all-topics-0914.md)
+- **给学生的筛素材判据须拿档案话题表逐类过一遍**:半命题观点文分三型(事情类问「离了它还会不会发生」/品质类问「哪一刻你本来可以不这么做」/大词类先缩切口);正反例与示范文题材不得全落同一类 — [源](selection-criterion-must-cover-all-topics-0914.md)
+- **判据还要拿教材页自列的每个选项过一遍；投屏教材页含「先设想→再看示例」两段的须分次揭**：「结尾看出新结局不一样」判死教材自列的「乌龟又赢了」（结局同来路变）;课上放行「可再加一处」而六处暗尺只认一处＝反向假选择;含＿＿的师话行会被tone_gate当占位槽整行保护 — [源](gushi-xinbian-5a-unit-move-0828.md)
+- **含蓄叙事≠完全不点题;过犹不及型技法须演三档**:判掉过度形态必须同组给适度正样(完全不做／适度／过头),并点明判的是哪几句;收尾改两选一 — [源](model-essay-moderate-tier-not-two-extremes-0914.md)
+- **示范文的「我」＝与学生同龄、过学生当下的日子**:红线禁的是署名不是视角;成人当下生活不作主素材(学生照着找只能编),教师童年事是例外不是默认;已复发两次 — [源](model-essay-persona-student-age-0914.md)
+- **教材换题=重写不是改稿,第0步是改事实源**:archive零命中就动笔=伪造官方条款;五处连改(archive/index/course-map/锚点表/unit-texts);文体线链一改既有详案提纲表第3行静默过期 — [源](wodejiaren-4a-lesson-state.md)｜跨册迁移改9处不是5处;题面与指导件是两层 — [源2](gushi-xinbian-5a-unit-move-0828.md)
+- **「倒过来写」指构思顺序不指成文顺序**:新技法与既有铁律冲突,先分清管构思还是成文 — [源](wodejiaren-4a-lesson-state.md)｜**`参考：`里的学生答案过一遍「多数人家真会这样吗」**,编得巧但生活不常有=空转 — [源](wodejiaren-4a-lesson-state.md)
+- **教材照片与教参对不上时,称谓/数字/篇名逐项复核**,别一笔归为「版本差异」;以用户最新教材为准,改前先问 — [源](wodejiaren-4a-lesson-state.md)
+- **反例必须自足到能被判、且不与正教的技法撞车**:摘一段做反例先问「放回整篇它是不是正是我下一步要夸的句子」;口号式结尾的病是「换个活动也能用」不是「内容离题」 — [源](counterexample-must-be-self-sufficient-0915.md)
+- **教材自带提纲/范例=必须落实的知识点,自创工具只能细化不能顶替**;否定反例精确落到「缺了什么」 — [源](twentyyears-hometown-5a-lesson-state.md)
+- **点名「可行做法」只点一种=指定默认款**:硬要求但解法开放处写清单不写单例 — [源](writing-lesson-stage7-interaction-form-gap.md)
+- **自由写作页固定按两页写页码**(教师每次自插一页学生稿纸截图);区间页标`第23-24页`引擎不认须单号＋括注 — [源](writing-freewrite-two-pages-0911.md)
+- **某节超时先砍重复不砍步骤**:同一材料读两遍/同一功能两处落点是首选压缩位;标称配时对齐逐环节实估、别平均摊(0907故事新编①②④富余2.8全压在③⑤) — [源](lesson-timing-overrun-cut-repeats-not-steps.md)
+- **示范文的可数断言（共几段/哪段最长/只用两三句）必须脚本实测**:意图与成品会漂移,通读看不出、学生一数就露;优先压示范文不优先改师话;⚠冷审改完须复跑机检(新写的师话会带回刚删的毛病) — [源](model-essay-countable-claims-must-be-measured.md)
+- **半命题多话题题目：例子覆盖事与品质两类、品质类判归因不判换词、含蓄≠不点题**:「美好」二字跟着这件事就是点题、跟着口号句才是口号;判据分路要落在每一处用到它的地方 — [源](halftitle-abstract-vs-concrete-topics-0914.md)
+- **同一把尺数演几遍·学生归纳出的老师只命名不复述·整页课文投屏只露段首（0918张祖庆视角审）**:一个道理第三遍起多半是填空不是思考;①②⑦各演一遍够,③给资料让学生拼句的那步先砍 — [源](jieshao-shiwu-5a-lesson-state.md)
+- **换掉/改长教师示范文=四处下游连改**:详案12处/配套两侧json/批改标准包进提示词/PPT六类页外部重做;须回看③反例是否撞车;⚠变长还会顶爆配套页数闸门 — [源](model-essay-swap-downstream-chain.md)
 ### 规则与体例
 - [⚠规则效力评估0915:素材层做到了·咬合三条零落地](model-essay-rules-effect-eval-0915.md) — 四篇同尺盲评;0912够得着需与0914叠加才判得出丙;C2旁批表双标准四篇全未达标;根因=checklist把三条压进同一个勾;要领数上限缺「补进核心技法行」出口;机检②③④全绿≠合格
 - [示范文规则0912补五条+机检E+瘦身](model-essay-rules-supplement-0912.md) — 够得着上限=优等学生;旁批表最见功夫两句必入表;不教第四招;起笔不与③反例同型;§六第7问;essay_audit.py每份必跑;⚠已拆条文+history,生成只读顶部一屏卡,别把来历写回条文
@@ -85,7 +116,6 @@
 - [测评卷SKILL状态](reading-assessment-skill-state.md) / [测评事实以详案为准](assessment-facts-follow-lesson-plan.md) — 详案升深度蓝本(事实仍锁档案);与SKILL默认相反遇分叉先确认
 - [阅读指南拓展栏点名具体书/影片](reading-guide-extension-concrete-titles.md) — 仅此栏放宽红线,吃不准就不写
 ## 未决事项与交付风险（做完即删）
-- 三上五我们眼中的缤纷世界 0919 详案已定稿（观察对象四换定为小动物+蚂蚁短片，四轮冷审+张视角减讲法+语体审），配套三侧/PPT 链/批改标准包未做；短片不随教案分发（版权） — [详情](binfen-shijie-3a-lesson-state.md)
 - 四上五生活万花筒 0918 详案已定稿（冷审 B 块 8 条按推荐落定），配套三侧/PPT 链/批改标准包未做 — [详情](shenghuo-wanhuatong-4a-lesson-state.md)
 - 五上五介绍一种事物 0918 详案已定稿（B 块 6 条已落定；开场 0918 晚第八版改「我说你猜·两段揭示」，网店无人机版作废），配套三侧/PPT 链/批改标准包未做 — [详情](jieshao-shiwu-5a-lesson-state.md)
 - 开场「不在场第三人」另2课待回改(用户定本次只改五上四):四上一推荐一个好地方L27-31「一位朋友带孩子来玩」+老师替他读心(改它须重找判据载体,非换几句话)、三下六L44敲门送伞的孩子 — [详情](opening-no-offstage-third-party.md)
