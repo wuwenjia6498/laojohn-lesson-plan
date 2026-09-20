@@ -73,7 +73,7 @@ metadata:
 - **阶段② PNG 重压：跳过**。oxipng 实测只省 15.7MB（占 303MB 的 5.2%），而做它就必须让 B 机改回 `reset --hard`、冻结期改动全部手工拷进拷出——不值。
 - **阶段③**：filter-repo 剥 583 blob / 380.4MB，**5.5 秒**；force push 303 MiB **1 分 12 秒**（实际约 4.2 MiB/s）。
 - **验证全过**：与备份镜像 diff 只有阶段①那 21 个文件；**HEAD 树指纹重写前后完全一致**（`acd085ba…`）；受保护三目录 315 文件 SHA 全不变；362 提交一个没少；120 pptx / 329 图 / 192 docx 完整性零损坏。
-- 远端留 `backup/pre-filter-20260920`（旧历史全量）与 `salvage/0805-honbei-dropped`，**两周后确认无事再删**。
+- 远端留 `backup/pre-filter-20260920`（旧历史全量）与 `salvage/0805-honbei-dropped`。**观察期到 2026-10-04**，其间无异常即可删 backup 分支（删之前 GitHub 网页显示的仓库体积不会降，属正常）；salvage tag 确认无用后再删。
 
 ## ★ 核心通则：GC 根必须先摘干净（0920 由 B 机同事归纳 · 本次发作四回）
 
