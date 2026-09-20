@@ -56,7 +56,10 @@ TYPO_READ = {"经长": "经常"}
 # 起手式黑名单。⚠ 一个变体一个串，别指望前缀能覆盖变体——「孩子在作文中」这个串
 # 原先没收，于是三篇点评卡全用它起头，这道防线整批静默放过（2026-08-27 实测）。
 OPENERS = ["孩子写到", "孩子写道", "孩子写的", "孩子在作文中", "孩子在这篇作文中",
-           "同学写到", "同学笔下", "家长您好", "这篇文章", "这篇写"]
+           "同学写到", "同学笔下", "家长您好", "这篇文章", "这篇写",
+           # 0921 加：从亮点句切进去的套式，防线之下仍撞了车（B、C 两篇同一句式）
+           "最让人记住的是", "最打动人的是", "最出彩的是", "读到",
+           "写的这位同学", "写的这个人", "写的这位"]
 
 
 # 空夸词表取自服务端，别在这里另写一份（那正是「改一处不改另一处」的老毛病）
@@ -175,10 +178,41 @@ async def main():
               f"，标点有出入 {loose}，查无此句 {bad}"
               f"　（校正前已自动对回原文 {fx} 处、标可疑 {sp} 处）")
 
+        # 篇章结构那一段（0921 起是一段话，四个 verdict 不上屏、只供程序与班级汇总）
+        summ = str(w.get("summary") or "").strip()
+        print(f"  结构段（{len(summ)} 字）：{summ}")
+        if not summ:
+            fails.append(f"{key} 篇篇章结构那一段空着")
+            print("  ✗ 结构段空着")
+        else:
+            if len(summ) < 80 or len(summ) > 240:
+                fails.append(f"{key} 篇结构段 {len(summ)} 字，要求 120～180（放宽到 80～240）")
+                print(f"  ✗ 结构段字数 {len(summ)}")
+            w2 = [x for x in EMPTY_WORDS if x in summ]
+            if w2:
+                fails.append(f"{key} 篇结构段用了空话{w2}")
+                print(f"  ✗ 结构段空话{w2}")
+            # 五样要说到（三年级不提重点，那是 0827 定的，0921 用户确认照旧）
+            miss = [name for name, keys in
+                    (("完整", ("完整", "写完", "开头", "结尾", "收住", "停在", "半截")),
+                     ("顺序", ("顺序", "先后", "先说", "跳", "回头", "按事情", "一路")),
+                     ("分段", ("段",)),
+                     ("衔接", ("衔接", "过渡", "接上", "接住", "接得", "接不", "接下去",
+                               "断口", "转得", "转到", "带过", "带一句", "顺下来", "顺下去")))
+                    if not any(x in summ for x in keys)]
+            if miss:
+                fails.append(f"{key} 篇结构段没说到：{'、'.join(miss)}")
+                print(f"  ✗ 结构段漏了：{miss}")
+            # 三年级：详略一个字都不该提
+            if [x for x in ("详略", "重点", "主次") if x in summ]:
+                fails.append(f"{key} 篇（三年级）结构段提了详略重点，本学段不判")
+                print("  ✗ 三年级结构段提了重点详略")
+            if re.search(r"[两二三四五六七八九十0-9]\s*个?自然段|分为[两二三四五六七八九十0-9]", summ):
+                print(f"  · 结构段报了具体段数（它常数错，看一眼）：{summ[:40]}…")
+
         # 取消「判得好就留空」之后，模型最可能的退化是把判定重说一遍
-        #（判「完整」写「结构完整」）。这是唯一能机检出来的形态。
-        for k, lab in (("completeness", "完整性"), ("order", "叙述顺序"),
-                       ("paragraph", "分段"), ("detail", "详略"), ("flow", "语句")):
+        #（判「通顺」写「语句通顺」）。结构四项 0921 起没有 note 了，只剩语句这一项。
+        for k, lab in (("flow", "语句表达"),):
             v = w.get(k) or {}
             vd, nt = str(v.get("verdict") or ""), str(v.get("note") or "")
             if vd == "不适用":
@@ -235,6 +269,9 @@ async def main():
         fl = w.get("flow") or {}
         if fl.get("demo_from") and fl.get("demo_to"):
             print(f"  语句示范：「{fl['demo_from']}」→「{fl['demo_to']}」")
+            if norm(fl["demo_from"]) == norm(fl["demo_to"]):
+                fails.append(f"{key} 篇语句示范改前改后一模一样——tidy_language 的兜底没生效")
+                print("  ✗ 语句示范原样抄了一遍")
             if [x for x in EMPTY_WORDS if x in str(fl["demo_to"])]:
                 fails.append(f"{key} 篇语句示范带空夸词：{fl['demo_to']}")
         elif fl.get("verdict") in ("个别不畅", "多处不通") or "短句" in str(fl.get("note") or ""):
@@ -252,7 +289,11 @@ async def main():
         if dv != "不适用":
             fails.append(f"{key} 篇三年级的详略判成了「{dv}」，应记「不适用」")
             print(f"  ✗ 三年级不该判详略，却判了「{dv}」")
-        print(f"  焦点：{r.get('focus', '')}")
+        fc = str(r.get("focus") or "")
+        print(f"  讲评要点（{len(fc)} 字）：{fc}")
+        if len(fc) < 70 or len(fc) > 170:
+            fails.append(f"{key} 篇讲评要点 {len(fc)} 字，要求 90～130（放宽到 70～170）")
+            print(f"  ✗ 讲评要点字数 {len(fc)}")
         print(f"  点评卡：{r.get('parent_card', '')}")
 
         # 5 越界提错别字
@@ -311,8 +352,10 @@ async def main():
             if a < b and opens[a][:8] and opens[a][:8] == opens[b][:8]:
                 fails.append(f"{a}、{b} 两篇点评卡开头雷同（去掉姓名后前 8 字相同）")
     for op in OPENERS:
+        # 用 opens（已去姓名、已 norm）比：点评卡多半以姓名起头，拿原文比这张表等于没装
         hit = [k for k, v in results.items()
-               if norm(v.get("parent_card", "")).startswith(norm(op))]
+               if norm(v.get("parent_card", "")).startswith(norm(op))
+               or opens[k].startswith(norm(op))]
         if len(hit) >= 2:
             fails.append(f"{'、'.join(hit)} 篇都用「{op}」起头——固定起手式")
     print("点评卡开头（已去姓名）：" + "　｜　".join(f"{k}「{v[:12]}…」" for k, v in opens.items()))
@@ -356,8 +399,10 @@ async def main():
                            for x in ("detail", "fix")]
                         + [str((c or {}).get(x) or "") for c in (v.get("checks") or [])
                            for x in ("comment", "advice")]
-                        + [str((y or {}).get("note") or "")
-                           for y in (v.get("whole_piece") or {}).values()])
+                        + [str((v.get("whole_piece") or {}).get("summary") or "")]
+                        + [str(y.get("note") or "")
+                           for y in (v.get("whole_piece") or {}).values()
+                           if isinstance(y, dict)])
         hit = [w for w in NO_RHETORIC if w in blob]
         if hit:
             fails.append(f"{k} 篇在劝人加修辞（「{hit[0]}」）——没用比喻不是毛病")

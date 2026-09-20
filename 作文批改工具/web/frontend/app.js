@@ -1,7 +1,7 @@
 /* 老约翰 · 同步习作批改助手 · 前端
  *
  * 三条不要改掉的设计：
- * 1. 逐份**串行**批改，且把已生成的点评卡开头传给下一份（prev_heads）——
+ * 1. 逐份**串行**批改，且把已生成的反馈卡开头传给下一份（prev_heads）——
  *    一个班二三十份发同一个家长群，句式撞车这工具就废了。并发会让这道防线失效。
  * 2. 图片在本地压到长边 1600 再传：手机原图四五 MB，直传既慢又贵，
  *    而稿纸是黑字白纸、1600 足够认字。
@@ -211,7 +211,7 @@ function onIdbFail(e) {
   if (e && e.name === "QuotaExceededError" && !blobsOff) {
     // 两级降级，不一步跳到全关：先只停存照片（批语小得多，通常还存得下）。
     // 优先级写死：**result 必存，blob 尽力**——永远不为了写图把批语挤掉。
-    // 只有批语在的那一份，详情页和点评卡照样能用（出图不依赖照片）。
+    // 只有批语在的那一份，详情页和反馈卡照样能用（出图不依赖照片）。
     blobsOff = true;
     return;
   }
@@ -266,7 +266,7 @@ function draftReset(lesson) {
       k: S.sid, sid: S.sid,
       lesson_id: lesson.lesson_id, lesson_label: lesson.label,
       // mock 必须记：makeCard() 读的是**当前** S.mock。演示模式批的东西，等服务端
-      // 配上密钥后再打开，点评卡会不带「非真实批改」水印却带着品牌落款——
+      // 配上密钥后再打开，反馈卡会不带「非真实批改」水印却带着品牌落款——
       // 那是能发进家长群的对外事故。打开前对不上就不给用。
       mock: S.mock, created: Date.now(), updated: Date.now(), total: 0, done: 0,
     });
@@ -478,7 +478,7 @@ function askSheet(title, html, okText, cancelText) {
 }
 
 async function pickLesson(l) {
-  // 换课会清掉队列。ok 那几份是花过真钱和时间换来的，而且没有任何副本——点评卡
+  // 换课会清掉队列。ok 那几份是花过真钱和时间换来的，而且没有任何副本——反馈卡
   // 要长按保存才落地，老师十有八九还没导出。而「返回选课页看一眼再点回来」是
   // 完全正常的路径，手指离另一课的按钮只有几十像素。加了暂存之后性质变了：
   // 「我明明存下来了却被一次误触清掉」比「刷新就没了」更让人恼火。
@@ -652,7 +652,7 @@ function renderQueue() {
   $("#bottombar").hidden = !S.items.length || $("#view-grade").hidden;
 }
 
-/* 串行泵：一份批完再批下一份，并把已有的点评卡开头带给下一份 */
+/* 串行泵：一份批完再批下一份，并把已有的反馈卡开头带给下一份 */
 async function pump() {
   if (S.busy) return;
   S.busy = true;
@@ -726,7 +726,13 @@ const WP_ROWS = [
   ["paragraph", "分段", "段落划分是否得当"],
   ["detail", "详略", "重点是否展开，次要是否从简"],
 ];
-const LANG_ROWS = [["flow", "语句", "有无生硬、不通的句子"]];
+// 0921 起结构改成一段话（whole_piece.summary），四个 verdict 只供程序核对与班级汇总、不上屏。
+// WP_ROWS 留着是给**旧存档**用的：0921 之前批的记录没有 summary，那些记录永久留存，
+// 掉回空白就等于把老师批过的东西弄丢了。
+const wpHints = wp => ["paragraph", "order"]
+  .map(k => ((wp[k] || {}).hint
+    ? `<div class="wp"><div class="cm sus-note">${esc(wp[k].hint)}</div></div>` : ""))
+  .join("");
 // 结构四项与句子通不通都**不进档位**（档位只由三条判据定），只给老师看，
 // 也不要把「逻辑乱」这种话直接转给家长。
 // 「不适用」不在坏值里——那是三年级不判详略时的取值，走中性色，它不是毛病。
@@ -761,7 +767,9 @@ function renderDetail() {
         esc(v.verdict || "—")}</span>${esc(v.note || "")}</div>
     </div>`;
   };
-  const wpBody = WP_ROWS.map(wpRow).join("");
+  const wpBody = wp.summary
+    ? `<div class="wp"><div class="cm para">${esc(wp.summary)}</div></div>` + wpHints(wp)
+    : WP_ROWS.map(wpRow).join("");
 
   // 语言：句子通不通 + 三种可数毛病 + 整篇一句话。
   // 毛病的引用不加 .sm 类——`.wp .ev.sm` 有两行截断，会把 sustag 那条红字一起藏掉。
@@ -781,17 +789,22 @@ function renderDetail() {
           ).join("")
         : `<div class="hint">无明显问题。</div>`
     }</div>`
-    // 语句：判定＋说明之外，多一处示范——不通的句子改顺了是什么样、通篇短句连成长句是什么样。
+    // 语句表达（0921 合并）：判定＋说明、一处示范、整体一句话，三样同属一栏。
+    // 合并的理由是老师看的是同一件事；提示词里两处明写「不许说同一样」，靠的是规则不是版面。
     // 原句（demo_from）与判据引用一样过了逐字校对，对不上的服务端已整个删掉，这里不用再标红。
     + (() => {
-        const base = LANG_ROWS.map(wpRow).join(""), f = wp.flow || {};
-        if (!(f.demo_from && f.demo_to)) return base;
-        const demo = `<div class="fix"><b>示范</b><span class="from">原句：${esc(f.demo_from)}</span>可以写成：${esc(f.demo_to)}</div>`;
-        const i = base.lastIndexOf("</div>");
-        return base.slice(0, i) + demo + base.slice(i);
-      })()
-    + (lg.overall ? `<div class="wp"><div class="h"><span class="t">表达</span><span class="what">句式、用词与描写方式</span></div>
-        <div class="cm">${esc(lg.overall)}</div></div>` : "");
+        const f = wp.flow || {};
+        const cls = f.verdict === "不适用" ? "v-na" : (WP_BAD.includes(f.verdict) ? "v-no" : "v-ok");
+        return `<div class="wp">
+          <div class="h"><span class="t">语句表达</span><span class="what">句子通不通、整体读下来什么样</span></div>
+          <div class="cm${f.suspect ? " sus-note" : ""}"><span class="vtag ${cls}">${
+            esc(f.verdict || "—")}</span>${esc(f.note || "")}</div>
+          ${(f.demo_from && f.demo_to)
+            ? `<div class="fix"><b>示范</b><span class="from">原句：${esc(f.demo_from)}</span>可以写成：${esc(f.demo_to)}</div>`
+            : ""}
+          ${lg.overall ? `<div class="cm">${esc(lg.overall)}</div>` : ""}
+        </div>`;
+      })();
 
   // 错别字（老师参考）。只在服务端真跑过校对（有 typos_check）时才渲染——
   // 改前的旧存档、关了校对（LJ_PROOFREAD=0）的记录没有这个字段，硬显示「没查出」就是假话。
@@ -843,13 +856,6 @@ function renderDetail() {
     <div class="unclear"><b>以下内容识别不清，请核对原稿</b>
       ${r.unclear.map(u => `<div>· ${esc(u)}</div>`).join("")}</div>` : "";
 
-  const sc = r.showcase || {};
-  const showcase = sc.suitable ? `
-    <div class="sec">
-      <h3>讲评课范读推荐<span class="aside">讲评点：${esc(sc.point || "")}</span></h3>
-      <div class="ev${sc.paragraph_suspect ? " sus" : ""}">${esc(sc.paragraph || "")}${
-        sc.paragraph_suspect ? '<span class="sustag">与原稿不符，范读前请核对</span>' : ""}</div>
-    </div>` : "";
   $("#detail-body").innerHTML = `
     <div class="namerow">
       <input id="in-name" value="${esc(r.student_name || "")}" placeholder="未识别姓名，请手动填写">
@@ -858,7 +864,7 @@ function renderDetail() {
     ${focus}
     ${unclear}
     <div class="sec">
-      <h3>亮点句摘录<span class="aside">点评卡优先引用</span></h3>
+      <h3>亮点句摘录<span class="aside">反馈卡优先引用</span></h3>
       ${hlBody}
     </div>
     <div class="sec"><h3>本课评价判据<span class="aside">课堂已讲授 · 档位依据</span></h3>${checks}</div>
@@ -872,16 +878,15 @@ function renderDetail() {
     </details>
     ${typoBlock}
     <div class="sec">
-      <h3>稿纸批语<span class="aside">誊写至稿纸「老师批改」栏 · 30 字以内</span></h3>
+      <h3>习作评语<span class="aside">誊写到学生稿纸上 · 30 字以内</span></h3>
       <textarea id="ta-note" rows="2">${esc(r.teacher_note || "")}</textarea>
-      <div class="row"><button class="ghost" id="btn-copy-note">复制批语</button></div>
+      <div class="row"><button class="ghost" id="btn-copy-note">复制评语</button></div>
     </div>
-    ${showcase}
     <div class="sec">
-      <h3>家长点评卡<span class="aside">确认文字后生成图片</span></h3>
-      ${r.quoted_sentence_suspect ? `<div class="unclear"><b>点评卡引用与原稿不符</b>
+      <h3>家长反馈卡<span class="aside">确认文字后生成图片</span></h3>
+      ${r.quoted_sentence_suspect ? `<div class="unclear"><b>反馈卡引用与原稿不符</b>
         引用内容：${esc(r.quoted_sentence || "")}<br>发送前请对照原稿核对。</div>` : ""}
-      ${(r.quote_check && r.quote_check.pinyin_left && r.quote_check.pinyin_left.length) ? `<div class="unclear"><b>点评卡里还有孩子用拼音代的字</b>
+      ${(r.quote_check && r.quote_check.pinyin_left && r.quote_check.pinyin_left.length) ? `<div class="unclear"><b>反馈卡里还有孩子用拼音代的字</b>
         ${esc(r.quote_check.pinyin_left.join("、"))}——工具拿不准是哪个字，没替它猜，生成图片前请你手改成正字。</div>` : ""}
       <textarea id="ta-card" rows="7">${esc(r.parent_card || "")}</textarea>
       <div class="count" id="cnt-card"></div>
@@ -889,7 +894,7 @@ function renderDetail() {
         <button class="ghost" id="btn-copy-card">复制文字</button>
         <button class="primary" id="btn-make">生成图片</button>
       </div>
-      <img id="cardimg" hidden alt="点评卡">
+      <img id="cardimg" hidden alt="反馈卡">
       <div class="saveTip" id="save-tip" hidden>长按上图保存，再发送至家长群。</div>
     </div>`;
 
@@ -929,7 +934,7 @@ async function copy(text, btn) {
   setTimeout(() => { btn.textContent = old; }, 1200);
 }
 
-/* ── 点评卡出图（canvas，前端画，长按保存）───── */
+/* ── 反馈卡出图（canvas，前端画，长按保存）───── */
 const CARD_W = 750, PAD = 56;
 const FONT = '"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif';
 
@@ -991,7 +996,7 @@ function makeCard() {
   c.fillStyle = "#C8352B"; c.fillRect(0, 0, CARD_W, 10);
 
   // 演示模式：卡片本身必须自带「假」的标记。这张图的用途就是被转发出去，
-  // 一张内容全假、却带着品牌落款的点评卡流到家长手里，比界面上少一句提示严重得多。
+  // 一张内容全假、却带着品牌落款的反馈卡流到家长手里，比界面上少一句提示严重得多。
   // 水印先画，正文压在它上面，不影响可读性。
   if (S.mock) {
     c.save();
@@ -1178,7 +1183,7 @@ function openSession(lesson, sid, rows, live) {
   }));
   // ⚠ 必须取最大 id，**不能用 length**——幽灵项被丢掉后 length 小于最大 id，
   //   新拍的照片就会拿到一个已经存在的 id。renderQueue 用 data-id 反查，撞了
-  //   就会点开另一个学生的批语，然后老师把 A 的点评卡发给 B 的家长。
+  //   就会点开另一个学生的批语，然后老师把 A 的反馈卡发给 B 的家长。
   S.seq = S.items.reduce((m, x) => Math.max(m, x.id), 0);
 
   renderBrief();
@@ -1228,7 +1233,7 @@ async function renderHistory() {
         "删除该课次的批改记录？",
         esc((m && m.lesson_label) || "这一课") + " 已批改的 <b>" + ((m && m.done) || 0) +
         " 份</b>批语将被删除，且无法恢复。<br>" +
-        "<span class=\"aside\">已保存至相册的点评卡不受影响。</span>",
+        "<span class=\"aside\">已保存至相册的反馈卡不受影响。</span>",
         "保留", "删除");
       if (stay) return;
       await draftDropSession(b.dataset.sid);
@@ -1246,12 +1251,12 @@ async function openHistSession(sid) {
   if (!m) return;
 
   // 演示模式批的东西，在真实模式下打开会出一张没有「非真实批改」水印、却带着
-  // 品牌落款的点评卡——那能直接发进家长群。不给开。
+  // 品牌落款的反馈卡——那能直接发进家长群。不给开。
   if (!!m.mock !== !!S.mock) {
     const stay = await askSheet(
       "该课次为演示模式批改",
       "服务端当时未配置密钥，批语为结构完整的<b>模拟数据</b>，不具参考价值；" +
-      "此时生成的点评卡也不带「非真实批改」水印，建议删除。",
+      "此时生成的反馈卡也不带「非真实批改」水印，建议删除。",
       "保留", "删除该课次");
     if (!stay) { await draftDropSession(sid); renderHistory(); refreshHist(); }
     return;
@@ -1291,7 +1296,7 @@ $("#btn-clear-draft").onclick = async () => {
     "清除本机全部记录？",
     "包括<b>历史记录中 " + histCount + " 个课次</b>的批语，删除后无法恢复。<br>" +
     "<span class=\"aside\">如仅需删除某一课次，请在「历史批改记录」中单独删除。" +
-    "已保存至相册的点评卡不受影响。</span>",
+    "已保存至相册的反馈卡不受影响。</span>",
     "保留", "全部删除");
   if (stay) return;
   draftClearAll();

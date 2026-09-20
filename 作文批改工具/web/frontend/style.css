@@ -303,6 +303,9 @@ textarea:focus{outline:0;border-color:var(--blue-line)}
 .sustag{display:block;margin-top:4px;font-size:12px;font-weight:700;color:var(--bad)}
 /* 分段这一项测不准时的提示。错结论比没结论更伤，所以要显眼 */
 .wp .cm.sus-note{color:var(--bad);font-weight:700}
+/* 篇章结构那一段（0921 起是一整段话，不再逐项列）：它是这一栏的主体内容，
+   不是某个判定的附注，所以比 .cm 深一档、行距放开，160 字读下来才不费劲 */
+.wp .cm.para{color:var(--ink);line-height:1.85}
 /* 语言块里的改法示范：每条毛病下面「可以这样改」、语句行下面「示范」。
    与判据的 .check .advice 同一种左线样式、字号压一档——它是参考层，不该比主判据的怎么改更显眼 */
 .wp .fix{margin:6px 0 0;padding:5px 9px;border-left:3px solid var(--brown-cell);font-size:13px;line-height:1.6;color:var(--ink)}
