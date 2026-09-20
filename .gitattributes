@@ -1,0 +1,4 @@
+# 钩子与 shell 脚本必须是 LF —— Windows 上被 checkout 成 CRLF 会导致
+# heredoc 定界符匹配失败、脚本静默失效（2026-09-20 装 pre-commit 闸门时踩到）
+.githooks/* text eol=lf
+*.sh        text eol=lf
