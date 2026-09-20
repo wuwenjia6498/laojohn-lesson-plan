@@ -85,7 +85,7 @@
 - [测评卷SKILL状态](reading-assessment-skill-state.md) / [测评事实以详案为准](assessment-facts-follow-lesson-plan.md) — 详案升深度蓝本(事实仍锁档案);与SKILL默认相反遇分叉先确认
 - [阅读指南拓展栏点名具体书/影片](reading-guide-extension-concrete-titles.md) — 仅此栏放宽红线,吃不准就不写
 ## 未决事项与交付风险（做完即删）
-- **仓库瘦身已完成(0920)**：759.67→303.40 MiB，filter-repo blob-id 模式剥 583 个死二进制，内容零变化已证；⚠ 附五条 git 批量操作踩坑（exFAT safe.directory／ls-files 中文转义造假象／batch-check 须带 %(rest)／rm --cached 整批中止／robocopy 搬不动中文路径） — [详情](repo-slimming-plan-0920.md)
+- **仓库瘦身已完成(0920)**：759.67→303.41 MiB（两机一致）。**⏰ 唯一待办：2026-10-04 后删远端 `backup/pre-filter-20260920`**（删前 GitHub 网页体积数字不降，属正常；删后两台机器的负向 refspec 即可撤）；⚠ 新克隆必跑两条装机命令(core.hooksPath + 负向 refspec，见 docs\协作同步说明.md)，否则大文件闸门失效、一条 git pull 就把仓库撑回 635MiB — [详情](repo-slimming-plan-0920.md)
 - 三上五我们眼中的缤纷世界 0919 详案已定稿（观察对象四换定为小动物+蚂蚁短片，四轮冷审+张视角减讲法+语体审），配套三侧/PPT 链/批改标准包未做；短片不随教案分发（版权） — [详情](binfen-shijie-3a-lesson-state.md)
 - 四上五生活万花筒 0918 详案已定稿（冷审 B 块 8 条按推荐落定），配套三侧/PPT 链/批改标准包未做 — [详情](shenghuo-wanhuatong-4a-lesson-state.md)
 - 五上五介绍一种事物 0918 详案已定稿（B 块 6 条已落定；开场 0918 晚第八版改「我说你猜·两段揭示」，网店无人机版作废），配套三侧/PPT 链/批改标准包未做 — [详情](jieshao-shiwu-5a-lesson-state.md)
