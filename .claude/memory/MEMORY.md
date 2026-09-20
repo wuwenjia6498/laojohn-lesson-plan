@@ -35,7 +35,7 @@
 - [学段口气全线没分级(0817)](writing-lesson-grade-tone-not-differentiated.md) — 判断分三层(用词/技法深度/思维层级);判据=降两级反问;0828复发:并列短语重难点只落实一半,拆开逐个问落点
 - [技法N件套须练全N件](technique-set-practice-all-parts.md) — 定稿前做「每件×是否产出过」对账;机检与checklist都抓不到｜⚠**同族第二病:自拟材料要按「步」拆开核要素是否齐全**(四上五正例中间一步无听觉、师话却把落在第一步的嗡嗡声算进去,通读查不到——整体读起来三样都有,漏的是「都在同一步里」) — [源](shenghuo-wanhuatong-4a-lesson-state.md)
 - [首页无区头单表6行+两行文案体例(现行)](writing-lesson-front-page-single-table.md) — 0831两行体例推翻0828:目标行一句话说清学会写哪类文章;技法行首句固定「使用+构思工具名」且与正文一字一致;写详案或改style_front_page前必读
-- [作文批改工具(0818立项)](writing-correction-tool-0818.md) — 给加盟商不能做skill;判据从详案抽标准包JSON;引用一字不差靠工程;0907上线闸门verified_by_human;0917判松根因=不做全篇盘点→survey先数再判+程序兜底;主模型doubao-2-1-pro(必带thinking=disabled);错别字层只给老师看;**0918语言层带改法:毛病每条fix·语句栏demo示范长句·用词重复程序复核·辅助描写留/压/删三类**;改提示词必跑run_regression
+- [作文批改工具(0818立项)](writing-correction-tool-0818.md) — 给加盟商不能做skill;判据从详案抽标准包JSON;引用一字不差靠工程;0907上线闸门verified_by_human;0917判松根因=不做全篇盘点→survey先数再判+程序兜底;主模型doubao-2-1-pro(必带thinking=disabled);错别字层只给老师看;**0918语言层带改法:毛病每条fix·语句栏demo示范长句·用词重复程序复核·辅助描写留/压/删三类**;**0920加用词不当/修辞不当两类:没用修辞不算毛病·每类程序只留一条·判词不判字**;改提示词必跑run_regression
 - [批改工具已部署Vercel(0824)](writing-correction-tool-vercel-deploy-0824.md) — 入口=部署根index.py不能放api/;.vercelignore挡config.json;正式地址grader.skyline666.top;⚠validate全绿≠包对
 - [⚠配套三侧文风0915与详案线同步换靶](writing-materials-retarget-0915.md) — 生成读三侧定稿样本不读对照表;polish_materials.py机检D每份必跑(同一张polish_rules,禁副本);存量42份已过一轮;样本卡=现行json快照,--check-exemplars防漂移(抄样本抄现行文件别抄git diff);⚠配套--all --dry-run是共享规则表第二回归面,首跑照出4条排除漏洞
 - ⚠**学生单上印的工具名必须和教师口头说的一致(0916)**:详案叫「人物特点卡」、学生单模板写死「构思表」,学生对不上号;`template_student.html` 45份共用**禁直接改词**,改法=加可选字段`worksheet.plan_name`不传则沿用旧词;⚠**PPT里的稿纸页就是学生用第2页的截图**,配套一改那张图就过期 — [源](manhua-laoshi-5a-lesson-state.md)
@@ -66,6 +66,7 @@
 - [可引用原文栏取成段](book-profile-quote-full-passage.md) / [类型字段禁空泛「儿童小说」](book-type-no-generic-children-fiction.md) — 下游需成段并保留原书弯引号;类型须具体文学类型
 - [低段/合集建档差异](low-grade-collection-profile-formalized.md) — 区分变量是「低段」非「快乐读书吧」
 ## 引擎与下游物料
+- [claude.ai 旧 skill 快照已删净(0920)](skill-snapshots-cloud-cleared-0920.md) — 三份 06 月快照连同 daily-post/picture-book-recommend 用户手动删除(有意);重名冲突根除,CLAUDE.md §5 警告块已压缩;⚠误用自查点(产物落 写作课输出\ 或文件名缺-第N单元-)日后再传 skill 仍管用
 **碰引擎/共享件前必读**：[下游六件抽共享层](downstream-shared-layer-and-token-facts.md)（改真源照该条回归法）· [0727上下文瘦身收官](context-engineering-slimdown-0727.md)（细节已下沉references别抄回）
 - [宣传件渲染链+PDF反查源三指纹(0826)](promo-materials-render-chain.md) — 手改PDF前先三指纹反查源html;馆内海报scale须0.98;海报html已改入库
 - [配套PDF的Type3字体病已修两线(0817)](pdf-type3-fonts-fixed.md) — 装饰图标改纯CSS图形非换emoji;.mark .sym字体栈中间那档雅黑勿删;已装check_type3
@@ -85,7 +86,7 @@
 - [测评卷SKILL状态](reading-assessment-skill-state.md) / [测评事实以详案为准](assessment-facts-follow-lesson-plan.md) — 详案升深度蓝本(事实仍锁档案);与SKILL默认相反遇分叉先确认
 - [阅读指南拓展栏点名具体书/影片](reading-guide-extension-concrete-titles.md) — 仅此栏放宽红线,吃不准就不写
 ## 未决事项与交付风险（做完即删）
-- **仓库瘦身已完成(0920)**：759.67→303.40 MiB，filter-repo blob-id 模式剥 583 个死二进制，内容零变化已证；⚠ 附五条 git 批量操作踩坑（exFAT safe.directory／ls-files 中文转义造假象／batch-check 须带 %(rest)／rm --cached 整批中止／robocopy 搬不动中文路径） — [详情](repo-slimming-plan-0920.md)
+- **仓库瘦身已完成(0920)**：759.67→303.41 MiB（两机一致）。**⏰ 唯一待办：2026-10-04 后删远端 `backup/pre-filter-20260920`**（删前 GitHub 网页体积数字不降，属正常；删后两台机器的负向 refspec 即可撤）；⚠ 新克隆必跑两条装机命令(core.hooksPath + 负向 refspec，见 docs\协作同步说明.md)，否则大文件闸门失效、一条 git pull 就把仓库撑回 635MiB — [详情](repo-slimming-plan-0920.md)
 - 三上五我们眼中的缤纷世界 0919 详案已定稿（观察对象四换定为小动物+蚂蚁短片，四轮冷审+张视角减讲法+语体审），配套三侧/PPT 链/批改标准包未做；短片不随教案分发（版权） — [详情](binfen-shijie-3a-lesson-state.md)
 - 四上五生活万花筒 0918 详案已定稿（冷审 B 块 8 条按推荐落定），配套三侧/PPT 链/批改标准包未做 — [详情](shenghuo-wanhuatong-4a-lesson-state.md)
 - 五上五介绍一种事物 0918 详案已定稿（B 块 6 条已落定；开场 0918 晚第八版改「我说你猜·两段揭示」，网店无人机版作废），配套三侧/PPT 链/批改标准包未做 — [详情](jieshao-shiwu-5a-lesson-state.md)

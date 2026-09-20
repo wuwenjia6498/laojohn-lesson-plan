@@ -767,10 +767,10 @@ function renderDetail() {
   // 毛病的引用不加 .sm 类——`.wp .ev.sm` 有两行截断，会把 sustag 那条红字一起藏掉。
   const lg = r.language || {};
   const lgIssues = lg.issues || [];
-  // 语言按「用词 → 语句 → 表达」排：语句是唯一带判定值的，另两项是描述性的。
-  // 三类毛病（口水词／同起头／动词笼统）都收在「用词」这一项下面。
+  // 语言按「用词与修辞 → 语句 → 表达」排：语句是唯一带判定值的，另两项是描述性的。
+  // 几类毛病（口水词／用词重复／用词不当／同起头／动词笼统／修辞不当）都收在这一项下面。
   const lgBody =
-    `<div class="wp"><div class="h"><span class="t">用词</span><span class="what">词语重复、动作笼统、句式单一</span></div>${
+    `<div class="wp"><div class="h"><span class="t">用词与修辞</span><span class="what">用词准不准、比喻拟人贴不贴、重复与笼统</span></div>${
       lgIssues.length
         ? lgIssues.map(x => `${x.kind || x.detail
             ? `<div class="cm">${esc(x.kind || "")}${x.kind && x.detail ? "：" : ""}${
