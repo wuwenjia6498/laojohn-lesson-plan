@@ -75,6 +75,34 @@ metadata:
 - **验证全过**：与备份镜像 diff 只有阶段①那 21 个文件；**HEAD 树指纹重写前后完全一致**（`acd085ba…`）；受保护三目录 315 文件 SHA 全不变；362 提交一个没少；120 pptx / 329 图 / 192 docx 完整性零损坏。
 - 远端留 `backup/pre-filter-20260920`（旧历史全量）与 `salvage/0805-honbei-dropped`，**两周后确认无事再删**。
 
+## ★ 核心通则：GC 根必须先摘干净（0920 由 B 机同事归纳 · 本次发作四回）
+
+**`gc --prune=now` 只对「没有任何 GC 根指着」的对象生效。动手前必须把这六类根逐个摘干净，否则瘦身完全空转：**
+
+| GC 根 | 本次怎么发作的 |
+|---|---|
+| **stash** | 她有 2 条旧 stash，以旧 main 为父，整段旧历史因此可达。**本条是她发现的，我的方案原本完全没提** |
+| **索引（index）** | 我让她用 `reset --soft`，索引停留在旧 HEAD、仍引用被删的 93MB blob；索引是 GC 根，于是第 4 步一个对象都清不掉。**她改用 `--hard` 才对** |
+| **远程跟踪 ref** | 我给的 `git fetch origin --prune --force` 会把 `backup/pre-filter-20260920` **整支旧历史拉到本地**——命令清单自己抵消了瘦身效果 |
+| **本地分支** | 她那边有 `backup-0820-before-rebase`（独有对象 470.7MB）与 `worktree-wl-5a-unit4`（540.1MB）；**我的清单完全没提到**。我这边则是 filter-repo 把 `refs/remotes/origin/backup/*` 迁成了本地分支 |
+| **worktree** | 上面那条还挂着注册 worktree，得先 `git worktree remove` |
+| **tag** | 本次无碍（救生 tag 是有意保留的） |
+
+**动手前的自查一条龙**：
+```bash
+git stash list
+git diff --cached --numstat | wc -l          # 索引与 HEAD 的差异，须 0
+git for-each-ref                             # 看全部 ref，含本地分支/远程跟踪/tag
+git worktree list
+```
+
+⚠ **我自己也栽在同一条上**：验证时跑 `git fetch backup <镜像>` 把整段旧历史拉回本地，仓库一度涨到 **938.17 MiB（比重写前还大）**。清法＝删掉多余本地分支 + `reflog expire --expire=now --all && gc --prune=now`，回到 303.41 MiB。
+**已装长效防线**：`git config --local --add remote.origin.fetch '^refs/heads/backup/*'`（负向 refspec，git ≥2.29），否则日后任何一次 `git fetch` 都会把保命分支的旧历史重新拉回来。**两台机器都要装。**
+
+⚠ **`git cherry` 在历史重写后不可信**：重写改了 patch-id，会把早已在 main 里的提交报成「无等价」（她实测 36/33 条全是假阴性）。判断分支上的工作是否已进主线，要**逐路径核内容**，不能看 `git cherry`。
+
+⚠ **`reset --hard` 不会删「已被新 gitignore 忽略」的文件**：那 93MB 作废图仍在两台机器的硬盘上（已脱离 git 跟踪）。要腾本地空间只能手动删；**别用 `git clean -Xfd`**，它会连 docx/pdf/pptx 渲染产物一起删。
+
 ## ⚠ 五条踩坑（下次碰 git 批量操作直接用）
 
 1. **exFAT 卷不记录属主，git 拒绝从项目路径 clone**——`clone --mirror` 第一步就会失败。已永久修：`git config --global --add safe.directory 'E:/laojohn-lesson-plan'` 与 `.../.git`。
