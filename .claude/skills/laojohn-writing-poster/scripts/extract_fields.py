@@ -7,7 +7,7 @@ r"""extract_fields.py —— 写作课详案 → 单元海报骨架 data.json（
 --dry-run 只把结果打到 stdout、不落盘（对全部详案跑一遍回归用）。
 
 字段三分类（契约唯一源 references/data_schema.md）：
-  A 类  本脚本机械抽、照抄不改写：课次/年级册/单元/题目/文体/胶囊/课堂闭环两行/CTA 固定项
+  A 类  本脚本机械抽、照抄不改写：课次/年级册/单元/题目/文体/胶囊/三卡固定栏目名/CTA 固定项
   C 类  留【…待 AI 提炼…】占位，由 AI 读 _sources 证据块填实（唯一写字处，只许压缩改写详案已有内容）
   _sources  证据块：提纲表两行原文、两课时环节名、「学写法」环节的提醒句/对比段、同课次配套 json 的可复用句
 
@@ -39,12 +39,18 @@ COMPARE_RE = re.compile(r"^师：第(?P<i>[一二])段：(?P<s>.+?)\s*$", re.M)
 BOLD_RE = re.compile(r"\{b\}(.+?)\{/b\}")
 WARN_KEYS = ("流水账", "不是", "不要", "别", "而是", "这就是")
 
+# 三张卡的固定栏目名（63 张统一，机械写死；对应家长三问：问题→方法→结果）
+CARD_LABELS = [("problem", "写作难点"), ("method", "这一课怎么教"), ("result", "孩子能学会什么")]
+
 PH = {
     "subtitle": "【副题待 AI 提炼：8–14 字，压缩自 _sources.companion.oneline 或 学习目标 行】",
-    "warn_head": "【卡①标题待 AI 提炼：≤8 字，一句否定式提醒，如「别写成流水账」，取自 _sources.warn_sentences】",
-    "warn_body": "【卡①正文待 AI 提炼：16–34 字，说清该怎么做，只压缩详案「学写法」环节师话】",
-    "skills": "【卡②关键词待 AI 提炼：4 项、各 2–5 字，取自 核心技法/学习目标 行与 companion.skills_b】",
-    "outcome": "【CTA 产出句待 AI 提炼：≤12 字，如「产出第一篇完整日记」，压缩自 学习目标 行末句】",
+    "problem_head": "【卡①标题待 AI 提炼：≤7 字，孩子最常见的一个真实问题，如「总写成流水账？」，取自 _sources.warn_sentences 与 compare.bad】",
+    "problem_lines": "【卡①正文待 AI 提炼：2–3 行、每行 ≤10 字，把那个问题说成家长能对号入座的样子】",
+    "method_head": "【卡②标题待 AI 提炼：≤7 字，本课最核心的一招，如「一天只写一件事」，取自 核心技法 行】",
+    "method_lines": "【卡②正文待 AI 提炼：2–3 行、每行 ≤10 字，说清这一招怎么做】",
+    "result_head": "【卡③标题待 AI 提炼：≤7 字，学完具体多会了一件什么事，如「让心情看得见」】",
+    "result_lines": "【卡③正文待 AI 提炼：2–3 行、每行 ≤10 字，写做到以后文章是什么样】",
+    "outcome": "【CTA 产出句待 AI 提炼：≤14 字，如「完成孩子的第一篇完整日记」，压缩自 学习目标 行末句】",
     "subject": "【插画主体待 AI 提炼：40–120 字，只写物件不写人不写字，取详案里出现的载体；写法见 references/illustration-prompt.md】",
 }
 
@@ -136,8 +142,6 @@ def build(md_path):
     lessons = split_lessons(md)
     l1 = lessons.get("第1课时", ("", ""))
     l2 = lessons.get("第2课时", ("", ""))
-    loop_rows = [["第1课", l1[0].rstrip("课") or "写作指导"],
-                 ["第2课", l2[0].rstrip("课") or "当堂写作与评改"]]
     l1_secs, l2_secs = sections(l1[1]), sections(l2[1])
     learn = section_body(l1[1], "学写法")
     compare = {}
@@ -155,11 +159,11 @@ def build(md_path):
         "subtitle": PH["subtitle"],
         "capsule": "%s｜%s同步习作" % (gl, unit) if unit else "%s｜同步习作" % gl,
         "cards": [
-            {"kind": "warn", "head": PH["warn_head"], "body": PH["warn_body"]},
-            {"kind": "skills", "head": "这一课练什么", "items": [PH["skills"]]},
-            {"kind": "loop", "head": "课堂闭环", "rows": loop_rows},
+            {"kind": kind, "label": label,
+             "head": PH["%s_head" % kind], "lines": [PH["%s_lines" % kind]]}
+            for kind, label in CARD_LABELS
         ],
-        "cta": {"fit": C.grade_fit(course["grade_vol"]), "sessions": "2 节专项课", "outcome": PH["outcome"]},
+        "cta": {"fit": C.grade_fit(course["grade_vol"]), "sessions": "2 节课", "outcome": PH["outcome"]},
         "illustration": {"subject": PH["subject"], "ratio": "4:3"},
         "_sources": {
             "md": md_path.name,
@@ -191,7 +195,7 @@ def main():
         for k in ("title", "subtitle", "cards", "cta", "illustration"):
             if k in old:
                 data[k] = old[k]
-        data["cta"]["fit"], data["cta"]["sessions"] = C.grade_fit(data["course"]["grade_vol"]), "2 节专项课"
+        data["cta"]["fit"], data["cta"]["sessions"] = C.grade_fit(data["course"]["grade_vol"]), "2 节课"
         print("  [提示] 已有 json，仅刷新 course/capsule/_sources，C 类字段保留", file=sys.stderr)
     out.parent.mkdir(parents=True, exist_ok=True)
     C.dump_json(out, data)
