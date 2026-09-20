@@ -1,0 +1,71 @@
+#!/bin/sh
+# 大文件与作废件闸门（2026-09-20 立 · 配合 git 仓库瘦身）
+#
+# 为什么需要它：.gitignore 对**已跟踪文件不生效**，也拦不住 git add -f。
+# 2026-09-20 瘦身查出的 93MB 作废图，正是 0728 补了 _历史/ 规则但文件早已入库，
+# 规则对它们一直空转，跟着仓库走了两个月。钩子是机器闸门，补上这个缺口。
+#
+# 装法（每台机器各跑一次，.git/hooks/ 不入库所以必须走 hooksPath）：
+#   git config --local core.hooksPath .githooks
+#
+# 逃生口（会留痕，慎用）：
+#   SKIP_BIGFILE=1 git commit ...
+
+HARD=20971520   # 20MB：无条件拦。卡在「外部 pptx 终稿 13~22MB 不得回本仓」这条线上
+SOFT=5242880    # 5MB：白名单外拦
+
+if [ -n "$SKIP_BIGFILE" ]; then
+    printf '⚠ pre-commit: SKIP_BIGFILE=1，大文件闸门已跳过\n' >&2
+    exit 0
+fi
+
+err=$(mktemp) || exit 1
+trap 'rm -f "$err"' EXIT
+
+git diff --cached --name-only -z --diff-filter=ACMR | while IFS= read -r -d '' f; do
+    # 一、按名拦：作废件与压缩包，与 .gitignore 双保险（这层连 git add -f 也挡得住）
+    case "$f" in
+        *_历史/*|*_已失效*|*_作废*|*_废弃*|*_已删除/*)
+            printf '  [作废件] %s\n' "$f" >> "$err"; continue ;;
+        *.zip|*.rar|*.7z|*.ZIP|*.RAR)
+            printf '  [压缩包] %s\n' "$f" >> "$err"; continue ;;
+    esac
+
+    # 二、按体积拦：量的是**暂存内容**，不是工作区文件
+    size=$(git cat-file -s ":$f" 2>/dev/null) || continue
+    [ -z "$size" ] && continue
+
+    if [ "$size" -ge "$HARD" ]; then
+        printf '  [≥20MB 硬拦] %s MB  %s\n' "$((size / 1048576))" "$f" >> "$err"
+        continue
+    fi
+
+    if [ "$size" -ge "$SOFT" ]; then
+        # 白名单：CLAUDE.md §8「重渲不出来」的三个目录 + 看图写话图位原图
+        case "$f" in
+            读书会原书插图/*|写作课教材插图/*|写作课件PPT输出/*) continue ;;
+            看图写话详案输出/*/图位/*.png|看图写话详案输出/*/图位/*.PNG) continue ;;
+        esac
+        printf '  [5–20MB 软拦] %s MB  %s\n' "$((size / 1048576))" "$f" >> "$err"
+    fi
+done
+
+if [ -s "$err" ]; then
+    printf '\n✘ pre-commit 拦下以下文件：\n\n' >&2
+    cat "$err" >&2
+    cat >&2 <<'MSG'
+
+判据（CLAUDE.md §8）：引擎重渲得出来的产物不入库，渲不出来的才入库。
+
+ · [作废件] / [压缩包]  —— 一律不入库。要留底就放仓库外，或另存归档目录。
+ · [≥20MB 硬拦]         —— 无例外。外部 pptx 终稿（13~22MB）按交付边界不回本仓。
+ · [5–20MB 软拦]        —— 白名单只有四处：读书会原书插图/、写作课教材插图/、
+                            写作课件PPT输出/、看图写话详案输出/**/图位/*.png
+
+确认这次确实该入库，用逃生口（会在终端留痕）：
+    SKIP_BIGFILE=1 git commit ...
+MSG
+    exit 1
+fi
+
+exit 0
