@@ -39,7 +39,8 @@
 │
 ├── 品牌资产\                      # 📌 品牌固定素材（所有海报共用，非按书变化）
 │   ├── logo.png                   # 品牌 Logo（书目卡/海报右上角）
-│   └── qrcode.png                 # 报名/关注二维码，更换时直接替换此文件
+│   ├── qrcode.png                 # 报名/关注二维码，更换时直接替换此文件
+│   └── 校区信息.json              # 写作课单元海报底部地址/电话/行动句（空则隐藏；各校区改这里重渲）
 │
 ├── ── 读书会线 · 产物 ────────────────────────────────────────
 │
@@ -87,6 +88,9 @@
 │
 ├── 写作配套输出\                  # ← laojohn-writing-materials（学生/教师/家长三侧配套）
 │   └── <年级册>-第N单元-<题目>\…-学生用/教师用/家长用.html/.pdf + …_data.json
+│
+├── 写作课海报输出\                # ← laojohn-writing-poster（同步习作单元招生海报）
+│   └── <年级册>-第N单元-<题目>\…-习作海报.json/.html/.jpg + …-插画.jpg（json+插画入库，html/jpg 不入库）
 │
 ├── 写作课整套文件打包输出\        # ← laojohn-writing-package
 │
@@ -167,6 +171,7 @@
 | `laojohn-ppt-draft` | 详案 → PPT 中间稿 **+ 逐页讲稿**（每课时双产出，页序 1:1；自带教学节拍分页引擎，详案无需换页点）。另承载页标回注脚本 `pageback_annotate.py`（两线共用） | 中间稿 `读书会课件中间稿输出\<书名>\` / `写作课件中间稿输出\<课次>\`；讲稿 `读书会课件讲稿输出\<书名>\`（**写作课讲稿已于 2026-08-03 停产**） | `<书名>-<课型>-中间稿.md`；`<书名>-<课型>-逐页讲稿.md` / `.docx` |
 | `laojohn-ppt` | **读书会**：中间稿 → 投屏课件 PPT 成品（`build_ppt.py` 烘焙）。**写作课**：承载「外部 PPT 后处理链」= 归位 → 读详案审查 PPT → 注入点击动画 → 详案页标回注（`build_ppt.py` 对写作课已停用） | `读书会课件PPT输出\<书名>\`；写作课为 `写作课件PPT输出\<课次>\`（外部件复制进来） | `<书名>-<课型>.pptx`；写作课 `<年级册>-第N单元-<题目>-课件PPT.pptx`（2026-08-26 起文件名内也带课次标识段） |
 | `laojohn-writing-materials` | 生成同步习作配套物料（学生用：构思表+稿纸两页含备用续页+范文页 4 页；教师用：速览页+怎么讲活三色旁注 2 页；家长用：家长一页纸 1 页）。承载两线共享的 HTML→PDF 渲染引擎 `_shared.py` | `写作配套输出\<年级册>-第N单元-<题目>\` | `<年级册>-第N单元-<题目>-<侧名>用.html/.pdf` + `…-<侧名>用_data.json`（源；侧名=学生/教师/家长） |
+| `laojohn-writing-poster` | 生成同步习作**单元招生海报**（毛笔大标题+副题+年级单元胶囊+AI 插画+三张要点卡+报名条二维码；文字全部压缩自详案，插画按 json 规格 AI 生图并判读）。渲染薄壳复用 book-card `_jpg_render.py`，生图薄壳复用 `课件配图工具\scripts\imgclient.py` | `写作课海报输出\<年级册>-第N单元-<题目>\` | `<课次>-习作海报.jpg/.html` + `<课次>-习作海报.json`（源）+ `<课次>-插画.jpg`（AI 插画，入库） |
 | `laojohn-picture-materials` | 生成看图写话配套课堂印刷件（支架小卡 8 张/页裁切 · 兜底纸条 7 条/页裁切 · 看图写话稿纸=主图+格子+格式提醒 · 教师家长页 2 页=教师速览+家长一页纸；纯口头课只出卡与教师家长页）。渲染引擎单向复用 writing-materials `_shared.py` | `看图写话配套输出\<详案stem>\` | `<详案stem>-<物料名>.html/.pdf` + `…-<物料名>_data.json`（源；物料名=支架小卡/兜底纸条/看图写话稿纸/教师家长页） |
 | `laojohn-book-card` | 生成「本期深度阅读书目」书目卡（书封+信息格+内容简介，社群传播用）。承载两家共享的 JPG 长图渲染引擎 `_jpg_render.py` | `读书会配套输出\<书名>\` | `<书名>_书目卡.jpg/.html/.json` |
 | `laojohn-course-poster` | 生成课程招生海报（读书会详案 → 对外招生宣传图） | `读书会配套输出\<书名>\` | `<书名>_海报.*` |
@@ -247,6 +252,7 @@ PYTHONUTF8=1 python .claude/skills/laojohn-lesson-plan/assets/insert_images_docx
 |------|------|---------|
 | `logo.png` | 书目卡/海报右上角品牌 Logo | 直接替换此文件，重跑渲染即可 |
 | `qrcode.png` | 海报上的报名/关注二维码 | 直接替换此文件，重跑渲染即可 |
+| `校区信息.json` | 写作课单元海报底部的地址／电话／提示句／行动句（laojohn-writing-poster） | 改字段值重跑渲染；留空则该行隐藏，不要去 P 图 |
 
 渲染命令通过 `--logo <项目根目录>\品牌资产\logo.png` 和 `--qr <项目根目录>\品牌资产\qrcode.png` 传入脚本。
 
@@ -300,6 +306,7 @@ PYTHONUTF8=1 python .claude/skills/laojohn-lesson-plan/assets/insert_images_docx
       ③ 注入逐条点击动画（inspect_pptx.py 出工作单 → 人工校正 → animate_pptx.py）
       ④ 详案页标回注（pageback_annotate.py）并重渲 docx
 6.  生成三侧配套   → [laojohn-writing-materials]   → 写作配套输出\<课次>\…-学生用/教师用/家长用.pdf
+6b. 单元招生海报   → [laojohn-writing-poster]      → 写作课海报输出\<课次>\…-习作海报.jpg（对外招生件，不进打包）
 7.  打包交付       → [laojohn-writing-package]     → 写作课整套文件打包输出\<课次>\
 ```
 

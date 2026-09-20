@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>老约翰 · 同步习作单元海报</title>
+<style>
+  /* 毛笔标题字：渲染脚本把 Ma Shan Zheng（OFL）子集化后以 data URI 注入，html 自包含 */
+  @font-face{
+    font-family:"Brush";
+    src:url("/*__FONT_BRUSH__*/") format("truetype");
+    font-display:block;
+  }
+  /* 微软雅黑把弯引号画成半角窄字形，让引号码位落到宋体（全角字形），其余文字不受影响 */
+  @font-face{
+    font-family:"CJK Quotes";
+    src:local("SimSun"),local("宋体");
+    unicode-range:U+2018-2019,U+201C-201D;
+  }
+  :root{
+    --ink:#4A2C17;          /* 深棕：标题、卡片标题 */
+    --ink-soft:#3A2A1E;     /* 正文棕黑 */
+    --capsule:#3B2A1B;
+    --orange:#F08A3E;
+    --cream:#FFF6E3;
+    --kraft-a:#EBD3A8;
+    --kraft-b:#E0BF8C;
+    --page-w:1242px;
+    --font:"CJK Quotes","Microsoft YaHei","Source Han Sans SC","Noto Sans CJK SC","PingFang SC",sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{background:#ffffff;}
+  #page{
+    width:var(--page-w);
+    padding:52px 64px 56px;
+    font-family:var(--font);
+    color:var(--ink-soft);
+    background:
+      radial-gradient(ellipse 520px 380px at 8% 4%, rgba(255,226,140,.55) 0%, rgba(255,226,140,0) 70%),
+      radial-gradient(ellipse 700px 300px at 92% 22%, rgba(255,236,190,.45) 0%, rgba(255,236,190,0) 70%),
+      linear-gradient(180deg, #FFF6E3 0%, #FFFBF1 55%, #FFFFFF 100%);
+    display:flex; flex-direction:column;
+  }
+
+  /* ---- 1. logo ---- */
+  /* 品牌资产 logo.png 是白底无透明通道：正片叠底让白底融进奶油背景，红字不受影响（换成透明 png 也照常可用） */
+  .logo{ width:200px; height:auto; display:block; mix-blend-mode:multiply; }
+
+  /* ---- 2. 标题区 ---- */
+  .hero{ text-align:center; margin-top:34px; }
+  .title{
+    font-family:"Brush","Ma Shan Zheng","KaiTi","STKaiti",serif;
+    color:var(--ink); line-height:1.12; letter-spacing:.04em;
+    font-weight:400;
+  }
+  .title[data-len="s"]{ font-size:196px; }
+  .title[data-len="m"]{ font-size:150px; }
+  .title[data-len="l"]{ font-size:118px; letter-spacing:.02em; }
+  .subtitle{
+    margin-top:18px; font-size:56px; font-weight:900; color:#1A1A1A; letter-spacing:.02em; line-height:1.3;
+  }
+  .capsule{
+    display:inline-block; margin-top:26px;
+    background:var(--capsule); color:#fff;
+    font-size:36px; font-weight:500; letter-spacing:.06em;
+    padding:14px 46px; border-radius:999px; line-height:1.3;
+  }
+
+  /* ---- 3. 插画 ---- */
+  .illu{
+    position:relative; margin:30px -24px 0; height:720px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .illu img{
+    width:100%; height:100%; object-fit:cover; object-position:center; display:block;
+    -webkit-mask-image:radial-gradient(ellipse 72% 78% at 50% 50%, #000 62%, rgba(0,0,0,0) 100%);
+            mask-image:radial-gradient(ellipse 72% 78% at 50% 50%, #000 62%, rgba(0,0,0,0) 100%);
+  }
+  .illu.empty{ height:560px; }
+
+  /* ---- 4. 三张牛皮纸卡 ---- */
+  .cards{ display:flex; gap:26px; align-items:stretch; margin-top:4px; }
+  .card{
+    flex:1 1 0; min-width:0; position:relative;
+    padding:66px 24px 36px; border-radius:16px;
+    background:
+      repeating-linear-gradient(112deg, rgba(255,255,255,.06) 0 2px, rgba(0,0,0,0) 2px 6px),
+      linear-gradient(165deg, var(--kraft-a) 0%, #E6C899 55%, var(--kraft-b) 100%);
+    box-shadow:0 10px 22px rgba(74,44,23,.14);
+  }
+  .pin{
+    position:absolute; top:18px; left:50%; transform:translateX(-50%);
+    width:30px; height:30px; border-radius:50%;
+    background:radial-gradient(circle at 35% 32%, #FFC07A 0%, #F08A3E 55%, #C25F26 100%);
+    box-shadow:0 3px 6px rgba(0,0,0,.28), inset 0 -2px 3px rgba(0,0,0,.15);
+  }
+  .card h3{
+    font-size:36px; font-weight:800; color:var(--ink); line-height:1.15;
+    padding-left:14px; border-left:7px solid var(--ink); letter-spacing:.01em;
+    word-break:keep-all;
+  }
+  .card .body{ margin-top:20px; font-size:28px; line-height:1.6; color:var(--ink-soft); font-weight:500; }
+  .card .row{ margin-top:8px; font-size:29px; line-height:1.55; color:var(--ink-soft); font-weight:600; white-space:nowrap; }
+  .card .row:first-of-type{ margin-top:20px; }
+  .card .sep{ color:#8C6A4A; font-weight:400; padding:0 6px; }
+  .card .k{ color:#8C6A4A; font-weight:600; }
+
+  /* ---- 5. 橙色报名条 ---- */
+  .cta{
+    margin-top:40px; border-radius:30px; padding:36px 40px 38px;
+    display:flex; align-items:center; justify-content:space-between; gap:24px;
+    background:linear-gradient(135deg, #F9A257 0%, #F08A3E 58%, #E8782D 100%);
+    color:#fff; box-shadow:0 12px 26px rgba(240,138,62,.35);
+  }
+  .cta .lines{ flex:1 1 0; min-width:0; }
+  .cta .fit{ font-size:48px; font-weight:800; line-height:1.3; letter-spacing:.02em; }
+  .cta .line{ font-size:36px; font-weight:700; line-height:1.6; letter-spacing:.01em; }
+  .cta .sep{ padding:0 8px; font-weight:400; opacity:.85; }
+  .qr{ flex:none; width:212px; height:212px; background:#fff; border-radius:16px; padding:12px; }
+  .qr img{ width:100%; height:100%; display:block; }
+
+  /* ---- 6. 底部联系方式 ---- */
+  .footer{ margin-top:32px; padding-left:8px; font-size:30px; line-height:1.75; color:var(--ink-soft); }
+  .footer .k{ letter-spacing:.02em; }
+
+  .hidden{ display:none !important; }
+</style>
+</head>
+<body>
+<div id="page">
+  <img class="logo" id="logo" src="/*__LOGO__*/" alt="老约翰深度阅读">
+
+  <div class="hero">
+    <div class="title" id="title"></div>
+    <div class="subtitle" id="subtitle"></div>
+    <div><span class="capsule" id="capsule"></span></div>
+  </div>
+
+  <div class="illu" id="illu"><img id="illu-img" src="/*__ILLU__*/" alt=""></div>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="cta" id="cta">
+    <div class="lines">
+      <div class="fit" id="cta-fit"></div>
+      <div class="line" id="cta-course"></div>
+      <div class="line" id="cta-action"></div>
+    </div>
+    <div class="qr" id="qr-wrap"><img id="qr" src="/*__QR__*/" alt="二维码"></div>
+  </div>
+
+  <div class="footer" id="footer"></div>
+</div>
+
+<script>
+const DATA = /*__DATA__*/ null;
+
+function esc(s){
+  return String(s === null || s === undefined ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function hide(el){ if (el) el.classList.add('hidden'); }
+function setText(id, txt){
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (txt) el.textContent = txt; else hide(el);
+}
+function joinSep(items){
+  return items.map(esc).join('<span class="sep">｜</span>');
+}
+
+(function init(){
+  const d = DATA || {};
+
+  // 标题按字数分档，档位在 CSS 里
+  const title = d.title || (d.course && d.course.topic) || '';
+  const tEl = document.getElementById('title');
+  tEl.textContent = title;
+  const n = [...title].length;
+  tEl.setAttribute('data-len', n <= 5 ? 's' : (n <= 7 ? 'm' : 'l'));
+
+  setText('subtitle', d.subtitle);
+  setText('capsule', d.capsule);
+
+  // 插画：脚本注入为空 ⇒ 去掉 img、留一块奶油空区（缺图属交付前状态，脚本已在 stderr 提示）
+  const illuImg = document.getElementById('illu-img');
+  if (!illuImg.getAttribute('src')) {
+    illuImg.remove();
+    document.getElementById('illu').classList.add('empty');
+  }
+
+  // 三张卡：warn 空 / skills 少于 2 项则整卡隐藏，其余卡自动等分
+  const cardsEl = document.getElementById('cards');
+  const html = [];
+  (d.cards || []).forEach(function(c){
+    if (!c) return;
+    if (c.kind === 'warn') {
+      if (!c.head && !c.body) return;
+      html.push('<div class="card"><span class="pin"></span><h3>'+esc(c.head)+'</h3>'
+              + (c.body ? '<div class="body">'+esc(c.body)+'</div>' : '') + '</div>');
+    } else if (c.kind === 'skills') {
+      const items = (c.items || []).filter(Boolean);
+      if (items.length < 2) return;
+      const rows = [];
+      for (let i = 0; i < items.length; i += 2) rows.push(items.slice(i, i + 2));
+      html.push('<div class="card"><span class="pin"></span><h3>'+esc(c.head || '这一课练什么')+'</h3>'
+              + rows.map(function(r){ return '<div class="row">'+joinSep(r)+'</div>'; }).join('') + '</div>');
+    } else if (c.kind === 'loop') {
+      const rows = (c.rows || []).filter(function(r){ return r && r[1]; });
+      if (!rows.length) return;
+      html.push('<div class="card"><span class="pin"></span><h3>'+esc(c.head || '课堂闭环')+'</h3>'
+              + rows.map(function(r){ return '<div class="row"><span class="k">'+esc(r[0])+'</span><span class="sep">｜</span>'+esc(r[1])+'</div>'; }).join('') + '</div>');
+    }
+  });
+  if (html.length) cardsEl.innerHTML = html.join(''); else hide(cardsEl);
+
+  // 报名条
+  const cta = d.cta || {};
+  const campus = d.campus || {};
+  setText('cta-fit', cta.fit);
+  const course = [cta.sessions, cta.outcome].filter(Boolean);
+  const courseEl = document.getElementById('cta-course');
+  if (course.length) courseEl.innerHTML = joinSep(course); else hide(courseEl);
+  setText('cta-action', campus.cta);
+  if (!document.getElementById('qr').getAttribute('src')) hide(document.getElementById('qr-wrap'));
+
+  // 底部：每行缺则隐藏，全空则整块隐藏
+  const foot = [];
+  if (campus.address) foot.push('<div><span class="k">地址：</span>'+esc(campus.address)+'</div>');
+  if (campus.phone)   foot.push('<div><span class="k">电话：</span>'+esc(campus.phone)+'</div>');
+  if (campus.note)    foot.push('<div>'+esc(campus.note)+'</div>');
+  const footEl = document.getElementById('footer');
+  if (foot.length) footEl.innerHTML = foot.join(''); else hide(footEl);
+
+  // 等毛笔体与图片都落位再放行截图（渲染引擎只等 data-rendered + 短暂 settle）
+  const waits = [document.fonts.ready];
+  try { waits.push(document.fonts.load('160px "Brush"', title || '字')); } catch (e) {}
+  Array.from(document.images).forEach(function(im){
+    if (im.getAttribute('src') && im.decode) waits.push(im.decode().catch(function(){}));
+  });
+  Promise.all(waits).catch(function(){}).then(function(){
+    document.body.setAttribute('data-rendered', '1');
+  });
+})();
+</script>
+</body>
+</html>

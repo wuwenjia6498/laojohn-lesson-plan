@@ -16,7 +16,7 @@
 - **Playwright 浏览器路径一般无需手动 export**：各渲染脚本已在脚本内用 `Path.home()`／`expanduser("~")` 回退到 `%LOCALAPPDATA%\ms-playwright`（PowerShell 写法 `$env:LOCALAPPDATA\ms-playwright`）——**用户名无关，换机器自动跟随当前用户，不要往文档或脚本里写死具体用户名**。路径异常时再 `export PLAYWRIGHT_BROWSERS_PATH=…` 覆盖（环境变量优先于脚本缺省值）。
 - **python 命令一律加 `PYTHONUTF8=1`**，避免脚本里 ✓ 等字符触发 GBK `UnicodeEncodeError`、中文路径乱码。
 
-**密钥承载约定（全仓首例，仅 `laojohn-picture-writing` 自动生图闭环用）：** 文生图/视觉验收的 AiHubMix 密钥经 **环境变量 `AIHUBMIX_API_KEY`（优先）** 或 **gitignored 的 `scripts/imggen.config.json`** 注入；base_url 默认 `https://aihubmix.com/v1`、模型 id 配置化、不写死。`imggen.config.json` 已入 `.gitignore`，**禁止提交密钥**；除此技能外全仓仍保持零网络调用。
+**密钥承载约定（仅两处用：`laojohn-picture-writing` 自动生图闭环、`laojohn-writing-poster` 单元海报插画）：** 文生图/视觉验收的 AiHubMix 密钥经 **环境变量 `AIHUBMIX_API_KEY`（优先）** 或 **gitignored 的 `scripts/imggen.config.json`** 注入；base_url 默认 `https://aihubmix.com/v1`、模型 id 配置化、不写死。`imggen.config.json` 已入 `.gitignore`，**禁止提交密钥**；除这两个技能外全仓仍保持零网络调用。
 
 ## 2. 数据流主链
 
@@ -43,7 +43,7 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 
 | 资产 | 唯一源 | 谁在用 |
 |------|--------|--------|
-| 品牌 logo / 二维码 | `品牌资产\logo.png`、`品牌资产\qrcode.png` | book-card、course-poster |
+| 品牌 logo / 二维码 / 校区信息 | `品牌资产\logo.png`、`品牌资产\qrcode.png`、`品牌资产\校区信息.json`（写作课海报底部地址/电话/行动句，空则该行隐藏） | book-card、course-poster、writing-poster（校区信息仅它用） |
 | 书籍封面 | `读书会书籍封面\<书名>.jpg/png`（书名不带书名号） | poster、book-card、reading-guide |
 | 原书插图 | `读书会原书插图\<书名>\插-01.png`（书名不带书名号，编号全书连号、半角连字符）+ 同目录 `_图单.md` | lesson-plan 配图版详案（后续可接 PPT 上屏/阅读单）。**扫描件＝版权材料，2026-08-20 起已入库**（私有仓库，见 §8；旧口径「永不入库」已作废）；`_图单.md` 同样入库，是取图与追溯的凭据。**书籍封面绝不挪进此目录**——引擎找不到封面是静默跳过，一挪就丢封面页且不报错 |
 | 书籍档案 | `读书会书籍档案\<书名>书籍档案.md` | lesson-plan 及所有消费档案的下游 |
@@ -55,7 +55,8 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 | 学习单渲染引擎 | `.claude\skills\laojohn-reading-sheet\` 下：`scripts\render.py`（PDF/HTML）+ `scripts\render_pptx.py`（可编辑 PPTX）+ `templates\`（模板库，**在 skill 根目录、不在 `scripts\` 下**） | reading-sheet（整本书阅读单）专用；`render.py` 的 `--templates-dir`/`--bundle-label` 是课型无关的可选参数（reading-sheet 自用，`--bundle-label` 默认「阅读单」），保留不删 |
 | 配套物料 HTML→PDF 渲染引擎 | `.claude\skills\laojohn-writing-materials\scripts\_shared.py` | writing-materials（同步习作配套）与 picture-materials（看图写话配套）两线共享单一源；后者的 `scripts\_shared.py` 是薄 shim，**禁复制**。**两线模板与 data.json 禁 emoji/生僻符号字符**——不在微软雅黑字表内的字会被现造成 Type3 字体、PDF 编辑器一律拒编；装饰图标一律纯 CSS 图形，`check_type3` 每次渲染自动报警。**完整红线口径见 writing-materials `SKILL.md`**。⚠ 与下面三件**不是同一个引擎**：本件出固定 A4 多页，下游物料出单页动态高，两种输出模型不可互相塞分支 |
 | 书籍档案机读块解析 | `.claude\skills\laojohn-book-profile\scripts\profile_meta.py` | book-card、course-poster 的 `extract_fields.py`（各以 importlib 载入，**禁复制正则**）。归 book-profile 是因为机读块格式由它定义（键名见其 `assets\book-profile-template.md`）——谁定义格式谁给解析器。`BLANK_MARKERS` 是两线并集，改它同时影响两个物料的"缺失留空"判定。函数清单见**脚本头注释** |
-| 读书会 JPG 长图渲染引擎 | `.claude\skills\laojohn-book-card\scripts\_jpg_render.py` | book-card（书目卡）与 course-poster（海报）两家。**两家历史口径差异全部参数化**（`strip_parens`／`fallback`）——**不要为了"统一"而改默认值，会改变既有产物**。尺寸/质量/输出模型见**脚本头注释** |
+| 读书会 JPG 长图渲染引擎 | `.claude\skills\laojohn-book-card\scripts\_jpg_render.py` | book-card（书目卡）、course-poster（读书会海报）、writing-poster（写作课单元海报，`render_writing_poster.py` 薄壳、口径同 course-poster）三家。**前两家历史口径差异全部参数化**（`strip_parens`／`fallback`）——**不要为了"统一"而改默认值，会改变既有产物**。尺寸/质量/输出模型见**脚本头注释** |
+| 生图/判读客户端 | `课件配图工具\scripts\imgclient.py` | 课件配图工具（`run_lesson.py`）、writing-poster（`gen_illustration.py` importlib 薄壳，禁复制）。双通道（Gemini／豆包）、密钥只从环境变量／`.env`／picture-writing 的 `imggen.config.json` 读（§1）；判读回包 `_error`/`_raw` 一律当「未知」不当「不通过」 |
 | 读书会 A4 单页 PDF 渲染引擎 | `.claude\skills\laojohn-reading-guide\scripts\_a4_render.py` | reading-guide、lesson-mindmap、teaching-mindmap 三家（后两家 `render_pdf.py` 是薄壳）。**`recenter_on_overflow`：两种导图传 True**（居中放射版式，超页需重设 min-height），**阅读指南保持 False**（文档流版式，打开会推开版式）。输出模型见**脚本头注释** |
 
 > 现存物理副本（`laojohn-ppt\assets\logo\`、`laojohn-course-poster\assets\qrcode.png` / `assets\covers\`）属历史遗留；以根目录单一源为准，勿据副本做新决策。
@@ -80,7 +81,7 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 
 ## 5. 其它跨技能红线
 
-- **「绝不联网、绝不凭记忆」红线专指「事实不许凭网络或记忆补」**——书目/书封/页码/情节/人物只来自书籍档案。仅两个例外口：① `laojohn-picture-writing` 自动生图闭环（按 imgspec 规格调 AiHubMix 文生图＋多模态视觉验收）——规格是事实源、生成图服从规格，**绝不可反过来用图改写规格/正文的情节·数字**；② `laojohn-writing-lesson` 可联网核实教材单元课文与语文要素（仓内无课文事实源，存量断言曾全出自模型记忆）——**结论只进 `references/unit-texts.md` 留痕（带来源与日期），不得绕过它直接写进详案**；只点篇名＋概括写法，禁带引号的课文原文。读书会线不受影响；其余技能零网络调用。
+- **「绝不联网、绝不凭记忆」红线专指「事实不许凭网络或记忆补」**——书目/书封/页码/情节/人物只来自书籍档案。仅三个例外口：① `laojohn-picture-writing` 自动生图闭环（按 imgspec 规格调 AiHubMix 文生图＋多模态视觉验收）——规格是事实源、生成图服从规格，**绝不可反过来用图改写规格/正文的情节·数字**；② `laojohn-writing-lesson` 可联网核实教材单元课文与语文要素（仓内无课文事实源，存量断言曾全出自模型记忆）——**结论只进 `references/unit-texts.md` 留痕（带来源与日期），不得绕过它直接写进详案**；只点篇名＋概括写法，禁带引号的课文原文；③ `laojohn-writing-poster` 单元海报中央插画（按 json 的 `illustration.subject` 调同一套 AiHubMix 生图＋多模态判读，客户端复用 `课件配图工具\scripts\imgclient.py`）——同①，图服从文字、判读失败记「未知」不记「不通过」。读书会线不受影响；其余技能零网络调用。
 
 - **Anthropic 官方 `docx`/`pptx`/`xlsx`/`pdf` skill：只许读改外部文件，禁止用来新建本仓产物（2026-08-18 装 · user 级 `anthropic-agent-skills` 市场）**。作用域**仅限「读取或修改一份已经存在的外部文件」**——体检外部平台生成的 pptx、拆解第三方 docx、合并 pdf 之类。**本仓一切交付产物的生成一律走 laojohn-* 流水线**：docx 走 `md_to_laojohn_docx.py`（且必带 `--header-left/--header-right`），读书会 pptx 走 `build_ppt.py`，写作课 pptx 走「归位 → 读详案审查 → 动画 → 页标回注」四步链（含 `plan_link.py` 闸门）。用官方 skill 新建，产出既不带品牌版式、也绕过页眉参数与闸门。
   - **须防触发词撞车**：官方 pptx 的 description 明写「凡用户提到 deck／slides／presentation 或点到 .pptx 文件名就触发，不问他接下来要干什么」，docx 亦覆盖 report／memo／letter／template；而本仓天天说 PPT、课件、docx。**凡涉及本仓产出，一律以 laojohn-* skill 为准**，官方件不得抢活。
@@ -108,6 +109,7 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 - `book-card\scripts\extract_fields.py`、`course-poster\scripts\extract_fields.py` → `book-profile\scripts\profile_meta.py`
 - `course-poster\scripts\render_poster.py` → `book-card\scripts\_jpg_render.py`
 - `lesson-mindmap`、`teaching-mindmap` 的 `render_pdf.py` → `reading-guide\scripts\_a4_render.py`
+- `writing-poster\scripts\render_writing_poster.py` → `book-card\scripts\_jpg_render.py`；`writing-poster\scripts\gen_illustration.py` → `课件配图工具\scripts\imgclient.py`（写作课线，2026-09-20 立；改 `_jpg_render.py` 回归时写作课海报一并重渲）
 
 薄壳按**相对路径**（`pathlib.Path(__file__).parents[2]`）定位真源，所以**改 skill 目录名或挪 scripts 目录会静默断链**；改三件真源中任何一件，必须把其"谁在用"栏里的物料全部重渲回归（回归基准数据：`读书会配套输出\俗世奇人\` 下五份 json）。
 
@@ -118,6 +120,7 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 | 书籍档案 | `<书名>书籍档案.md`（**无连字符、不带书名号**——下游脚本按此路径查档案，带横杠会查不到） |
 | 课案详案 | `<书名>-课案详案.md` / `.docx` |
 | 写作课详案 | `<年级册>-第N单元-<题目>-写作课详案.md` / `.docx`。**「第N单元」是写作课线全部产物的统一课次标识段**（2026-08-02 立）：配套物料/PPT/中间稿/打包的**子目录名与文件名前缀**一律同此口径，**PPT 文件名内也带课次标识段**（`<年级册>-第N单元-<题目>-课件PPT.pptx`，2026-08-26 改；旧口径「PPT 文件名内仍是纯题目、不带年级单元」已作废，存量 12 份已迁移，命名生成点在 `laojohn-ppt/scripts/place_pptx.py`）。**配套三侧的文件名后缀为 `-学生用/-教师用/-家长用`**（同日由 `-X合订` 改）；**打包目录单层平铺、无子文件夹**（同日撤掉 `课件PPT\`、`配套物料\` 两层，仅写作课线）。**文内标题与环节命名体例的唯一源＝`writing-lesson/references/title-naming.md`**；改体例须同时改其 `lesson-structure.md` §三与 `checklist.md`——三处曾自相矛盾 |
+| 写作课单元海报 | `写作课海报输出\<课次>\<课次>-习作海报.json/.html/.jpg` + `<课次>-插画.jpg`（课次＝上行标识段；json 与 AI 插画入库，html/jpg 不入库，候选图 `*.候选.jpg` 不入库） |
 | 看图写话详案 | `<年级册>（<季>）第 N 次 · <课型>.md` / `.docx`（**不带主题、不带「看图写话详案」尾缀**）。**一课次一目录**（2026-08-03 立）：四件与 `图位\` 同住 `看图写话详案输出\<课次>\`，目录名＝文件 stem；**`图位\` 的完整路径未变**，故存量取图口径（配套稿纸 `anchor_img`、打包 glob、冷审核图）不受影响。标题体例＝三行（唯一源 `picture-writing/references/title-naming.md`），其中 `######` 期次副标**承载文件名口径、`style_front_page.py` 靠它判型，不可省**；期号仅为内部方法编号，禁入对外产物 |
 
 > **与 README 的分工（勿再互指）**：完整的「SKILL → 输出目录 → 文件命名规则」对照表在 `README.md`「SKILL 与输出目录对照」；本节只留**命名错了下游会静默失效**的跨技能硬约束（路径查找、标识段贯穿全线、脚本靠副标判型），不重列格式细则。
@@ -126,7 +129,7 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 
 各输出目录的**渲染产物**（docx/pptx/pdf/jpg/渲染 html/png，及 `读书会整套文件打包输出\`、`读书会课件PPT输出\` 整目录）已 gitignore——它们都能从 md/json 源 + 引擎脚本重渲，只存本地不进仓库。**只提交 md/json 源与输入资产**（书籍档案、中间稿/讲稿 md、各 `_content.json`/`-manifest.json`、书籍封面、品牌资产、skill 参考件、看图写话图位 png）。提交前 `git status` 里不该出现产物文件；若出现，说明有人改了 `.gitignore` 或新增了未纳规则的输出目录——新输出目录要同步补 ignore 规则，**严禁用 `git add -f` 把产物强加回来**。
 
-**三类「重渲不出来」的资产入库**（`读书会原书插图\`、`写作课教材插图\`、`写作课件PPT输出\`，2026-08-20 起）：版权扫描件与外部生成的 pptx 引擎重渲不出，不入库就是双机静默分叉；仓库私有、仅两人可访问，git 是唯一跑通的通道（网盘方案已否，见记忆 two-person-sync-0820）。**外部 pptx 只存「审核过＋注入动画」版（约 1.5MB/份），人工嵌图终稿不回本仓**（外部件每份 13~22MB，`.git` 已近 GitHub 软建议的 1GB）；`laojohn-writing-package` 不收 PPT，页标以本仓版页码为准（唯一源 `laojohn-ppt/SKILL.md`「交付边界」）。`shrink_pptx_media.py` 仅当单份 >5MB 才跑，且只压新件——已在远程历史里的旧件压了也收不回。
+**三类「重渲不出来」的资产入库**（`读书会原书插图\`、`写作课教材插图\`、`写作课件PPT输出\`，2026-08-20 起；第四类 `写作课海报输出\**\*-插画.jpg` AI 插画自 2026-09-20 起同口径入库）：版权扫描件与外部生成的 pptx 引擎重渲不出，不入库就是双机静默分叉；仓库私有、仅两人可访问，git 是唯一跑通的通道（网盘方案已否，见记忆 two-person-sync-0820）。**外部 pptx 只存「审核过＋注入动画」版（约 1.5MB/份），人工嵌图终稿不回本仓**（外部件每份 13~22MB，`.git` 已近 GitHub 软建议的 1GB）；`laojohn-writing-package` 不收 PPT，页标以本仓版页码为准（唯一源 `laojohn-ppt/SKILL.md`「交付边界」）。`shrink_pptx_media.py` 仅当单份 >5MB 才跑，且只压新件——已在远程历史里的旧件压了也收不回。
 
 ⚠ **这推翻了此前「原书扫描件永不入库」的规定**，是明确决策、不是有人手滑 `git add -f`。三条连带口径同时变更：
 - **「换机器后配图版详案报『缺图待补』是预期行为」这条已作废**——新克隆现在自带全部插图，**再报缺图就是真出问题了，必须排查**（多半是文件名与 `_图单.md` 对不上，或 `【图位:插-NN】`占位写错）。旧稿里凡见到「缺图属预期」的说法一律以本条为准。
