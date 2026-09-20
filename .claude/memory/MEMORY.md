@@ -66,6 +66,7 @@
 - [可引用原文栏取成段](book-profile-quote-full-passage.md) / [类型字段禁空泛「儿童小说」](book-type-no-generic-children-fiction.md) — 下游需成段并保留原书弯引号;类型须具体文学类型
 - [低段/合集建档差异](low-grade-collection-profile-formalized.md) — 区分变量是「低段」非「快乐读书吧」
 ## 引擎与下游物料
+- [claude.ai 旧 skill 快照已删净(0920)](skill-snapshots-cloud-cleared-0920.md) — 三份 06 月快照连同 daily-post/picture-book-recommend 用户手动删除(有意);重名冲突根除,CLAUDE.md §5 警告块已压缩;⚠误用自查点(产物落 写作课输出\ 或文件名缺-第N单元-)日后再传 skill 仍管用
 **碰引擎/共享件前必读**：[下游六件抽共享层](downstream-shared-layer-and-token-facts.md)（改真源照该条回归法）· [0727上下文瘦身收官](context-engineering-slimdown-0727.md)（细节已下沉references别抄回）
 - [宣传件渲染链+PDF反查源三指纹(0826)](promo-materials-render-chain.md) — 手改PDF前先三指纹反查源html;馆内海报scale须0.98;海报html已改入库
 - [配套PDF的Type3字体病已修两线(0817)](pdf-type3-fonts-fixed.md) — 装饰图标改纯CSS图形非换emoji;.mark .sym字体栈中间那档雅黑勿删;已装check_type3
