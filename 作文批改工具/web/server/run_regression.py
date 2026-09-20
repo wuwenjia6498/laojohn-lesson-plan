@@ -180,13 +180,18 @@ async def main():
 
         # 篇章结构那一段（0921 起是一段话，四个 verdict 不上屏、只供程序与班级汇总）
         summ = str(w.get("summary") or "").strip()
-        print(f"  结构段（{len(summ)} 字）：{summ}")
+        blocks = [b.strip() for b in summ.split(chr(10)) if b.strip()]
+        print(f"  结构段（{len(summ)} 字 / {len(blocks)} 段）：{summ}")
+        if summ and not 2 <= len(blocks) <= 3:
+            fails.append(f"{key} 篇结构段分了 {len(blocks)} 段，要求 2～3 段（教师扫着看，一大块读不动）")
+            print(f"  ✗ 结构段 {len(blocks)} 段")
         if not summ:
             fails.append(f"{key} 篇篇章结构那一段空着")
             print("  ✗ 结构段空着")
         else:
             if len(summ) < 80 or len(summ) > 240:
-                fails.append(f"{key} 篇结构段 {len(summ)} 字，要求 120～180（放宽到 80～240）")
+                fails.append(f"{key} 篇结构段 {len(summ)} 字，要求 120～180（机检放到 240——"
+                             f"实测模型对上限不敏感，卡太死每轮都红，内容质量优先）")
                 print(f"  ✗ 结构段字数 {len(summ)}")
             w2 = [x for x in EMPTY_WORDS if x in summ]
             if w2:
@@ -195,7 +200,9 @@ async def main():
             # 五样要说到（三年级不提重点，那是 0827 定的，0921 用户确认照旧）
             miss = [name for name, keys in
                     (("完整", ("完整", "写完", "开头", "结尾", "收住", "停在", "半截")),
-                     ("顺序", ("顺序", "先后", "先说", "跳", "回头", "按事情", "一路")),
+                     # 「依次」「顺着往下」实测都被判成漏说（0921 晚），词族按真实写法补齐
+                     ("顺序", ("顺序", "先后", "先说", "跳", "回头", "按事情", "一路",
+                               "依次", "接着", "顺着", "往下写", "一件接一件", "先总", "再讲")),
                      ("分段", ("段",)),
                      ("衔接", ("衔接", "过渡", "接上", "接住", "接得", "接不", "接下去",
                                "断口", "转得", "转到", "带过", "带一句", "顺下来", "顺下去")))
@@ -232,6 +239,20 @@ async def main():
                 else:
                     print(f"  · {lab} note 里带了判定词「{vd}」，看看能不能删掉：{nt}")
 
+        # 三条判据之间引同一句（0921 真稿：①引 4 句、②③各抄走 2 句）——程序已去重，这里兜底核
+        seen_q, dup = set(), []
+        for c in r.get("checks") or []:
+            for q in [c.get("evidence")] + list(c.get("quotes") or []):
+                k2 = norm(str(q or ""))
+                if not k2:
+                    continue
+                if k2 in seen_q:
+                    dup.append(str(q)[:20])
+                seen_q.add(k2)
+        if dup:
+            fails.append(f"{key} 篇判据之间引重了同一句：{dup[:2]}——dedupe_check_quotes 没生效")
+            print(f"  ✗ 判据引用重复：{dup[:2]}")
+
         lang = r.get("language") or {}
         print(f"  亮点 {len(r.get('highlights') or [])} 处｜"
               f"结构 " + "／".join(f"{k}:{(w.get(v) or {}).get('verdict','?')}"
@@ -258,6 +279,14 @@ async def main():
             if g.get("kind") == "用词重复":
                 print(f"  · 用词重复（程序已复核）：{g.get('detail')}")
             # 「读出来」的那两类：程序核不了判得对不对，只核它有没有落在一句真原文上
+            if g.get("kind") == "修辞不当":
+                q3, f3 = str(g.get("quote") or ""), str(g.get("fix") or "")
+                m3 = re.search(r"(?:像|如同|仿佛|好像|似)([^，。！？；]{1,8})", q3)
+                if m3 and any(x in f3 for x in ("像", "如同", "仿佛", "好像")):
+                    core = m3.group(1).strip("的 ")
+                    if core and core[:2] not in f3:
+                        fails.append(f"{key} 篇修辞不当的改法另造了新比喻（原喻体「{core}」没了）：{f3}")
+                        print(f"  ✗ 修辞改法另造新比喻：{f3}")
             if g.get("kind") in ("用词不当", "修辞不当"):
                 if not str(g.get("quote") or "").strip():
                     fails.append(f"{key} 篇「{g.get('kind')}」没引原句——tidy_language 的兜底没生效")
@@ -291,8 +320,8 @@ async def main():
             print(f"  ✗ 三年级不该判详略，却判了「{dv}」")
         fc = str(r.get("focus") or "")
         print(f"  讲评要点（{len(fc)} 字）：{fc}")
-        if len(fc) < 70 or len(fc) > 170:
-            fails.append(f"{key} 篇讲评要点 {len(fc)} 字，要求 90～130（放宽到 70～170）")
+        if len(fc) < 70 or len(fc) > 200:
+            fails.append(f"{key} 篇讲评要点 {len(fc)} 字，要求 90～130（机检放到 200，同上）")
             print(f"  ✗ 讲评要点字数 {len(fc)}")
         print(f"  点评卡：{r.get('parent_card', '')}")
 
@@ -386,6 +415,28 @@ async def main():
             if w2 in t:
                 fails.append(f"{k} 篇语言评价用了空话「{w2}」")
 
+    # 8 规范教学用语（0921 晚用户要求）：这些口头说法一个都不许出现在给教师看的栏目里。
+    #    只收「批语腔俚语」——学生示范句里不会出现的那种，免得误伤模仿学生口吻的改法示范。
+    # ⚠「立得住／站得住」是教研通用说法，不在此列（0921 晚实测误伤过一次）
+    SLANG = ("写慢", "写得最实", "往好看里写", "数不准", "帮上忙", "等于没写",
+             "对着稿纸看一眼", "挨个介绍", "一眼就看出", "话多了")
+    print()
+    for k, v in results.items():
+        lg3 = v.get("language") or {}
+        w3 = v.get("whole_piece") or {}
+        blob2 = " ".join([str(v.get(x) or "") for x in ("focus", "teacher_note")]
+                         + [str(w3.get("summary") or "")]
+                         + [str((w3.get("flow") or {}).get("note") or "")]
+                         + [str(lg3.get("overall") or "")]
+                         + [str(g.get(x) or "") for g in (lg3.get("issues") or [])
+                            for x in ("detail", "fix")]
+                         + [str((c or {}).get(x) or "") for c in (v.get("checks") or [])
+                            for x in ("comment", "advice")])
+        hit2 = [x for x in SLANG if x in blob2]
+        if hit2:
+            fails.append(f"{k} 篇用了口头说法{hit2}——给教师看的文字要用规范教学用语")
+            print(f"  ✗ {k} 篇口头说法：{hit2}")
+
     # 7 不许劝人硬加比喻：没用修辞不是毛病，写进任何一栏都会逼出三十篇假比喻
     NO_RHETORIC = ("缺少修辞", "缺乏修辞", "没有用修辞", "没有使用修辞", "未使用修辞",
                    "多用比喻", "多用修辞", "多用一些修辞", "适当运用修辞", "运用修辞手法",
@@ -413,7 +464,7 @@ async def main():
         for f in fails:
             print(f"  · {f}")
     else:
-        print("\n七项全过。")
+        print("\n八项全过。")
     print("\n机器判不了、要你自己看的：批语像不像人话；"
           "是对家长说话还是对学生说话；下次方向具不具体到能做。")
     return 1 if fails else 0

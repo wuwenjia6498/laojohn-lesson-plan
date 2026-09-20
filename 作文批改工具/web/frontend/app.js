@@ -753,7 +753,7 @@ function renderDetail() {
           h.quote_suspect ? '<span class="sustag">与原稿不符，请核对</span>' : ""}</div>
         <div class="w">${h.kind ? `<span class="kind">${esc(h.kind)}</span>` : ""}${esc(h.why)}</div>
       </div>`).join("")
-    : `<div class="hint">本篇未发现明显出彩的句子。<b>不必勉强摘录</b>——牵强的表扬家长能看出来。</div>`;
+    : `<div class="hint">本篇未发现明显出彩的句子。<b>不必勉强摘录</b>，牵强的表扬家长看得出来。</div>`;
 
   const wp = r.whole_piece || {};
   const wpRow = ([k, label, hint]) => {
@@ -768,7 +768,9 @@ function renderDetail() {
     </div>`;
   };
   const wpBody = wp.summary
-    ? `<div class="wp"><div class="cm para">${esc(wp.summary)}</div></div>` + wpHints(wp)
+    ? `<div class="wp">${String(wp.summary).split(String.fromCharCode(10))
+        .map(x => x.trim()).filter(Boolean)
+        .map(x => `<div class="cm para">${esc(x)}</div>`).join("")}</div>` + wpHints(wp)
     : WP_ROWS.map(wpRow).join("");
 
   // 语言：句子通不通 + 三种可数毛病 + 整篇一句话。
@@ -778,7 +780,7 @@ function renderDetail() {
   // 语言按「用词与修辞 → 语句 → 表达」排：语句是唯一带判定值的，另两项是描述性的。
   // 几类毛病（口水词／用词重复／用词不当／同起头／动词笼统／修辞不当）都收在这一项下面。
   const lgBody =
-    `<div class="wp"><div class="h"><span class="t">用词与修辞</span><span class="what">用词准不准、比喻拟人贴不贴、重复与笼统</span></div>${
+    `<div class="wp"><div class="h"><span class="t">用词与修辞</span><span class="what">用词是否准确、修辞是否恰当、有无重复与笼统</span></div>${
       lgIssues.length
         ? lgIssues.map(x => `${x.kind || x.detail
             ? `<div class="cm">${esc(x.kind || "")}${x.kind && x.detail ? "：" : ""}${
@@ -796,7 +798,7 @@ function renderDetail() {
         const f = wp.flow || {};
         const cls = f.verdict === "不适用" ? "v-na" : (WP_BAD.includes(f.verdict) ? "v-no" : "v-ok");
         return `<div class="wp">
-          <div class="h"><span class="t">语句表达</span><span class="what">句子通不通、整体读下来什么样</span></div>
+          <div class="h"><span class="t">语句表达</span><span class="what">句子是否通顺、整体表达特点</span></div>
           <div class="cm${f.suspect ? " sus-note" : ""}"><span class="vtag ${cls}">${
             esc(f.verdict || "—")}</span>${esc(f.note || "")}</div>
           ${(f.demo_from && f.demo_to)
@@ -820,7 +822,7 @@ function renderDetail() {
     let aside, body;
     if (tc.status !== "ok") {
       aside = "这次没跑成";
-      body = `<div class="wp"><div class="cm sus-note">这次错别字校对没跑成——不是「没有错别字」。可重批一次，或自己看稿。</div></div>`;
+      body = `<div class="wp"><div class="cm sus-note">本次错别字校对未完成，不等于没有错别字。可重新批改一次，或请对照原稿自行核对。</div></div>`;
     } else if (!list.length) {
       aside = "没查出 · 只给老师看";
       body = `<div class="wp"><div class="hint">没查出错别字（潦草但没写错的字不算；漏报可能有，不作定论）。</div></div>`;
@@ -828,7 +830,7 @@ function renderDetail() {
       aside = `确定 ${sure.length} · 待核 ${unsure.length} · 只给老师看`;
       body = sure.map(x => item(x, false)).join("")
         + (unsure.length
-          ? `<div class="wp"><div class="cm sus-note">以下几处工具拿不准，对着稿纸看一眼。</div></div>`
+          ? `<div class="wp"><div class="cm sus-note">以下几处校对结果不确定，请对照原稿核对。</div></div>`
             + unsure.map(x => item(x, true)).join("")
           : "")
         + `<div class="wp"><div class="row"><button class="ghost" id="btn-copy-typos">复制错别字清单</button></div></div>`;
