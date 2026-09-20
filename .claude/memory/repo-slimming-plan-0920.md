@@ -97,6 +97,7 @@ git worktree list
 ```
 
 ⚠ **我自己也栽在同一条上**：验证时跑 `git fetch backup <镜像>` 把整段旧历史拉回本地，仓库一度涨到 **938.17 MiB（比重写前还大）**。清法＝删掉多余本地分支 + `reflog expire --expire=now --all && gc --prune=now`，回到 303.41 MiB。
+⚠⚠ **同一条 0920 当天咬了我三次**（第三次是为核对备份分支内容跑 `git fetch origin +refs/heads/backup/*:...`，仓库当场涨到 637.19 MiB）。**负向 refspec 只管默认 fetch，命令行显式写的 refspec 一律绕过它**——凡要看备份分支的内容，用 `git ls-remote` 或临时 clone，别往生产仓库里 fetch。
 **已装长效防线**：`git config --local --add remote.origin.fetch '^refs/heads/backup/*'`（负向 refspec，git ≥2.29），否则日后任何一次 `git fetch` 都会把保命分支的旧历史重新拉回来。**两台机器都要装。**
 
 ⚠ **`git cherry` 在历史重写后不可信**：重写改了 patch-id，会把早已在 main 里的提交报成「无等价」（她实测 36/33 条全是假阴性）。判断分支上的工作是否已进主线，要**逐路径核内容**，不能看 `git cherry`。
