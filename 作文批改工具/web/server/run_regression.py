@@ -13,6 +13,8 @@
 4. 点评卡开头是否撞套路（防同质化那道防线在真实模型上还灵不灵）。
 5. 有没有越界提错别字（主批改的批语里仍一个字不许提）。
 6. 错别字校对层：A 篇两处「经长」都抓到、B/C 篇零误报、三篇都跑成（0917 加）。
+7. 用词与修辞两类判断型毛病：报了就必须引得出原句；任何一栏都不许劝人「多用比喻」
+   （三篇基准稿纸都没有比喻，这一栏一旦开始劝，三十篇就会全被劝去硬安比喻）（0920 加）。
 """
 import asyncio
 import base64
@@ -205,6 +207,11 @@ async def main():
               + "｜语言毛病:" + ("／".join(g.get("kind", "?")
                                           for g in (lang.get("issues") or [])) or "无"))
         kinds = [g.get("kind") for g in (lang.get("issues") or [])]
+        # 判断类的两类各最多一条（模型不守，由 tidy_language 截）
+        for kd in ("用词不当", "修辞不当"):
+            if kinds.count(kd) > 1:
+                fails.append(f"{key} 篇「{kd}」报了 {kinds.count(kd)} 条——tidy_language 的截断没生效")
+                print(f"  ✗ 「{kd}」{kinds.count(kd)} 条，程序该只留一条")
         # 每条毛病都得带改法（0918 加）。程序补的那条口水词没有改法（detail 带「——一篇里反复用同一个词」），豁免
         for g in lang.get("issues") or []:
             if str(g.get("detail") or "").endswith("一篇里反复用同一个词"):
@@ -216,6 +223,14 @@ async def main():
                 fails.append(f"{key} 篇语言毛病「{g.get('kind')}」的改法带空夸词：{g.get('fix')}")
             if g.get("kind") == "用词重复":
                 print(f"  · 用词重复（程序已复核）：{g.get('detail')}")
+            # 「读出来」的那两类：程序核不了判得对不对，只核它有没有落在一句真原文上
+            if g.get("kind") in ("用词不当", "修辞不当"):
+                if not str(g.get("quote") or "").strip():
+                    fails.append(f"{key} 篇「{g.get('kind')}」没引原句——tidy_language 的兜底没生效")
+                    print(f"  ✗ 「{g.get('kind')}」没引原句")
+                print(f"  · {g.get('kind')}（判得对不对要你自己看）：{g.get('detail')}")
+                if g.get("kind") == "修辞不当":
+                    print("    ⚠ 三篇基准稿纸都没用比喻拟人，这条多半是误报，看一眼")
         # 语句一栏的示范：不通就改顺，通篇短句就连成长句；判「通顺」且 note 说的是短句却没示范，报
         fl = w.get("flow") or {}
         if fl.get("demo_from") and fl.get("demo_to"):
@@ -248,6 +263,14 @@ async def main():
         if any(w in card_all for w in ("错别字", "别字", "写错", "错字", "应为")):
             fails.append(f"{key} 篇提到了错别字（越界，那一层归老师）")
             print("  ✗ 提到了错别字——越界")
+        # 「用词不当」判的是词不是字，最容易被拿来夹带错别字（A 篇的「经长」正是诱饵）。
+        # 这里词表比上面窄：改法里说「这个词用错了」是本分，只有「错别字／别字／错字」才越界。
+        lang_all = " ".join(str(g.get(k2) or "")
+                            for g in ((r.get("language") or {}).get("issues") or [])
+                            for k2 in ("detail", "fix"))
+        if any(w in lang_all for w in ("错别字", "别字", "错字")):
+            fails.append(f"{key} 篇语言毛病里提到了错别字（越界）")
+            print("  ✗ 语言毛病里提到了错别字——越界")
 
         # 6 错别字校对层：A 篇两处「经长」要都抓到，B/C 篇一处不许报，三篇都得跑成。
         #   误报比漏报伤——报到老师那里的每一条他都要对着稿纸核。
@@ -320,12 +343,32 @@ async def main():
             if w2 in t:
                 fails.append(f"{k} 篇语言评价用了空话「{w2}」")
 
+    # 7 不许劝人硬加比喻：没用修辞不是毛病，写进任何一栏都会逼出三十篇假比喻
+    NO_RHETORIC = ("缺少修辞", "缺乏修辞", "没有用修辞", "没有使用修辞", "未使用修辞",
+                   "多用比喻", "多用修辞", "多用一些修辞", "适当运用修辞", "运用修辞手法",
+                   "加入比喻", "用上比喻", "增加修辞")
+    print()
+    for k, v in results.items():
+        lg2 = v.get("language") or {}
+        blob = " ".join([str(v.get(x) or "") for x in ("parent_card", "teacher_note", "focus")]
+                        + [str(lg2.get("overall") or "")]
+                        + [str(g.get(x) or "") for g in (lg2.get("issues") or [])
+                           for x in ("detail", "fix")]
+                        + [str((c or {}).get(x) or "") for c in (v.get("checks") or [])
+                           for x in ("comment", "advice")]
+                        + [str((y or {}).get("note") or "")
+                           for y in (v.get("whole_piece") or {}).values()])
+        hit = [w for w in NO_RHETORIC if w in blob]
+        if hit:
+            fails.append(f"{k} 篇在劝人加修辞（「{hit[0]}」）——没用比喻不是毛病")
+            print(f"  ✗ {k} 篇劝人加修辞：{hit}")
+
     if fails:
         print(f"\n不合格 {len(fails)} 项：")
         for f in fails:
             print(f"  · {f}")
     else:
-        print("\n六项全过。")
+        print("\n七项全过。")
     print("\n机器判不了、要你自己看的：批语像不像人话；"
           "是对家长说话还是对学生说话；下次方向具不具体到能做。")
     return 1 if fails else 0
