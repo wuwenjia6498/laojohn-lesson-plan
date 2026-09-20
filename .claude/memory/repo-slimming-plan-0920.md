@@ -98,6 +98,9 @@ git worktree list
 
 ⚠ **我自己也栽在同一条上**：验证时跑 `git fetch backup <镜像>` 把整段旧历史拉回本地，仓库一度涨到 **938.17 MiB（比重写前还大）**。清法＝删掉多余本地分支 + `reflog expire --expire=now --all && gc --prune=now`，回到 303.41 MiB。
 ⚠⚠ **同一条 0920 当天咬了我三次**（第三次是为核对备份分支内容跑 `git fetch origin +refs/heads/backup/*:...`，仓库当场涨到 637.19 MiB）。**负向 refspec 只管默认 fetch，命令行显式写的 refspec 一律绕过它**——凡要看备份分支的内容，用 `git ls-remote` 或临时 clone，别往生产仓库里 fetch。
+⚠⚠⚠ **第五回（B 机，普通 `git pull` 触发）**：负向 refspec 是 **per-clone 的本地配置、不随仓库走**，我只在 A 机配了，B 机一条 `git pull` 就把备份支整支拉下来，301.22 → 635.04 MiB。**新克隆的机器第一次 pull 必中招**，所以它和大文件闸门一样必须进装机步骤（已写入 `docs\协作同步说明.md`「新克隆后必做两条」）。
+→ **同一机制当天共发作五回：stash → 索引 → 远程跟踪 ref → 本地分支 → 默认 fetch refspec。** 归纳成一句：**凡能当 GC 根的东西都要摘干净，而「摘干净」的配置本身不随仓库传播，得逐机器装。**
+
 **已装长效防线**：`git config --local --add remote.origin.fetch '^refs/heads/backup/*'`（负向 refspec，git ≥2.29），否则日后任何一次 `git fetch` 都会把保命分支的旧历史重新拉回来。**两台机器都要装。**
 
 ⚠ **`git cherry` 在历史重写后不可信**：重写改了 patch-id，会把早已在 main 里的提交报成「无等价」（她实测 36/33 条全是假阴性）。判断分支上的工作是否已进主线，要**逐路径核内容**，不能看 `git cherry`。
