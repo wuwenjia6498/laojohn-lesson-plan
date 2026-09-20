@@ -1,11 +1,11 @@
 ---
 name: repo-slimming-plan-0920
-description: 仓库瘦身方案已出未执行：病灶是死历史47%而非活文件；用 filter-repo blob-id 模式剥 404MB，759MiB→约390MB；四个拍板点待定
+description: 仓库瘦身已执行完毕（0920）：filter-repo blob-id 模式剥 583 个死二进制，759.67→303.40 MiB，内容零变化已证；含五条可复用的踩坑
 metadata:
   type: project
 ---
 
-2026-09-20 体检并出方案，**方案已写、尚未执行**。方案全文在**仓外**：`C:\Users\69491\.claude\plans\git-1-gb-breezy-lamport.md`（含全部可复制命令、双机时序、回滚卡片）。本条只留跨会话不可推断的结论。
+2026-09-20 体检、演练、**当日执行完毕**。方案全文在**仓外**：`C:\Users\69491\.claude\plans\git-1-gb-breezy-lamport.md`（含全部可复制命令、双机时序、回滚卡片）。本条只留跨会话不可推断的结论。
 
 ## 体检结论：病灶是死历史，不是活文件
 
@@ -61,6 +61,28 @@ metadata:
 **冻结期的唯一禁令是「不提交、不推送」——文件照常编辑、docx 照常渲**；B 只需在两个时点各到场约 10 分钟（T0 确认干净、T6 重新落地，后者要下载 303 MiB）。
 → 推荐约法＝**一个晚上**（对方下班前回 T0 三连，A 当晚跑完，次日上班前对方跑 T6），谁都不用等谁。通知对方的原话模板在方案文件 ④.0。
 
-## 四个待拍板（执行前必须回话）
+## 执行结果（2026-09-20 当日完成）
 
-A 那 93MB 作废件只留本地？ · B 角色册 26.6MB 旧母版一并剥离并改 `.gitignore` 注释？ · C 改名前目录的历史 pdf/png/docx 全剥（**md 文字历史全保留**）？ · D 用 `fetch+reset+gc` 并改 CLAUDE.md §8？——四条均建议采纳。用户 0920 定「先出方案、择期执行」，实际动手须先与另一台机器约冻结时段。
+| | 前 | 后 |
+|---|---|---|
+| size-pack | 759.67 MiB | **303.40 MiB** |
+| packs / 对象 | 2 / 8033 | 1 / 7207 |
+| 跟踪文件 | 1413 | 1393 |
+
+- **阶段①**（`b620604`）：摘除 25 个自证作废件 93.0MB，补泛化 ignore 规则；保留 `_已失效` 下 5 个 md。
+- **阶段② PNG 重压：跳过**。oxipng 实测只省 15.7MB（占 303MB 的 5.2%），而做它就必须让 B 机改回 `reset --hard`、冻结期改动全部手工拷进拷出——不值。
+- **阶段③**：filter-repo 剥 583 blob / 380.4MB，**5.5 秒**；force push 303 MiB **1 分 12 秒**（实际约 4.2 MiB/s）。
+- **验证全过**：与备份镜像 diff 只有阶段①那 21 个文件；**HEAD 树指纹重写前后完全一致**（`acd085ba…`）；受保护三目录 315 文件 SHA 全不变；362 提交一个没少；120 pptx / 329 图 / 192 docx 完整性零损坏。
+- 远端留 `backup/pre-filter-20260920`（旧历史全量）与 `salvage/0805-honbei-dropped`，**两周后确认无事再删**。
+
+## ⚠ 五条踩坑（下次碰 git 批量操作直接用）
+
+1. **exFAT 卷不记录属主，git 拒绝从项目路径 clone**——`clone --mirror` 第一步就会失败。已永久修：`git config --global --add safe.directory 'E:/laojohn-lesson-plan'` 与 `.../.git`。
+2. **`git ls-files` 默认把中文转义成八进制**，`grep '中文'` 必然零命中——**会造出「校验通过」的假象**。凡对中文路径做 grep 校验，一律加 `-c core.quotepath=false`。本次因此误判过一次。
+3. **`git cat-file --batch-check` 的格式串必须带 `%(rest)`**，否则 `rev-list --objects` 的「SHA 路径」两段会被当成一个对象名，全部报 missing。
+4. **`git rm --cached` 批量传路径时，一条不存在就整批中止**——目录级删除会先带走子目录里的文件，后续按文件名再删就撞空。用 `--ignore-unmatch` + 去重后的 `--pathspec-from-file=- --pathspec-file-nul`。
+5. **robocopy 搬不动含 `·`／全角括号的中文路径**，静默失败；改用 Python `shutil.copy2` 逐个拷。
+
+## 四个拍板点（0920 均已采纳并执行）
+
+A 那 93MB 作废件只留本地？ · B 角色册 26.6MB 旧母版一并剥离并改 `.gitignore` 注释？ · C 改名前目录的历史 pdf/png/docx 全剥（**md 文字历史全保留**）？ · D 用 `fetch+reset+gc` 并改 CLAUDE.md §8？——四条均建议采纳。四条全部采纳并已执行。冻结时段：当日午后，B 机同事按 T0 三条自检达标后进入冻结。
