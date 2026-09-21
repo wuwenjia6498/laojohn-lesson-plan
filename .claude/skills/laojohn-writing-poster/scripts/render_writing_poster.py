@@ -169,9 +169,11 @@ def theme_css(illu, data):
     ah = acc if acc is not None else hue
     # 牛皮纸只允许向主色偏一点，偏多了就不像纸（原色 #EBD3A8 / #E0BF8C ≈ 38°）
     kh = 38 + max(-8, min(8, ((hue - 38 + 180) % 360) - 180))
-    out.append("--glow-a:%s;--glow-b:%s;--kraft-a:%s;--kraft-b:%s;"
+    # 三条要点条一律同色（2026-09-22 用户定，三档递进与两档都已并掉）；
+    # 第三条只靠左缘橙条与橙调栏目名区分，不靠底色
+    out.append("--glow-a:%s;--glow-b:%s;--tone-a:%s;"
                % (_hsl(hue, .78, .80, ".50"), _hsl(ah, .70, .88, ".42"),
-                  _hsl(kh, .52, .81), _hsl(kh, .50, .74)))
+                  _hsl(kh, .52, .83)))
     return ":root{%s}" % "".join(out)
 
 

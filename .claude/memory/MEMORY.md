@@ -39,7 +39,7 @@
 - [批改工具已部署Vercel(0824)](writing-correction-tool-vercel-deploy-0824.md) — 入口=部署根index.py不能放api/;.vercelignore挡config.json;正式地址grader.skyline666.top;⚠validate全绿≠包对
 - [⚠配套三侧文风0915与详案线同步换靶](writing-materials-retarget-0915.md) — 生成读三侧定稿样本不读对照表;polish_materials.py机检D每份必跑(同一张polish_rules,禁副本);存量42份已过一轮;样本卡=现行json快照,--check-exemplars防漂移(抄样本抄现行文件别抄git diff);⚠配套--all --dry-run是共享规则表第二回归面,首跑照出4条排除漏洞
 - ⚠**学生单上印的工具名必须和教师口头说的一致(0916)**:详案叫「人物特点卡」、学生单模板写死「构思表」,学生对不上号;`template_student.html` 45份共用**禁直接改词**,改法=加可选字段`worksheet.plan_name`不传则沿用旧词;⚠**PPT里的稿纸页就是学生用第2页的截图**,配套一改那张图就过期 — [源](manhua-laoshi-5a-lesson-state.md)
-- [⚠写作课单元海报工具立项·四决策(0920)](writing-poster-tool-0920.md) — 独立skill laojohn-writing-poster;每单元AI插画(imgclient薄壳,判读失败记unknown);OFL毛笔体入库,title避开＿＿;校区信息.json空则隐藏(地址电话待填);三上一二三四已按新母版出图、余20份未跑;logo已换1200px透明底(去multiply,8处共用源已核无写死宽高);手绘风格库已接(编号按单元自选);⚠插画画面＝本课情境(示范文关键一刻/题面/正例)可有人只禁字;⚠0921底色改浅淡呼应(主底奶油不动只染光晕与卡片;自动取色区分度弱,靠顶层theme_hue手填才拉得开);0921版式改卡片叠压插画140px+插画基准920px,每张按画面调illustration.zoom(1.05~1.2,超1.25裁出硬边);主体须落上2/3,被盖改subject别改重叠量;⚠文案母版0921改递进三层(写作痛点·教法/能力收获/成长收获),卡片纯色,整段书面句非碎行·head≤10字·每卡≤60字,卡③唯一放宽可价值判断,交付方式不上卡片;外部文案建议须逐句反查详案
+- [⚠写作课单元海报工具立项·四决策(0920)](writing-poster-tool-0920.md) — 独立skill laojohn-writing-poster;每单元AI插画(imgclient薄壳,判读失败记unknown);OFL毛笔体入库,title避开＿＿;校区信息.json空则隐藏(地址电话待填);三上一二三四已按新母版出图、余20份未跑;logo已换1200px透明底(去multiply,8处共用源已核无写死宽高);手绘风格库已接(编号按单元自选);⚠插画画面＝本课情境(示范文关键一刻/题面/正例)可有人只禁字;⚠0921底色改浅淡呼应(主底奶油不动只染光晕与卡片;自动取色区分度弱,靠顶层theme_hue手填才拉得开);0921版式改卡片叠压插画140px+插画基准920px,每张按画面调illustration.zoom(1.05~1.2,超1.25裁出硬边);主体须落上2/3,被盖改subject别改重叠量;⚠文案母版0921改递进三层(写作痛点·教法/能力收获/成长收获三条竖排,均左标题|竖线|右正文横排,无阴影纯色平铺·三条同底色·第三条只靠橙左缘条+橙label区分(底色分档三轮全否,别再提),靠kind=spirit分流;竖排居中版已否太占高),卡片纯色,整段书面句非碎行·head≤10字·每卡≤60字,卡③唯一放宽可价值判断,交付方式不上卡片;外部文案建议须逐句反查详案
 - [配套json富文本标记只有部分字段解析(0907)](writing-materials-richtext-field-scope.md) — 教师materials/家长oneline走textContent,写{b}会印成(b);⚠溢出/页数/Type3三道机检全绿也抓不到,渲完正则扫一遍PDF文本
 - [手改只改HTML必被重渲冲掉(0821)](writing-materials-handedits-lost-on-rerender.md) — 文字改动一律回写_data.json;⚠仓内9课json仍不含那批手改
 - **PPT链**(八条细节→[链索引](ppt-chain-index.md)):⚠本仓止于动画注入·终稿不回仓(0902,打包不收PPT,下一课次先确认收到的是初稿)｜⚠先读详案再审查再动画(0806,机检全过≠审查完成;PPT对详案错勿迁就)｜⚠[表头重影层每次顺手清·删在注入前(0915)](ppt-header-ghost-image-0915.md)｜⚠[动画禁由下向上(0915)](ppt-anim-no-upward-jump-0915.md) — 撤销0804「哪怕跳回顶部」;表格按行揭示;页脚条载任务指令须上移先出;交付前必跑回跳校验
@@ -90,6 +90,7 @@
 - [阅读指南拓展栏点名具体书/影片](reading-guide-extension-concrete-titles.md) — 仅此栏放宽红线,吃不准就不写
 ## 未决事项与交付风险（做完即删）
 - **⚠六上四《笔尖流出的故事》仓内pptx PowerPoint拒开(0921发现)**:自0918产出就坏;17份里的孤例;30页坏26页(好的4页全是结构页);zip/图/xml/rels/已知三坑/bldLst/剔timing 全排除;⚠动画注入成功≠PowerPoint能开,交付前得真开一遍 — [详情](bijian-liuchu-6a-ppt-broken-0921.md)
+- **备课视频首批两支已出片(0921)**:五上四 17.8分钟为准片(外部终稿画面、增量39%、机检FAIL0、字幕零违规、零漂移);三上一 16.4分钟素材薄;六上四等PPT定稿;张视角二审三条已落地(bridge废除/locate与do重合/空泛点题词表);⚠闸门A记的是「用户指示直接出片(未逐页通读)」 — [详情](lesson-video-line-0921.md)
 - **仓库瘦身已完成(0920)**：759.67→303.41 MiB（两机一致）。**⏰ 唯一待办：2026-10-04 后删远端 `backup/pre-filter-20260920`**（删前 GitHub 网页体积数字不降，属正常；删后两台机器的负向 refspec 即可撤）；⚠ 新克隆必跑两条装机命令(core.hooksPath + 负向 refspec，见 docs\协作同步说明.md)，否则大文件闸门失效、一条 git pull 就把仓库撑回 635MiB — [详情](repo-slimming-plan-0920.md)
 - 三上五我们眼中的缤纷世界 0919 详案已定稿（观察对象四换定为小动物+蚂蚁短片，四轮冷审+张视角减讲法+语体审），配套三侧/PPT 链/批改标准包未做；短片不随教案分发（版权） — [详情](binfen-shijie-3a-lesson-state.md)
 - 四上五生活万花筒 0918 详案已定稿（冷审 B 块 8 条按推荐落定），配套三侧/PPT 链/批改标准包未做 — [详情](shenghuo-wanhuatong-4a-lesson-state.md)

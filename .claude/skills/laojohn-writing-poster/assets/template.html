@@ -22,8 +22,8 @@
     --capsule:#3B2A1B;
     --orange:#F08A3E;
     --cream:#FFF6E3;
-    --kraft-a:#EBD3A8;
-    --kraft-b:#E0BF8C;
+    /* 三条要点条同一底色；渲染脚本按插画取色后由 /*__THEME__*/ 覆盖 */
+    --tone-a:#EEDAB8;
     /* 两处光晕的缺省品牌暖调；渲染脚本按插画取色后由 /*__THEME__*/ 覆盖 */
     --glow-a:rgba(255,226,140,.55);
     --glow-b:rgba(255,236,190,.45);
@@ -95,35 +95,61 @@
   }
   .illu.empty{ height:560px; }
 
-  /* ---- 4. 三张牛皮纸卡 ---- */
+  /* ---- 4. 三条要点条（竖排堆叠，统一横排结构：左标题｜竖线｜右正文） ---- */
   /* 卡片区上提，压住插画下缘约 140px：插画与卡片连成一块，不是上下两段（2026-09-21 改） */
-  .cards{ display:flex; gap:26px; align-items:stretch; margin-top:-140px; position:relative; z-index:2; }
+  .cards{ display:flex; flex-direction:column; gap:20px; margin-top:-140px; position:relative; z-index:2; }
   .illu.empty + .cards{ margin-top:4px; }   /* 无图时不重叠，照旧留白 */
-  .card{
-    flex:1 1 0; min-width:0; position:relative;
-    padding:40px 24px 36px; border-radius:16px;
-    background:var(--kraft-a);   /* 纯色（2026-09-21 用户定，原牛皮纸斜纹＋渐变已撤） */
-    box-shadow:0 14px 32px rgba(74,44,23,.26);
+
+  /* 三条共用骨架：左栏定宽 380px，三条的竖分隔线才对齐 */
+  .card, .spirit{
+    position:relative; display:flex; align-items:center; gap:30px;
+    padding:22px 34px 24px; border-radius:18px;
   }
-  /* 三层：固定栏目名（63 张统一）→ 本单元标题 → 正文整段 */
-  .card .label{
-    font-size:23px; font-weight:600; color:#8C6A4A; letter-spacing:.14em;
-    line-height:1.2; margin-bottom:12px; white-space:nowrap;
+  /* 纯色平铺、无阴影、三条同一底色（2026-09-22 用户定） */
+  .card, .spirit{ background:var(--tone-a); }
+  .card .head-col, .spirit .head-col{ flex:0 0 380px; min-width:0; }
+  .card .label, .spirit .label{
+    font-size:21px; font-weight:600; color:#8C6A4A; letter-spacing:.16em;
+    line-height:1.2; white-space:nowrap;
   }
-  /* head ≤10 字：字号由 JS 按字数算（可用宽 285px），保证三卡标题都是单行、正文起始线齐平 */
-  .card h3{
-    font-size:36px; font-weight:800; color:var(--ink); line-height:1.16;
-    padding-left:14px; border-left:7px solid var(--ink); letter-spacing:.01em;
-    white-space:nowrap;
+  /* 标题一律单行：36px 封顶，超 10 字按左栏可用宽 374px 缩到刚好放得下 */
+  .card h3, .spirit h3{
+    margin-top:8px; font-size:36px; font-weight:800; color:var(--ink);
+    line-height:1.22; letter-spacing:.02em; white-space:nowrap;
   }
-  .card .body{ margin-top:18px; }
+  .card h3{ padding-left:14px; border-left:7px solid var(--ink); }
+  .card .body, .spirit .body{
+    flex:1 1 0; min-width:0;
+    border-left:2px solid rgba(74,44,23,.16); padding-left:32px;
+  }
   /* 正文是整段连贯句（不是手工碎行），交给浏览器自动折行 */
-  .card .line{ font-size:26px; line-height:1.72; color:var(--ink-soft); font-weight:500; text-align:justify; }
-  .card .line + .line{ margin-top:14px; }
+  .card .line, .spirit .line{
+    font-size:24px; line-height:1.66; color:var(--ink-soft); font-weight:500;
+  }
+  .card .line + .line, .spirit .line + .line{ margin-top:8px; }
+
+  /* 第三条「成长收获」：讲的是价值升华，与前两条「怎么教／学会什么」不同层，
+     故与前两条同结构、异外观——去纯色卡面改半透明白底＋细边框，栏目名带短横线，
+     标题不挂深棕竖条（2026-09-21 用户定；更早的竖排居中版把海报拉长近 400px，已弃）。 */
+  /* 第三条底色与前两条完全一致，区别只在左缘橙条、橙调栏目名、标题不挂深棕竖条 */
+  .spirit{ margin-top:12px; }   /* 与前两条多留一点距，层级才读得出 */
+  /* 左缘一道橙条，标记「这是收束」；前两条没有 */
+  .spirit::before{
+    content:""; position:absolute; left:0; top:16px; bottom:16px; width:6px;
+    border-radius:0 6px 6px 0; background:linear-gradient(180deg, #F2A15C 0%, #E8782D 100%);
+  }
+  /* 栏目名用橙调，与底部报名条呼应，也和前两条的灰棕 label 拉开 */
+  .spirit .label{
+    display:inline-flex; align-items:center; gap:14px;
+    letter-spacing:.18em; color:#C4702B;
+  }
+  .spirit .label::after{
+    content:""; display:block; width:40px; height:2px; background:rgba(196,112,43,.55);
+  }
 
   /* ---- 5. 橙色报名条 ---- */
   .cta{
-    margin-top:40px; border-radius:30px; padding:36px 40px 38px;
+    margin-top:30px; border-radius:30px; padding:34px 40px 36px;
     display:flex; align-items:center; justify-content:space-between; gap:24px;
     background:linear-gradient(135deg, #F9A257 0%, #F08A3E 58%, #E8782D 100%);
     color:#fff; box-shadow:0 12px 26px rgba(240,138,62,.35);
@@ -156,6 +182,8 @@
   <div class="illu" id="illu"><img id="illu-img" src="/*__ILLU__*/" alt=""></div>
 
   <div class="cards" id="cards"></div>
+
+  <div class="spirit" id="spirit"></div>
 
   <div class="cta" id="cta">
     <div class="lines">
@@ -212,25 +240,36 @@ function setText(id, txt){
     document.getElementById('illu').classList.add('empty');
   }
 
-  // 三张卡（写作痛点·教法 → 能力收获 → 精神滋养）：label 为 63 张固定栏目名；
-  // lines 是整段数组（每段自动折行），head 与 lines 皆空则整卡隐藏，其余卡自动等分
-  // 卡片标题一律单行：36px 封顶，超 7 字按可用宽 278px 缩到刚好放得下
-  function headSize(t){ return Math.min(36, Math.floor(278 / Math.max(1, t.length))); }
+  // 三条竖排：kind=pain/gain 用纯色卡条，kind=spirit（成长收获）同结构异外观、排在最后（2026-09-21 改）。
+  // lines 是整段数组（每段自动折行），head 与 lines 皆空则该块隐藏。
+  // 三条标题一律单行：36px 封顶，超 10 字按左栏可用宽 374px 缩到刚好放得下
+  function headSize(t){ return Math.min(36, Math.floor(374 / Math.max(1, t.length))); }
+  function headCol(c){
+    return '<div class="head-col">'
+      + (c.label ? '<div class="label">'+esc(c.label)+'</div>' : '')
+      + (c.head ? '<h3 style="font-size:'+headSize(c.head)+'px">'+esc(c.head)+'</h3>' : '')
+      + '</div>';
+  }
+  function body(lines){
+    return lines.length ? '<div class="body">'
+      + lines.map(function(t){ return '<div class="line">'+esc(t)+'</div>'; }).join('') + '</div>' : '';
+  }
   const cardsEl = document.getElementById('cards');
+  const spiritEl = document.getElementById('spirit');
   const html = [];
+  let spiritHtml = '';
   (d.cards || []).forEach(function(c){
     if (!c) return;
     const lines = (c.lines || []).filter(Boolean);
     if (!c.head && !lines.length) return;
-    html.push('<div class="card">'
-            + (c.label ? '<div class="label">'+esc(c.label)+'</div>' : '')
-            + (c.head ? '<h3 style="font-size:'+headSize(c.head)+'px">'+esc(c.head)+'</h3>' : '')
-            + (lines.length ? '<div class="body">'
-                + lines.map(function(t){ return '<div class="line">'+esc(t)+'</div>'; }).join('')
-                + '</div>' : '')
-            + '</div>');
+    if (c.kind === 'spirit') {
+      spiritHtml = headCol(c) + body(lines);
+      return;
+    }
+    html.push('<div class="card">' + headCol(c) + body(lines) + '</div>');
   });
   if (html.length) cardsEl.innerHTML = html.join(''); else hide(cardsEl);
+  if (spiritHtml) spiritEl.innerHTML = spiritHtml; else hide(spiritEl);
 
   // 报名条
   const cta = d.cta || {};
