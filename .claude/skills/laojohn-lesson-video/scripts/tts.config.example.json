@@ -1,0 +1,19 @@
+{
+  "_说明": "复制成 tts.config.json 再填（那个文件已 gitignore，禁提交密钥）。环境变量优先于本文件。",
+  "TTS_PROVIDER": "aihubmix",
+  "AIHUBMIX_API_KEY": "",
+  "AIHUBMIX_BASE_URL": "https://aihubmix.com/v1",
+  "TTS_MODEL": "gpt-4o-mini-tts",
+  "TTS_VOICE": "nova",
+  "TTS_INSTRUCTIONS": "语气平稳、像老教师带新老师过教案，不夸张、不播音腔",
+
+  "_火山": "语音技术控制台单独开通，与方舟 ARK_API_KEY 不是同一套凭证",
+  "VOLC_TTS_APPID": "",
+  "VOLC_TTS_TOKEN": "",
+  "VOLC_TTS_CLUSTER": "volcano_tts",
+  "VOLC_TTS_VOICE": "zh_female_qingxin",
+
+  "MINIMAX_API_KEY": "",
+  "MINIMAX_GROUP_ID": "",
+  "MINIMAX_TTS_VOICE": "female-tianmei"
+}

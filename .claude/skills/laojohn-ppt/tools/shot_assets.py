@@ -27,7 +27,7 @@
     .html → Playwright 截图                               【已装】
     本机没有 LibreOffice / pandoc，所以 docx/pptx 只有 COM 这一条路。
 
-COM 的三个坑（踩中的表现都不像"文件打不开"，别往错方向查）：
+COM 的四个坑（踩中的表现都不像"文件打不开"，别往错方向查）：
   1. 目标文件正被 Word/WPS/PowerPoint 打开时，COM 可能拿到只读句柄或整个卡住。
      脚本开跑前先提示，卡住就去关掉那个窗口。
   2. Quit() 必须放 finally——异常时不退会留一个后台 WINWORD/POWERPNT 进程，
@@ -35,6 +35,15 @@ COM 的三个坑（踩中的表现都不像"文件打不开"，别往错方向�
   3. WPS 抢注了 .docx/.pptx 关联时，Dispatch("Word.Application") 可能落到 WPS 的
      COM 实现上，ExportAsFixedFormat 的参数名不同 → 这里用位置参数并 try/except，
      失败就明确报错让用户手动"另存为 PDF"，不要静默出一张空图。
+  4. **pywin32 的 gen_py 类型库缓存会损坏**（2026-09-21 踩中）。表现是
+     EnsureDispatch 报 `module 'win32com.gen_py.…' has no attribute 'CLSIDToClassMap'`，
+     而且坏掉之后连普通 Dispatch 也跟着失败，报的却是
+     `Presentations.Open : Failed` —— 这条读起来像"文件被占用"，
+     与真实原因毫无关系，很容易去查 WPS 抢注。
+     修法：删掉 `%LOCALAPPDATA%\Temp\gen_py\` 与 site-packages 下
+     `win32com\gen_py\` 的内容（保留 __init__.py），下次调用会自动重建。
+     辅助判据：同一份文件在 PowerShell 里 `New-Object -ComObject` 能打开、
+     在 python 里打不开，就是这个缓存问题，不是 Office 装坏了。
 
 版权红线：截图一律避开含教材插图 / 原书扫描页的版面（尤其 `-配图.docx` 那一版详案），
 只截自制内容。仓内那些扫描件仅限内部备课使用，不得随宣讲件对外转发。
@@ -112,13 +121,17 @@ def _docx_export_pdf(src, pdf_out):
 
 
 # ---------------------------------------------------------------- pptx
-def pptx_to_png_batch(src, jobs):
+def pptx_to_png_batch(src, jobs, size=None):
     """PowerPoint COM 一次会话导出多页。jobs = [(slide_no, out_path), ...]
 
     必须批量、不能一张一开一关：Quit() 之后 PowerPoint 要几秒才真正退出，期间
     再 Dispatch 会拿到正在退出的实例，下一次 Presentations.Open 直接失败，报
     「发生意外 / Presentations.Open : Failed」——这条报错读起来像"文件被占用"，
     与真实原因（上次会话没退干净）完全无关，极易查错方向。实测踩过一次。
+
+    size=(w, h) 是**用途无关的可选参数**，默认 None 时沿用 MAX_EDGE 那档（1600x900），
+    宣讲件贴图的行为一字不变。备课视频线（laojohn-lesson-video）要 1920x1080 出帧，
+    才传它。⚠ 别给它一个非 None 的硬默认——那会静默改掉宣讲件所有存量截图的尺寸。
     """
     import win32com.client
     app = None
@@ -136,8 +149,7 @@ def pptx_to_png_batch(src, jobs):
         # 「Open.Slides」——那条报错读起来像文件被占用，与真实原因毫无关系。
         prs = app.Presentations.Open(os.path.abspath(src), -1, 0, 0)
         total = prs.Slides.Count
-        w = MAX_EDGE
-        h = int(MAX_EDGE * 9 / 16)          # 16:9 按长边导出
+        w, h = size if size else (MAX_EDGE, int(MAX_EDGE * 9 / 16))   # 16:9 按长边导出
         for slide_no, out in jobs:
             if not (1 <= slide_no <= total):
                 results.append((out, "%s 只有 %d 页，要不到第 %d 页"
