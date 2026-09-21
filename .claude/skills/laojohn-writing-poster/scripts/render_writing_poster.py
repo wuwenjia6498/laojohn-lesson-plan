@@ -92,6 +92,89 @@ def load_campus(root, override):
     return {k: v for k, v in d.items() if not str(k).startswith("_")}
 
 
+
+# ---- 插画自动取色：光晕与牛皮纸卡跟着本课插画走（主底奶油不动，插画融合才不破） ----
+# 取色只影响装饰层；json 顶层 "theme_hue"（0–360 数字）可覆盖自动结果。
+def _hsl(h, s, l, a=None):
+    import colorsys
+    r, g, b = colorsys.hls_to_rgb((h % 360) / 360.0, l, s)
+    r, g, b = int(round(r * 255)), int(round(g * 255)), int(round(b * 255))
+    return "rgba(%d,%d,%d,%s)" % (r, g, b, a) if a is not None else "#%02X%02X%02X" % (r, g, b)
+
+
+def illu_hues(path, nbin=36):
+    """返回 (主色相, 强调色相或 None)。奶油/木色/土黄纸底带排除在外，否则四张都取成同一个橙。"""
+    import colorsys
+    from PIL import Image
+    im = Image.open(path).convert("RGB")
+    im.thumbnail((160, 160))
+    bins = [0.0] * nbin
+    for r, g, b in im.getdata():
+        h, s, v = colorsys.rgb_to_hsv(r / 255., g / 255., b / 255.)
+        if v < .22 or s < .42:
+            continue
+        if 0.055 <= h <= 0.17 and s < .62 and v > .72:   # 纸底与木色，不算主色
+            continue
+        bins[int(h * nbin) % nbin] += s * v
+    total = sum(bins)
+    if total <= 0:
+        return None, None
+    main = max(range(nbin), key=lambda i: bins[i])
+    far = [i for i in range(nbin)
+           if min((i - main) % nbin, (main - i) % nbin) * (360.0 / nbin) >= 45
+           and bins[i] / total >= .05]
+    acc = max(far, key=lambda i: bins[i]) if far else None
+    deg = lambda i: (i + .5) * (360.0 / nbin)
+    return deg(main), (deg(acc) if acc is not None else None)
+
+
+
+def logo_uri(path, target_w=640):
+    """logo 源图只有 292px 宽，2 倍渲染下直接放大发虚：先 Lanczos 上采样再轻锐化，救回一点小字边缘。
+    换上 ≥600px 的 品牌资产\logo.png 后本函数自动不介入（够宽就原样返回）。"""
+    from PIL import Image, ImageFilter
+    im = Image.open(str(path))
+    if im.width >= target_w:
+        return _jr.data_uri(str(path))
+    im = im.convert("RGB").resize(
+        (target_w, round(im.height * target_w / im.width)), Image.LANCZOS)
+    im = im.filter(ImageFilter.UnsharpMask(radius=1.6, percent=105, threshold=2))
+    buf = io.BytesIO(); im.save(buf, "PNG", optimize=True)
+    return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
+
+
+def theme_css(illu, data):
+    """生成覆盖 :root 的主题变量：插画取色 + 插画浓度；两者互不依赖，缺一个不影响另一个。"""
+    out = []
+    # 插画浓度：铅笔淡彩这类偏浅的图调 1.2–1.4；只是滤镜，原图不动，随时回退
+    punch = (data.get("illustration") or {}).get("punch")
+    try:
+        punch = float(punch)
+    except (TypeError, ValueError):
+        punch = None
+    if punch and abs(punch - 1) > 1e-6:
+        d = punch - 1
+        out.append("--illu-filter:saturate(%.3f) contrast(%.3f) brightness(%.3f);"
+                   % (1 + d * 1.30, 1 + d * 0.55, 1 - d * 0.10))
+
+    hue = data.get("theme_hue")
+    acc = None
+    if hue is None and illu:
+        try:
+            hue, acc = illu_hues(str(illu))
+        except Exception:
+            hue = None
+    if hue is None:
+        return (":root{%s}" % "".join(out)) if out else ""
+    ah = acc if acc is not None else hue
+    # 牛皮纸只允许向主色偏一点，偏多了就不像纸（原色 #EBD3A8 / #E0BF8C ≈ 38°）
+    kh = 38 + max(-8, min(8, ((hue - 38 + 180) % 360) - 180))
+    out.append("--glow-a:%s;--glow-b:%s;--kraft-a:%s;--kraft-b:%s;"
+               % (_hsl(hue, .78, .80, ".50"), _hsl(ah, .70, .88, ".42"),
+                  _hsl(kh, .52, .81), _hsl(kh, .50, .74)))
+    return ":root{%s}" % "".join(out)
+
+
 def render(data_path, out_base=None, illustration=None, logo=None, qr=None, campus=None,
            template=None, font_mode=None):
     data_path = Path(data_path)
@@ -123,10 +206,11 @@ def render(data_path, out_base=None, illustration=None, logo=None, qr=None, camp
     title = data.get("title") or data.get("course", {}).get("topic", "")
 
     tokens = {
-        "/*__LOGO__*/": _jr.data_uri(str(logo_p)) if logo_p.exists() else "",
+        "/*__LOGO__*/": logo_uri(logo_p) if logo_p.exists() else "",
         "/*__QR__*/": _jr.data_uri(str(qr_p)) if qr_p.exists() else "",
         "/*__ILLU__*/": _jr.data_uri(str(illu)) if illu else "",
         "/*__FONT_BRUSH__*/": font_data_uri(title, font_mode or "subset"),
+        "/*__THEME__*/": theme_css(illu, data),
     }
     tpl = str(Path(template) if template else DEFAULT_TEMPLATE)
     jpg, html = _jr.shoot(tpl, out_base, data, tokens,
