@@ -35,6 +35,7 @@
 - [学段口气全线没分级(0817)](writing-lesson-grade-tone-not-differentiated.md) — 判断分三层(用词/技法深度/思维层级);判据=降两级反问;0828复发:并列短语重难点只落实一半,拆开逐个问落点
 - [技法N件套须练全N件](technique-set-practice-all-parts.md) — 定稿前做「每件×是否产出过」对账;机检与checklist都抓不到｜⚠**同族第二病:自拟材料要按「步」拆开核要素是否齐全**(四上五正例中间一步无听觉、师话却把落在第一步的嗡嗡声算进去,通读查不到——整体读起来三样都有,漏的是「都在同一步里」) — [源](shenghuo-wanhuatong-4a-lesson-state.md)
 - [首页无区头单表6行+两行文案体例(现行)](writing-lesson-front-page-single-table.md) — 0831两行体例推翻0828:目标行一句话说清学会写哪类文章;技法行首句固定「使用+构思工具名」且与正文一字一致;写详案或改style_front_page前必读
+- [三档标准改学生可见(0921)](three-tier-standard-student-visible-0921.md) — 〔…教师掌握（不必读给学生）〕括注以后都不写;lesson-structure+checklist已改;tone_gate无需改;存量45份不回溯
 - [作文批改工具(0818立项)](writing-correction-tool-0818.md) — 给加盟商不能做skill;判据从详案抽标准包JSON;引用一字不差靠工程;0907上线闸门verified_by_human;0917判松根因=不做全篇盘点→survey先数再判+程序兜底;主模型doubao-2-1-pro(必带thinking=disabled);错别字层只给老师看;**0918语言层带改法:毛病每条fix·语句栏demo示范长句·用词重复程序复核·辅助描写留/压/删三类**;**0920加用词不当/修辞不当两类:没用修辞不算毛病·每类程序只留一条·判词不判字**;**0921栏目七改:结构改整段(四verdict保留不上屏)·语句表达合栏·去范读·反馈卡/习作评语改名只改显示名·错别字只引≤20字·focus四句;⚠OPENERS拿带姓名原文比一直没生效**;**0921晚真稿实测再改六条:讲评要点回退连贯两三句·结构2~3段(不分点≠不分段)·亮点必收开头结尾铺排·判据跨条判重(子串+8字重叠)·规范教学用语第三铁律(⚠「立得住」不禁)·成语误用排第一且修辞改法禁另造喻体;起手式靠提示词治不住→程序轮换角度**;改提示词必跑run_regression
 - [批改工具已部署Vercel(0824)](writing-correction-tool-vercel-deploy-0824.md) — 入口=部署根index.py不能放api/;.vercelignore挡config.json;正式地址grader.skyline666.top;⚠validate全绿≠包对
 - [⚠配套三侧文风0915与详案线同步换靶](writing-materials-retarget-0915.md) — 生成读三侧定稿样本不读对照表;polish_materials.py机检D每份必跑(同一张polish_rules,禁副本);存量42份已过一轮;样本卡=现行json快照,--check-exemplars防漂移(抄样本抄现行文件别抄git diff);⚠配套--all --dry-run是共享规则表第二回归面,首跑照出4条排除漏洞
@@ -90,7 +91,7 @@
 - **仓库瘦身已完成(0920)**：759.67→303.41 MiB（两机一致）。**⏰ 唯一待办：2026-10-04 后删远端 `backup/pre-filter-20260920`**（删前 GitHub 网页体积数字不降，属正常；删后两台机器的负向 refspec 即可撤）；⚠ 新克隆必跑两条装机命令(core.hooksPath + 负向 refspec，见 docs\协作同步说明.md)，否则大文件闸门失效、一条 git pull 就把仓库撑回 635MiB — [详情](repo-slimming-plan-0920.md)
 - 三上五我们眼中的缤纷世界 0919 详案已定稿（观察对象四换定为小动物+蚂蚁短片，四轮冷审+张视角减讲法+语体审），配套三侧/PPT 链/批改标准包未做；短片不随教案分发（版权） — [详情](binfen-shijie-3a-lesson-state.md)
 - 四上五生活万花筒 0918 详案已定稿（冷审 B 块 8 条按推荐落定），配套三侧/PPT 链/批改标准包未做 — [详情](shenghuo-wanhuatong-4a-lesson-state.md)
-- 五上五介绍一种事物 0918 详案已定稿（B 块 6 条已落定；开场 0918 晚第八版改「我说你猜·两段揭示」，网店无人机版作废），配套三侧/PPT 链/批改标准包未做 — [详情](jieshao-shiwu-5a-lesson-state.md)
+- 五上五介绍一种事物 0921 按用户 47 条意见改稿定稿（语言层去AI腔+说明方法说全名+魔方术语段改外行话；「很大」类句改判后面有没有跟上；书包/当场量再次踩中机构课），配套三侧/PPT 链/批改标准包未做 — [详情](jieshao-shiwu-5a-lesson-state.md)
 - 六上五围绕中心意思写 0920 按用户 25 条意见改稿定稿（示范文事实逻辑五处重写；三档标准改学生可见自评表；课时2 实算超 4.2 分已压回 45.5、标称改 28+17），配套三侧/PPT 链/批改标准包未做 — [详情](weirao-zhongxin-6a-lesson-state.md)
 - 开场「不在场第三人」另2课待回改(用户定本次只改五上四):四上一推荐一个好地方L27-31「一位朋友带孩子来玩」+老师替他读心(改它须重找判据载体,非换几句话)、三下六L44敲门送伞的孩子 — [详情](opening-no-offstage-third-party.md)
 - 六上三让生活更美好：workflow③「三分型」实例仍写两把尺未改（详案已按一把尺落定） — [详情](shenghuo-meihao-6a-lesson-state.md)
