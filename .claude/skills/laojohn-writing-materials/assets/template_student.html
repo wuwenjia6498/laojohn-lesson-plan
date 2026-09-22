@@ -196,7 +196,7 @@
     <div class="modhead">
       <span class="step">1</span>
       <h2 id="plan-title">理思路 · 构思表</h2>
-      <span class="hint">每格只填关键词，3 分钟填完</span>
+      <span class="hint" id="plan-hint">每格只填关键词，3 分钟填完</span>
     </div>
     <table class="plan">
       <tbody id="plan-body">
@@ -370,6 +370,10 @@
       document.getElementById('plan-title').textContent='理思路 · '+w.plan_name;
       document.getElementById('ws2-planref').textContent='照第一页的'+w.plan_name+'，一样一样写';
     }
+    /* plan_hint：表头右侧那句小字。缺省「每格只填关键词，3 分钟填完」是通用话，
+       但各课详案给的填表时间不一（六上五给的是 6 分钟），对不上学生就按错的时间填。
+       不传＝沿用缺省，存量课次零影响；要改只写这一个字段，别动模板里的默认串。 */
+    if(w.plan_hint) document.getElementById('plan-hint').textContent=w.plan_hint;
     document.getElementById('ws2-lead').textContent=w.page2_lead;
     document.getElementById('ws-draftnote').textContent=w.draftnote;
     // worksheet.marks 已废弃（2026-09-07 稿纸页删修改符号表），存量 data.json 里的字段忽略
