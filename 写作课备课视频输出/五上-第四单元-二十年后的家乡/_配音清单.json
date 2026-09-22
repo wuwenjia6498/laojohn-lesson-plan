@@ -2,76 +2,67 @@
   "provider": "volc",
   "voice": "zh_male_yuanboxiaoshu_uranus_bigtts",
   "speed": 1.0,
-  "rate_cps_measured": 5.09,
+  "rate_cps_measured": 5.15,
   "silence": {
     "sentence": 0.25,
     "page": 0.8
   },
   "usage": {
-    "calls": 9,
-    "chars": 282,
-    "seconds": 54.76800000000001,
+    "calls": 12,
+    "chars": 307,
+    "seconds": 57.672000000000004,
     "cached": 0
   },
   "totals": {
-    "lines": 221,
-    "chars": 6013,
-    "seconds": 1180.2
+    "lines": 218,
+    "chars": 5836,
+    "seconds": 1132.8
   },
   "lines": [
     {
       "shot": "s00",
       "i": 1,
       "role": "do",
-      "text": "五年级上册第四单元的习作是《二十年后的家乡》，属于想象类写作。",
-      "chars": 31,
-      "file": "audio/s00_01_9df319dceb53.wav",
-      "sec": 5.856
-    },
-    {
-      "shot": "s00",
-      "i": 2,
-      "role": "do",
-      "text": "学生要通过写作提纲搭建全篇，分题目、开头、中间、结尾四部分，重点写家乡的变化和画面感。",
-      "chars": 43,
-      "file": "audio/s00_02_6f6fc5550a93.wav",
-      "sec": 9.216
+      "text": "五年级上册第四单元的习作课，题目是《二十年后的家乡》，写的是想象。",
+      "chars": 33,
+      "file": "audio/s00_01_f7f23177e20f.wav",
+      "sec": 6.048
     },
     {
       "shot": "s02",
       "i": 1,
       "role": "locate",
-      "text": "刚才是课程的整体介绍，这一页换成明确本课时的任务和环节。",
-      "chars": 28,
-      "file": "audio/s02_01_80e012880681.wav",
-      "sec": 4.944
+      "text": "这一节课的落点是一张提纲，前面几个环节都在为它铺路。",
+      "chars": 26,
+      "file": "audio/s02_01_b17bc80b78fd.wav",
+      "sec": 4.368
     },
     {
       "shot": "s02",
       "i": 2,
-      "role": "locate",
-      "text": "今天的目标是带学生搭建写作提纲，分清题目、开头、中间、结尾四部分的结构。",
-      "chars": 36,
-      "file": "audio/s02_02_9326506c2909.wav",
-      "sec": 6.672
+      "role": "do",
+      "text": "创设情境、打开想象是让学生攒素材，学写法给两个工具，列提纲把素材装进框架，",
+      "chars": 37,
+      "file": "audio/s02_02_0458dd59090e.wav",
+      "sec": 8.016
     },
     {
       "shot": "s02",
       "i": 3,
       "role": "do",
-      "text": "先让学生知道本课时的五个环节：创设情境、打开想象、学写法、列提纲、出示示范文。",
-      "chars": 39,
-      "file": "audio/s02_03_fbbce59209c0.wav",
-      "sec": 8.448
+      "text": "最后用示范文让他们看见成品长什么样。",
+      "chars": 18,
+      "file": "audio/s02_03_4afefdf009c6.wav",
+      "sec": 3.24
     },
     {
       "shot": "s02",
       "i": 4,
       "role": "do",
-      "text": "讲清楚每一步的任务和顺序，尤其是列提纲时要细化中间段落，选三个方面的变化写、一处一段。",
-      "chars": 43,
-      "file": "audio/s02_04_bec69e7abc19.wav",
-      "sec": 8.664
+      "text": "这五步是连着的，哪一步没做实，提纲就填不满。",
+      "chars": 22,
+      "file": "audio/s02_04_f210c9f525b2.wav",
+      "sec": 4.272
     },
     {
       "shot": "s03",
@@ -79,8 +70,8 @@
       "role": "locate",
       "text": "这一页要解决的是：让学生发现开头写得太概括时，读者看不见具体画面。",
       "chars": 33,
-      "file": "audio/s03_01_1206c71a3de1.wav",
-      "sec": 6.288
+      "file": "audio/s03_01_c2438d5eacdc.wav",
+      "sec": 6.072
     },
     {
       "shot": "s03",
@@ -88,8 +79,8 @@
       "role": "locate",
       "text": "刚才听完那段开头，学生已经意识到问题，但还没找到具体原因。",
       "chars": 29,
-      "file": "audio/s03_02_9e6acbe05828.wav",
-      "sec": 5.16
+      "file": "audio/s03_02_350b1b42319f.wav",
+      "sec": 4.776
     },
     {
       "shot": "s03",
@@ -97,7 +88,7 @@
       "role": "do",
       "text": "读完开头后，先问学生哪一句让他们看见了画面。",
       "chars": 22,
-      "file": "audio/s03_03_a7bf31a964df.wav",
+      "file": "audio/s03_03_3c728487f2a1.wav",
       "sec": 4.248
     },
     {
@@ -106,8 +97,8 @@
       "role": "do",
       "text": "学生挑不出时，再点破问题：开头写得太概括，读者知道家乡变了，却看不见具体怎么变。",
       "chars": 40,
-      "file": "audio/s03_04_915baafeef93.wav",
-      "sec": 8.04
+      "file": "audio/s03_04_c74efa6bb099.wav",
+      "sec": 8.28
     },
     {
       "shot": "s03",
@@ -115,8 +106,8 @@
       "role": "do",
       "text": "别急着讲方法，这一步只让学生发现问题。",
       "chars": 19,
-      "file": "audio/s03_05_076489b87e72.wav",
-      "sec": 3.864
+      "file": "audio/s03_05_8d9a6eb5c991.wav",
+      "sec": 4.248
     },
     {
       "shot": "s03",
@@ -124,8 +115,8 @@
       "role": "why",
       "text": "这一步是后面讲方法的底子。",
       "chars": 13,
-      "file": "audio/s03_06_2bb33f6a0632.wav",
-      "sec": 2.808
+      "file": "audio/s03_06_b6164d215410.wav",
+      "sec": 2.832
     },
     {
       "shot": "s03",
@@ -133,7 +124,7 @@
       "role": "why",
       "text": "只有学生先看到问题，后面的解决方案才有针对性。",
       "chars": 23,
-      "file": "audio/s03_07_099edf298126.wav",
+      "file": "audio/s03_07_4f10801b8c39.wav",
       "sec": 4.512
     },
     {
@@ -142,8 +133,8 @@
       "role": "why",
       "text": "开头不署名是为了避免学生把问题归因于某个人，而是专注于内容本身。",
       "chars": 32,
-      "file": "audio/s03_08_1565c8eb5930.wav",
-      "sec": 6.0
+      "file": "audio/s03_08_e08e178dd1bd.wav",
+      "sec": 6.216
     },
     {
       "shot": "s03",
@@ -151,8 +142,8 @@
       "role": "risk",
       "text": "学生可能会说“没有哪一句让我看见画面”或“只知道街道更干净、楼房更高，具体什么样看不出来”。",
       "chars": 46,
-      "file": "audio/s03_09_8396944e9f69.wav",
-      "sec": 8.784
+      "file": "audio/s03_09_b1041c81b482.wav",
+      "sec": 8.544
     },
     {
       "shot": "s03",
@@ -160,8 +151,8 @@
       "role": "risk",
       "text": "遇到这种，追问一句：“更方便到底怎么方便？能不能写出一个具体场景？”",
       "chars": 34,
-      "file": "audio/s03_10_b0a8218e3646.wav",
-      "sec": 6.216
+      "file": "audio/s03_10_7bc4876fce47.wav",
+      "sec": 6.432
     },
     {
       "shot": "s04",
@@ -169,8 +160,8 @@
       "role": "locate",
       "text": "到这儿你先明确任务：让学生知道这节课要写一篇《二十年后的家乡》，",
       "chars": 32,
-      "file": "audio/s04_01_f8328031ac55.wav",
-      "sec": 5.328
+      "file": "audio/s04_01_9926cc706828.wav",
+      "sec": 5.688
     },
     {
       "shot": "s04",
@@ -178,7 +169,7 @@
       "role": "locate",
       "text": "并且最终要在小组和全班分享片段。",
       "chars": 16,
-      "file": "audio/s04_02_317b169af708.wav",
+      "file": "audio/s04_02_6a647b311977.wav",
       "sec": 3.264
     },
     {
@@ -187,8 +178,8 @@
       "role": "do",
       "text": "先别急着讲方法，先让学生算一算二十年后是哪一年、自己多大年纪。",
       "chars": 31,
-      "file": "audio/s04_03_44d0ae769335.wav",
-      "sec": 5.832
+      "file": "audio/s04_03_042b8050e8e7.wav",
+      "sec": 6.048
     },
     {
       "shot": "s04",
@@ -196,7 +187,7 @@
       "role": "do",
       "text": "这个动作能把他们带入情境，接着再点明：写作要从亲眼见到的画面入手，结尾写下对家乡的感受。",
       "chars": 44,
-      "file": "audio/s04_04_8d427f29f774.wav",
+      "file": "audio/s04_04_e46da898c136.wav",
       "sec": 8.832
     },
     {
@@ -205,8 +196,8 @@
       "role": "why",
       "text": "这一招是后面构思的底子：只有先让学生进入时空穿越的情境，他们才能写出未来的画面，",
       "chars": 40,
-      "file": "audio/s04_05_06bcccf155da.wav",
-      "sec": 8.112
+      "file": "audio/s04_05_6542a968707c.wav",
+      "sec": 7.92
     },
     {
       "shot": "s04",
@@ -214,8 +205,8 @@
       "role": "why",
       "text": "而不是现在的事物。",
       "chars": 9,
-      "file": "audio/s04_06_13279c9acae6.wav",
-      "sec": 1.968
+      "file": "audio/s04_06_3c69ed9d28ca.wav",
+      "sec": 1.728
     },
     {
       "shot": "s04",
@@ -223,8 +214,8 @@
       "role": "risk",
       "text": "学生会分成两类：一类能顺着提示说出具体年份和年龄，另一类可能只说“未来”或“以后”。",
       "chars": 42,
-      "file": "audio/s04_07_13c907912981.wav",
-      "sec": 8.52
+      "file": "audio/s04_07_0f115f40a192.wav",
+      "sec": 8.112
     },
     {
       "shot": "s04",
@@ -232,7 +223,7 @@
       "role": "risk",
       "text": "遇到后者，追问一句：“具体是哪一年？你那时多大？”",
       "chars": 25,
-      "file": "audio/s04_08_bba426273b0d.wav",
+      "file": "audio/s04_08_eb797fdce302.wav",
       "sec": 4.704
     },
     {
@@ -241,7 +232,7 @@
       "role": "risk",
       "text": "帮助他们进入具体情境。",
       "chars": 11,
-      "file": "audio/s04_09_3f209de085b9.wav",
+      "file": "audio/s04_09_4a65f04b4b39.wav",
       "sec": 2.592
     },
     {
@@ -250,8 +241,8 @@
       "role": "locate",
       "text": "刚才学生已经回忆了身边三年的变化，这一步要让他们从这些变化中找到灵感，",
       "chars": 35,
-      "file": "audio/s05_01_873e802198ee.wav",
-      "sec": 6.288
+      "file": "audio/s05_01_f36622def624.wav",
+      "sec": 6.072
     },
     {
       "shot": "s05",
@@ -259,7 +250,7 @@
       "role": "locate",
       "text": "为二十年后的家乡构思铺路。",
       "chars": 13,
-      "file": "audio/s05_02_eced5ae527ba.wav",
+      "file": "audio/s05_02_bef6ba1d7a21.wav",
       "sec": 2.52
     },
     {
@@ -268,7 +259,7 @@
       "role": "do",
       "text": "先让学生轮流发言，每人说一处三年间发生变化的地方。",
       "chars": 25,
-      "file": "audio/s05_03_6b70bb2b5d6d.wav",
+      "file": "audio/s05_03_609144c1df88.wav",
       "sec": 5.064
     },
     {
@@ -277,8 +268,8 @@
       "role": "do",
       "text": "发言时只需简单说两句：以前什么样，现在什么样。",
       "chars": 23,
-      "file": "audio/s05_04_a3904ba39aca.wav",
-      "sec": 4.272
+      "file": "audio/s05_04_1d15690e6c6c.wav",
+      "sec": 4.44
     },
     {
       "shot": "s05",
@@ -286,8 +277,8 @@
       "role": "do",
       "text": "交流结束后，点名几位学生分享给全班，帮助大家看到更多变化的可能性。",
       "chars": 33,
-      "file": "audio/s05_05_63778364cd15.wav",
-      "sec": 6.264
+      "file": "audio/s05_05_3229ad299e6a.wav",
+      "sec": 5.856
     },
     {
       "shot": "s05",
@@ -295,8 +286,8 @@
       "role": "why",
       "text": "这一步的设计是为了让学生的想象从真实的变化出发。",
       "chars": 24,
-      "file": "audio/s05_06_797e80fbce19.wav",
-      "sec": 4.704
+      "file": "audio/s05_06_2e5048db42a0.wav",
+      "sec": 4.536
     },
     {
       "shot": "s05",
@@ -304,8 +295,8 @@
       "role": "why",
       "text": "十岁的孩子对“二十年后”可能很模糊，先从身边的变化入手，能让他们的构思更具体、",
       "chars": 39,
-      "file": "audio/s05_07_4657ceb911ea.wav",
-      "sec": 7.512
+      "file": "audio/s05_07_135037c1fa62.wav",
+      "sec": 7.68
     },
     {
       "shot": "s05",
@@ -313,7 +304,7 @@
       "role": "why",
       "text": "更贴近自己的生活。",
       "chars": 9,
-      "file": "audio/s05_08_bfb5e2fd1e06.wav",
+      "file": "audio/s05_08_2b82a669e57a.wav",
       "sec": 2.16
     },
     {
@@ -322,8 +313,8 @@
       "role": "risk",
       "text": "学生可能会说“我家那儿什么都没变”。",
       "chars": 18,
-      "file": "audio/s05_09_dad7b072af22.wav",
-      "sec": 3.0
+      "file": "audio/s05_09_604314e910e7.wav",
+      "sec": 3.24
     },
     {
       "shot": "s05",
@@ -331,8 +322,8 @@
       "role": "risk",
       "text": "遇到这种情况，可以追问：“你的书包里有没有什么东西，是三年前还没有的？”",
       "chars": 36,
-      "file": "audio/s05_10_d050f1b5c312.wav",
-      "sec": 6.24
+      "file": "audio/s05_10_66883b29e990.wav",
+      "sec": 6.408
     },
     {
       "shot": "s05",
@@ -340,7 +331,7 @@
       "role": "risk",
       "text": "或者“家里最近有没有添置什么新物品？”",
       "chars": 19,
-      "file": "audio/s05_11_1124b24d5652.wav",
+      "file": "audio/s05_11_ac8d0105d9e0.wav",
       "sec": 3.672
     },
     {
@@ -349,8 +340,8 @@
       "role": "risk",
       "text": "找到例子后，再引导他们想象二十年后这些东西可能会变成什么样。",
       "chars": 30,
-      "file": "audio/s05_12_cf78ac7b6bec.wav",
-      "sec": 5.568
+      "file": "audio/s05_12_29cda71604a7.wav",
+      "sec": 5.976
     },
     {
       "shot": "s06",
@@ -358,8 +349,8 @@
       "role": "locate",
       "text": "学生刚刚分享了三年间的变化，现在要引导他们大胆想象二十年后的家乡，从环境、工作、",
       "chars": 40,
-      "file": "audio/s06_01_8fa72c99abab.wav",
-      "sec": 7.776
+      "file": "audio/s06_01_d015af319583.wav",
+      "sec": 7.584
     },
     {
       "shot": "s06",
@@ -367,8 +358,8 @@
       "role": "locate",
       "text": "生活三个方面展开。",
       "chars": 9,
-      "file": "audio/s06_02_63394b86226c.wav",
-      "sec": 1.92
+      "file": "audio/s06_02_1d18a96f6ea0.wav",
+      "sec": 1.752
     },
     {
       "shot": "s06",
@@ -376,7 +367,7 @@
       "role": "do",
       "text": "先用三个方面的例子启发学生：环境可以是小河、池塘、绿地；",
       "chars": 28,
-      "file": "audio/s06_03_fe648ff2b382.wav",
+      "file": "audio/s06_03_8aa9e94945be.wav",
       "sec": 6.024
     },
     {
@@ -385,8 +376,8 @@
       "role": "do",
       "text": "工作可以是家里长辈的职业；",
       "chars": 13,
-      "file": "audio/s06_04_bcfd804c1d03.wav",
-      "sec": 2.664
+      "file": "audio/s06_04_b44ced5e294a.wav",
+      "sec": 2.424
     },
     {
       "shot": "s06",
@@ -394,8 +385,8 @@
       "role": "do",
       "text": "生活可以是学校、菜市场、街边小店等。",
       "chars": 18,
-      "file": "audio/s06_05_68f7f775d84e.wav",
-      "sec": 4.032
+      "file": "audio/s06_05_ba75feb26174.wav",
+      "sec": 3.864
     },
     {
       "shot": "s06",
@@ -403,8 +394,8 @@
       "role": "do",
       "text": "提醒他们选两到三处自己最熟悉的地方，回忆现在的模样，为后续提纲打基础。",
       "chars": 35,
-      "file": "audio/s06_06_df69239fc14f.wav",
-      "sec": 6.816
+      "file": "audio/s06_06_288754e340e5.wav",
+      "sec": 6.84
     },
     {
       "shot": "s06",
@@ -412,8 +403,8 @@
       "role": "why",
       "text": "不从具体的地方入手，学生的想象容易变得空泛。",
       "chars": 22,
-      "file": "audio/s06_07_92ddb2b24cf1.wav",
-      "sec": 4.536
+      "file": "audio/s06_07_922cc03ff259.wav",
+      "sec": 4.272
     },
     {
       "shot": "s06",
@@ -421,8 +412,8 @@
       "role": "why",
       "text": "选熟悉的地方展开，能让他们的构思更有画面感，也更贴近自己的家乡。",
       "chars": 32,
-      "file": "audio/s06_08_e366fbb417c1.wav",
-      "sec": 6.216
+      "file": "audio/s06_08_167b60568ea0.wav",
+      "sec": 6.648
     },
     {
       "shot": "s06",
@@ -430,8 +421,8 @@
       "role": "risk",
       "text": "学生可能会说“我爸爸开货车，二十年后货车也许能自己开，爸爸只需要在车上看着就行”。",
       "chars": 41,
-      "file": "audio/s06_09_1e10dee85f6d.wav",
-      "sec": 7.704
+      "file": "audio/s06_09_c46bc1a78e5c.wav",
+      "sec": 8.52
     },
     {
       "shot": "s06",
@@ -439,8 +430,8 @@
       "role": "risk",
       "text": "这种回答很好，但要提醒他们补充画面：货车自己开时，爸爸的具体动作是什么？让画面更生动。",
       "chars": 43,
-      "file": "audio/s06_10_55cb83db8fb1.wav",
-      "sec": 8.352
+      "file": "audio/s06_10_5d91889089fc.wav",
+      "sec": 9.192
     },
     {
       "shot": "s07",
@@ -448,7 +439,7 @@
       "role": "locate",
       "text": "有了刚才学生对二十年后变化的初步想象，",
       "chars": 19,
-      "file": "audio/s07_01_bd8a89a8a44c.wav",
+      "file": "audio/s07_01_93a3ec8e26a7.wav",
       "sec": 3.432
     },
     {
@@ -457,8 +448,8 @@
       "role": "locate",
       "text": "这一页要帮助他们明确：画面必须让读者看得出是未来的家乡，而不是现在的样子。",
       "chars": 37,
-      "file": "audio/s07_02_8185b5592b22.wav",
-      "sec": 6.816
+      "file": "audio/s07_02_7b95c6c29abb.wav",
+      "sec": 6.456
     },
     {
       "shot": "s07",
@@ -466,8 +457,8 @@
       "role": "do",
       "text": "最容易做错的是忽略对比。",
       "chars": 12,
-      "file": "audio/s07_03_86f4c1247c35.wav",
-      "sec": 2.664
+      "file": "audio/s07_03_f65d7bf32f63.wav",
+      "sec": 2.448
     },
     {
       "shot": "s07",
@@ -475,8 +466,8 @@
       "role": "do",
       "text": "先读两段开头，分别请选第一段和第二段的学生说出理由。",
       "chars": 26,
-      "file": "audio/s07_04_f4f0818a4736.wav",
-      "sec": 5.232
+      "file": "audio/s07_04_2ad7ce5310cb.wav",
+      "sec": 4.824
     },
     {
       "shot": "s07",
@@ -484,8 +475,8 @@
       "role": "do",
       "text": "选第一段的学生，你要追问一句：“和现在的菜市场比，有哪一处不一样？”",
       "chars": 34,
-      "file": "audio/s07_05_de0cf7ca3d19.wav",
-      "sec": 5.856
+      "file": "audio/s07_05_5bd0c9995ce7.wav",
+      "sec": 5.472
     },
     {
       "shot": "s07",
@@ -493,8 +484,8 @@
       "role": "why",
       "text": "这一步的位置不能换：先让学生自己发现第一段的问题，再澄清“不是写现在就错”，",
       "chars": 38,
-      "file": "audio/s07_06_5ad9426b4c62.wav",
-      "sec": 7.92
+      "file": "audio/s07_06_f5037b4d802a.wav",
+      "sec": 7.248
     },
     {
       "shot": "s07",
@@ -502,7 +493,7 @@
       "role": "why",
       "text": "否则学生会误以为不能提到现在的样子，导致后续构思受限。",
       "chars": 27,
-      "file": "audio/s07_07_372ad296f3cb.wav",
+      "file": "audio/s07_07_428f1538a2fc.wav",
       "sec": 5.568
     },
     {
@@ -511,8 +502,8 @@
       "role": "risk",
       "text": "收上来的东西会分成两类：一类是“写得细”，另一类是“没有变化”。",
       "chars": 32,
-      "file": "audio/s07_08_487c7a32606d.wav",
-      "sec": 6.408
+      "file": "audio/s07_08_71235b5bbab9.wav",
+      "sec": 6.216
     },
     {
       "shot": "s07",
@@ -520,8 +511,8 @@
       "role": "risk",
       "text": "第一类要肯定细致的描写，再追问“和现在比，哪儿不一样”；",
       "chars": 28,
-      "file": "audio/s07_09_7f913fee0516.wav",
-      "sec": 5.568
+      "file": "audio/s07_09_c2e88fb82474.wav",
+      "sec": 5.808
     },
     {
       "shot": "s07",
@@ -529,8 +520,8 @@
       "role": "risk",
       "text": "第二类要提醒学生，只有变化后的画面才能让读者看见未来的家乡。",
       "chars": 30,
-      "file": "audio/s07_10_91c719007948.wav",
-      "sec": 6.432
+      "file": "audio/s07_10_a21e8fd360aa.wav",
+      "sec": 6.408
     },
     {
       "shot": "s08",
@@ -538,7 +529,7 @@
       "role": "locate",
       "text": "刚才是比两段开头，",
       "chars": 9,
-      "file": "audio/s08_01_83e58f0d2929.wav",
+      "file": "audio/s08_01_3d58da4a50dc.wav",
       "sec": 1.92
     },
     {
@@ -547,8 +538,8 @@
       "role": "locate",
       "text": "这一页换成检验开场片段：为什么“街道变得更干净了”这样的句子不能单独撑起一段？",
       "chars": 39,
-      "file": "audio/s08_02_e42e0044ecf3.wav",
-      "sec": 6.648
+      "file": "audio/s08_02_45f4b9c5be59.wav",
+      "sec": 6.672
     },
     {
       "shot": "s08",
@@ -556,7 +547,7 @@
       "role": "do",
       "text": "先请学生判断：这几句话放到其他城市或三年后是否仍然成立。",
       "chars": 28,
-      "file": "audio/s08_03_a62fc1c9b772.wav",
+      "file": "audio/s08_03_825457549b7f.wav",
       "sec": 5.856
     },
     {
@@ -565,8 +556,8 @@
       "role": "do",
       "text": "学生回答后，你要点明：缺少专属于二十年后的画面，是这些句子的问题所在。",
       "chars": 35,
-      "file": "audio/s08_04_caa3a9928e89.wav",
-      "sec": 6.648
+      "file": "audio/s08_04_39004eb1e82e.wav",
+      "sec": 6.432
     },
     {
       "shot": "s08",
@@ -574,8 +565,8 @@
       "role": "why",
       "text": "“街道变得更干净了”可以放开用，但必须搭配具体画面。",
       "chars": 26,
-      "file": "audio/s08_05_15134f64d4ab.wav",
-      "sec": 4.944
+      "file": "audio/s08_05_8b8211d55a0c.wav",
+      "sec": 4.92
     },
     {
       "shot": "s08",
@@ -583,8 +574,8 @@
       "role": "why",
       "text": "单独使用，读者无法看见变化后的家乡，写作目标就无法达成。",
       "chars": 28,
-      "file": "audio/s08_06_f38e5ce98640.wav",
-      "sec": 5.808
+      "file": "audio/s08_06_cedc4aa90f2c.wav",
+      "sec": 6.0
     },
     {
       "shot": "s08",
@@ -592,7 +583,7 @@
       "role": "risk",
       "text": "卡住的不是句子本身，而是学生对“画面”的理解。",
       "chars": 23,
-      "file": "audio/s08_07_4c177bff93db.wav",
+      "file": "audio/s08_07_19163d472195.wav",
       "sec": 4.536
     },
     {
@@ -601,8 +592,8 @@
       "role": "risk",
       "text": "遇到学生只说“成立”，你可以追问：“二十年后，这句话背后是什么样的场景？”",
       "chars": 37,
-      "file": "audio/s08_08_1d0c83b497b1.wav",
-      "sec": 6.672
+      "file": "audio/s08_08_4701065ab060.wav",
+      "sec": 6.624
     },
     {
       "shot": "s08",
@@ -610,7 +601,7 @@
       "role": "risk",
       "text": "引导他们补充细节。",
       "chars": 9,
-      "file": "audio/s08_09_e5dcb3b87cf3.wav",
+      "file": "audio/s08_09_4569fd142bcf.wav",
       "sec": 2.16
     },
     {
@@ -619,8 +610,8 @@
       "role": "locate",
       "text": "这一页要解决的是：让学生看见具体画面如何让“街道变得更干净了”变得生动，",
       "chars": 36,
-      "file": "audio/s09_01_a59f6d490b55.wav",
-      "sec": 6.456
+      "file": "audio/s09_01_17bc8e452e42.wav",
+      "sec": 6.264
     },
     {
       "shot": "s09",
@@ -628,8 +619,8 @@
       "role": "locate",
       "text": "同时回扣刚才缺乏画面的那个问题。",
       "chars": 16,
-      "file": "audio/s09_02_13b69603bca0.wav",
-      "sec": 2.688
+      "file": "audio/s09_02_627a9ed77942.wav",
+      "sec": 2.88
     },
     {
       "shot": "s09",
@@ -637,8 +628,8 @@
       "role": "do",
       "text": "学生听完示范改写后，你要问：“哪一处画面让你真切感受到这条街道就在眼前？”",
       "chars": 37,
-      "file": "audio/s09_03_f5d9b4aee081.wav",
-      "sec": 6.84
+      "file": "audio/s09_03_111f00412967.wav",
+      "sec": 6.648
     },
     {
       "shot": "s09",
@@ -646,8 +637,8 @@
       "role": "do",
       "text": "从学生的回答中引导他们理解画面感的关键。",
       "chars": 20,
-      "file": "audio/s09_04_19ca8ed6bbd9.wav",
-      "sec": 3.648
+      "file": "audio/s09_04_b4eb199a4d42.wav",
+      "sec": 3.864
     },
     {
       "shot": "s09",
@@ -655,8 +646,8 @@
       "role": "why",
       "text": "学生的变化是关键：这一步过了，他们才能从抽象的概括句转到具体的画面描写，",
       "chars": 36,
-      "file": "audio/s09_05_b3951eb3fa47.wav",
-      "sec": 7.272
+      "file": "audio/s09_05_8ac4492633a2.wav",
+      "sec": 7.68
     },
     {
       "shot": "s09",
@@ -664,8 +655,8 @@
       "role": "why",
       "text": "真正写出未来的家乡。",
       "chars": 10,
-      "file": "audio/s09_06_b1ce56dd2191.wav",
-      "sec": 2.16
+      "file": "audio/s09_06_966244d21226.wav",
+      "sec": 2.4
     },
     {
       "shot": "s09",
@@ -673,8 +664,8 @@
       "role": "risk",
       "text": "遇上学生只提到“车停到地下车库”或“种上了树”，",
       "chars": 24,
-      "file": "audio/s09_07_ebb45e3133ec.wav",
-      "sec": 4.968
+      "file": "audio/s09_07_28032e71bfff.wav",
+      "sec": 4.944
     },
     {
       "shot": "s09",
@@ -682,8 +673,8 @@
       "role": "risk",
       "text": "你追问一句：“放学时分，孩子们会怎么走？你仿佛能看到什么样的景象？”",
       "chars": 34,
-      "file": "audio/s09_08_8e7ee80dd5ef.wav",
-      "sec": 6.24
+      "file": "audio/s09_08_4d2935b8ab68.wav",
+      "sec": 6.84
     },
     {
       "shot": "s09",
@@ -691,8 +682,8 @@
       "role": "risk",
       "text": "帮助他们补充完整画面。",
       "chars": 11,
-      "file": "audio/s09_09_0ccb59f8318d.wav",
-      "sec": 2.16
+      "file": "audio/s09_09_9841841b0af0.wav",
+      "sec": 2.4
     },
     {
       "shot": "s10",
@@ -700,7 +691,7 @@
       "role": "locate",
       "text": "到这儿你先整理学生刚才的回答，把“对照写”和“写画面”这两个方法明确下来，",
       "chars": 37,
-      "file": "audio/s10_01_7fb51bb472ae.wav",
+      "file": "audio/s10_01_42457243ef68.wav",
       "sec": 5.904
     },
     {
@@ -709,8 +700,8 @@
       "role": "locate",
       "text": "作为今天的写法重点。",
       "chars": 10,
-      "file": "audio/s10_02_46fbc6ad138a.wav",
-      "sec": 1.776
+      "file": "audio/s10_02_bb342d56f2e1.wav",
+      "sec": 1.752
     },
     {
       "shot": "s10",
@@ -718,8 +709,8 @@
       "role": "do",
       "text": "别急着归纳方法，先用示范片段讲解：对照写如何突出变化，写画面如何让读者看见场景。",
       "chars": 40,
-      "file": "audio/s10_03_11a2297f51b5.wav",
-      "sec": 8.64
+      "file": "audio/s10_03_4cdc34f4a7c6.wav",
+      "sec": 8.832
     },
     {
       "shot": "s10",
@@ -727,7 +718,7 @@
       "role": "do",
       "text": "讲完后再总结两种方法的搭配使用。",
       "chars": 16,
-      "file": "audio/s10_04_950a9d09dd4b.wav",
+      "file": "audio/s10_04_e7f9e2004319.wav",
       "sec": 3.048
     },
     {
@@ -736,8 +727,8 @@
       "role": "why",
       "text": "这一招是后面写作环节的底子：学生只有掌握了对照写和画面写，才能把变化写得既清楚又生动。",
       "chars": 43,
-      "file": "audio/s10_05_cc06e497b4e1.wav",
-      "sec": 9.408
+      "file": "audio/s10_05_d10931a0f9c7.wav",
+      "sec": 8.952
     },
     {
       "shot": "s11",
@@ -745,8 +736,8 @@
       "role": "locate",
       "text": "现在抛给学生一个问题：从刚才想象过的变化里选一个，用今天学到的两个写法试着说一段。",
       "chars": 41,
-      "file": "audio/s11_01_b8e5310ec662.wav",
-      "sec": 7.584
+      "file": "audio/s11_01_1f517ab4902f.wav",
+      "sec": 7.2
     },
     {
       "shot": "s11",
@@ -754,8 +745,8 @@
       "role": "do",
       "text": "这一步结束时手里该有学生的口头构思：一句点明变化，一句写现在的样子，",
       "chars": 34,
-      "file": "audio/s11_02_82c9eb4fdbaf.wav",
-      "sec": 7.056
+      "file": "audio/s11_02_0f88f47fb638.wav",
+      "sec": 6.648
     },
     {
       "shot": "s11",
@@ -763,7 +754,7 @@
       "role": "do",
       "text": "再几句补充变化后的画面。",
       "chars": 12,
-      "file": "audio/s11_03_7fb2ff1d2d3d.wav",
+      "file": "audio/s11_03_3b7843125a0f.wav",
       "sec": 2.424
     },
     {
@@ -772,8 +763,8 @@
       "role": "why",
       "text": "直接解决的是“写得很细，但全是现在的事物”这个毛病。",
       "chars": 26,
-      "file": "audio/s11_04_e4940a327649.wav",
-      "sec": 5.376
+      "file": "audio/s11_04_035d447717a0.wav",
+      "sec": 5.112
     },
     {
       "shot": "s11",
@@ -781,8 +772,8 @@
       "role": "why",
       "text": "学生通过练习，能把变化后的画面补充完整。",
       "chars": 20,
-      "file": "audio/s11_05_9da4424abc16.wav",
-      "sec": 4.512
+      "file": "audio/s11_05_5b426720449a.wav",
+      "sec": 4.296
     },
     {
       "shot": "s11",
@@ -790,8 +781,8 @@
       "role": "risk",
       "text": "这儿最容易卡在画面补充不完整。",
       "chars": 15,
-      "file": "audio/s11_06_8b4d4011e393.wav",
-      "sec": 3.24
+      "file": "audio/s11_06_dad0645d05eb.wav",
+      "sec": 3.0
     },
     {
       "shot": "s11",
@@ -799,8 +790,8 @@
       "role": "risk",
       "text": "遇到学生只说概括句，",
       "chars": 10,
-      "file": "audio/s11_07_5a5e259d56f1.wav",
-      "sec": 2.4
+      "file": "audio/s11_07_da754fb58db2.wav",
+      "sec": 2.592
     },
     {
       "shot": "s11",
@@ -808,8 +799,8 @@
       "role": "risk",
       "text": "你可以追问：“改造过后，来到这里的人会做些什么？你仿佛能看到怎样的景象？”",
       "chars": 37,
-      "file": "audio/s11_08_71282da67b5e.wav",
-      "sec": 7.08
+      "file": "audio/s11_08_55921a8e94a3.wav",
+      "sec": 6.648
     },
     {
       "shot": "s11",
@@ -817,8 +808,8 @@
       "role": "risk",
       "text": "帮助他们展开细节。",
       "chars": 9,
-      "file": "audio/s11_09_eaf090cdceae.wav",
-      "sec": 2.16
+      "file": "audio/s11_09_c18cb1e8c79e.wav",
+      "sec": 1.968
     },
     {
       "shot": "s12",
@@ -826,8 +817,8 @@
       "role": "locate",
       "text": "学生刚刚学习了中间段落的写法，现在手里有课本上的提纲范例。",
       "chars": 29,
-      "file": "audio/s12_01_97ca4d29c1a6.wav",
-      "sec": 5.328
+      "file": "audio/s12_01_e4a47e9d7686.wav",
+      "sec": 4.944
     },
     {
       "shot": "s12",
@@ -835,8 +826,8 @@
       "role": "locate",
       "text": "这一页要帮助他们搭建整篇习作的框架，明确题目、开头、中间和结尾四部分的结构。",
       "chars": 38,
-      "file": "audio/s12_02_0381a12fbcb7.wav",
-      "sec": 7.032
+      "file": "audio/s12_02_6c47ae5518df.wav",
+      "sec": 6.672
     },
     {
       "shot": "s12",
@@ -844,8 +835,8 @@
       "role": "do",
       "text": "到这儿你先投屏课本提纲，逐栏说明四部分的内容。",
       "chars": 23,
-      "file": "audio/s12_03_b51eeae10d9d.wav",
-      "sec": 4.248
+      "file": "audio/s12_03_56057e6c47a7.wav",
+      "sec": 4.032
     },
     {
       "shot": "s12",
@@ -853,8 +844,8 @@
       "role": "do",
       "text": "特别是中间三条变化，强调提纲只记方向，画面留到作文里写。",
       "chars": 28,
-      "file": "audio/s12_04_7542853ef467.wav",
-      "sec": 5.64
+      "file": "audio/s12_04_ef69aa30f93b.wav",
+      "sec": 5.472
     },
     {
       "shot": "s12",
@@ -862,8 +853,8 @@
       "role": "why",
       "text": "提纲的作用是让学生在动笔前理清思路，避免写作时才发现内容不够或顺序混乱。",
       "chars": 36,
-      "file": "audio/s12_05_1a70eb5fcb6f.wav",
-      "sec": 7.512
+      "file": "audio/s12_05_8096182e0b75.wav",
+      "sec": 7.248
     },
     {
       "shot": "s12",
@@ -871,8 +862,8 @@
       "role": "why",
       "text": "中间三条变化要简短，画面具体化留到后面写作环节展开。",
       "chars": 26,
-      "file": "audio/s12_06_9dc11aebab54.wav",
-      "sec": 5.376
+      "file": "audio/s12_06_984825518ed6.wav",
+      "sec": 5.4
     },
     {
       "shot": "s12",
@@ -880,7 +871,7 @@
       "role": "risk",
       "text": "学生可能会直接写“环境更好了”“生活更便利了”这样的概括句。",
       "chars": 30,
-      "file": "audio/s12_07_75ba2dddaf9a.wav",
+      "file": "audio/s12_07_6755e2e0e374.wav",
       "sec": 5.568
     },
     {
@@ -889,8 +880,8 @@
       "role": "risk",
       "text": "遇到这种情况，追问一句：“便利之后是什么画面？那里的人们会做些什么？”",
       "chars": 35,
-      "file": "audio/s12_08_47501f75f4e6.wav",
-      "sec": 6.408
+      "file": "audio/s12_08_be02b1d7f65e.wav",
+      "sec": 6.216
     },
     {
       "shot": "s12",
@@ -898,8 +889,8 @@
       "role": "risk",
       "text": "帮助他们补充细节。",
       "chars": 9,
-      "file": "audio/s12_09_6b0a5d59c248.wav",
-      "sec": 1.968
+      "file": "audio/s12_09_638db4f087d1.wav",
+      "sec": 1.992
     },
     {
       "shot": "s13",
@@ -907,8 +898,8 @@
       "role": "locate",
       "text": "有了课本提纲的框架，才能进一步细化中间段落。",
       "chars": 22,
-      "file": "audio/s13_01_70c7688626b6.wav",
-      "sec": 3.792
+      "file": "audio/s13_01_40e664ff52b8.wav",
+      "sec": 4.032
     },
     {
       "shot": "s13",
@@ -916,8 +907,8 @@
       "role": "locate",
       "text": "这一页要指导学生填写构思表，明确每一处变化的具体内容。",
       "chars": 27,
-      "file": "audio/s13_02_6f97429cf765.wav",
-      "sec": 4.776
+      "file": "audio/s13_02_6c581ab19d0b.wav",
+      "sec": 4.944
     },
     {
       "shot": "s13",
@@ -925,7 +916,7 @@
       "role": "do",
       "text": "最容易做错的是第三栏内容过于笼统，比如只写“更好了”。",
       "chars": 27,
-      "file": "audio/s13_03_9a160980b5d8.wav",
+      "file": "audio/s13_03_e29003351f49.wav",
       "sec": 5.232
     },
     {
@@ -934,8 +925,8 @@
       "role": "do",
       "text": "你巡视时重点看这一栏，遇到这种情况追问：“便利之后是什么画面？那里的人们会做些什么？”",
       "chars": 43,
-      "file": "audio/s13_04_f78ac51e4737.wav",
-      "sec": 7.632
+      "file": "audio/s13_04_a07612561ce6.wav",
+      "sec": 8.04
     },
     {
       "shot": "s13",
@@ -943,8 +934,8 @@
       "role": "why",
       "text": "这一步的位置不能换：先填关键词，再扩展成段落。",
       "chars": 23,
-      "file": "audio/s13_05_ed9902fe0fc8.wav",
-      "sec": 4.968
+      "file": "audio/s13_05_93866260084e.wav",
+      "sec": 5.136
     },
     {
       "shot": "s13",
@@ -952,8 +943,8 @@
       "role": "why",
       "text": "关键词是学生构思的基础，填得具体，后面写作时才能展开画面。",
       "chars": 29,
-      "file": "audio/s13_06_ef5128d6fe22.wav",
-      "sec": 6.408
+      "file": "audio/s13_06_43099225260b.wav",
+      "sec": 5.976
     },
     {
       "shot": "s13",
@@ -961,8 +952,8 @@
       "role": "risk",
       "text": "收上来的表格可能会出现第三栏内容空白或只写概括词。",
       "chars": 25,
-      "file": "audio/s13_07_203bb2bfe421.wav",
-      "sec": 5.568
+      "file": "audio/s13_07_aa1cb30dffb3.wav",
+      "sec": 5.4
     },
     {
       "shot": "s13",
@@ -970,8 +961,8 @@
       "role": "risk",
       "text": "遇到这种，启发学生补充具体景象，比如“车进地库、路边种两排树、放学孩子走路中间”，再修改表格。",
       "chars": 47,
-      "file": "audio/s13_08_67207161a611.wav",
-      "sec": 10.464
+      "file": "audio/s13_08_b8bfbfbe14a2.wav",
+      "sec": 10.512
     },
     {
       "shot": "s14",
@@ -979,8 +970,8 @@
       "role": "locate",
       "text": "刚才是填写构思表，这一页换成誊写到整篇框架，并圈出重点详写的变化。",
       "chars": 33,
-      "file": "audio/s14_01_d1d2f9e2de1a.wav",
-      "sec": 6.288
+      "file": "audio/s14_01_c67621fee84e.wav",
+      "sec": 6.456
     },
     {
       "shot": "s14",
@@ -988,7 +979,7 @@
       "role": "do",
       "text": "看学生的框架，重点关注画圈那一步。",
       "chars": 17,
-      "file": "audio/s14_02_2e00fa147e53.wav",
+      "file": "audio/s14_02_fadc605ce9fe.wav",
       "sec": 3.24
     },
     {
@@ -997,8 +988,8 @@
       "role": "do",
       "text": "圈出的变化要是学生最感兴趣、想象最丰富的部分，篇幅不需要均等。",
       "chars": 31,
-      "file": "audio/s14_03_d7670ff98e32.wav",
-      "sec": 6.24
+      "file": "audio/s14_03_d05bc9867def.wav",
+      "sec": 6.048
     },
     {
       "shot": "s14",
@@ -1006,8 +997,8 @@
       "role": "why",
       "text": "画圈可以放开，但详略必须守住：圈出的部分要写得具体，其他部分简单交代即可。",
       "chars": 37,
-      "file": "audio/s14_04_43661070ee6e.wav",
-      "sec": 7.92
+      "file": "audio/s14_04_1dcd7ff5e381.wav",
+      "sec": 8.112
     },
     {
       "shot": "s14",
@@ -1015,7 +1006,7 @@
       "role": "why",
       "text": "这样才能让习作有主次，留下深刻印象。",
       "chars": 18,
-      "file": "audio/s14_05_9f59b7241487.wav",
+      "file": "audio/s14_05_35af0780c6a3.wav",
       "sec": 3.864
     },
     {
@@ -1024,7 +1015,7 @@
       "role": "locate",
       "text": "刚才学生已经圈出了要详写的一两处变化，这一页要让他们对照提纲，检查四个部分是否齐全，",
       "chars": 42,
-      "file": "audio/s15_01_2719d57dbb9d.wav",
+      "file": "audio/s15_01_dfc7c113bc16.wav",
       "sec": 7.416
     },
     {
@@ -1033,7 +1024,7 @@
       "role": "locate",
       "text": "确保构思框架完整。",
       "chars": 9,
-      "file": "audio/s15_02_f1bcea6a1b76.wav",
+      "file": "audio/s15_02_9192df465d66.wav",
       "sec": 1.92
     },
     {
@@ -1042,8 +1033,8 @@
       "role": "do",
       "text": "学生对照提纲检查时，你巡视时要特别留意第三栏的填写：遇到只写“更好了”或“更方便了”的，",
       "chars": 44,
-      "file": "audio/s15_03_74a9da09a9f8.wav",
-      "sec": 8.808
+      "file": "audio/s15_03_575db10db34c.wav",
+      "sec": 8.04
     },
     {
       "shot": "s15",
@@ -1051,8 +1042,8 @@
       "role": "do",
       "text": "追问一句：“便利之后是什么画面？”",
       "chars": 17,
-      "file": "audio/s15_04_6195ed8446a5.wav",
-      "sec": 3.624
+      "file": "audio/s15_04_56cf343eece3.wav",
+      "sec": 2.832
     },
     {
       "shot": "s15",
@@ -1060,8 +1051,8 @@
       "role": "do",
       "text": "帮助他们具体化。",
       "chars": 8,
-      "file": "audio/s15_05_4a321f774fbb.wav",
-      "sec": 1.632
+      "file": "audio/s15_05_589e3e9d59d3.wav",
+      "sec": 1.464
     },
     {
       "shot": "s15",
@@ -1069,7 +1060,7 @@
       "role": "why",
       "text": "画圈是为了让详略在动笔前定下来，避免写完再删。",
       "chars": 23,
-      "file": "audio/s15_06_cd333029655d.wav",
+      "file": "audio/s15_06_83fcef3fa9af.wav",
       "sec": 5.136
     },
     {
@@ -1078,8 +1069,8 @@
       "role": "why",
       "text": "只有提前明确详写的重点，学生才能在写作时突出主次，写出有层次的文章。",
       "chars": 34,
-      "file": "audio/s15_07_e5f044221ceb.wav",
-      "sec": 7.536
+      "file": "audio/s15_07_1a153ada59bf.wav",
+      "sec": 7.272
     },
     {
       "shot": "s15",
@@ -1087,8 +1078,8 @@
       "role": "risk",
       "text": "遇到学生只圈出一处变化或没有圈出任何变化时，你可以提醒他们：详写的部分是文章的亮点，必须提前选定。",
       "chars": 49,
-      "file": "audio/s15_08_9fcd6f20a275.wav",
-      "sec": 10.464
+      "file": "audio/s15_08_190525e5bce6.wav",
+      "sec": 10.248
     },
     {
       "shot": "s15",
@@ -1096,8 +1087,8 @@
       "role": "risk",
       "text": "若学生填得很细但全是现在的事物，追问一句：“二十年后，这里会是什么样？”",
       "chars": 36,
-      "file": "audio/s15_09_71615996768b.wav",
-      "sec": 6.84
+      "file": "audio/s15_09_ef1d4490800d.wav",
+      "sec": 7.08
     },
     {
       "shot": "s15",
@@ -1105,7 +1096,7 @@
       "role": "risk",
       "text": "帮助他们跳出当前的限制。",
       "chars": 12,
-      "file": "audio/s15_10_bf1dbbba9698.wav",
+      "file": "audio/s15_10_2de980140434.wav",
       "sec": 2.592
     },
     {
@@ -1114,8 +1105,8 @@
       "role": "locate",
       "text": "到这儿你先让学生听示范文，数一数写了几处变化，并记住一句最能让他们看见画面的句子。",
       "chars": 41,
-      "file": "audio/s16_01_64b264a14461.wav",
-      "sec": 7.032
+      "file": "audio/s16_01_31f6e285a558.wav",
+      "sec": 6.672
     },
     {
       "shot": "s16",
@@ -1123,8 +1114,8 @@
       "role": "do",
       "text": "整篇先读一遍，不要急着分析。",
       "chars": 14,
-      "file": "audio/s16_02_3d47e1d70b4a.wav",
-      "sec": 2.664
+      "file": "audio/s16_02_aff0488ac77c.wav",
+      "sec": 2.424
     },
     {
       "shot": "s16",
@@ -1132,7 +1123,7 @@
       "role": "do",
       "text": "第一遍只让学生听、数变化，别提前出示旁批表的分类。",
       "chars": 25,
-      "file": "audio/s16_03_a22cea2fa96b.wav",
+      "file": "audio/s16_03_26bcc8ebad57.wav",
       "sec": 4.848
     },
     {
@@ -1141,7 +1132,7 @@
       "role": "do",
       "text": "读完后，问一句：“哪一句让你看见了画面？”",
       "chars": 21,
-      "file": "audio/s16_04_3d3c95b523bb.wav",
+      "file": "audio/s16_04_f4f1c400b41e.wav",
       "sec": 3.624
     },
     {
@@ -1150,8 +1141,8 @@
       "role": "why",
       "text": "这一招是后面逐句分析的底子。",
       "chars": 14,
-      "file": "audio/s16_05_edd8ada8fd5b.wav",
-      "sec": 3.0
+      "file": "audio/s16_05_2c710484ea6c.wav",
+      "sec": 2.808
     },
     {
       "shot": "s16",
@@ -1159,8 +1150,8 @@
       "role": "why",
       "text": "学生先听出变化，再固定发现，顺序倒过来就成了灌输结论。",
       "chars": 27,
-      "file": "audio/s16_06_5de319beb051.wav",
-      "sec": 6.408
+      "file": "audio/s16_06_494b808804c9.wav",
+      "sec": 6.24
     },
     {
       "shot": "s16",
@@ -1168,8 +1159,8 @@
       "role": "why",
       "text": "让学生自己发现画面感的句子，后续分析才能有参与感。",
       "chars": 25,
-      "file": "audio/s16_07_59a6ec2e056a.wav",
-      "sec": 5.16
+      "file": "audio/s16_07_6e86a0eab82c.wav",
+      "sec": 4.944
     },
     {
       "shot": "s16",
@@ -1177,7 +1168,7 @@
       "role": "risk",
       "text": "学生会分成两类：一类只记住景物变化，另一类能抓住画面里的动作。",
       "chars": 31,
-      "file": "audio/s16_08_bf1137aa8b1d.wav",
+      "file": "audio/s16_08_212c8a215da4.wav",
       "sec": 6.648
     },
     {
@@ -1186,8 +1177,8 @@
       "role": "risk",
       "text": "遇到只说景物的，追问一句：“这里有谁？他在做什么？”",
       "chars": 26,
-      "file": "audio/s16_09_bf1f267f12c6.wav",
-      "sec": 4.968
+      "file": "audio/s16_09_75b8bf731c5f.wav",
+      "sec": 4.944
     },
     {
       "shot": "s16",
@@ -1195,7 +1186,7 @@
       "role": "risk",
       "text": "这样能引导他们关注画面中的人物和动作。",
       "chars": 19,
-      "file": "audio/s16_10_775d023067a7.wav",
+      "file": "audio/s16_10_2d7396ab2a4f.wav",
       "sec": 3.432
     },
     {
@@ -1204,8 +1195,8 @@
       "role": "locate",
       "text": "刚才学生听完示范文，这一步要抛出两个问题：写了几个方面？哪几处变化？",
       "chars": 34,
-      "file": "audio/s17_01_d630dbcba32a.wav",
-      "sec": 6.048
+      "file": "audio/s17_01_10a8db597765.wav",
+      "sec": 5.688
     },
     {
       "shot": "s17",
@@ -1213,7 +1204,7 @@
       "role": "locate",
       "text": "这些问题是从刚才的听中长出来的。",
       "chars": 16,
-      "file": "audio/s17_02_5c43553c0885.wav",
+      "file": "audio/s17_02_55e1832ef64d.wav",
       "sec": 2.88
     },
     {
@@ -1222,8 +1213,8 @@
       "role": "do",
       "text": "这一步结束时，学生手里应该有两样东西：写了几处变化的答案，以及每处篇幅长短的比较。",
       "chars": 41,
-      "file": "audio/s17_03_baf335453cbb.wav",
-      "sec": 8.28
+      "file": "audio/s17_03_fbdc815f777b.wav",
+      "sec": 8.04
     },
     {
       "shot": "s17",
@@ -1231,8 +1222,8 @@
       "role": "do",
       "text": "问完后，再逐句带他们看段首句，明确每段的描写对象。",
       "chars": 25,
-      "file": "audio/s17_04_5ffda6398ec6.wav",
-      "sec": 5.232
+      "file": "audio/s17_04_c7694747e19f.wav",
+      "sec": 5.064
     },
     {
       "shot": "s17",
@@ -1240,8 +1231,8 @@
       "role": "why",
       "text": "这一步解决的是“详略不当”的毛病。",
       "chars": 17,
-      "file": "audio/s17_05_f91c7b9f4de1.wav",
-      "sec": 3.24
+      "file": "audio/s17_05_908b2d744a87.wav",
+      "sec": 3.264
     },
     {
       "shot": "s17",
@@ -1249,8 +1240,8 @@
       "role": "why",
       "text": "三处篇幅一样长，读者就看不出主次；",
       "chars": 17,
-      "file": "audio/s17_06_acbe8e9287a0.wav",
-      "sec": 3.864
+      "file": "audio/s17_06_e2a3074295d6.wav",
+      "sec": 3.672
     },
     {
       "shot": "s17",
@@ -1258,8 +1249,8 @@
       "role": "why",
       "text": "学生得先发现这一点，后面才能学会调整。",
       "chars": 19,
-      "file": "audio/s17_07_6f788d7611a8.wav",
-      "sec": 3.864
+      "file": "audio/s17_07_d029cc810b85.wav",
+      "sec": 4.104
     },
     {
       "shot": "s17",
@@ -1267,7 +1258,7 @@
       "role": "why",
       "text": "段首概括句的作用也在这里：开门见山点明描写对象，让读者不迷路。",
       "chars": 31,
-      "file": "audio/s17_08_e3e683714caa.wav",
+      "file": "audio/s17_08_337861e7fd2b.wav",
       "sec": 6.408
     },
     {
@@ -1276,8 +1267,8 @@
       "role": "risk",
       "text": "这儿最容易卡在篇幅比较上。",
       "chars": 13,
-      "file": "audio/s17_09_a63a8f736eff.wav",
-      "sec": 2.832
+      "file": "audio/s17_09_0df11ab120b1.wav",
+      "sec": 2.592
     },
     {
       "shot": "s17",
@@ -1285,8 +1276,8 @@
       "role": "risk",
       "text": "学生可能只说“操场写得最短”，没提小河和抓药写得更长。",
       "chars": 27,
-      "file": "audio/s17_10_e1206a7365f1.wav",
-      "sec": 5.808
+      "file": "audio/s17_10_d550d51d004d.wav",
+      "sec": 5.784
     },
     {
       "shot": "s17",
@@ -1294,8 +1285,8 @@
       "role": "risk",
       "text": "追问一句：“哪一处是重点？为什么？”",
       "chars": 18,
-      "file": "audio/s17_11_6d106d6deee4.wav",
-      "sec": 3.456
+      "file": "audio/s17_11_483edeb2ce03.wav",
+      "sec": 3.696
     },
     {
       "shot": "s17",
@@ -1303,8 +1294,8 @@
       "role": "risk",
       "text": "还可能有人对段首句的作用不理解，觉得删掉也可以。",
       "chars": 24,
-      "file": "audio/s17_12_24d9190f484b.wav",
-      "sec": 4.728
+      "file": "audio/s17_12_408ef0a5bd0a.wav",
+      "sec": 4.704
     },
     {
       "shot": "s17",
@@ -1312,7 +1303,7 @@
       "role": "risk",
       "text": "问一句：“删掉后，读者会缺少什么信息？”",
       "chars": 20,
-      "file": "audio/s17_13_a2f6f27a2631.wav",
+      "file": "audio/s17_13_88ade27502dc.wav",
       "sec": 4.104
     },
     {
@@ -1321,8 +1312,8 @@
       "role": "locate",
       "text": "学生刚发现了篇幅详略的不同，这一页用旁批表逐句分析写法，把发现固定下来。",
       "chars": 36,
-      "file": "audio/s18_01_44c0c8c96cfc.wav",
-      "sec": 7.032
+      "file": "audio/s18_01_425fbcc0ef67.wav",
+      "sec": 7.416
     },
     {
       "shot": "s18",
@@ -1330,8 +1321,8 @@
       "role": "do",
       "text": "先投屏旁批表，再逐句问学生：每句在做什么？",
       "chars": 21,
-      "file": "audio/s18_02_0de051369d56.wav",
-      "sec": 4.68
+      "file": "audio/s18_02_2aeed9f5e144.wav",
+      "sec": 4.656
     },
     {
       "shot": "s18",
@@ -1339,7 +1330,7 @@
       "role": "do",
       "text": "让他们自己说出分类，不要直接灌输答案。",
       "chars": 19,
-      "file": "audio/s18_03_ff25804999ea.wav",
+      "file": "audio/s18_03_9e3898bbac3d.wav",
       "sec": 3.456
     },
     {
@@ -1348,7 +1339,7 @@
       "role": "do",
       "text": "问完后，把分类表的作用点出来：它是工具，不是结论。",
       "chars": 25,
-      "file": "audio/s18_04_f04da25c7054.wav",
+      "file": "audio/s18_04_8a25d89a5da7.wav",
       "sec": 4.656
     },
     {
@@ -1357,7 +1348,7 @@
       "role": "why",
       "text": "不这么做会让学生只记住分类表，而忘了发现过程。",
       "chars": 23,
-      "file": "audio/s18_05_0833f8a9991b.wav",
+      "file": "audio/s18_05_01294974e766.wav",
       "sec": 4.536
     },
     {
@@ -1366,8 +1357,8 @@
       "role": "why",
       "text": "旁批表是工具，不是结论，必须从学生的发现长出来。",
       "chars": 24,
-      "file": "audio/s18_06_03c02cbc2287.wav",
-      "sec": 5.136
+      "file": "audio/s18_06_5f47ba941682.wav",
+      "sec": 4.944
     },
     {
       "shot": "s18",
@@ -1375,8 +1366,8 @@
       "role": "why",
       "text": "逐句分析能让学生自己归纳写法，而不是被动接受分类。",
       "chars": 25,
-      "file": "audio/s18_07_5203b3d00d41.wav",
-      "sec": 5.136
+      "file": "audio/s18_07_3ce8d9c5d26f.wav",
+      "sec": 4.704
     },
     {
       "shot": "s18",
@@ -1384,8 +1375,8 @@
       "role": "risk",
       "text": "学生可能会直接背分类表，而忽略句子的具体作用。",
       "chars": 23,
-      "file": "audio/s18_08_b9602acc8770.wav",
-      "sec": 4.704
+      "file": "audio/s18_08_f659782b83e2.wav",
+      "sec": 4.296
     },
     {
       "shot": "s18",
@@ -1393,8 +1384,8 @@
       "role": "risk",
       "text": "遇到这种情况，追问一句：“这句写了什么？它让你看见了什么？”",
       "chars": 30,
-      "file": "audio/s18_09_e3a59a235d85.wav",
-      "sec": 5.592
+      "file": "audio/s18_09_63e72bbd3e10.wav",
+      "sec": 5.568
     },
     {
       "shot": "s19",
@@ -1402,8 +1393,8 @@
       "role": "locate",
       "text": "有了旁批表固定发现，才能回到结尾看它怎么收束。",
       "chars": 23,
-      "file": "audio/s19_01_76d8cd09d6fd.wav",
-      "sec": 4.176
+      "file": "audio/s19_01_643d89bd1d86.wav",
+      "sec": 4.008
     },
     {
       "shot": "s19",
@@ -1411,8 +1402,8 @@
       "role": "locate",
       "text": "结尾的设计是整篇的最后一环。",
       "chars": 14,
-      "file": "audio/s19_02_42b1223a5873.wav",
-      "sec": 2.688
+      "file": "audio/s19_02_f5530ef431e5.wav",
+      "sec": 2.88
     },
     {
       "shot": "s19",
@@ -1420,7 +1411,7 @@
       "role": "do",
       "text": "最容易做错的是直接写“我爱家乡”。",
       "chars": 17,
-      "file": "audio/s19_03_19e0b704bed1.wav",
+      "file": "audio/s19_03_f5baf1d37eec.wav",
       "sec": 3.048
     },
     {
@@ -1429,8 +1420,8 @@
       "role": "do",
       "text": "带学生看结尾的画面，问一句：“这两句让你体会到作者什么样的心情？”",
       "chars": 33,
-      "file": "audio/s19_04_281dbdb8e079.wav",
-      "sec": 6.288
+      "file": "audio/s19_04_c641da311473.wav",
+      "sec": 5.856
     },
     {
       "shot": "s19",
@@ -1438,8 +1429,8 @@
       "role": "do",
       "text": "再引导他们发现：回扣前面写到过的景物，是一种更自然的收尾方式。",
       "chars": 31,
-      "file": "audio/s19_05_2c9eaaadfed5.wav",
-      "sec": 6.024
+      "file": "audio/s19_05_492e0e0f1d34.wav",
+      "sec": 6.048
     },
     {
       "shot": "s19",
@@ -1447,8 +1438,8 @@
       "role": "why",
       "text": "这一步的位置不能换：结尾是整篇的收束，直接写抒情句会显得生硬。",
       "chars": 31,
-      "file": "audio/s19_06_8957b0e3ca7d.wav",
-      "sec": 7.08
+      "file": "audio/s19_06_f4270d7063bb.wav",
+      "sec": 6.432
     },
     {
       "shot": "s19",
@@ -1456,8 +1447,8 @@
       "role": "why",
       "text": "回扣前面写到过的景物，或者直接表达真实感受，才能让结尾更贴合学生自己的想法。",
       "chars": 38,
-      "file": "audio/s19_07_8300d8667663.wav",
-      "sec": 7.704
+      "file": "audio/s19_07_5971f27343c4.wav",
+      "sec": 7.536
     },
     {
       "shot": "s19",
@@ -1465,7 +1456,7 @@
       "role": "risk",
       "text": "收上来的东西会分化：有的学生会直接写“我爱家乡”，有的会回扣前面写到过的景物。",
       "chars": 39,
-      "file": "audio/s19_08_8cf0b5ce2490.wav",
+      "file": "audio/s19_08_64a965309429.wav",
       "sec": 8.112
     },
     {
@@ -1474,7 +1465,7 @@
       "role": "risk",
       "text": "遇到直接抒情的，问一句：“还有什么画面能让读者感受到你的心情？”",
       "chars": 32,
-      "file": "audio/s19_09_c7c6fa9aec86.wav",
+      "file": "audio/s19_09_886bed254b94.wav",
       "sec": 6.0
     },
     {
@@ -1483,8 +1474,8 @@
       "role": "locate",
       "text": "刚才是看结尾如何回到小河，这一页换成第二课时的任务安排：对照提纲起笔、自由写作完成整篇、",
       "chars": 44,
-      "file": "audio/s20_01_5a6163c5d0da.wav",
-      "sec": 8.16
+      "file": "audio/s20_01_77bf05f22b6f.wav",
+      "sec": 8.712
     },
     {
       "shot": "s20",
@@ -1492,7 +1483,7 @@
       "role": "locate",
       "text": "交流评议修改收束。",
       "chars": 9,
-      "file": "audio/s20_02_55e7a3cbfac9.wav",
+      "file": "audio/s20_02_fdc275f3ea27.wav",
       "sec": 1.92
     },
     {
@@ -1501,8 +1492,8 @@
       "role": "do",
       "text": "先明确每个环节的任务，再提醒学生写作时要紧扣提纲，尤其是中间段落的变化要具体到画面。",
       "chars": 42,
-      "file": "audio/s20_03_df772062bf01.wav",
-      "sec": 8.04
+      "file": "audio/s20_03_b31d6899f2ab.wav",
+      "sec": 8.016
     },
     {
       "shot": "s20",
@@ -1510,8 +1501,8 @@
       "role": "do",
       "text": "写作环节中，巡视时可以问学生：“这里有谁？他在做什么？”",
       "chars": 28,
-      "file": "audio/s20_04_6cf3ead1183d.wav",
-      "sec": 5.496
+      "file": "audio/s20_04_8a99648cc74b.wav",
+      "sec": 5.064
     },
     {
       "shot": "s20",
@@ -1519,7 +1510,7 @@
       "role": "do",
       "text": "帮助他们把画面写得更生动。",
       "chars": 13,
-      "file": "audio/s20_05_dfc27e1b83c3.wav",
+      "file": "audio/s20_05_3a961fb63b58.wav",
       "sec": 2.424
     },
     {
@@ -1528,8 +1519,8 @@
       "role": "locate",
       "text": "学生刚明确了写作提纲的结构，现在要排定三处变化的顺序，并确认详写重点。",
       "chars": 35,
-      "file": "audio/s21_01_12c435a3deb3.wav",
-      "sec": 6.672
+      "file": "audio/s21_01_e7c78c08d74c.wav",
+      "sec": 6.432
     },
     {
       "shot": "s21",
@@ -1537,8 +1528,8 @@
       "role": "locate",
       "text": "这一步是为了让后续写作更有层次感。",
       "chars": 17,
-      "file": "audio/s21_02_4f693ac38a95.wav",
-      "sec": 3.048
+      "file": "audio/s21_02_149de62ab570.wav",
+      "sec": 2.88
     },
     {
       "shot": "s21",
@@ -1546,7 +1537,7 @@
       "role": "do",
       "text": "学生标好 1、2、3 后，你要确认他们是否圈定了最有话说的一处作为详写重点。",
       "chars": 38,
-      "file": "audio/s21_03_90e598a2543a.wav",
+      "file": "audio/s21_03_200bf48202d5.wav",
       "sec": 6.264
     },
     {
@@ -1555,8 +1546,8 @@
       "role": "do",
       "text": "如果有学生改了主意，把圈移到另一行，问一句：“为什么选这处？”",
       "chars": 31,
-      "file": "audio/s21_04_611c6f314396.wav",
-      "sec": 5.448
+      "file": "audio/s21_04_0eb55fdb7c62.wav",
+      "sec": 5.64
     },
     {
       "shot": "s21",
@@ -1564,7 +1555,7 @@
       "role": "do",
       "text": "确保他们的选择是经过思考的。",
       "chars": 14,
-      "file": "audio/s21_05_e3a1fb3a7bfc.wav",
+      "file": "audio/s21_05_ee3be0072964.wav",
       "sec": 2.664
     },
     {
@@ -1573,8 +1564,8 @@
       "role": "why",
       "text": "让学生自己选出详写的重点，是为了让后续的修改更有针对性。",
       "chars": 28,
-      "file": "audio/s21_06_15bc3b6e9055.wav",
-      "sec": 5.976
+      "file": "audio/s21_06_66f359e2fa52.wav",
+      "sec": 5.568
     },
     {
       "shot": "s21",
@@ -1582,8 +1573,8 @@
       "role": "why",
       "text": "明确写作的主次，能避免文章读起来像流水账。",
       "chars": 21,
-      "file": "audio/s21_07_0a51ca8abf61.wav",
-      "sec": 4.704
+      "file": "audio/s21_07_4b14143d89a0.wav",
+      "sec": 4.536
     },
     {
       "shot": "s21",
@@ -1591,8 +1582,8 @@
       "role": "risk",
       "text": "学生可能会随意标顺序，或者圈定一处但没有理由。",
       "chars": 23,
-      "file": "audio/s21_08_ca7c8c4482e2.wav",
-      "sec": 4.968
+      "file": "audio/s21_08_fbec8f7162e0.wav",
+      "sec": 4.704
     },
     {
       "shot": "s21",
@@ -1600,8 +1591,8 @@
       "role": "risk",
       "text": "遇到这种情况，追问一句：“你为什么选这处？”",
       "chars": 22,
-      "file": "audio/s21_09_fa58b542527a.wav",
-      "sec": 4.104
+      "file": "audio/s21_09_f029b1315ff3.wav",
+      "sec": 4.08
     },
     {
       "shot": "s21",
@@ -1609,8 +1600,8 @@
       "role": "risk",
       "text": "引导他们从自己最熟悉、最有话说的地方开始写。",
       "chars": 22,
-      "file": "audio/s21_10_44be139d42df.wav",
-      "sec": 4.536
+      "file": "audio/s21_10_729464ab45e2.wav",
+      "sec": 4.296
     },
     {
       "shot": "s22",
@@ -1618,7 +1609,7 @@
       "role": "locate",
       "text": "到这儿你先让学生拿出提纲表，按刚才标好的顺序开始写正式稿。",
       "chars": 29,
-      "file": "audio/s22_01_50155a5cb324.wav",
+      "file": "audio/s22_01_5e5b3c3575e9.wav",
       "sec": 5.16
     },
     {
@@ -1627,8 +1618,8 @@
       "role": "locate",
       "text": "写的时候记住两点：每段开头点明变化，段内对照从前和现在的画面。",
       "chars": 31,
-      "file": "audio/s22_02_b65847023282.wav",
-      "sec": 6.072
+      "file": "audio/s22_02_fe1bb06ef564.wav",
+      "sec": 5.688
     },
     {
       "shot": "s22",
@@ -1636,8 +1627,8 @@
       "role": "do",
       "text": "先别急着巡视，三分钟内让学生专注写开头和标记的第一处变化。",
       "chars": 29,
-      "file": "audio/s22_03_05ff653433e9.wav",
-      "sec": 5.856
+      "file": "audio/s22_03_1837e0539060.wav",
+      "sec": 5.64
     },
     {
       "shot": "s22",
@@ -1645,8 +1636,8 @@
       "role": "do",
       "text": "计时结束后再观察：写得很慢的学生，问他提纲里哪两处还没写；",
       "chars": 29,
-      "file": "audio/s22_04_99577581b03a.wav",
-      "sec": 5.64
+      "file": "audio/s22_04_364a2c2a74b5.wav",
+      "sec": 5.448
     },
     {
       "shot": "s22",
@@ -1654,7 +1645,7 @@
       "role": "do",
       "text": "写得很简短的，问他变化后会带来什么场景。",
       "chars": 20,
-      "file": "audio/s22_05_e14ffd917b0a.wav",
+      "file": "audio/s22_05_997ae01cab30.wav",
       "sec": 3.864
     },
     {
@@ -1663,8 +1654,8 @@
       "role": "why",
       "text": "这一招是后面自改环节的底子：学生自己选出的详写段落，才会成为他改稿时的标尺。",
       "chars": 38,
-      "file": "audio/s22_06_55182230604f.wav",
-      "sec": 8.112
+      "file": "audio/s22_06_c6b78980857b.wav",
+      "sec": 7.92
     },
     {
       "shot": "s22",
@@ -1672,8 +1663,8 @@
       "role": "why",
       "text": "写得慢或简短的，提问能帮他把画面撑开。",
       "chars": 19,
-      "file": "audio/s22_07_530a014cc571.wav",
-      "sec": 4.728
+      "file": "audio/s22_07_c9c48f90b0e2.wav",
+      "sec": 4.536
     },
     {
       "shot": "s22",
@@ -1681,8 +1672,8 @@
       "role": "risk",
       "text": "两类学生会分化：一类写得很细，但全是现在的事物；",
       "chars": 24,
-      "file": "audio/s22_08_eef484bc34af.wav",
-      "sec": 4.944
+      "file": "audio/s22_08_58c5d1091369.wav",
+      "sec": 5.376
     },
     {
       "shot": "s22",
@@ -1690,8 +1681,8 @@
       "role": "risk",
       "text": "另一类写得很快，但只有笼统的“更好、更便利”。",
       "chars": 23,
-      "file": "audio/s22_09_e71bda8ab138.wav",
-      "sec": 4.512
+      "file": "audio/s22_09_e8bed4cd8da6.wav",
+      "sec": 4.944
     },
     {
       "shot": "s22",
@@ -1699,8 +1690,8 @@
       "role": "risk",
       "text": "前者追问“便利之后是什么画面”，后者追问“这里有谁？他在做什么”。",
       "chars": 33,
-      "file": "audio/s22_10_4f1b14122823.wav",
-      "sec": 6.0
+      "file": "audio/s22_10_b89a7fe85ea9.wav",
+      "sec": 6.408
     },
     {
       "shot": "s24",
@@ -1708,8 +1699,8 @@
       "role": "locate",
       "text": "学生刚完成了整篇习作的初稿，这一页要让他们通过分享和反馈，发现自己文章的亮点和不足，",
       "chars": 42,
-      "file": "audio/s24_01_3cdcc34201c5.wav",
-      "sec": 7.776
+      "file": "audio/s24_01_de8065c220f8.wav",
+      "sec": 7.8
     },
     {
       "shot": "s24",
@@ -1717,7 +1708,7 @@
       "role": "locate",
       "text": "为下一步修改明确方向。",
       "chars": 11,
-      "file": "audio/s24_02_d434b2dbdd5f.wav",
+      "file": "audio/s24_02_eb8e62259175.wav",
       "sec": 2.136
     },
     {
@@ -1726,8 +1717,8 @@
       "role": "do",
       "text": "到这儿你先组织学生分组，每人读出自己最满意的片段。",
       "chars": 25,
-      "file": "audio/s24_03_c5c3cd542207.wav",
-      "sec": 4.656
+      "file": "audio/s24_03_e3e0cec1584e.wav",
+      "sec": 4.44
     },
     {
       "shot": "s24",
@@ -1735,8 +1726,8 @@
       "role": "do",
       "text": "提醒听众只听朗读、不看稿子。",
       "chars": 14,
-      "file": "audio/s24_04_9ecc55797924.wav",
-      "sec": 3.048
+      "file": "audio/s24_04_3b1def1c3595.wav",
+      "sec": 2.664
     },
     {
       "shot": "s24",
@@ -1744,8 +1735,8 @@
       "role": "do",
       "text": "读完后的三点反馈建议照着说：“哪一处想象最有意思？哪一句写得最具体，听完仿佛看见了什么？还有哪一句没有画面感？”",
       "chars": 56,
-      "file": "audio/s24_05_da9010e44b24.wav",
-      "sec": 10.416
+      "file": "audio/s24_05_895b3a7372b4.wav",
+      "sec": 10.848
     },
     {
       "shot": "s24",
@@ -1753,7 +1744,7 @@
       "role": "do",
       "text": "最后那一点就是作者的修改方向。",
       "chars": 15,
-      "file": "audio/s24_06_0fa8cd29f1f2.wav",
+      "file": "audio/s24_06_6a4e755d6851.wav",
       "sec": 2.664
     },
     {
@@ -1762,7 +1753,7 @@
       "role": "why",
       "text": "不这么做会让学生的修改失去针对性。",
       "chars": 17,
-      "file": "audio/s24_07_bac0669c9c3b.wav",
+      "file": "audio/s24_07_ecbbda05d3a3.wav",
       "sec": 3.24
     },
     {
@@ -1771,7 +1762,7 @@
       "role": "why",
       "text": "选出“最满意的片段”是让学生自己找到改稿的标尺，",
       "chars": 24,
-      "file": "audio/s24_08_40458efdd148.wav",
+      "file": "audio/s24_08_923c8f9bafb7.wav",
       "sec": 4.704
     },
     {
@@ -1780,7 +1771,7 @@
       "role": "why",
       "text": "而听众的具体反馈能帮助作者发现细节上的不足，比教师直接指出问题更有效。",
       "chars": 35,
-      "file": "audio/s24_09_26c3e19ed67a.wav",
+      "file": "audio/s24_09_46eff588b8a4.wav",
       "sec": 7.08
     },
     {
@@ -1789,7 +1780,7 @@
       "role": "risk",
       "text": "听众可能说不出具体的句子，比如只说“写得很好”或“很有意思”。",
       "chars": 31,
-      "file": "audio/s24_10_846c07f44b40.wav",
+      "file": "audio/s24_10_3c00c051aa55.wav",
       "sec": 5.568
     },
     {
@@ -1798,7 +1789,7 @@
       "role": "risk",
       "text": "遇到这种情况，建议追问一句：“这一句让你看见了什么？”",
       "chars": 27,
-      "file": "audio/s24_11_d229bebfcd01.wav",
+      "file": "audio/s24_11_2fda1f9e7800.wav",
       "sec": 4.728
     },
     {
@@ -1807,7 +1798,7 @@
       "role": "risk",
       "text": "还是说不上来，那多半是那一处缺了细节，读的人自己就明白该补什么。",
       "chars": 32,
-      "file": "audio/s24_12_bf196491ee36.wav",
+      "file": "audio/s24_12_b80e7412db38.wav",
       "sec": 6.408
     },
     {
@@ -1816,8 +1807,8 @@
       "role": "locate",
       "text": "有了小组分享的反馈，学生才能明确自己的优点和不足。",
       "chars": 25,
-      "file": "audio/s25_01_4b11f634827c.wav",
-      "sec": 4.56
+      "file": "audio/s25_01_7bfb03fb0c32.wav",
+      "sec": 4.176
     },
     {
       "shot": "s25",
@@ -1825,7 +1816,7 @@
       "role": "locate",
       "text": "这一页要让他们对照三问，自检稿子，找到修改方向。",
       "chars": 24,
-      "file": "audio/s25_02_c13aff30dbbf.wav",
+      "file": "audio/s25_02_636ba79db70f.wav",
       "sec": 4.176
     },
     {
@@ -1834,8 +1825,8 @@
       "role": "do",
       "text": "提醒学生：第一问数得出来，第二问要挑出具体句子并说出为什么，第三问看结尾是否落到具体画面。",
       "chars": 45,
-      "file": "audio/s25_03_a024534b9eae.wav",
-      "sec": 8.832
+      "file": "audio/s25_03_2fe6078a60e2.wav",
+      "sec": 9.048
     },
     {
       "shot": "s25",
@@ -1843,8 +1834,8 @@
       "role": "do",
       "text": "找到写得最好的段落和句子，作为修改的参照标准。",
       "chars": 23,
-      "file": "audio/s25_04_8ece9b9acc18.wav",
-      "sec": 4.248
+      "file": "audio/s25_04_10dc9bc7ff4e.wav",
+      "sec": 4.44
     },
     {
       "shot": "s25",
@@ -1852,8 +1843,8 @@
       "role": "why",
       "text": "这一步的位置不能换：小组分享之后再自检，学生才能带着明确的反馈去检查自己的稿子，",
       "chars": 40,
-      "file": "audio/s25_05_4f9b035a2129.wav",
-      "sec": 7.944
+      "file": "audio/s25_05_f95305b749c6.wav",
+      "sec": 8.328
     },
     {
       "shot": "s25",
@@ -1861,7 +1852,7 @@
       "role": "why",
       "text": "而不是泛泛地看。",
       "chars": 8,
-      "file": "audio/s25_06_db3b162a356b.wav",
+      "file": "audio/s25_06_0dec77ea9339.wav",
       "sec": 1.728
     },
     {
@@ -1870,8 +1861,8 @@
       "role": "locate",
       "text": "刚才是自检和发现问题，这一页换成增补修改，重点是只做增补、不做大段删改，",
       "chars": 36,
-      "file": "audio/s26_01_49e5d9f386cd.wav",
-      "sec": 7.392
+      "file": "audio/s26_01_76c85a12f76c.wav",
+      "sec": 6.84
     },
     {
       "shot": "s26",
@@ -1879,7 +1870,7 @@
       "role": "locate",
       "text": "明确五处需要修改的地方。",
       "chars": 12,
-      "file": "audio/s26_02_bbf910e7458f.wav",
+      "file": "audio/s26_02_52357e1f466e.wav",
       "sec": 2.136
     },
     {
@@ -1888,8 +1879,8 @@
       "role": "do",
       "text": "怎么看出做对了：修改后的段落能读出具体的画面，结尾落到真实的感受或具体的景象。",
       "chars": 39,
-      "file": "audio/s26_03_65a226ca28c4.wav",
-      "sec": 7.44
+      "file": "audio/s26_03_e4abe106085d.wav",
+      "sec": 7.488
     },
     {
       "shot": "s26",
@@ -1897,8 +1888,8 @@
       "role": "do",
       "text": "你先让学生对照五处逐条修改：补画面、补对照、补人物、补段首概括句、补结尾的真实感受。",
       "chars": 42,
-      "file": "audio/s26_04_35941ea87006.wav",
-      "sec": 8.64
+      "file": "audio/s26_04_2fba08f8805f.wav",
+      "sec": 8.4
     },
     {
       "shot": "s26",
@@ -1906,7 +1897,7 @@
       "role": "do",
       "text": "最后用修改符号整理稿子，读一读改动过的地方。",
       "chars": 22,
-      "file": "audio/s26_05_0058e1473826.wav",
+      "file": "audio/s26_05_f314d916b1d5.wav",
       "sec": 4.032
     },
     {
@@ -1915,8 +1906,8 @@
       "role": "why",
       "text": "详略处理可以放开，但段首概括句和结尾的真实感受得守住。",
       "chars": 27,
-      "file": "audio/s26_06_9bd2b8a3c583.wav",
-      "sec": 5.808
+      "file": "audio/s26_06_1381989e0932.wav",
+      "sec": 5.376
     },
     {
       "shot": "s26",
@@ -1924,89 +1915,71 @@
       "role": "why",
       "text": "段首概括句交代变化对象，结尾落到具体的景象或情感，才能让文章有完整的结构和情感表达。",
       "chars": 42,
-      "file": "audio/s26_07_9a6b7c563078.wav",
-      "sec": 8.544
+      "file": "audio/s26_07_14d36f521de7.wav",
+      "sec": 8.112
     },
     {
       "shot": "s99",
       "i": 1,
       "role": "do",
-      "text": "这一课的关键是按提纲搭出全篇：题目、开头、中间、结尾四部分先定下来，",
-      "chars": 34,
-      "file": "audio/s99_01_698cea2dde6d.wav",
-      "sec": 6.84
+      "text": "这一课的关键是一处变化写一段：段首点明这一处变成了什么样，段里把从前和现在摆到一起，",
+      "chars": 42,
+      "file": "audio/s99_01_4dfa4d537611.wav",
+      "sec": 7.872
     },
     {
       "shot": "s99",
       "i": 2,
       "role": "do",
-      "text": "中间选三个方面的变化写、一个方面写一段。",
-      "chars": 20,
-      "file": "audio/s99_02_18e1f30d7183.wav",
-      "sec": 3.864
+      "text": "最后落到有人在那儿做事的画面上。",
+      "chars": 16,
+      "file": "audio/s99_02_10b7ccaf2f19.wav",
+      "sec": 2.832
     },
     {
       "shot": "s99",
       "i": 3,
       "role": "do",
-      "text": "段首点明变化对象，段里今昔对照，结尾落到有人做事的画面上。",
-      "chars": 29,
-      "file": "audio/s99_03_5868bb444556.wav",
-      "sec": 5.64
+      "text": "最容易讲僵的是打开想象那一步，学生一开始写现在就有的东西，这一课就白上了，",
+      "chars": 37,
+      "file": "audio/s99_03_b89bd9508b77.wav",
+      "sec": 7.248
     },
     {
       "shot": "s99",
       "i": 4,
       "role": "do",
-      "text": "最容易讲僵的是第二环节——学生一旦开始写现在就有的事物，这一课就白上了，",
-      "chars": 36,
-      "file": "audio/s99_04_3c86040e6adf.wav",
-      "sec": 6.432
+      "text": "那里得追问一句：“便利之后是什么画面？”",
+      "chars": 20,
+      "file": "audio/s99_04_8d8da8cfd725.wav",
+      "sec": 3.24
     },
     {
       "shot": "s99",
       "i": 5,
       "role": "do",
-      "text": "那里得追问：“便利之后是什么画面”。",
-      "chars": 18,
-      "file": "audio/s99_05_2ca43fd1dea2.wav",
-      "sec": 3.048
+      "text": "修改环节只做增补，不做大段删改。",
+      "chars": 16,
+      "file": "audio/s99_05_7ba7089075a3.wav",
+      "sec": 3.456
     },
     {
       "shot": "s99",
       "i": 6,
-      "role": "do",
-      "text": "修改环节只做增补，不做大段删改，给圈出的那一处添加细节，不要回头删字。",
-      "chars": 35,
-      "file": "audio/s99_06_b42d9e3c3b95.wav",
-      "sec": 7.224
+      "role": "end",
+      "text": "这一课的备课讲解就到这里。",
+      "chars": 13,
+      "file": "audio/s99_06_6dfb1b9fbb06.wav",
+      "sec": 2.256
     },
     {
       "shot": "s99",
       "i": 7,
       "role": "end",
-      "text": "上课前再过一遍构思表第三栏，想好怎么追问：“这里有谁？他在做什么”，问出一个动作即可离开。",
-      "chars": 45,
-      "file": "audio/s99_07_b4e7c8b6eb0f.wav",
-      "sec": 8.28
-    },
-    {
-      "shot": "s99",
-      "i": 8,
-      "role": "end",
-      "text": "段首概括句和结尾的真实感受得守住，提前想好怎么接学生的回答，",
-      "chars": 30,
-      "file": "audio/s99_08_d76f40d7173d.wav",
-      "sec": 5.88
-    },
-    {
-      "shot": "s99",
-      "i": 9,
-      "role": "end",
-      "text": "才能让文章有完整的结构和情感表达。",
-      "chars": 17,
-      "file": "audio/s99_09_d07d89de046e.wav",
-      "sec": 3.456
+      "text": "上课前把构思表第三栏再过一遍，那句追问提前想好怎么说。",
+      "chars": 27,
+      "file": "audio/s99_07_7501eae3a085.wav",
+      "sec": 4.824
     }
   ]
 }

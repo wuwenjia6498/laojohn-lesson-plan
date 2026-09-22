@@ -51,7 +51,9 @@ BOLD_MARK = re.compile(r"\{/?b\}")
 # ⚠ cover/lesson_split 要与 write_narration 里告诉模型的字数对得上：
 # prompt 说「全页 90–160 字」而预算表给 90，模型写 144 就被报「偏离预算」——
 # 两处口径不一致，机检就在报自己。
-BUDGET = {"cover": 80, "lesson_split": 130, "teach": 175, "model": 230,
+# cover 0922 从 80 下调到 40：用户定了封面只说「几年级哪个单元、题目是什么」，
+# 多讲的那些后面每一页都会讲，开头说就是剧透加重复。
+BUDGET = {"cover": 40, "lesson_split": 130, "teach": 175, "model": 230,
           "write": 195, "review": 205, "appendix": 150, "outro": 250}
 # kicker（详案页标里的页型词）→ 分镜 kind
 KIND_BY_KICKER = [
