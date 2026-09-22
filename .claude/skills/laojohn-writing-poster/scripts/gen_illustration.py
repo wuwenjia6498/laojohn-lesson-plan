@@ -44,9 +44,23 @@ RETRY_SUFFIX = "。特别注意：画面中绝对不要出现任何文字、字�
 HANDDRAW_ASSETS = Path(__file__).resolve().parents[1] / "assets" / "handdraw"
 HANDDRAW_USER_PKG = Path.home() / ".claude" / "skills" / "handdraw-style-prompter"   # 用户级包，可能不存在
 # 本工具的固定约束（无论走不走编号风格都要有）：构图/底色/无人无字/纸面空白
-FIXED_CONSTRAINTS = ("浅奶油色背景（色值 #FFF6E3，画面四周渐淡融入背景、留白干净），主体集中在画面中央。"
-                     "画面中如有人物，为中国小学生或教师，形象简洁亲切、不夸张。"
-                     "没有任何文字、字母、数字、水印、品牌标志；黑板、纸张、屏幕、标签一律保持空白，不得出现任何可辨认的文字或符号。")
+# ⚠ 人物那一句分两档（2026-09-22 拆）：走编号风格时不能再说「形象简洁、不夸张」——
+#   风格库的人物类特征（脸型/头身比例/表情自成一套）正好被这句话压平，出来就是通用写实脸，
+#   而特征里那半句「避免回落为统一的标准Q版表情」又被 _positive_traits 按含「避免」滤掉了，
+#   两头一夹，编号形同虚设（六上五 #105 快速线稿实测出成精修水彩）。styled 档把这半句补回来。
+_BG_CONSTRAINT = "浅奶油色背景（色值 #FFF6E3，画面四周渐淡融入背景、留白干净），主体集中在画面中央。"
+_PEOPLE_PLAIN = "画面中如有人物，为中国小学生、家长或教师，形象简洁亲切、不夸张。"
+_PEOPLE_STYLED = ("画面中如有人物，为中国小学生、家长或教师，形象亲切；"
+                  "人物的脸型、头身比例、手脚形状、表情与肢体动作一律服从上述风格特征，"
+                  "不要回落成通用写实画法。")
+# ⚠ 这一条只在编号分支加：通用分支的「水彩平涂」写在 STYLE_PREFIX 里，编号分支没有任何上色约束——
+#   风格特征里凡带「线稿／速写／素描」字样的编号（#105 等），不兜这句就直接出黑白单色，
+#   放进暖色卡片的海报里整张发灰（六上五实测）。
+_COLOR_STYLED = "整幅为彩色，线条之外用柔和水彩淡彩上色，不要黑白线稿、素描或单色画面。"
+_NO_TEXT_CONSTRAINT = ("没有任何文字、字母、数字、水印、品牌标志；"
+                       "黑板、纸张、屏幕、标签一律保持空白，不得出现任何可辨认的文字或符号。")
+FIXED_CONSTRAINTS = _BG_CONSTRAINT + _PEOPLE_PLAIN + _NO_TEXT_CONSTRAINT
+STYLED_CONSTRAINTS = _BG_CONSTRAINT + _COLOR_STYLED + _PEOPLE_STYLED + _NO_TEXT_CONSTRAINT
 NO_PEOPLE = "画面里没有人、没有手、没有拟人角色。"
 NEG_SUFFIX = "。" + FIXED_CONSTRAINTS
 # 参考图隔离声明（照 handdraw-style-prompter SKILL.md 原文）
@@ -132,7 +146,7 @@ def build_prompt(subject, retry=False, style=None, no_people=False):
     if style:
         p = ("风格名称：#%s · %s。参考作者/风格名称：%s。" % (style["number"], style["name"], style["reference"] or "（索引未标）")
              + ("核心风格特征：%s。" % style["traits"] if style["traits"] else "")
-             + "主题：" + subj + "。" + FIXED_CONSTRAINTS + extra + REF_ISOLATION)
+             + "主题：" + subj + "。" + STYLED_CONSTRAINTS + extra + REF_ISOLATION)
     else:
         p = STYLE_PREFIX + subj + NEG_SUFFIX + extra
     return p + RETRY_SUFFIX if retry else p
