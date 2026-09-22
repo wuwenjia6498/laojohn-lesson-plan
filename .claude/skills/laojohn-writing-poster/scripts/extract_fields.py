@@ -40,7 +40,7 @@ BOLD_RE = re.compile(r"\{b\}(.+?)\{/b\}")
 WARN_KEYS = ("流水账", "不是", "不要", "别", "而是", "这就是")
 
 # 三张卡的固定栏目名（63 张统一，机械写死；痛点与教法合并一卡，再递进到收获与滋养）
-CARD_LABELS = [("pain", "写作痛点 · 教法"), ("gain", "能力收获"), ("spirit", "成长收获")]
+CARD_LABELS = [("pain", "写作难点 · 教法"), ("gain", "能力收获"), ("spirit", "成长收获")]
 
 PH = {
     "subtitle": "【副题待 AI 提炼：8–14 字，压缩自 _sources.companion.oneline 或 学习目标 行】",
