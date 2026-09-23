@@ -44,19 +44,18 @@
     "outcome": "完成一篇完整的续写故事"
   },
   "illustration": {
-    "subject": "教室里，一个背着书包的小学生推开门愣在门口；几个同学围在课桌旁，桌上一个插着蜡烛的小蛋糕，窗台上系着几只气球，讲台上一台打开的笔记本电脑屏幕亮着、屏幕里两个大人在挥手，黑板留白",
+    "subject": "画面中上部，一本摊开的书侧立着，书页里伸出一条浅浅的小路向右上方延伸；路上一只系红围巾的小兔子正独自往前走，路的尽头只有两三棵树和一间亮着灯的小木屋；书脊上坐着一个金棕色卷发的西方小男孩，戴黄色尖顶小帽、穿背带裤，举着一支长铅笔，笔尖正把这条路继续往前画；其余大片留白，不画草地、不画天空，纸面没有字。",
     "ratio": "4:3",
-    "punch": 1.3,
-    "style": "169",
+    "style": "042",
     "file": "三上-第三单元-续写故事-插画.jpg",
     "provider": "gemini",
     "model": "gemini-3-pro-image-preview",
     "prompt_used": "三上-第三单元-续写故事-插画-提示词.txt",
-    "generated_at": "2026-09-20 17:52",
+    "generated_at": "2026-09-22 18:52",
     "style_used": {
-      "number": "169",
-      "name": "Colored Pencil Diary",
-      "reference_image": "169.webp"
+      "number": "042",
+      "name": "Naturalist Watercolor Animal Storybook",
+      "reference_image": "042.webp"
     },
     "judge": {
       "verdict": "pass",
@@ -65,10 +64,11 @@
         "has_person": true,
         "bg_cream": true,
         "subject_ok": true,
-        "notes": "画面展示了一个教室内的生日惊喜场景。"
+        "notes": "画面符合描述，背景为浅奶油色，包含书、小路、小兔子、小木屋和男孩等元素。"
       }
     },
-    "zoom": 1.05
+    "punch": 1.2,
+    "zoom": 1.15
   },
   "theme_hue": 205,
   "_sources": {

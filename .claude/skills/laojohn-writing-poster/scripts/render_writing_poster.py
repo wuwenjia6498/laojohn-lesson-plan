@@ -3,7 +3,7 @@ r"""render_writing_poster.py —— 单元海报 data.json → 自包含 HTML + 
 
     PYTHONUTF8=1 python render_writing_poster.py <data.json> [--out-base <路径基名>]
         [--illustration <jpg>] [--logo <png>] [--qr <png>] [--campus <json>] [--template <html>]
-        [--font-mode subset|full]
+        [--font-mode subset|full] [--no-creamify]
 
 默认：out_base ＝ json 同目录 <课次>-习作海报；插画 ＝ 同目录 <课次>-插画.jpg（缺则留空区并 stderr 提示）；
 logo/qr/校区信息 ＝ 项目根 品牌资产\（单一源，skill 内不存副本）。**所有覆盖参数默认 None**（CLAUDE.md §3 红线）。
@@ -129,6 +129,62 @@ def illu_hues(path, nbin=36):
 
 
 
+# ---- 插画白纸边 → 奶油底（2026-09-22 立）----
+# 生图提示词早写死了背景 #FFF6E3，模型仍常把四周画成纯白纸边；模板的双层 mask 只负责渐隐，
+# 白边渐隐到奶油底上就是一条横贯画面的发白带（实测海报插画上缘 (255,255,253) vs 底色 (255,248,232)）。
+# 故在转 data URI 前于内存里把「白点」重映射到奶油：只吃高光、中间调不动，主体与淡彩几乎不变。
+# 原图不覆盖，随时可回退；满幅到边的图（外环不近白）自动跳过。
+CREAM_RGB = (255, 246, 227)
+
+
+def creamify_illu(path, enabled=None):
+    """插画四周若是白纸边就把白点染成奶油，返回 data URI。enabled=False 关掉，None=自动判定。"""
+    if enabled is False:
+        return _jr.data_uri(str(path))
+    import numpy as np
+    from PIL import Image
+    im = Image.open(str(path)).convert("RGB")
+    a = np.asarray(im).astype(np.float32)
+    h, w = a.shape[:2]
+    bw, bh = max(1, int(w * .05)), max(1, int(h * .05))
+    ring = np.concatenate([a[:bh].reshape(-1, 3), a[-bh:].reshape(-1, 3),
+                           a[:, :bw].reshape(-1, 3), a[:, -bw:].reshape(-1, 3)])
+    lo, hi = ring.min(axis=1), ring.max(axis=1)
+    near_white = ((lo > 244) & (hi - lo < 12)).mean()   # 近白且低饱和的占比
+    if near_white < .25:                                # 满幅到边的图：没有白边可染，原样用
+        return _jr.data_uri(str(path))
+    # 权重按 min 通道在 235→255 之间平滑升到 1：235 以下完全不动，纯白处完全落到奶油
+    t = np.clip((a.min(axis=2) - 235.0) / 20.0, 0, 1)
+    t = (t * t * (3 - 2 * t))[..., None]                # smoothstep
+    cream = np.array(CREAM_RGB, dtype=np.float32) / 255.0
+    out = a * (1 - t) + (a * cream) * t
+    buf = io.BytesIO()
+    Image.fromarray(np.clip(out, 0, 255).astype("uint8")).save(buf, "JPEG", quality=95)
+    print("  [插画] 检出白纸边（外环近白 %.0f%%），已把白点染成奶油 #FFF6E3" % (near_white * 100))
+    return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
+
+
+def keyout_bg_illu(path):
+    """纯色块平涂图（illustration.feather:false）专用：把插画底色抠成透明，返回 PNG data URI。
+    关掉羽化后插画是个硬矩形，底色与页面光晕差一点就显出方框（2026-09-23 三上一实测）；
+    平涂图底色均匀，按外环中位色做色差抠图最干净。与底色相差 12 以内全透明、36 以外不动，中间平滑过渡。"""
+    import numpy as np
+    from PIL import Image
+    im = Image.open(str(path)).convert("RGB")
+    a = np.asarray(im).astype(np.float32)
+    h, w = a.shape[:2]
+    bw, bh = max(1, int(w * .03)), max(1, int(h * .03))
+    ring = np.concatenate([a[:bh].reshape(-1, 3), a[:, :bw].reshape(-1, 3), a[:, -bw:].reshape(-1, 3)])
+    bg = np.median(ring, axis=0)
+    dist = np.linalg.norm(a - bg, axis=2)
+    alpha = np.clip((dist - 12.0) / 24.0, 0, 1)
+    rgba = np.dstack([a, alpha * 255]).astype("uint8")
+    buf = io.BytesIO()
+    Image.fromarray(rgba, "RGBA").save(buf, "PNG", optimize=True)
+    print("  [插画] feather:false → 已按底色 %s 抠成透明" % bg.round().astype(int).tolist())
+    return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
+
+
 def logo_uri(path, target_w=640):
     """logo 源图只有 292px 宽，2 倍渲染下直接放大发虚：先 Lanczos 上采样再轻锐化，救回一点小字边缘。
     换上 ≥600px 的 品牌资产\logo.png 后本函数自动不介入（够宽就原样返回）。"""
@@ -157,6 +213,15 @@ def theme_css(illu, data):
         out.append("--illu-filter:saturate(%.3f) contrast(%.3f) brightness(%.3f);"
                    % (1 + d * 1.30, 1 + d * 0.55, 1 - d * 0.10))
 
+    # 头部整体下移（json 顶层 head_offset，单位 px）：插画自身上缘留白多、头部与画面之间显空时用
+    off = data.get("head_offset")
+    try:
+        off = float(off)
+    except (TypeError, ValueError):
+        off = None
+    if off:
+        out.append("--head-offset:%gpx;" % off)
+
     hue = data.get("theme_hue")
     acc = None
     if hue is None and illu:
@@ -172,16 +237,16 @@ def theme_css(illu, data):
     # 三条要点条一律同色（2026-09-22 用户定，三档递进与两档都已并掉）；
     # 第三条只靠左缘橙条与橙调栏目名区分，不靠底色
     out.append("--glow-a:%s;--glow-b:%s;--tone-a:%s;"
-               # 光晕 2026-09-22 压淡：原 (.78,.80,.50)/(.70,.88,.42) 在页面上半压出一片黄，
-               # 标题区跟着发闷。降饱和、提亮度、砍掉约一半不透明度，上半页回白，
-               # 主底奶油（#FFF6E3）不动，插画融合口径不受影响。
-               % (_hsl(hue, .68, .89, ".26"), _hsl(ah, .60, .93, ".22"),
+               # 光晕两次调整，现取两端中点：原 (.78,.80,.50)/(.70,.88,.42) 上半页压出一片黄、标题发闷，
+               # 2026-09-22 砍到 (.68,.89,.26)/(.60,.93,.22) 又太淡、上半页空得没有层次（用户反馈），
+               # 同日回到中点。主底奶油（#FFF6E3）不动，插画融合口径不受影响。
+               % (_hsl(hue, .73, .865, ".38"), _hsl(ah, .65, .905, ".32"),
                   _hsl(kh, .52, .83)))
     return ":root{%s}" % "".join(out)
 
 
 def render(data_path, out_base=None, illustration=None, logo=None, qr=None, campus=None,
-           template=None, font_mode=None):
+           template=None, font_mode=None, creamify=None):
     data_path = Path(data_path)
     data = C.load_json(data_path)
     problems = C.check_text(data)
@@ -209,11 +274,14 @@ def render(data_path, out_base=None, illustration=None, logo=None, qr=None, camp
         data = dict(data)
         data["campus"] = load_campus(root, campus)
     title = data.get("title") or data.get("course", {}).get("topic", "")
+    # 白边奶油化：CLI --no-creamify 优先，其次 json 的 illustration.creamify，缺省 None＝自动判定
+    cream_on = creamify if creamify is not None else (data.get("illustration") or {}).get("creamify")
 
     tokens = {
         "/*__LOGO__*/": logo_uri(logo_p) if logo_p.exists() else "",
         "/*__QR__*/": _jr.data_uri(str(qr_p)) if qr_p.exists() else "",
-        "/*__ILLU__*/": _jr.data_uri(str(illu)) if illu else "",
+        "/*__ILLU__*/": (keyout_bg_illu(illu) if (data.get("illustration") or {}).get("feather") is False
+                         else creamify_illu(illu, cream_on)) if illu else "",
         "/*__FONT_BRUSH__*/": font_data_uri(title, font_mode or "subset"),
         "/*__THEME__*/": theme_css(illu, data),
     }
@@ -240,8 +308,10 @@ def main():
     ap.add_argument("--campus", default=None, help="校区信息 json（默认 品牌资产/校区信息.json）")
     ap.add_argument("--template", default=None)
     ap.add_argument("--font-mode", default=None, choices=["subset", "full"])
+    ap.add_argument("--no-creamify", dest="creamify", action="store_const", const=False, default=None,
+                    help="关掉插画白纸边自动染奶油（缺省自动判定；json 侧 illustration.creamify:false 同效）")
     a = ap.parse_args()
-    render(a.data, a.out_base, a.illustration, a.logo, a.qr, a.campus, a.template, a.font_mode)
+    render(a.data, a.out_base, a.illustration, a.logo, a.qr, a.campus, a.template, a.font_mode, a.creamify)
     return 0
 
 

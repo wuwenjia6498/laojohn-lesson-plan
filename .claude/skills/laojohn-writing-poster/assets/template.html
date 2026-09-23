@@ -24,9 +24,13 @@
     --cream:#FFF6E3;
     /* 三条要点条同一底色；渲染脚本按插画取色后由 /*__THEME__*/ 覆盖 */
     --tone-a:#EEDAB8;
-    /* 两处光晕的缺省品牌暖调；渲染脚本按插画取色后由 /*__THEME__*/ 覆盖 */
-    --glow-a:rgba(255,241,205,.28);
-    --glow-b:rgba(255,246,225,.22);
+    /* 两处光晕的缺省品牌暖调；渲染脚本按插画取色后由 /*__THEME__*/ 覆盖
+       （2026-09-22 与脚本侧一同提回中点：0922 早先那次压淡后上半页空得没有层次） */
+    --glow-a:rgba(255,238,196,.38);
+    --glow-b:rgba(255,244,218,.32);
+    /* 头部（logo＋标题区）整体下移量：json 顶层 head_offset 注入，缺省 0＝母版原样。
+       用在插画本身上缘留白多、头部与画面之间显空的单张上（2026-09-22 立）。 */
+    --head-offset:0px;
     --page-w:1242px;
     --font:"CJK Quotes","Microsoft YaHei","Source Han Sans SC","Noto Sans CJK SC","PingFang SC",sans-serif;
   }
@@ -34,7 +38,7 @@
   html,body{background:#ffffff;}
   #page{
     width:var(--page-w);
-    padding:80px 64px 56px;   /* 顶部留白：logo 放大到 270px 后 52px 显得贴顶（2026-09-21 调） */
+    padding:calc(80px + var(--head-offset)) 64px 56px;   /* 顶部留白：logo 放大到 270px 后 52px 显得贴顶（2026-09-21 调）；--head-offset 单张再下移 */
     font-family:var(--font);
     color:var(--ink-soft);
     background:
@@ -234,6 +238,20 @@ function setText(id, txt){
   const ill = d.illustration || {};
   const zoom = (Number(ill.zoom) > 0) ? Number(ill.zoom) : 1;
   if (zoom !== 1) document.getElementById('illu').style.height = Math.round(920 * zoom) + 'px';
+  // illustration.scale（0–1，可空，2026-09-23 加）：整张图按比例缩小、不裁切。zoom 只改容器高度、宽度始终铺满，
+  //   对近景大头图缩 zoom 只会把上下裁掉、人物并不变小（三上五实测）；要「图真的小一点」用 scale。缺省不生效，存量海报不变。
+  // illustration.space_above（像素，可空，2026-09-23 加）：插画与上方胶囊之间额外留白，版面嫌紧时用；缺省不生效。
+  const above = Number(ill.space_above);
+  if (above > 0) document.getElementById('illu').style.marginTop = (14 + above) + 'px';
+  // illustration.feather（可空，2026-09-23 加）：填 false 关掉插画边缘羽化。羽化是给水彩图融进奶油底用的；
+  //   #046 这类纯色块平涂图被羽化后，贴边的人物会半透明地虚掉一截，看着怪（三上一实测）。缺省照旧羽化。
+  if (ill.feather === false) { illuImg.style.webkitMaskImage = 'none'; illuImg.style.maskImage = 'none'; }
+  const scale = Number(ill.scale);
+  if (scale > 0 && scale < 1) {
+    illuImg.style.width = (scale * 100) + '%';
+    illuImg.style.height = 'auto';
+    document.getElementById('illu').style.height = 'auto';
+  }
   if (ill.focus) illuImg.style.objectPosition = ill.focus;
   if (!illuImg.getAttribute('src')) {
     illuImg.remove();

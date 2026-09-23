@@ -44,17 +44,17 @@
     "outcome": "当堂写完一篇中心明确的文章"
   },
   "illustration": {
-    "subject": "厨房里，一位穿蓝白条纹长袖上衣、系砖红色围裙的妈妈站在灶台前，手机夹在肩膀和耳朵中间、歪着头正说着话，两只手举到头顶扎头发，眼睛还瞟着锅里，一脸忙不过来的神情；油锅里一个煎蛋冒着热气，锅铲搁在锅沿上；身后餐桌一角放着书包和水杯，窗外天刚亮",
+    "subject": "画面左侧一个十一二岁的少年——个子抽条、手长腿长、脸型清瘦——穿蓝色套头衫、赭色长裤和短靴，侧身举起弓、拉满弦，正瞄向右侧一个立在地上的圆靶；靶心已经插着三四支箭，支支都落在正中那一圈里，箭尾朝外；地面只有一条细细的地平线和两三丛草；配色克制，只用蓝、赭、橄榄绿和靶心的一点红，四周留白，不画天空。",
     "ratio": "4:3",
     "file": "六上-第五单元-围绕中心意思写-插画.jpg",
     "provider": "gemini",
     "model": "gemini-3-pro-image-preview",
     "prompt_used": "六上-第五单元-围绕中心意思写-插画-提示词.txt",
-    "generated_at": "2026-09-22 12:46",
+    "generated_at": "2026-09-23 15:11",
     "style_used": {
-      "number": "105",
-      "name": "Fast Family-Essay Sketch",
-      "reference_image": "105.webp"
+      "number": "053",
+      "name": "European Clear-Line Adventure Figure",
+      "reference_image": "053.webp"
     },
     "judge": {
       "verdict": "pass",
@@ -63,10 +63,14 @@
         "has_person": true,
         "bg_cream": true,
         "subject_ok": true,
-        "notes": "The illustration depicts a busy mother multitasking in the kitchen with a cream-colored background."
+        "notes": "画面符合描述，包含少年射箭和靶心的场景。"
       }
     },
-    "zoom": 1.1
+    "zoom": 1.0,
+    "style": "053",
+    "_brief": {
+      "重生": "2026-09-23 风格库重切后按原画面、原 #053 重生两轮共 6 张候选；用户选第一轮候选 3。⚠ 该图人物接近丁丁（金色翘刘海），用户确认仍用。此后 #053 特征已去掉「翘刘海」，再重生不会复现这张的样子"
+    }
   },
   "_sources": {
     "md": "六上-第五单元-围绕中心意思写-写作课详案.md",

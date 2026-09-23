@@ -192,7 +192,7 @@ def main():
     out = Path(a.out) if a.out else C.repo_root(a.md) / "写作课海报输出" / cid / ("%s-习作海报.json" % cid)
     if out.exists():
         old = C.load_json(out)
-        for k in ("title", "subtitle", "cards", "cta", "illustration"):
+        for k in ("title", "subtitle", "cards", "cta", "illustration", "theme_hue"):
             if k in old:
                 data[k] = old[k]
         data["cta"]["fit"], data["cta"]["sessions"] = C.grade_fit(data["course"]["grade_vol"]), "2 节课"
