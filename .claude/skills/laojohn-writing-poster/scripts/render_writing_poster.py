@@ -151,8 +151,8 @@ def creamify_illu(path, enabled=None):
                            a[:, :bw].reshape(-1, 3), a[:, -bw:].reshape(-1, 3)])
     lo, hi = ring.min(axis=1), ring.max(axis=1)
     near_white = ((lo > 244) & (hi - lo < 12)).mean()   # 近白且低饱和的占比
-    if near_white < .25:                                # 满幅到边的图：没有白边可染，原样用
-        return _jr.data_uri(str(path))
+    if near_white < .25:                                # 没有白纸边：再看是不是偏黄的纸底
+        return _match_paper(a, path)
     # 权重按 min 通道在 235→255 之间平滑升到 1：235 以下完全不动，纯白处完全落到奶油
     t = np.clip((a.min(axis=2) - 235.0) / 20.0, 0, 1)
     t = (t * t * (3 - 2 * t))[..., None]                # smoothstep
@@ -161,6 +161,33 @@ def creamify_illu(path, enabled=None):
     buf = io.BytesIO()
     Image.fromarray(np.clip(out, 0, 255).astype("uint8")).save(buf, "JPEG", quality=95)
     print("  [插画] 检出白纸边（外环近白 %.0f%%），已把白点染成奶油 #FFF6E3" % (near_white * 100))
+    return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
+
+
+def _match_paper(a, path):
+    """纸底偏黄时整体挪到奶油色，返回 data URI；不是纸底就原样返回。
+    gpt-image 出的图纸底常是 (251,233,190) 这类米黄，比页面奶油深一档，插画四周就显出一块偏暖的方形（2026-09-23
+    六上一、三上五实测）。取上方两角当纸色（下缘常是草地），须同时满足：两角颜色均匀、够亮、暖色（R≥G≥B）、
+    离奶油不远（≤45，挡住淡蓝天空这类满幅背景）且确有色差（>6）。只挪「接近纸色」的像素：
+    与纸色相差 20 以内整段挪到奶油，70 以外不动，中间线性过渡——人物、暖光、草地都不受影响。"""
+    import numpy as np
+    from PIL import Image
+    h, w = a.shape[:2]
+    k = max(1, int(min(h, w) * .06))
+    corners = np.concatenate([a[:k, :k].reshape(-1, 3), a[:k, -k:].reshape(-1, 3)])
+    paper = np.median(corners, axis=0)
+    cream = np.array(CREAM_RGB, dtype=np.float32)
+    gap = float(np.linalg.norm(paper - cream))
+    r, g, b = paper
+    uniform = float(np.median(np.linalg.norm(corners - paper, axis=1))) < 8
+    if not (uniform and paper.min() > 180 and r >= g >= b and 6 < gap <= 45):
+        return _jr.data_uri(str(path))
+    wgt = np.clip(1 - (np.linalg.norm(a - paper, axis=2) - 20) / 50, 0, 1)[..., None]
+    out = a + wgt * (cream - paper)
+    buf = io.BytesIO()
+    Image.fromarray(np.clip(out, 0, 255).astype("uint8")).save(buf, "JPEG", quality=95)
+    print("  [插画] 纸底 %s 偏离奶油 %.0f，已挪到 #FFF6E3（只动接近纸色的像素）"
+          % (paper.round().astype(int).tolist(), gap))
     return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
 
 
