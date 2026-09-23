@@ -54,6 +54,8 @@ def units(root):
     if not os.path.isdir(d):
         sys.exit("找不到 %s——确认工作目录是项目根" % d)
     for fn in os.listdir(d):
+        if fn.startswith("_"):                   # `_润色报告-<课次>-写作课详案.md` 之类的报告件，不是课次
+            continue
         if fn.endswith(PLAN_SUFFIX):
             unit = fn[: -len(PLAN_SUFFIX)]
             out[unit] = unit.split("-")[-1]      # 末段＝题目

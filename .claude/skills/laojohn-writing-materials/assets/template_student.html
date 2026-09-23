@@ -89,7 +89,9 @@
   .compact .plan .fill{height:52px;}
   .compact .mod{margin-bottom:5mm;}
   .compact .modhead{margin-bottom:2.5mm;}
-  .plan.multicol .rowlabel{width:10%;text-align:center;padding:9px 4px;}  /* 只作用于多列那张表 */
+  .plan.multicol .rowlabel{width:var(--planlabelw,10%);text-align:center;padding:9px 4px;}  /* 只作用于多列那张表 */
+  /* 首列是要当场填写的行名（如「方面一：」）时，由 worksheet.plan_label_width 调宽并改左对齐 */
+  .plan.multicol.widelabel .rowlabel{text-align:left;padding:9px;}
 
   .draftnote{font-size:10.5px;color:var(--ink-soft);margin-bottom:2mm;}
 
@@ -356,10 +358,20 @@
     const tbody=document.getElementById('plan-body');
     /* 构思表表头：plan_cols 可覆盖成多列（缺省＝想清楚这一步/写下你的关键词） */
     if(Array.isArray(w.plan_cols) && w.plan_cols.length){
-      const w0=w.plan_cols.length>2?'10%':'34%';   /* 多列表首列只放序号，让出书写宽度 */
+      /* plan_label_width：首列宽度覆盖。缺省下多列表首列只放序号、压到 10%，
+         但有的课首列是「方面一：」这类要学生当场写上方面名的行名，10% 写不下。
+         不传＝沿用缺省，存量课次零影响；要改只写这一个字段，别动模板里的默认值。 */
+      const w0=w.plan_label_width||(w.plan_cols.length>2?'10%':'34%');
       document.getElementById('plan-head').innerHTML=
         w.plan_cols.map((c,i)=>'<th'+(i===0?' style="width:'+w0+'"':'')+'>'+esc(c)+'</th>').join('');
-      if(w.plan_cols.length>2) tbody.parentElement.classList.add('multicol');
+      if(w.plan_cols.length>2){
+        const tb=tbody.parentElement;
+        tb.classList.add('multicol');
+        if(w.plan_label_width){
+          tb.style.setProperty('--planlabelw',w.plan_label_width);
+          tb.classList.add('widelabel');
+        }
+      }
     }
     w.plan_rows.forEach(r=>tbody.appendChild(planRow(r)));
     document.getElementById('ws-skills').innerHTML=rich(w.skills);
