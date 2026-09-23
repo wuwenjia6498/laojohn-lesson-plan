@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 r"""gen_illustration.py —— 单元海报中央插画：json.illustration.subject → 提示词 → 生图 → 判读 → 落盘（两段式第 2b 步）
 
-    PYTHONUTF8=1 python gen_illustration.py <data.json> [--provider gemini|doubao] [--ratio 4:3|1:1|3:4]
+    PYTHONUTF8=1 python gen_illustration.py <data.json> [--provider gpt-image|gemini|doubao（缺省 gpt-image）] [--ratio 4:3|1:1|3:4]
         [--seed N] [--force] [--no-judge]
 
 生图/判读客户端复用 课件配图工具\scripts\imgclient.py（importlib 薄壳、禁复制；密钥只从环境变量 / 课件配图工具\.env /
@@ -93,6 +93,10 @@ JUDGE_Q = (
     "subject_ok＝画面是否包含下列物件——{subject}（true/false）；"
     "notes＝一句话说明。只回 JSON，不要解释文字、不要 markdown 代码块。"
 )
+
+
+# 2026-09-23 起海报默认走 gpt-image（#044 两轮对比最贴示例图）；不读 IMAGE_PROVIDER——那是课件配图工具的 .env 口径
+DEFAULT_PROVIDER = "gpt-image"
 
 
 def load_client(provider):
@@ -197,7 +201,7 @@ def run(data_path, provider=None, ratio=None, seed=None, force=False, no_judge=F
         except (FileNotFoundError, ValueError) as e:
             print("  ⚠ 风格编号未生效，回退通用前缀：%s" % e, file=sys.stderr)
 
-    client = load_client(provider)
+    client = load_client(provider or DEFAULT_PROVIDER)
     verdict, obs = None, None
     for attempt in (0, 1):
         prompt = build_prompt(subject, retry=bool(attempt), style=style, no_people=bool(ill.get("no_people")))
@@ -248,7 +252,7 @@ def run(data_path, provider=None, ratio=None, seed=None, force=False, no_judge=F
 def main():
     ap = argparse.ArgumentParser(description="单元海报插画：生图 + 判读 + 落盘")
     ap.add_argument("data", help="<课次>-习作海报.json")
-    ap.add_argument("--provider", default=None, choices=["gemini", "doubao"])
+    ap.add_argument("--provider", default=None, choices=["gemini", "doubao", "gpt-image"])
     ap.add_argument("--ratio", default=None, choices=["4:3", "1:1", "3:4", "16:9"])
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--force", action="store_true", help="已有正式图也重生")

@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
-"""生图/判读客户端 · 双通道可插拔（豆包 Seedream ／ AiHubMix 上的 Gemini）。
+"""生图/判读客户端 · 三通道可插拔（豆包 Seedream ／ AiHubMix 上的 Gemini ／ AiHubMix 上的 gpt-image）。
+
+gpt-image 通道 2026-09-23 加，目前只写作课海报用（见 GptImageClient 注释）；下面讲的「两条通道」指前两条。
 
 为什么保留两条通道而不是换掉：**规则库里的每一条都绑定在某个通道上**。
 T1–T5 五项、以及整课跑批查出的 A/B 两条，全部是在豆包上测出来的；换 Gemini
 就得逐条重验——这正是 PRD §7 当初说「Gemini 的经验迁到豆包必须重验」的同一个道理，
 反过来一样成立。留着两条通道，`--provider` 一换就能跑同一套验证做对照。
 
-选通道：环境变量 `IMAGE_PROVIDER=doubao|gemini`（缺省 gemini），或调用方显式传参。
+选通道：环境变量 `IMAGE_PROVIDER=doubao|gemini|gpt-image`（缺省 gemini），或调用方显式传参。
 
 密钥纪律：只从环境变量 / `.env` 读，任何脚本不得写死。
   · 豆包：`ARK_API_KEY`
-  · Gemini：`AIHUBMIX_API_KEY`；本仓早有此约定（见 CLAUDE.md §1「密钥承载约定」），
+  · Gemini／gpt-image：`AIHUBMIX_API_KEY`；本仓早有此约定（见 CLAUDE.md §1「密钥承载约定」），
     故若本工具的 .env 里没有，会**显式提示着**回退到
     `.claude/skills/laojohn-picture-writing/scripts/imggen.config.json`（同一个账号的 key，
     停用归档后在 `.claude/skills-parked/` 下，两处都会找；
@@ -374,7 +376,80 @@ def _gemini_bytes(resp):
     return None
 
 
-PROVIDERS = {"doubao": DoubaoClient, "gemini": GeminiClient}
+class GptImageClient(_Base):
+    """AiHubMix 上的 OpenAI gpt-image（ChatGPT 出图同系）。
+
+    2026-09-23 加：手绘风格 #044 两轮对比（同提示词＋参考图），ChatGPT 都比豆包更贴示例图，
+    四上五海报也最终用了 ChatGPT 图。目前只给写作课海报用；课件配图工具的规则库是在
+    豆包／Gemini 上验证的，run_lesson.py 的 --provider 故意没开放这一条。
+    无参考图走 images/generations，有参考图走 images/edits（multipart）。
+    实测 gpt-image-2 接受任意像素尺寸（2048x1536 直出），回包只有 b64_json。
+    """
+
+    name = "gpt-image"
+    RATIO = {"1:1": "2048x2048", "3:4": "1536x2048", "4:3": "2048x1536", "16:9": "2048x1152"}
+    _seed_warned = False
+
+    def __init__(self):
+        super().__init__()
+        load_dotenv()
+        self.key = _aihubmix_key()
+        self.base = os.environ.get("AIHUBMIX_BASE_URL", "https://aihubmix.com/v1").rstrip("/")
+        self.chat_base, self.chat_key = self.base, self.key
+        self.model = os.environ.get("OPENAI_IMAGE_MODEL", "gpt-image-2")
+        self.quality = os.environ.get("OPENAI_IMAGE_QUALITY", "high")
+        self.vision_model = os.environ.get("AIHUBMIX_VISION_MODEL", "gpt-4o")
+        self.text_model = os.environ.get("AIHUBMIX_TEXT_MODEL", "gpt-4o")
+        self.vision_extra = {}
+
+    @staticmethod
+    def _png(path):
+        """参考图（风格库里多是 webp）统一转 PNG 再传，不赌 edits 接口对各格式的兼容。"""
+        from PIL import Image
+        buf = io.BytesIO()
+        Image.open(path).convert("RGB").save(buf, "PNG")
+        return buf.getvalue()
+
+    def generate(self, prompt, ratio="1:1", images=None, seed=None, timeout=300):
+        if seed is not None and not GptImageClient._seed_warned:
+            print("  [提示] gpt-image 不支持 seed，本通道的样本为独立随机抽样")
+            GptImageClient._seed_warned = True
+        fields = {"model": self.model, "prompt": prompt, "size": self.RATIO[ratio],
+                  "quality": self.quality, "n": 1}
+        headers = {"Authorization": f"Bearer {self.key}"}
+        for i in range(2):
+            try:
+                if images:
+                    files = [("image[]", (f"ref{k}.png", self._png(x), "image/png"))
+                             for k, x in enumerate(images)]
+                    r = requests.post(f"{self.base}/images/edits", headers=headers,
+                                      data={k: str(v) for k, v in fields.items()},
+                                      files=files, timeout=timeout)
+                else:
+                    r = requests.post(f"{self.base}/images/generations", headers=headers,
+                                      json=fields, timeout=timeout)
+                break
+            except requests.exceptions.RequestException as e:
+                if i == 1:
+                    raise RuntimeError(f"生图请求失败：{e!r}")
+                time.sleep(5)
+        self.usage["calls"] += 1
+        if r.status_code != 200:
+            raise RuntimeError(f"生图失败 {r.status_code}: {r.text[:500]}")
+        j = r.json()
+        self.usage["images"] += 1
+        self.usage["output_tokens"] += (j.get("usage") or {}).get("output_tokens", 0)
+        d = (j.get("data") or [{}])[0]
+        if d.get("b64_json"):
+            return base64.b64decode(d["b64_json"])
+        if d.get("url"):
+            import urllib.request
+            with urllib.request.urlopen(d["url"], timeout=120) as resp:
+                return resp.read()
+        raise RuntimeError(f"gpt-image 返回里没有图片：{str(j)[:300]}")
+
+
+PROVIDERS = {"doubao": DoubaoClient, "gemini": GeminiClient, "gpt-image": GptImageClient}
 
 
 def make_client(provider=None):

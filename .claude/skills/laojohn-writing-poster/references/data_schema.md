@@ -58,4 +58,4 @@
 
 ## 回执（`gen_illustration.py` 回写）
 
-`illustration.file / provider / model / prompt_used / generated_at / style_used{number,name,reference_image}|null / judge{verdict: pass|fail|unknown|skipped, obs}`。
+`illustration.file / provider（gemini|doubao|gpt-image|external）/ model / prompt_used / generated_at / style_used{number,name,reference_image}|null / judge{verdict: pass|fail|unknown|skipped, obs}`。

@@ -58,7 +58,7 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 | 读书会 JPG 长图渲染引擎 | `.claude\skills\laojohn-book-card\scripts\_jpg_render.py` | book-card（书目卡）、course-poster（读书会海报）、writing-poster（写作课单元海报，`render_writing_poster.py` 薄壳、口径同 course-poster）三家。**前两家历史口径差异全部参数化**（`strip_parens`／`fallback`）——**不要为了"统一"而改默认值，会改变既有产物**。尺寸/质量/输出模型见**脚本头注释** |
 | TTS 多通道客户端 | `.claude\skills\laojohn-lesson-video\scripts\ttsclient.py` | lesson-video（备课视频旁白配音）。工厂 `make_tts(provider)`，`TTS_PROVIDER` 一个环境变量切 aihubmix／volc／minimax；密钥三级回退同 §1。**落盘统一 24kHz 单声道 wav**（mp3 拼接会累积编码器 padding 漂移）；失败返回 `_error`、**绝不落静音冒充成功** |
 | ffmpeg 定位 | `.claude\skills\laojohn-lesson-video\scripts\ffmpeg_path.py` | lesson-video 内部。发现序：`FFMPEG_EXE` → PATH → WinGet\Links → `工具\ffmpeg\`。⚠ **Playwright 自带的 ffmpeg 不能用**（disable-everything 构建，只有 VP8/webm，没有 libx264 与 mp4 muxer），脚本主动跳过它 |
-| 生图/判读客户端 | `课件配图工具\scripts\imgclient.py` | 课件配图工具（`run_lesson.py`）、writing-poster（`gen_illustration.py` importlib 薄壳，禁复制）。双通道（Gemini／豆包）、密钥只从环境变量／`.env`／picture-writing 的 `imggen.config.json` 读（§1）；判读回包 `_error`/`_raw` 一律当「未知」不当「不通过」 |
+| 生图/判读客户端 | `课件配图工具\scripts\imgclient.py` | 课件配图工具（`run_lesson.py`）、writing-poster（`gen_illustration.py` importlib 薄壳，禁复制）。三通道（Gemini／豆包／gpt-image；gpt-image 目前只 writing-poster 用，`run_lesson.py` 未开放）、密钥只从环境变量／`.env`／picture-writing 的 `imggen.config.json` 读（§1）；判读回包 `_error`/`_raw` 一律当「未知」不当「不通过」 |
 | 读书会 A4 单页 PDF 渲染引擎 | `.claude\skills\laojohn-reading-guide\scripts\_a4_render.py` | reading-guide、lesson-mindmap、teaching-mindmap 三家（后两家 `render_pdf.py` 是薄壳）。**`recenter_on_overflow`：两种导图传 True**（居中放射版式，超页需重设 min-height），**阅读指南保持 False**（文档流版式，打开会推开版式）。输出模型见**脚本头注释** |
 
 > 现存物理副本（`laojohn-ppt\assets\logo\`、`laojohn-course-poster\assets\qrcode.png` / `assets\covers\`）属历史遗留；以根目录单一源为准，勿据副本做新决策。
