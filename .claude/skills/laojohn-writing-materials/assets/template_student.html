@@ -92,6 +92,18 @@
   .plan.multicol .rowlabel{width:var(--planlabelw,10%);text-align:center;padding:9px 4px;}  /* 只作用于多列那张表 */
   /* 首列是要当场填写的行名（如「方面一：」）时，由 worksheet.plan_label_width 调宽并改左对齐 */
   .plan.multicol.widelabel .rowlabel{text-align:left;padding:9px;}
+  /* 练笔空白与自检表（2026-09-23 增，可选区块）：详案要求学习单在构思表之外
+     另留一块当堂练笔的横线空白（worksheet.practice）、印一张分档自检表（worksheet.selfcheck）
+     的课才出（如三上五《我们眼中的缤纷世界》）。两者都不写＝渲染结果与此前一字不变。
+     有任一项时整页走 .dense，构思表行高再压，保证一页放下。 */
+  .dense .plan .fill{height:36px;}
+  .dense .mod{margin-bottom:4mm;}
+  .dense .modhead{margin-bottom:2mm;}
+  .practice-box{border:1px solid var(--brown-line);background:#fff;padding:0 10px;}
+  .practice-box .line{height:30px;border-bottom:1px dashed var(--brown-line);}
+  .practice-box .line:last-child{border-bottom:none;}
+  .selfcheck td{border:1px solid var(--brown-line);padding:6px 9px;font-size:11px;line-height:1.5;vertical-align:middle;}
+  .selfcheck td.tier{width:12%;text-align:center;font-weight:700;color:var(--brown-deep);background:var(--brown-cell);}
 
   .draftnote{font-size:10.5px;color:var(--ink-soft);margin-bottom:2mm;}
 
@@ -205,6 +217,24 @@
         <tr id="plan-head"><th style="width:34%">想清楚这一步</th><th>写下你的关键词</th></tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- 练笔空白：仅当 worksheet.practice 存在时显示（2026-09-23 增，可选区块） -->
+  <div class="mod" id="mod-practice" style="display:none">
+    <div class="modhead">
+      <h2 id="practice-title"></h2>
+      <span class="hint" id="practice-hint"></span>
+    </div>
+    <div class="practice-box" id="practice-box"></div>
+  </div>
+
+  <!-- 自检表：仅当 worksheet.selfcheck 存在时显示（2026-09-23 增，可选区块） -->
+  <div class="mod" id="mod-selfcheck" style="display:none">
+    <div class="modhead">
+      <h2 id="selfcheck-title"></h2>
+      <span class="hint" id="selfcheck-hint"></span>
+    </div>
+    <table class="selfcheck"><tbody id="selfcheck-body"></tbody></table>
   </div>
 
   <div class="footer-skill">
@@ -382,10 +412,36 @@
       document.getElementById('plan-title').textContent='理思路 · '+w.plan_name;
       document.getElementById('ws2-planref').textContent='照第一页的'+w.plan_name+'，一样一样写';
     }
+    /* plan_ref：稿纸页那行小字的整句覆盖（2026-09-23 增）。「一样一样写」与「只选一两处写」
+       这类课的教法相反，须改口。不传＝沿用上面的缺省，存量课次零影响。 */
+    if(w.plan_ref) document.getElementById('ws2-planref').textContent=w.plan_ref;
     /* plan_hint：表头右侧那句小字。缺省「每格只填关键词，3 分钟填完」是通用话，
        但各课详案给的填表时间不一（六上五给的是 6 分钟），对不上学生就按错的时间填。
        不传＝沿用缺省，存量课次零影响；要改只写这一个字段，别动模板里的默认串。 */
     if(w.plan_hint) document.getElementById('plan-hint').textContent=w.plan_hint;
+    /* practice / selfcheck：详案要求学习单上另有练笔空白、分档自检表的课才写（2026-09-23 增）。
+       不传＝两块保持隐藏、页面不加 .dense，存量课次零影响；要改只写这两个字段，别动默认值。 */
+    if(w.practice || w.selfcheck) document.querySelector('.pg-ws1').classList.add('dense');
+    if(w.practice){
+      document.getElementById('mod-practice').style.display='';
+      document.getElementById('practice-title').textContent=w.practice.title;
+      if(w.practice.hint) document.getElementById('practice-hint').textContent=w.practice.hint;
+      const box=document.getElementById('practice-box');
+      for(let i=0;i<(w.practice.lines||3);i++){
+        const ln=document.createElement('div'); ln.className='line'; box.appendChild(ln);
+      }
+    }
+    if(w.selfcheck){
+      document.getElementById('mod-selfcheck').style.display='';
+      document.getElementById('selfcheck-title').textContent=w.selfcheck.title;
+      if(w.selfcheck.hint) document.getElementById('selfcheck-hint').textContent=w.selfcheck.hint;
+      const sb=document.getElementById('selfcheck-body');
+      w.selfcheck.rows.forEach(r=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML='<td class="tier">'+esc(r.label)+'</td><td>'+esc(r.text)+'</td>';
+        sb.appendChild(tr);
+      });
+    }
     document.getElementById('ws2-lead').textContent=w.page2_lead;
     document.getElementById('ws-draftnote').textContent=w.draftnote;
     // worksheet.marks 已废弃（2026-09-07 稿纸页删修改符号表），存量 data.json 里的字段忽略
