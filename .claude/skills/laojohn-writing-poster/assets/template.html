@@ -246,6 +246,13 @@ function setText(id, txt){
   // illustration.feather（可空，2026-09-23 加）：填 false 关掉插画边缘羽化。羽化是给水彩图融进奶油底用的；
   //   #046 这类纯色块平涂图被羽化后，贴边的人物会半透明地虚掉一截，看着怪（三上一实测）。缺省照旧羽化。
   if (ill.feather === false) { illuImg.style.webkitMaskImage = 'none'; illuImg.style.maskImage = 'none'; }
+  // illustration.feather:"light"（2026-09-24 加）：轻羽化，只收最外一圈窄边。满幅场景图嫌缺省羽化「四周虚掉太多」时用（六上四实测）。
+  if (ill.feather === 'light') {
+    const m = 'radial-gradient(ellipse 98% 99% at 50% 50%, #000 84%, rgba(0,0,0,.95) 93%, rgba(0,0,0,0) 100%),'
+            + 'linear-gradient(to right, rgba(0,0,0,0) 0, #000 3%, #000 97%, rgba(0,0,0,0) 100%),'
+            + 'linear-gradient(to bottom, rgba(0,0,0,0) 0, #000 3%, #000 98%, rgba(0,0,0,0) 100%)';
+    illuImg.style.webkitMaskImage = m; illuImg.style.maskImage = m;
+  }
   const scale = Number(ill.scale);
   if (scale > 0 && scale < 1) {
     illuImg.style.width = (scale * 100) + '%';
