@@ -266,6 +266,29 @@ STYLE_NONE = """## 画风
 并在 `_前缀备注` 里**明写这是你推的、待用户确认**。"""
 
 
+def handdraw_given(no):
+    """用户选了手绘风格编号时，给阶段一的画风说明。
+
+    出图时程序会把该编号的特征放在最前、再挂参考图（run_lesson.compose），`前缀基底` 不再使用——
+    所以这里只要求模型把画风档／色板写得与编号一致，别自己再推一个「水彩」出来和编号打架。"""
+    from handdraw_style import resolve_style
+    st = resolve_style(no)
+    return STYLE_GIVEN.format(v=(
+        f"手绘风格 #{st['number']}（{st['name']}）。画面特征：{st['traits']}。"
+        "`画风档`、`色板` 照这些特征概括，不要另改成水彩或别的画风；"
+        "出图时程序会自动拼上这些特征并挂该编号的参考图。"))
+
+
+def pin_spec(spec, provider, handdraw_no=None):
+    """项目 JSON 落盘前钉住两件事：出图通道（project.通道）与手绘编号（style_card.手绘编号）。
+
+    通道钉进项目，是为了缺省通道以后再改时，已开工的项目不跟着换目录（见 run_lesson.resolve_provider）。"""
+    spec.setdefault("project", {})["通道"] = provider
+    if handdraw_no:
+        spec.setdefault("style_card", {})["手绘编号"] = "%03d" % int(str(handdraw_no).lstrip("#"))
+    return spec
+
+
 class DecodeFailed(RuntimeError):
     """拆解没拿到可用结果。
 
@@ -571,7 +594,9 @@ def _main():
     ap.add_argument("deck", help="extract_deck.py 产出的 deck.json")
     ap.add_argument("plan", help="教学详案 .md / .txt / .docx")
     ap.add_argument("-o", "--out", required=True, help="输出项目 json")
-    ap.add_argument("--provider", default=None, help="gemini / doubao，缺省读 .env")
+    ap.add_argument("--provider", default=None,
+                    help="gpt-image / gemini / doubao，缺省读 .env 的 IMAGE_PROVIDER、再缺省 gpt-image；"
+                         "同时钉进项目 JSON 的 project.通道，之后出图走这条")
     ap.add_argument("--model", default=None, help="拆解用的文本模型，缺省读 .env")
     ap.add_argument("--stage1-only", action="store_true", help="只跑角色盘点，便于先看再往下")
     ap.add_argument("--reuse-stage1", help="复用已有的阶段一结果 json，跳过重跑")
@@ -580,6 +605,8 @@ def _main():
     ap.add_argument("--style", default=None,
                     help="指定画风（如「水彩儿童插画：柔和水彩质感、干净留白」）。"
                          "不给则由模型推一个并标注待确认——画风是审美选择，不该让模型替你定")
+    ap.add_argument("--handdraw", default=None,
+                    help="手绘风格编号 001–274（手绘风格库，与写作课海报同一套）。给了就不必再给 --style")
     a = ap.parse_args()
 
     imgclient.load_dotenv()
@@ -606,7 +633,8 @@ def _main():
         print(f"阶段一：复用 {a.reuse_stage1}")
     else:
         print("阶段一·盘点角色与画风 …")
-        style = STYLE_GIVEN.format(v=a.style) if a.style else STYLE_NONE
+        style = (handdraw_given(a.handdraw) if a.handdraw
+                 else STYLE_GIVEN.format(v=a.style) if a.style else STYLE_NONE)
         s1 = call(client, STAGE1, a.model, a.max_tokens,
                   rules=rules, plan=plan, deck=deck_txt, style=style)
         s1_path.write_text(json.dumps(s1, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -655,6 +683,7 @@ def _main():
             "style_card": s1.get("style_card", {}),
             "characters": s1.get("characters", []), "slides": slides,
             "_逐页判断": s2.get("逐页判断") or s2.get("候选页") or [], "_角色盘点": s1.get("角色盘点", [])}
+    pin_spec(spec, client.name, a.handdraw)
     out.write_text(json.dumps(spec, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"  已写 {out}")
 

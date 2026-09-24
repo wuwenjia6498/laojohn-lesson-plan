@@ -294,6 +294,12 @@ async def api_save(name: str, body: dict):
     for k in ("style_card", "characters", "slides"):
         if k in body:
             d[k] = body[k]
+    if (d.get("style_card") or {}).get("手绘编号"):
+        try:        # 存盘时就校验，别等点了「生成」才在后台任务里失败
+            hs = run_lesson.handdraw(d["style_card"])
+            d["style_card"]["手绘编号"] = hs["number"]
+        except (ValueError, FileNotFoundError) as e:
+            raise HTTPException(400, f"手绘风格编号不可用：{e}")
     for sl in d.get("slides", []):
         if "_初稿prompt" not in sl:
             prev = old_by_pg.get(sl["页码"], {})
@@ -306,6 +312,7 @@ async def api_save(name: str, body: dict):
 
 @app.post("/api/projects")
 async def api_create(name: str = Form(...), style: str = Form(""),
+                     handdraw: str = Form(""),
                      model: str = Form("claude-opus-4-5"),
                      pptx: UploadFile = File(...), plan: UploadFile = File(...)):
     """新建项目：上传课件 pptx + 教学详案 → 后台拆解 → 落成项目 JSON。
@@ -318,6 +325,12 @@ async def api_create(name: str = Form(...), style: str = Form(""),
         raise HTTPException(400, "项目名不能为空，也不能含路径分隔符")
     if (PROJECTS / f"{name}.json").exists():
         raise HTTPException(409, f"项目「{name}」已存在")
+    handdraw = handdraw.strip().lstrip("#")
+    if handdraw:
+        try:        # 编号错了在上传前就说，别等拆解跑完一两分钟才在出图时报
+            run_lesson.handdraw({"手绘编号": handdraw})
+        except (ValueError, FileNotFoundError) as e:
+            raise HTTPException(400, f"手绘风格编号不可用：{e}")
     plan_suffix = (Path(plan.filename).suffix or ".md").lower()
     if plan_suffix not in PLAN_SUFFIXES:
         raise HTTPException(400, f"详案只收 {'/'.join(sorted(PLAN_SUFFIXES))}，收到的是「{plan_suffix}」")
@@ -348,7 +361,8 @@ async def api_create(name: str = Form(...), style: str = Form(""),
         deck_txt = json.dumps(build_specs.deck_digest(deck, by_page),
                               ensure_ascii=False, indent=1)
         client = imgclient.make_client()
-        sty = (build_specs.STYLE_GIVEN.format(v=style) if style.strip()
+        sty = (build_specs.handdraw_given(handdraw) if handdraw
+               else build_specs.STYLE_GIVEN.format(v=style) if style.strip()
                else build_specs.STYLE_NONE)
         s1 = build_specs.call(client, build_specs.STAGE1, model, rules=rules,
                               plan=plan_txt, deck=deck_txt, style=sty)
@@ -359,7 +373,9 @@ async def api_create(name: str = Form(...), style: str = Form(""),
         s2 = build_specs.call(client, build_specs.STAGE2, model, rules=rules,
                               plan=plan_txt, deck=deck_txt,
                               stage1=json.dumps(s1, ensure_ascii=False, indent=1))
-        spec = assemble(s1, s2)
+        spec = build_specs.pin_spec(assemble(s1, s2), run_lesson.default_provider(), handdraw)
+        job_log(jid, f"   出图通道：{spec['project']['通道']}"
+                     + (f"｜手绘风格 #{spec['style_card']['手绘编号']}" if handdraw else ""))
         PROJECTS.mkdir(parents=True, exist_ok=True)
         (PROJECTS / f"{name}.json").write_text(
             json.dumps(spec, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -579,7 +595,7 @@ async def api_gen(name: str, body: dict):
                      f"{'、'.join(sorted(pool))}）"
                      f"—— 多半是重新拆解过、页码变了，刷新页面再点。")
 
-    client = imgclient.make_client()
+    client = imgclient.make_client(outdir.name)     # 与产出目录同一条通道，不读缺省值
     if kind == "char":
         items = [c for c in d["characters"] if not ids or c["id"] in ids]
         jid = new_job("生成定妆", total=len(items))
@@ -589,8 +605,7 @@ async def api_gen(name: str, body: dict):
             out = []
             for c in items:
                 refs = run_lesson.resolve_refs(c.get("挂载"), outdir, made)
-                p = (c["prompt"] if c.get("通道") == "编辑"
-                     else run_lesson.prefix_for(d["style_card"], c) + " " + c["prompt"])
+                p, refs = run_lesson.compose(d["style_card"], c, refs)
                 job_log(jid, f"生成 {c['id']}（{c['画幅']}）"
                              + (f" ←挂 {len(refs)} 张" if refs else ""))
                 run_lesson.gen(client, outdir, "角色", c["id"], p, c["画幅"], refs, force)
@@ -633,15 +648,14 @@ async def api_gen(name: str, body: dict):
                              + "、".join(c["id"] for c in need))
                 for c in need:
                     refs = run_lesson.resolve_refs(c.get("挂载"), outdir, made)
-                    pc = (c["prompt"] if c.get("通道") == "编辑"
-                          else run_lesson.prefix_for(d["style_card"], c) + " " + c["prompt"])
+                    pc, refs = run_lesson.compose(d["style_card"], c, refs)
                     job_log(jid, f"  补定妆 {c['id']}（{c['画幅']}）")
                     run_lesson.gen(client, outdir, "角色", c["id"], pc, c["画幅"], refs, False)
                     job_step(jid)
                 job_log(jid, "定妆补齐，开始出页目。")
             for s in items:
                 refs = run_lesson.resolve_refs(s.get("挂载"), outdir, made)
-                p = run_lesson.prefix_for(d["style_card"], s) + " " + s["prompt"]
+                p, refs = run_lesson.compose(d["style_card"], s, refs)
                 job_log(jid, f"生成 {s['页码']}（{s['画幅']}）"
                              + (f" ←挂 {len(refs)} 张" if refs else ""))
                 run_lesson.gen(client, outdir, "页目", s["页码"], p, s["画幅"], refs, force)
@@ -679,7 +693,7 @@ def do_edit(d, outdir, ids, instruction):
     if not src.exists():
         raise HTTPException(409, f"{pg} 还没有图，先生成一张再改。")
 
-    client = imgclient.make_client()
+    client = imgclient.make_client(outdir.name)
     jid = new_job("局部修改", total=1)
 
     def work(jid):

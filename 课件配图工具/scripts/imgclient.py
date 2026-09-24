@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 """生图/判读客户端 · 三通道可插拔（豆包 Seedream ／ AiHubMix 上的 Gemini ／ AiHubMix 上的 gpt-image）。
 
-gpt-image 通道 2026-09-23 加，目前只写作课海报用（见 GptImageClient 注释）；下面讲的「两条通道」指前两条。
+gpt-image 通道 2026-09-23 加（写作课海报先用），2026-09-24 起也是课件配图工具的**缺省通道**（用户拍板）；
+⚠ 下面讲的 T1–T5 与整课跑批规则库都是在豆包／Gemini 上测出来的，**在 gpt-image 上尚未重验**。
 
 为什么保留两条通道而不是换掉：**规则库里的每一条都绑定在某个通道上**。
 T1–T5 五项、以及整课跑批查出的 A/B 两条，全部是在豆包上测出来的；换 Gemini
 就得逐条重验——这正是 PRD §7 当初说「Gemini 的经验迁到豆包必须重验」的同一个道理，
 反过来一样成立。留着两条通道，`--provider` 一换就能跑同一套验证做对照。
 
-选通道：环境变量 `IMAGE_PROVIDER=doubao|gemini|gpt-image`（缺省 gemini），或调用方显式传参。
+选通道：环境变量 `IMAGE_PROVIDER=gpt-image|gemini|doubao`（缺省 gpt-image，2026-09-24 由 gemini 改），或调用方显式传参。
+课件配图工具的项目另有 project.通道 钉住通道（见 run_lesson.resolve_provider），老项目不随缺省值漂移。
 
 密钥纪律：只从环境变量 / `.env` 读，任何脚本不得写死。
   · 豆包：`ARK_API_KEY`
@@ -380,8 +382,9 @@ class GptImageClient(_Base):
     """AiHubMix 上的 OpenAI gpt-image（ChatGPT 出图同系）。
 
     2026-09-23 加：手绘风格 #044 两轮对比（同提示词＋参考图），ChatGPT 都比豆包更贴示例图，
-    四上五海报也最终用了 ChatGPT 图。目前只给写作课海报用；课件配图工具的规则库是在
-    豆包／Gemini 上验证的，run_lesson.py 的 --provider 故意没开放这一条。
+    四上五海报也最终用了 ChatGPT 图。2026-09-24 起也是课件配图工具的缺省通道（用户拍板）；
+    该工具的规则库是在豆包／Gemini 上验证的，在这条通道上尚未重验，出图须人工逐张看。
+    ⚠ 接口走 Azure 审核：提示词带在世画家名会被 moderation_blocked（手绘编号只用中文特征，不带作者名）。
     无参考图走 images/generations，有参考图走 images/edits（multipart）。
     实测 gpt-image-2 接受任意像素尺寸（2048x1536 直出），回包只有 b64_json。
     """
@@ -454,7 +457,7 @@ PROVIDERS = {"doubao": DoubaoClient, "gemini": GeminiClient, "gpt-image": GptIma
 
 def make_client(provider=None):
     load_dotenv()
-    name = (provider or os.environ.get("IMAGE_PROVIDER") or "gemini").lower()
+    name = (provider or os.environ.get("IMAGE_PROVIDER") or "gpt-image").lower()
     if name not in PROVIDERS:
         raise SystemExit(f"未知通道 {name}，可选：{'/'.join(PROVIDERS)}")
     return PROVIDERS[name]()

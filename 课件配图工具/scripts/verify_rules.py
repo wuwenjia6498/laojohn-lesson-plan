@@ -476,7 +476,7 @@ def main():
     ap.add_argument("--reuse", action="store_true", help="复用已存在的图，不重复生图")
     ap.add_argument("--no-judge", action="store_true", help="不做机器判读")
     ap.add_argument("--outdir", help="指定输出目录（默认 验证输出/<通道>-<时间戳>/）")
-    ap.add_argument("--provider", choices=["gemini", "doubao"],
+    ap.add_argument("--provider", choices=["gpt-image", "gemini", "doubao"],
                     help="生图通道（缺省读 .env 的 IMAGE_PROVIDER）。结论只对所测通道成立")
     ap.add_argument("--samples", type=int,
                     help="覆盖各组样本数（不给则用各组缺省：T2=5、T3形状=3、T3数量=5、"

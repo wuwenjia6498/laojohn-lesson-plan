@@ -70,6 +70,7 @@
 ## 引擎与下游物料
 - [claude.ai 旧 skill 快照已删净(0920)](skill-snapshots-cloud-cleared-0920.md) — 三份 06 月快照连同 daily-post/picture-book-recommend 用户手动删除(有意);重名冲突根除,CLAUDE.md §5 警告块已压缩;⚠误用自查点(产物落 写作课输出\ 或文件名缺-第N单元-)日后再传 skill 仍管用
 **碰引擎/共享件前必读**：[下游六件抽共享层](downstream-shared-layer-and-token-facts.md)（改真源照该条回归法）· [0727上下文瘦身收官](context-engineering-slimdown-0727.md)（细节已下沉references别抄回）
+- [课件配图工具接手绘风格库+缺省gpt-image(0924)](imgtool-handdraw-gptimage-0924.md) — 解析抽成与海报共用的handdraw_style.py;风格卡`手绘编号`走compose();通道钉project.通道、老项目按已有图目录认(七个全gemini);⚠规则库在gpt-image上未重验
 - [宣传件渲染链+PDF反查源三指纹(0826)](promo-materials-render-chain.md) — 手改PDF前先三指纹反查源html;馆内海报scale须0.98;海报html已改入库
 - [配套PDF的Type3字体病已修两线(0817)](pdf-type3-fonts-fixed.md) — 装饰图标改纯CSS图形非换emoji;.mark .sym字体栈中间那档雅黑勿删;已装check_type3
 - [外部改稿docx回贴md(0902-0915)](external-docx-backfill-0902.md) — 骨架继承+文本整替;⚠判新旧看措辞不看哈希;⚠先互比外部历次版本(同晚两份或是平行方案须问采哪份);⚠外部统一术语会并掉配套上两样东西;⚠清扫噪音正则禁\s用[ 　];三方不同步以PPT+配套为基准;取舍权在用户;先读首页[授课提示]

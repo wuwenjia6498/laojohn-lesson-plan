@@ -21,16 +21,16 @@ picture-writing 的 imggen.config.json 读，本脚本不碰密钥）。**CLI �
   json.illustration.style 或 --style 给编号（001–274）⇒ 提示词改为「画风特征（最前）+ 画面内容 + 本工具固定约束 +
   参考图说明」，并把该编号的参考图作为 images 传给生图（对 Gemini 该库判定为能力未知 ⇒ 特征+参考图双保险）。
   2026-09-23 起：风格名／作者名不再进提示词（只进回执）；上色句只在特征缺「色板」时加（上色极少的速写类给具体颜色，见 _needs_color）；参考图由风格库重切（去错格、去文字标签）。
-  不给编号 ⇒ 沿用 STYLE_PREFIX 通用水彩前缀（向后兼容）。索引读 assets/handdraw/styles.json（仓内副本），参考图先找
-  assets/handdraw/refs/<编号>.webp，没有就从用户级包拷一份进来（入库，同事机器不装风格库也能重生）；两处都没有 ⇒ 报错回退通用前缀。
+  不给编号 ⇒ 沿用 STYLE_PREFIX 通用水彩前缀（向后兼容）。索引读 课件配图工具/手绘风格库/styles.json（仓内副本），参考图先找
+  同目录 refs/<编号>.webp，没有就从用户级包拷一份进来（入库，同事机器不装风格库也能重生）；两处都没有 ⇒ 报错回退通用前缀。
   特征只保留正向描述（含「避免/不要/不准/禁止」的分句过滤掉，照该库 positive_traits 口径）。
+  2026-09-24 起编号解析（resolve_style／正向特征／上色句／参考图说明）与资产都在课件配图工具下（handdraw_style.py
+  ＋ 手绘风格库/），与课件配图工具共用一份；本文件 importlib 载入，禁复制。
 """
 import argparse
 import datetime
 import importlib.util
 import json
-import re
-import shutil
 import sys
 from pathlib import Path
 
@@ -42,8 +42,24 @@ STYLE_PREFIX = (
     "画面："
 )
 RETRY_SUFFIX = "。特别注意：画面中绝对不要出现任何文字、字母或数字。"
-HANDDRAW_ASSETS = Path(__file__).resolve().parents[1] / "assets" / "handdraw"
-HANDDRAW_USER_PKG = Path.home() / ".claude" / "skills" / "handdraw-style-prompter"   # 用户级包，可能不存在
+_IMGTOOL_SCRIPTS = Path(__file__).resolve().parents[4] / "课件配图工具" / "scripts"
+
+
+def _load_shared(name):
+    """按路径载入课件配图工具下的共享脚本（imgclient／handdraw_style 同此口径，禁复制）。"""
+    real = _IMGTOOL_SCRIPTS / (name + ".py")
+    if not real.exists():
+        sys.exit("找不到共享脚本：%s" % real)
+    spec = importlib.util.spec_from_file_location(name + "_real", real)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+# 手绘风格解析 2026-09-24 抽到 课件配图工具/scripts/handdraw_style.py（与课件配图工具共用），这里只取名字
+_hs = _load_shared("handdraw_style")
+resolve_style, _positive_traits, _needs_color = _hs.resolve_style, _hs.positive_traits, _hs.needs_color
+REF_ISOLATION = _hs.REF_ISOLATION
 # 本工具的固定约束（无论走不走编号风格都要有）：构图/底色/无人无字/纸面空白
 # ⚠ 人物那一句分两档（2026-09-22 拆）：走编号风格时不能再说「形象简洁、不夸张」——
 #   风格库的人物类特征（脸型/头身比例/表情自成一套）正好被这句话压平，出来就是通用写实脸，
@@ -56,35 +72,14 @@ _PEOPLE_PLAIN = "画面中如有人物，为中国小学生、家长或教师，
 _PEOPLE_STYLED = ("画面中如有人物，为中国小学生、家长或教师，形象亲切；"
                   "人物的脸型、头身比例、手脚形状、表情与肢体动作一律服从上述风格特征，"
                   "不要回落成通用写实画法。")
-# ⚠ 这一条只在编号分支加：通用分支的「水彩平涂」写在 STYLE_PREFIX 里，编号分支没有任何上色约束——
+# ⚠ 上色句（_needs_color）只在编号分支加：通用分支的「水彩平涂」写在 STYLE_PREFIX 里，编号分支没有任何上色约束——
 #   风格特征里凡带「线稿／速写／素描」字样的编号（#105 等），不兜这句就直接出黑白单色，
-#   放进暖色卡片的海报里整张发灰（六上五实测）。
-# ⚠ 2026-09-23 改：原句写死「柔和水彩淡彩上色」，对所有编号一律生效，把 #046 块面平涂、#013 扁平色块等
-#   都拉成了水彩。现只在特征里没有「色板」一项（即没说清用什么颜色）时才加，且不指定媒介。
-# ⚠ 同日补：速写／线稿类（#105「上色：极少」）光说「按画风自己的上色方式」等于没说，实测又出成近黑白；
-#   这类改用 _COLOR_SKETCH 写明具体颜色，线条与人物仍照画风。判型见 _needs_color()。
-_COLOR_STYLED = "整幅为彩色画面，按上述画风自己的上色方式着色，不要只有黑白线稿或单色。"
-_COLOR_SKETCH = ("整幅为彩色画面：保留上述线条与速写感，线条之外用暖黄、浅蓝、淡粉、浅绿的透明淡彩轻轻铺色，"
-                 "人物衣服、皮肤和主要物件都要有颜色，不要只有黑白或灰色线稿。")
-_SKETCH_RE = re.compile(r"上色：(?:极少|少量|几乎不)|黑白|单色")
-
-
-def _needs_color(traits):
-    """特征没写色板时返回要补的上色句：速写/线稿类给具体颜色，其余给通用句；写了色板返回空串。"""
-    if "色板" in traits:
-        return ""
-    return _COLOR_SKETCH if _SKETCH_RE.search(traits) else _COLOR_STYLED
-
-
+#   放进暖色卡片的海报里整张发灰（六上五实测）。判型与句子本身见 handdraw_style.py。
 _NO_TEXT_CONSTRAINT = ("没有任何文字、字母、数字、水印、品牌标志；"
                        "黑板、纸张、屏幕、标签一律保持空白，不得出现任何可辨认的文字或符号。")
 FIXED_CONSTRAINTS = _BG_CONSTRAINT + _PEOPLE_PLAIN + _NO_TEXT_CONSTRAINT
 NO_PEOPLE = "画面里没有人、没有手、没有拟人角色。"
 NEG_SUFFIX = "。" + FIXED_CONSTRAINTS
-# 参考图说明（2026-09-23 由风格库原文的长串「不要…」改为短的正向句：否定清单在 Gemini／Seedream 上易反向泄漏，
-#   且原文连「构图、布局」都禁，削弱了风格迁移；内容隔离仍保留）
-REF_ISOLATION = ("所附参考图只用来取画风：线条、上色方式、色彩、质感和人物造型比例都照它画；"
-                 "画面内容完全按上面的描述，不沿用参考图里的角色和物件。")
 JUDGE_Q = (
     "只看这张插画，只回一个 JSON 对象，键与含义："
     "has_text＝画面里是否出现任何文字/字母/数字（true/false）；"
@@ -100,13 +95,7 @@ DEFAULT_PROVIDER = "gpt-image"
 
 
 def load_client(provider):
-    real = Path(__file__).resolve().parents[4] / "课件配图工具" / "scripts" / "imgclient.py"
-    if not real.exists():
-        sys.exit("找不到生图客户端：%s" % real)
-    spec = importlib.util.spec_from_file_location("imgclient_real", real)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod.make_client(provider)
+    return _load_shared("imgclient").make_client(provider)
 
 
 def judge_failed(obs):
@@ -118,48 +107,6 @@ def judge_failed(obs):
     if "_raw" in obs:
         return "判读结果未能解析成 JSON"
     return None
-
-
-def _positive_traits(traits):
-    """只留正向可见特征（照风格库 resolve_reference.positive_traits 口径，不复制其文件）。"""
-    if not traits:
-        return ""
-    kept = []
-    for part in re.split(r"[；;。\n]+", traits):
-        part = part.strip(" ，,、：:。；;\t")
-        if not part or any(w in part for w in ("避免", "不要", "不准", "禁止")):
-            continue
-        if re.search(r"无(?:写实纹理|精细材质|真实纹理)", part):
-            continue
-        kept.append(part)
-    return "；".join(kept)
-
-
-def resolve_style(number):
-    """编号 → {number, name, reference, traits, ref_path}；索引读仓内副本，参考图缺则从用户级包拷进仓。"""
-    num = "%03d" % int(number)
-    idx = HANDDRAW_ASSETS / "styles.json"
-    if not idx.exists():
-        idx = HANDDRAW_USER_PKG / "skills" / "handdraw-style-prompter" / "references" / "styles.json"
-    if not idx.exists():
-        raise FileNotFoundError("风格索引不存在（仓内 assets/handdraw/styles.json 与用户级风格库都没有）")
-    rec = next((r for r in json.loads(idx.read_text(encoding="utf-8")) if r.get("number") == num), None)
-    if not rec:
-        raise ValueError("风格编号 %s 不在索引里（001–274）" % num)
-    refs = HANDDRAW_ASSETS / "refs"
-    local = next((p for p in (refs / (num + "_grid.webp"), refs / (num + ".webp")) if p.exists()), None)
-    if local is None:
-        start = ((int(num) - 1) // 200) * 200 + 1
-        bucket = HANDDRAW_USER_PKG / "images" / "individual" / ("%03d-%03d" % (start, start + 199))
-        src = next((p for p in (bucket / (num + "_grid.webp"), bucket / (num + ".webp")) if p.exists()), None)
-        if src is None:
-            raise FileNotFoundError("编号 %s 的参考图既不在仓内 refs/ 也不在用户级风格库（%s）" % (num, bucket))
-        refs.mkdir(parents=True, exist_ok=True)
-        local = refs / src.name
-        shutil.copyfile(src, local)
-        print("  [风格] 参考图首次使用，已拷进仓：%s（请随 json 一并提交）" % local.name)
-    return {"number": num, "name": rec.get("generation_name", ""), "reference": rec.get("reference", ""),
-            "traits": _positive_traits(rec.get("traits", "")), "ref_path": str(local)}
 
 
 def build_prompt(subject, retry=False, style=None, no_people=False):

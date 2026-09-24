@@ -121,6 +121,8 @@ async function viewHome() {
         <input id="pName" value="${DEFAULT_NAME}" placeholder="三上-第一单元-猜猜他是谁"></label>
       <label class="field" style="flex:2 1 380px"><span>画风（改成你要的；清空则由模型推一个并标注待确认）</span>
         <input id="pStyle" value="${DEFAULT_STYLE}" placeholder="水彩儿童插画：柔和水彩质感、干净留白"></label>
+      <label class="field" style="flex:0 1 200px"><span>手绘风格编号（选填，001–274）</span>
+        <input id="pHanddraw" placeholder="如 105；填了就不用左边的画风"></label>
     </div>
     <div class="row" style="margin-bottom:10px">
       <label class="field" style="flex:1"><span>课件 .pptx</span><input type="file" id="pPptx" accept=".pptx"></label>
@@ -137,6 +139,7 @@ async function viewHome() {
     if (!name || !$('#pPptx').files[0] || !$('#pPlan').files[0])
       return alert('项目名、pptx、详案三样都要填。');
     fd.append('name', name); fd.append('style', $('#pStyle').value);
+    fd.append('handdraw', $('#pHanddraw').value.trim());
     fd.append('pptx', $('#pPptx').files[0]); fd.append('plan', $('#pPlan').files[0]);
     $('#pGo').disabled = true;
     try {
@@ -268,16 +271,25 @@ function secStyle() {
   const sum = el('summary');
   sum.style.cssText = 'cursor:pointer;font-size:15px;font-weight:600';
   sum.append(document.createTextNode('风格卡'));
-  sum.append(el('span', 'muted', '　' + (s.画风档 || '').slice(0, 46)));
+  sum.append(el('span', 'muted', '　' + (s.手绘编号 ? '手绘 #' + s.手绘编号 + '　' : '')
+                               + (s.画风档 || '').slice(0, 46)));
   c.append(sum);
   const box = el('div'); box.style.paddingTop = '12px';
-  for (const k of ['画风档', '色板', '人物年龄设定', '场景基调', '概念母题',
+  box.append(el('p', 'muted',
+    '手绘编号（001–274，与写作课海报同一套风格库）：填了之后，出图时画风改用该编号的特征并挂它的参考图，' +
+    '「前缀基底」不再使用；清空则回到前缀基底。编号写错存不进去。'));
+  for (const k of ['手绘编号', '画风档', '色板', '人物年龄设定', '场景基调', '概念母题',
                    '前缀基底', '人物条目', '文字禁令', '通用禁区']) {
-    if (!(k in s)) continue;
+    if (!(k in s) && k !== '手绘编号') continue;
     const lab = el('label', 'field'); lab.append(el('span', '', k));
     const t = el('textarea'); t.rows = 1;
-    t.value = typeof s[k] === 'string' ? s[k] : JSON.stringify(s[k]);
-    t.onchange = async () => { s[k] = t.value; await save({ style_card: s }); };
+    t.value = s[k] == null ? '' : (typeof s[k] === 'string' ? s[k] : JSON.stringify(s[k]));
+    t.onchange = async () => {
+      const old = s[k];
+      if (k === '手绘编号' && !t.value.trim()) delete s[k]; else s[k] = t.value.trim();
+      try { await save({ style_card: s }); }
+      catch (e) { if (old === undefined) delete s[k]; else s[k] = old; t.value = old || ''; alert(e.message); }
+    };
     lab.append(t); box.append(lab);
   }
   c.append(box);

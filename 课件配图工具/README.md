@@ -8,13 +8,23 @@ PRD（《课件配图工具-需求文档PRD.md》）第 7 节列了五条待验�
 
 ## ⚠ 头号纪律：每条规则只对它被测出来的那条通道成立
 
-PRD 原话是「Gemini 的经验迁到豆包必须逐条重验」，**反过来一样成立**。工具支持两条
+PRD 原话是「Gemini 的经验迁到豆包必须逐条重验」，**反过来一样成立**。工具支持三条
 生图通道，`--provider` 一换，规则库就得整套重验，不得沿用：
 
 | 通道 | 生图模型 | 调用方式 |
 |---|---|---|
-| `doubao` | 火山方舟 Seedream（`doubao-seedream-5-0-pro-260628`） | `/images/generations`，画幅给像素串 |
+| `gpt-image`（**缺省**，2026-09-24 起） | AiHubMix 上的 `gpt-image-2`（ChatGPT 出图同系） | 无参考图 `/images/generations`，有参考图 `/images/edits`；画幅给像素串，回包 b64 |
 | `gemini` | AiHubMix 上的 Nano Banana Pro（`gemini-3-pro-image-preview`） | 原生 google-genai，**没有 images.generate**，画幅给 `aspect_ratio`+`image_size` |
+| `doubao` | 火山方舟 Seedream（`doubao-seedream-5-0-pro-260628`） | `/images/generations`，画幅给像素串 |
+
+⚠ **缺省通道改成 gpt-image 是用户拍板（写作课海报 #044 两轮对比最贴示例图），但下面 T1–T5
+与整课跑批的规则都是在豆包／Gemini 上测出来的，在 gpt-image 上尚未重验**——出图须人工逐张看。
+gpt-image 接口走 Azure 审核，提示词带在世画家名会被拦（手绘编号只用中文特征，不带作者名）；
+它的 edits 接口比另两家更「照抄」参考图，参考图里的衣服道具容易被带进来。
+
+**通道钉在项目上，不随缺省值漂移**：新建项目时通道写进 `project.通道`；没写这个字段的老项目
+按 `课件产出/<项目>/` 下哪个通道目录已经有图来认（现有七个项目都认作 `gemini`，图不会「消失」）。
+要把老项目改走新通道，改它 JSON 里的 `project.通道`——换通道＝换产出目录，旧验收不继承。
 
 产出目录、验证输出、验收记录**全部按通道分开存**。这不是为了整齐：若两条通道共用
 一个目录，新图会悄悄覆盖已验收的旧图，而 `_验收记录.json` 还写着「已通过」——
@@ -38,6 +48,23 @@ python scripts/run_lesson.py 课件项目/猜猜他是谁.json --stage export
 ```
 
 产物在 `验证输出/<时间戳>/`：逐项子目录存图，另有 `结果.json` 与 `验证报告.md`。
+
+## 手绘风格编号（2026-09-24 起）
+
+与写作课单元海报共用同一套手绘风格库（274 个编号，资产在 `手绘风格库/`，解析在
+`scripts/handdraw_style.py`，**禁复制**）。给项目选一个编号：
+
+- 网页：新建项目表单里的「手绘风格编号」，或已建项目风格卡里的 `手绘编号` 一栏（写错存不进去）
+- 命令行：`build_specs.py ... --handdraw 105`
+
+填了编号后，出图时 `run_lesson.compose()` 把画风段换成该编号的正向特征、放在最前，
+**`前缀基底` 不再使用**（那里多半写着「水彩」，会和编号打架）；`人物条目`／`文字禁令` 照旧按两个开关裁；
+该编号的参考图**排在所有挂载图之后**，句末说明最后一张只取画风、其余保持人物一致（T5：多参考图默认
+第一张主导，用文字可以指派分工）。编辑通道（剪影转制、局部修改）不拼画风、不挂风格图。
+清空编号即回到原来的前缀基底，提示词与改造前逐字一致。
+
+⚠ 海报侧的经验同样适用：参考图的标志性服装去不干净，嫌它就换编号；画面描述里别写「写实」这类
+与风格反着来的词；274 条里只有 19 条特征改写过，用新编号前先看它的特征。
 
 ## 自动拆解（2026-08-28 起）
 
@@ -92,7 +119,8 @@ python scripts/build_specs.py ... --reuse-stage1 <角色盘点.json>   # 阶段�
 
 ## 脚本
 
-- `scripts/imgclient.py`——双通道生图/判读客户端（`make_client("gemini"|"doubao")`），两家的画幅写法、参考图塞法、返回格式差异全收敛在这里。
+- `scripts/imgclient.py`——三通道生图/判读客户端（`make_client("gpt-image"|"gemini"|"doubao")`，缺省 gpt-image），各家的画幅写法、参考图塞法、返回格式差异全收敛在这里。
+- `scripts/handdraw_style.py`——手绘风格编号 → 特征＋参考图（与写作课海报共用的单一源）。
 - `scripts/verify_rules.py`——五项验证 CLI。
 - `scripts/run_lesson.py`——整课跑批 CLI（char → 闸门1 → pages → 闸门2 → export）。
 - `scripts/measure_ratio.py`——头身比像素量测。凡量化判据都走它，不问视觉模型：让模型估百分比既慢（实测触发超长推理直到超时）又不可信。

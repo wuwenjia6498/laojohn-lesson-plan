@@ -36,6 +36,37 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 GATES = {"char": "闸门1·定妆验收", "pages": "闸门2·页目验收"}
 
 
+def resolve_provider(d, stem, provider=None):
+    """这个项目用哪条生图通道。顺序：显式传参 > 项目 JSON 的 project.通道 > 老项目已有图的目录 > 缺省。
+
+    2026-09-24 缺省通道由 gemini 改为 gpt-image（ChatGPT 出图同系）。**老项目不跟着换**：
+    产出目录按通道分，若老项目也改走 gpt-image，就会去读一个空目录，界面上已出的图全部「消失」、
+    验收记录也对不上。所以没写 project.通道 的老项目，按盘上哪个通道目录里已经有图来认；
+    新建项目在创建时就把通道写进 project.通道，之后不再受缺省值影响。
+    要把老项目改走新通道：改它 JSON 里的 project.通道（换通道＝换目录，旧验收不继承）。
+    """
+    if provider:
+        return provider
+    pinned = (d.get("project") or {}).get("通道") if isinstance(d.get("project"), dict) else None
+    if pinned:
+        return pinned
+    base = ROOT / "课件产出" / stem
+    if base.is_dir():
+        used = sorted(p.name for p in base.iterdir()
+                      if p.is_dir() and not p.name.startswith("_") and any(p.rglob("*.jpg")))
+        if len(used) == 1:
+            return used[0]
+    return default_provider()
+
+
+def default_provider():
+    """新项目的缺省通道：.env／环境变量 IMAGE_PROVIDER，没有就 gpt-image（与 imgclient.make_client 同口径）。"""
+    import os
+    from imgclient import load_dotenv
+    load_dotenv()
+    return (os.environ.get("IMAGE_PROVIDER") or "gpt-image").lower()
+
+
 def load(project_path, provider=None):
     """产出目录：课件产出/<项目文件名>/<通道>/。
 
@@ -48,10 +79,9 @@ def load(project_path, provider=None):
     验收记录把另一份项目的 5 张也算了进来——声称验了 8 张，实际只看过 3 张。
     文件名在同一目录里天然唯一，拿它做目录名就不会撞。
     """
-    import os
     path = pathlib.Path(project_path)
     d = json.loads(path.read_text(encoding="utf-8"))
-    prov = provider or os.environ.get("IMAGE_PROVIDER") or "gemini"
+    prov = resolve_provider(d, path.stem, provider)
     outdir = ROOT / "课件产出" / path.stem / prov
     outdir.mkdir(parents=True, exist_ok=True)
     return d, outdir
@@ -153,6 +183,56 @@ def prefix_for(style, slide):
     return p
 
 
+_STYLE_CACHE = {}
+
+
+def handdraw(style):
+    """风格卡上的 `手绘编号` → 解析结果（带缓存）；没填返回 None。编号不存在直接报错，不静默回退。"""
+    no = str(style.get("手绘编号") or "").strip().lstrip("#")
+    if not no:
+        return None
+    if no not in _STYLE_CACHE:
+        from handdraw_style import resolve_style
+        _STYLE_CACHE[no] = resolve_style(no)
+    return _STYLE_CACHE[no]
+
+
+# 走手绘编号时，人物那一句要让位给风格：风格库的人物特征（脸型/头身比例/表情）自成一套，
+# 不说这句模型会回落成通用写实脸（写作课海报六上五 #105 实测，见 gen_illustration.py）。
+_PEOPLE_STYLED = "人物的脸型、头身比例、手脚形状、表情与肢体动作一律服从上述风格特征，不要回落成通用写实画法。"
+
+
+def compose(style, item, refs):
+    """拼出一个角色件/页目真正发给生图的 (prompt, refs)。所有出图入口都走这里，别再各自拼前缀。
+
+    · 编辑通道（剪影转制）：整句就是编辑指令，不拼前缀、不挂风格图——拼了会把它拉回插画。
+    · 风格卡填了 `手绘编号`（2026-09-24 接入手绘风格库，与写作课海报共用 handdraw_style.py）：
+      画风段换成该编号的正向特征放最前，`前缀基底` 不再使用（那里多半写着「水彩」，会和编号打架）；
+      `人物条目`／`文字禁令` 照旧按两个开关裁；编号参考图**排在最后**挂上，并在句末说清哪张只取画风——
+      T5 实测多参考图默认第一张主导、用文字可以指派分工，所以定妆图仍排前面、风格图靠这句话限定职责。
+    · 没填编号：沿用 prefix_for，与改造前逐字一致。
+    """
+    refs = list(refs or [])
+    if item.get("通道") == "编辑":
+        return item["prompt"], refs
+    hs = handdraw(style)
+    if not hs:
+        return prefix_for(style, item) + " " + item["prompt"], refs
+    from handdraw_style import needs_color, REF_ISOLATION, REF_ISOLATION_MIXED
+    parts = []
+    if hs["traits"]:
+        parts.append("请用这种画风绘制：" + hs["traits"] + "。")
+    parts.append(needs_color(hs["traits"]))
+    if not item.get("去人物条目") and style.get("人物条目"):
+        parts.append(style["人物条目"].strip("，。 ") + "；" + _PEOPLE_STYLED)
+    if not item.get("允许画面文字") and style.get("文字禁令"):
+        parts.append(style["文字禁令"].strip("，。 ") + "。")
+    note = REF_ISOLATION_MIXED if refs else REF_ISOLATION
+    body = item["prompt"].strip().rstrip("。；，") + "。"
+    prompt = "".join(parts) + "画面内容：" + body + note
+    return prompt, refs + [pathlib.Path(hs["ref_path"])]
+
+
 def resolve_refs(names, outdir, made):
     """把挂载项换成实际图片路径；缺哪张就说清楚缺哪张，不静默跳过。
 
@@ -197,8 +277,8 @@ def stage_char(d, outdir, client, force, only=None):
             made[c["id"]] = outdir / "角色" / f"{c['id']}.jpg"
             continue
         refs = resolve_refs(c.get("挂载"), outdir, made)
-        # 编辑通道（剪影转制）不拼风格前缀：整句就是编辑指令，拼前缀反而会把它拉回插画
-        p = c["prompt"] if c.get("通道") == "编辑" else prefix_for(style, c) + " " + c["prompt"]
+        # 编辑通道（剪影转制）不拼风格前缀、不挂风格图：由 compose 统一裁
+        p, refs = compose(style, c, refs)
         made[c["id"]] = gen(client, outdir, "角色", c["id"], p, c["画幅"], refs, force)
 
     # 验收提示按实际角色件生成，不写死名字 —— 原先这里硬编码着手抄那份的
@@ -244,7 +324,7 @@ def stage_pages(d, outdir, client, force, only=None, proj_path=None):
         if only and s["页码"] not in only:
             continue
         refs = resolve_refs(s.get("挂载"), outdir, made)
-        p = prefix_for(style, s) + " " + s["prompt"]
+        p, refs = compose(style, s, refs)
         done[s["页码"]] = gen(client, outdir, "页目", s["页码"], p, s["画幅"], refs, force)
         # 记下这张图是按哪段描述画的。重新拆解会改写描述而图不会跟着变，
         # 没有这个印记就只能拿文件时间猜「图是不是旧的」——
@@ -327,8 +407,9 @@ def main():
     ap.add_argument("--only", nargs="*",
                     help="只处理指定的角色 id 或页码（配 --force 重跑单件，不炸掉整批）")
     ap.add_argument("--status", action="store_true", help="只看进度")
-    ap.add_argument("--provider", choices=["gemini", "doubao"],
-                    help="生图通道（缺省读 .env 的 IMAGE_PROVIDER）。换通道＝换产出目录，旧验收不继承")
+    ap.add_argument("--provider", choices=["gpt-image", "gemini", "doubao"],
+                    help="生图通道（缺省：项目 JSON 的 project.通道 > 老项目已有图的目录 > .env 的 IMAGE_PROVIDER > gpt-image）。"
+                         "换通道＝换产出目录，旧验收不继承")
     a = ap.parse_args()
     d, outdir = load(a.project, a.provider)
 
@@ -342,7 +423,7 @@ def main():
         return status(d, outdir)
     if a.stage == "export":
         return stage_export(d, outdir)
-    client = make_client(a.provider)
+    client = make_client(outdir.name)       # 必须与产出目录同一条通道，不能各自读缺省值
     print(f"项目：{d['project']['名称']}｜通道：{client.name}｜模型：{client.model}"
           f"｜输出：{outdir}")
     print()

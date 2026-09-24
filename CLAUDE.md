@@ -58,7 +58,8 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 | 读书会 JPG 长图渲染引擎 | `.claude\skills\laojohn-book-card\scripts\_jpg_render.py` | book-card（书目卡）、course-poster（读书会海报）、writing-poster（写作课单元海报，`render_writing_poster.py` 薄壳、口径同 course-poster）三家。**前两家历史口径差异全部参数化**（`strip_parens`／`fallback`）——**不要为了"统一"而改默认值，会改变既有产物**。尺寸/质量/输出模型见**脚本头注释** |
 | TTS 多通道客户端 | `.claude\skills\laojohn-lesson-video\scripts\ttsclient.py` | lesson-video（备课视频旁白配音）。工厂 `make_tts(provider)`，`TTS_PROVIDER` 一个环境变量切 aihubmix／volc／minimax；密钥三级回退同 §1。**落盘统一 24kHz 单声道 wav**（mp3 拼接会累积编码器 padding 漂移）；失败返回 `_error`、**绝不落静音冒充成功** |
 | ffmpeg 定位 | `.claude\skills\laojohn-lesson-video\scripts\ffmpeg_path.py` | lesson-video 内部。发现序：`FFMPEG_EXE` → PATH → WinGet\Links → `工具\ffmpeg\`。⚠ **Playwright 自带的 ffmpeg 不能用**（disable-everything 构建，只有 VP8/webm，没有 libx264 与 mp4 muxer），脚本主动跳过它 |
-| 生图/判读客户端 | `课件配图工具\scripts\imgclient.py` | 课件配图工具（`run_lesson.py`）、writing-poster（`gen_illustration.py` importlib 薄壳，禁复制）。三通道（Gemini／豆包／gpt-image；gpt-image 目前只 writing-poster 用，`run_lesson.py` 未开放）、密钥只从环境变量／`.env`／picture-writing 的 `imggen.config.json` 读（§1）；判读回包 `_error`/`_raw` 一律当「未知」不当「不通过」 |
+| 生图/判读客户端 | `课件配图工具\scripts\imgclient.py` | 课件配图工具（`run_lesson.py`）、writing-poster（`gen_illustration.py` importlib 薄壳，禁复制）。三通道（gpt-image／Gemini／豆包），**两家缺省都是 gpt-image**（课件配图工具 2026-09-24 起；其规则库在 gpt-image 上尚未重验）；课件配图工具的通道钉在项目 `project.通道` 上、老项目按已有图目录认，改缺省值不会让老项目换目录。密钥只从环境变量／`.env`／picture-writing 的 `imggen.config.json` 读（§1）；判读回包 `_error`/`_raw` 一律当「未知」不当「不通过」 |
+| 手绘风格库 | `课件配图工具\scripts\handdraw_style.py`（解析）＋ `课件配图工具\手绘风格库\`（`styles.json` 274 条索引 + 只放用过编号的 `refs\`，入库） | 课件配图工具（风格卡 `手绘编号`，`run_lesson.compose()`）、writing-poster（`illustration.style`，`gen_illustration.py` importlib 载入，禁复制）。用户级包 `handdraw-style-prompter` 在仓外（§9 旁注见 `docs\协作同步说明.md` 五点五节），首次用新编号自动拷参考图进 `refs\`、须随 json 提交。改解析须两家回归：海报比 `build_prompt` 快照逐字相等，课件配图看 `compose` 拼出的提示词、无编号时须与 `prefix_for` 逐字相等 |
 | 读书会 A4 单页 PDF 渲染引擎 | `.claude\skills\laojohn-reading-guide\scripts\_a4_render.py` | reading-guide、lesson-mindmap、teaching-mindmap 三家（后两家 `render_pdf.py` 是薄壳）。**`recenter_on_overflow`：两种导图传 True**（居中放射版式，超页需重设 min-height），**阅读指南保持 False**（文档流版式，打开会推开版式）。输出模型见**脚本头注释** |
 
 > 现存物理副本（`laojohn-ppt\assets\logo\`、`laojohn-course-poster\assets\qrcode.png` / `assets\covers\`）属历史遗留；以根目录单一源为准，勿据副本做新决策。
@@ -111,7 +112,7 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 - `book-card\scripts\extract_fields.py`、`course-poster\scripts\extract_fields.py` → `book-profile\scripts\profile_meta.py`
 - `course-poster\scripts\render_poster.py` → `book-card\scripts\_jpg_render.py`
 - `lesson-mindmap`、`teaching-mindmap` 的 `render_pdf.py` → `reading-guide\scripts\_a4_render.py`
-- `writing-poster\scripts\render_writing_poster.py` → `book-card\scripts\_jpg_render.py`；`writing-poster\scripts\gen_illustration.py` → `课件配图工具\scripts\imgclient.py`（写作课线，2026-09-20 立；改 `_jpg_render.py` 回归时写作课海报一并重渲）
+- `writing-poster\scripts\render_writing_poster.py` → `book-card\scripts\_jpg_render.py`；`writing-poster\scripts\gen_illustration.py` → `课件配图工具\scripts\imgclient.py` 与 `handdraw_style.py`（写作课线，2026-09-20 立、风格解析 2026-09-24 并入；改 `_jpg_render.py` 回归时写作课海报一并重渲）
 
 薄壳按**相对路径**（`pathlib.Path(__file__).parents[2]`）定位真源，所以**改 skill 目录名或挪 scripts 目录会静默断链**；改三件真源中任何一件，必须把其"谁在用"栏里的物料全部重渲回归（回归基准数据：`读书会配套输出\俗世奇人\` 下五份 json）。
 
