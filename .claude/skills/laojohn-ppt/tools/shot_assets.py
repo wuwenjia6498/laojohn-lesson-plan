@@ -44,9 +44,6 @@ COM 的四个坑（踩中的表现都不像"文件打不开"，别往错方向�
      `win32com\gen_py\` 的内容（保留 __init__.py），下次调用会自动重建。
      辅助判据：同一份文件在 PowerShell 里 `New-Object -ComObject` 能打开、
      在 python 里打不开，就是这个缓存问题，不是 Office 装坏了。
-
-版权红线：截图一律避开含教材插图 / 原书扫描页的版面（尤其 `-配图.docx` 那一版详案），
-只截自制内容。仓内那些扫描件仅限内部备课使用，不得随宣讲件对外转发。
 """
 import argparse
 import json
