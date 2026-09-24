@@ -164,6 +164,10 @@
   .cta .sep{ padding:0 8px; font-weight:400; opacity:.85; }
   .qr{ flex:none; width:212px; height:212px; background:#fff; border-radius:16px; padding:12px; }
   .qr img{ width:100%; height:100%; display:block; }
+  /* 二维码占位（缺省）：各校区换真码时 --qr 传图即可 */
+  .qr .ph{ width:100%; height:100%; box-sizing:border-box; border:3px dashed #D9C3A6; border-radius:10px;
+           display:flex; align-items:center; justify-content:center; text-align:center;
+           font-size:24px; line-height:1.5; font-weight:400; color:#B89A78; letter-spacing:.08em; }
 
   /* ---- 6. 底部联系方式 ---- */
   .footer{ margin-top:32px; padding-left:8px; font-size:30px; line-height:1.75; color:var(--ink-soft); }
@@ -304,7 +308,9 @@ function setText(id, txt){
   const courseEl = document.getElementById('cta-course');
   if (course.length) courseEl.innerHTML = joinSep(course); else hide(courseEl);
   setText('cta-action', campus.cta);
-  if (!document.getElementById('qr').getAttribute('src')) hide(document.getElementById('qr-wrap'));
+  // 无二维码图 ⇒ 显示占位框（不隐藏，保留版位供各校区换码）
+  if (!document.getElementById('qr').getAttribute('src'))
+    document.getElementById('qr-wrap').innerHTML = '<div class="ph">二维码<br>位置</div>';
 
   // 底部：每行缺则隐藏，全空则整块隐藏
   const foot = [];

@@ -6,7 +6,8 @@ r"""render_writing_poster.py —— 单元海报 data.json → 自包含 HTML + 
         [--font-mode subset|full] [--no-creamify]
 
 默认：out_base ＝ json 同目录 <课次>-习作海报；插画 ＝ 同目录 <课次>-插画.jpg（缺则留空区并 stderr 提示）；
-logo/qr/校区信息 ＝ 项目根 品牌资产\（单一源，skill 内不存副本）。**所有覆盖参数默认 None**（CLAUDE.md §3 红线）。
+logo/校区信息 ＝ 项目根 品牌资产\（单一源，skill 内不存副本）。二维码缺省画「二维码位置」占位框（2026-09-25 用户定，
+各校区自行换码）；要印真码用 --qr <png>（如 品牌资产\qrcode.png）。**所有覆盖参数默认 None**（CLAUDE.md §3 红线）。
 
 渲染骨架来自 laojohn-book-card\scripts\_jpg_render.py（读书会书目卡/海报同一真源，importlib 薄壳、零复制），
 口径与 course-poster 相同：1242px 宽、quality 92、device_scale_factor 2 ⇒ JPG 2484px 宽、高随内容。
@@ -292,9 +293,9 @@ def render(data_path, out_base=None, illustration=None, logo=None, qr=None, camp
         print("  [提示] 插画缺失（%s），已留空白区；先跑 gen_illustration.py 再重渲" % illu.name, file=sys.stderr)
         illu = None
     logo_p = Path(logo) if logo else root / "品牌资产" / "logo.png"
-    qr_p = Path(qr) if qr else root / "品牌资产" / "qrcode.png"
+    qr_p = Path(qr) if qr else None   # 缺省＝占位框（模板里画），不取 品牌资产\qrcode.png
     for p, name in ((logo_p, "logo"), (qr_p, "二维码")):
-        if not p.exists():
+        if p is not None and not p.exists():
             print("  [警告] %s 缺失：%s" % (name, p), file=sys.stderr)
 
     if "campus" not in data:
@@ -306,7 +307,7 @@ def render(data_path, out_base=None, illustration=None, logo=None, qr=None, camp
 
     tokens = {
         "/*__LOGO__*/": logo_uri(logo_p) if logo_p.exists() else "",
-        "/*__QR__*/": _jr.data_uri(str(qr_p)) if qr_p.exists() else "",
+        "/*__QR__*/": _jr.data_uri(str(qr_p)) if qr_p and qr_p.exists() else "",
         "/*__ILLU__*/": (keyout_bg_illu(illu) if (data.get("illustration") or {}).get("feather") is False
                          else creamify_illu(illu, cream_on)) if illu else "",
         "/*__FONT_BRUSH__*/": font_data_uri(title, font_mode or "subset"),
