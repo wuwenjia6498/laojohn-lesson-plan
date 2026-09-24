@@ -5,6 +5,8 @@ metadata:
   type: project
 ---
 
+> **0924 已消解**：外部改词新版替换入库，PowerPoint 能开。根因未查明，排查手法仍留作参考。
+
 **仓内 `写作课件PPT输出\u516d上-第四单元-笔尖流出的故事\...-课件PPT.pptx 打不开**，
 报 `PowerPoint could not open the file.`（HRESULT -2147467259 通用失败，不说原因）。
 2026-09-21 做备课视频出图时撞上。
