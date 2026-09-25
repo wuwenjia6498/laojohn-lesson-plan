@@ -18,4 +18,6 @@ metadata:
 
 **How to apply：** 改外部 pptx 一律用 `.claude/skills/laojohn-ppt/tools/pptx_text_edit.py`（本次固化，头注释里有完整排查表）：复制形状走 `clone_shape()`，收尾**必须**调 `prune_timing(prs)` + `normalize_paragraphs(prs)` 再 save。文件打不开时按 **1→2→3 顺序排查**（查重复 shape id → 查 timing 空容器 → 查段落子元素顺序），三项都干净才去怀疑 COM 环境；用「原件副本导得出、改后件导不出」这一对照来区分是文件问题还是环境问题。另两处小坑：`set_rich` 的 `{b}…{/b}` 跨行不闭合会静默吃掉四个字符（已加拦截）；手工 `\n` 断行位置靠估算必出孤字行，交给 PowerPoint 自动折行更稳，但别在文本里留缩进空格。
 
+**⚠ 0925 反例：`normalize_paragraphs` 自己也会把文件改坏。** 六上五外部 pptx 有 26 个 slide 的段落是「pPr, r, pPr, r…」多个 `pPr` 交错的写法（PowerPoint 认）。`normalize_paragraphs` 会把每个 `pPr` 都挪到段首，挤成一串，结果原件只跑这一个函数就打不开。**所以「收尾必调」要改成「往段落里 append 过 run 才调」**；只换图或只挪几何的改动不要调它。工具本身还没修（应当只处理单个 `pPr` 的段落），修之前照此执行。排查法：拿原件分别只跑 `prune_timing`、只跑 `normalize_paragraphs`，各自用 COM 打开，看是哪一个导致打不开。
+
 与 [[manhua-laoshi-5a-lesson-state]]、[[revise-finalized-lesson-plan-pitfalls-0915]] 同族。

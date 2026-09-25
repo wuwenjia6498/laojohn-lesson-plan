@@ -413,12 +413,17 @@ class GptImageClient(_Base):
         Image.open(path).convert("RGB").save(buf, "PNG")
         return buf.getvalue()
 
-    def generate(self, prompt, ratio="1:1", images=None, seed=None, timeout=300):
+    def generate(self, prompt, ratio="1:1", images=None, seed=None, timeout=300, background=None):
+        """background="transparent" 时出透明底 PNG（2026-09-25 课件嵌图试点加，实测 gpt-image-2
+        edits 接口认；缺省 None＝不传，既有调用行为不变）。透明图须自行按 PNG 落盘，别走 save()——
+        save() 统一转 JPEG 会把透明通道丢掉。"""
         if seed is not None and not GptImageClient._seed_warned:
             print("  [提示] gpt-image 不支持 seed，本通道的样本为独立随机抽样")
             GptImageClient._seed_warned = True
         fields = {"model": self.model, "prompt": prompt, "size": self.RATIO[ratio],
                   "quality": self.quality, "n": 1}
+        if background:
+            fields.update(background=background, output_format="png")
         headers = {"Authorization": f"Bearer {self.key}"}
         for i in range(2):
             try:
