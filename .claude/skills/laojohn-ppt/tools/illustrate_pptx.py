@@ -27,6 +27,13 @@ op 一览：
   band  通栏浅色底带：插到最底层，不遮任何内容
   font  只改某形状内所有 run 的字号（size＝磅），不动文字
   fill  改形状填充色（卡片表头换彩色）
+swap／add 可带 "click": N（1 基）：把这张图并进本页第 N 击，与那一击的文字同时淡入（0926 用户定：
+  图对应某张卡／某一条的，翻页不能先露出来；会露答案的图跟答案那一击）。不写 click＝静态，开场就在，
+  只用于整页情境图。按原有点击组重注入，走 helpers.add_click_reveal（单一源，禁复制时间树）。
+  ⚠ 图的顶端高于上一击时会造成回跳，这种图宁可并进更早的一击。
+  click 另可单独作 op：{"op": "click", "id": 66, "click": 3}——把页上已有的形状（如外部件自带的图）并进第 3 击。
+  del：{"op": "del", "id": 53}——删掉一个形状（如判断页上会露答案的图，挪到结果页重新 add）；
+  被删的形状若在动画里会报错退出，不静默拆动画。
 分节页与结尾页一律不加图（is_section 自动跳过，0925 用户定）。
 全局可选：theme（页题条色＋分节页色）、tip_icon（页脚提示句前加手指图标）、mascot。
 图源是透明底 PNG（gen_cutouts.py 直出）时按不透明区域裁边，不走抠图。
@@ -53,6 +60,9 @@ HERE = pathlib.Path(__file__).resolve().parent
 _spec = importlib.util.spec_from_file_location("pte", HERE / "pptx_text_edit.py")
 pte = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(pte)
+sys.path.insert(0, str(HERE.parent / "scripts"))
+from helpers import add_click_reveal  # noqa: E402  单一源，禁复制
+from pptx.oxml.ns import qn  # noqa: E402
 
 A = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
 R_EMBED = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed"
@@ -226,6 +236,43 @@ def title_bar(slide):
     return None
 
 
+def click_groups(slide):
+    """读出本页现有点击组：[[target, ...], ...]，target＝shape_id 或 (shape_id, 段落号)。"""
+    t = slide.element.find(qn("p:timing"))
+    if t is None:
+        return []
+    gs = []
+    for ctn in t.iter(qn("p:cTn")):
+        nt = ctn.get("nodeType")
+        if nt not in ("clickEffect", "withEffect", "afterEffect"):
+            continue
+        sp = ctn.find(".//" + qn("p:spTgt"))
+        rg = sp.find(".//" + qn("p:pRg"))
+        tgt = (int(sp.get("spid")), int(rg.get("st"))) if rg is not None else int(sp.get("spid"))
+        if nt == "clickEffect" or not gs:
+            gs.append([])
+        if tgt not in gs[-1]:
+            gs[-1].append(tgt)
+    return gs
+
+
+def join_clicks(slide, no, joins):
+    """joins：[(shape_id, 第几击)]。并进原有点击组后整页重注入。"""
+    gs = click_groups(slide)
+    for sid, k in joins:
+        if not 1 <= k <= len(gs):
+            raise SystemExit(f"P{no:02d} 只有 {len(gs)} 击，click={k} 越界")
+        for g in gs:                      # 已在别的击里就是「挪」：先移出原击
+            if sid in g:
+                g.remove(sid)
+        gs[k - 1].append(sid)
+    gs = [g for g in gs if g]             # 挪空的击随之消失（击数减少，序号按挪之前算）
+    for tag in ("p:timing", "p:bldLst"):
+        for node in slide.element.findall(qn(tag)):
+            slide.element.remove(node)
+    add_click_reveal(slide, gs, dur=500)
+
+
 def run(cfg_path):
     cfg = json.loads(pathlib.Path(cfg_path).read_text(encoding="utf-8"))
     cache = cfg["cache"]
@@ -235,15 +282,31 @@ def run(cfg_path):
         if is_section(slide, int(key), len(prs.slides)):
             print(f"  [跳过] P{int(key):02d} 是分节页／结尾页：不加图（0925 用户定，全线适用）")
             continue
+        joins = []
         for o in ops:
             if o["op"] in ("swap", "add"):
                 img = prep(o["img"], cache, o.get("crop"), o.get("cutout", False), o.get("edge", 1200), o.get("keep", ""))
-                (op_swap if o["op"] == "swap" else op_add)(slide, o, img)
+                if o["op"] == "swap":
+                    op_swap(slide, o, img)
+                    sid = o["id"]
+                else:
+                    sid = op_add(slide, o, img).shape_id
+                if o.get("click"):
+                    joins.append((sid, o["click"]))
             elif o["op"] == "geom":
                 sh = shape(slide, o["id"])
                 if "dx" in o: sh.left = sh.left + Inches(o["dx"])
                 if "dy" in o: sh.top = sh.top + Inches(o["dy"])
                 set_geom(sh, o.get("x"), o.get("y"), o.get("w"), o.get("h"))
+            elif o["op"] == "click":
+                shape(slide, o["id"])
+                joins.append((o["id"], o["click"]))
+            elif o["op"] == "del":
+                used = {t if isinstance(t, int) else t[0] for g in click_groups(slide) for t in g}
+                if o["id"] in used:
+                    raise SystemExit(f"P{int(key):02d} 形状 {o['id']} 在动画里，不能删")
+                el = shape(slide, o["id"])._element
+                el.getparent().remove(el)
             elif o["op"] == "band":
                 op_band(slide, o)
             elif o["op"] == "fill":
@@ -254,6 +317,8 @@ def run(cfg_path):
                     r.set("sz", str(int(o["size"] * 100)))
             else:
                 raise ValueError(f"未知 op：{o['op']}")
+        if joins:
+            join_clicks(slide, int(key), joins)
     th = cfg.get("theme")
     if th:
         for i, slide in enumerate(prs.slides, 1):

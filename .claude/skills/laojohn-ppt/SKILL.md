@@ -217,7 +217,7 @@ PYTHONUTF8=1 python .claude\skills\laojohn-lesson-plan\assets\insert_images_docx
    - **要立在底带或页边上的人物，一律单独生成透明底版**：`python 课件配图工具/scripts/gen_cutouts.py 课件项目/<项目>.json`，清单写在项目 JSON 的 `抠图件` 里，产出放在 `抠图/`。**不要拿页目图后期抠**，页目图自带水彩底晕，残边抠不干净，用户三次点名。
    - 吉祥物是项目里的一个角色件（本课主角男孩招手的半身像）。
 2. **写版式清单**：`课件配图工具/课件产出/<项目>/ppt配图版式.json`，逐页写 op（swap／add／geom／band／font／fill），全局写 theme、tip_icon、mascot。格式见工具头注释。
-3. **生成**：`python .claude/skills/laojohn-ppt/tools/illustrate_pptx.py <版式清单.json>`。原图位用 swap 在原形状里换图，shape id 不变，动画绑定保留；新加的图不进动画。
+3. **生成**：`python .claude/skills/laojohn-ppt/tools/illustrate_pptx.py <版式清单.json>`。原图位用 swap 在原形状里换图，shape id 不变，动画绑定保留；新加的图缺省是静态的，**对应某张卡、某一条或会露出答案的图，要写 `"click": N` 并进第 N 击**（逐页判断，见母版 §四之二第 10 条）。
 4. **核验**：用 PowerPoint COM 导出全部页截图逐页看；再按上面「收尾核验」的思路查 shape id 有没有重复、anim.json 里的 id 是否都还在、有没有新增的动画回跳。
 5. **补齐终稿**（2026-09-26 六上五 v9 沉淀）：`tools/finalize_external.py`，对配图终稿与仓内动画版各跑一次——
    - `--worksheet-after N --student-html 写作配套输出/<课次>/<课次>-学生用.html`：自由写作说明页（第 N 页）后插稿纸页；
@@ -226,7 +226,7 @@ PYTHONUTF8=1 python .claude\skills\laojohn-lesson-plan\assets\insert_images_docx
    - `--zh-cn`：外部件 run 一律标 en-US，PowerPoint 按英文断行、标点落行首——改 zh-CN，页题放不下的顺带加宽。
    仓内动画版旁的 `-anim.json` 会按新页序自动重排；之后重跑 `audit_against_plan.py`、页标回注、重渲详案 docx。
 
-版式口径（用户逐条定过；**仓内直出件以母版 `assets/writing-master/framework.md` §四之二 为准，与下面同一口径**，本节只多出后期改外部件时才用的操作）：
+版式口径（用户逐条定过；**仓内直出件以母版 `assets/writing-master/framework.md` §四之二 为准，与下面同一口径**，本节只多出后期改外部件时才用的操作；**动手前先读 §四之二 第 10 条「加一张图，就把整页重新设计一遍」**：可以改分栏、卡片尺寸和间距，按页型定图的大小，相邻页换着构图）：
 - 以图为主重排，不在原版式里找空地塞小图：正文让出右栏，人物落在浅色底带的底边或页面底边上，页脚提示句收窄，给人物让位。
 - 底带看页面加，不是每页都要：让人物有落脚处、页面显得饱满时才加；物件图（比如碎杯子）不需要。
 - 卡片页的小插画要收进卡片，贴在卡片右下角、略微探出卡边，不能孤零零放在卡片外面。
