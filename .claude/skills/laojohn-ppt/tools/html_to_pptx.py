@@ -42,6 +42,8 @@ from pptx.oxml.ns import qn  # noqa: E402
 from pptx.util import Emu  # noqa: E402
 
 PX = 9525  # EMU / px（96 dpi）
+# 写进 pptx 文档属性「备注」的直出标记：打包（laojohn-writing-package）据此认「这份就是终稿」
+DIRECT_MARK = "laojohn-direct-build"
 FONT = "Microsoft YaHei"
 HERE = pathlib.Path(__file__).resolve().parent
 
@@ -643,6 +645,7 @@ def convert(src, out, slot_json=None, only=None):
         br.close()
 
     _renumber(prs)
+    prs.core_properties.comments = DIRECT_MARK
     prs.save(out)
     _write_anim_sidecar(out, anim_tags)
     for m in warns:

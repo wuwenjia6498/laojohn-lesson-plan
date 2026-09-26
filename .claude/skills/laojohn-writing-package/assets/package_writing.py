@@ -8,14 +8,15 @@ r"""
     ├── <年级册>-第N单元-<题目>-写作课详案.docx   ← 写作课详案输出\
     └── <年级册>-第N单元-<题目>-学生用/教师用/家长用.pdf  ← 写作配套输出\<课次>\*.pdf
 
-⚠ **本包不含 PPT（2026-09-02 改口径）**：写作课 PPT 的终稿＝人工在外部嵌入插图并
-   优化文字之后的那一版，它不回本仓；`写作课件PPT输出\` 里存的是本仓工序的产出
-   （审核过 + 注入动画的版本），**不是给老师的终稿**。收进来会让交付包混入半成品，
-   故本脚本不再收 pptx。老师的 PPT 由人工从外部终稿直接提供。
+⚠ **PPT 只收仓内直出件（2026-09-26 改口径）**：外部件课次的终稿＝人工在外部嵌图、
+   优化文字之后的那一版，不回本仓，`写作课件PPT输出\` 里那份是半成品（审核过＋注入动画），
+   **不收**，老师的 PPT 由人工从外部终稿提供。仓内直出的课次，`写作课件PPT输出\` 里那份
+   本身就是终稿（带图带动画），**收**。认法：pptx 文档属性「备注」带 html_to_pptx.py 写入的
+   直出标记 `laojohn-direct-build`（不看有没有课件构建脚本——六上五有构建脚本，但仓内放的是外部件）。
 
 约定：
 - 复制不移动——各原始输出目录是单一事实源，绝不破坏。
-- 默认只收对外成品（docx/pdf；**不含 pptx，见上**）；--with-sources 时额外把可编辑源文件（md/json）一并打包。
+- 默认只收对外成品（docx/pdf；pptx 仅收直出件，见上）；--with-sources 时额外把可编辑源文件（md/json）一并打包。
 - **写作课线不再有逐页讲稿**（2026-08-03 停产，目录已撤）；读书会线的讲稿由 laojohn-course-package 收，与本脚本无关。
 - 缺料不报错、不阻断：跳过并在汇总里标「缺」，让用户知道哪些物料还没生成。
 
@@ -45,7 +46,24 @@ CATEGORIES = [
         "globs": ["写作配套输出/{unit}/*"],
         "primary": {".pdf"},
     },
+    {
+        "label": "课件PPT（仅直出件）",
+        "dest": "",
+        "globs": ["写作课件PPT输出/{unit}/{unit}-课件PPT.pptx"],
+        "primary": {".pptx"},
+        "direct_only": True,
+    },
 ]
+
+DIRECT_MARK = "laojohn-direct-build"
+
+
+def is_direct(pptx: Path) -> bool:
+    try:
+        from pptx import Presentation
+        return DIRECT_MARK in (Presentation(str(pptx)).core_properties.comments or "")
+    except Exception:
+        return False
 
 
 def gather(root: Path, unit: str, with_sources: bool):
@@ -63,6 +81,9 @@ def gather(root: Path, unit: str, with_sources: bool):
                     continue
                 seen.add(src)
                 ext = src.suffix.lower()
+                if cat.get("direct_only") and not is_direct(src):
+                    items.append((src, False, "外部件半成品(不收)"))
+                    continue
                 if ext in cat["primary"]:
                     items.append((src, True, "成品"))
                 elif with_sources:
@@ -138,7 +159,11 @@ def main():
     missing = [s[0] for s in summary if s[2] == "缺"]
     print("-" * 60)
     print(f"共复制 {total_copied} 个文件 → {dest_root}")
-    print("※ 本包不含 PPT——终稿在外部（人工嵌图后的版本），请另行提供给老师。")
+    ppt_n = next((n for label, n, _ in summary if label.startswith("课件PPT")), 0)
+    if ppt_n:
+        print("※ 已收仓内直出的课件 PPT（直出件即终稿）。")
+    else:
+        print("※ 本包不含 PPT——本课是外部件，终稿在外部（人工嵌图后的版本），请另行提供给老师。")
     if missing:
         print(f"⚠ 缺失物料（未生成或命名不符）：{ '、'.join(missing) }")
     if args.dry_run:
