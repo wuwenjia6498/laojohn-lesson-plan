@@ -33,6 +33,7 @@ description: 把"老约翰深度阅读读书会"风格的课件中间稿 (.md) �
 3. **一条龙出件**：`python .claude/skills/laojohn-ppt/tools/direct_build.py <课次>`——截稿纸（`grab_worksheet.py`）→ 跑构建脚本出 dc.html → `html_to_pptx.py` 转 pptx → `inspect_pptx.py` → `audit_against_plan.py`（审查闸门）→ 并入分组 → `animate_pptx.py` → 回读核验（shape id、回跳）。目标文件已存在（如外部件动画版）会拒绝覆盖，`--force` 或 `--out` 另存。
 4. **目检**：COM 逐页导出（`tools/shot_assets.py` 或 PowerPoint 导出）看溢出、压图、断行。
 5. **页标回注＋重渲 docx**：同后处理链第 4 步。
+6. **入库并推送**（2026-09-26 用户定：直出件要让同事在 GitHub 上看得到，**完成即推，不必再问**）：`direct_build.py` 末尾会打出入库清单（pptx、`-anim.json`、课件构建脚本、详案 md、页标映射 json），逐项 `git add` 后 commit，再 `git push`。推送前按 CLAUDE.md §9 确认提交身份是本人；>5MB 先跑 `scripts/shrink_pptx_media.py`。直出件就是终稿，**不适用**下面「交付边界」的「终稿不回仓」。
 
 ---
 
@@ -194,6 +195,8 @@ PYTHONUTF8=1 python .claude\skills\laojohn-lesson-plan\assets\insert_images_docx
 不传 `--base-docx` 的话，回插件会自己现调引擎另出一份基础 docx——那份**没跑 `style_front_page.py`**，首页会掉回朴素版式。传入刚重渲好的无图版，配图版才同时继承页标与首页版式。取图目录由 `writing` 档的 `name_from: stem` 按详案文件名解析到 `写作课教材插图\<年级册>-第N单元-<题目>\`，不用给 `--images-dir`。
 
 ### 交付边界（2026-09-02 用户拍板）
+
+（本节只管外部件；仓内直出件就是终稿，入库并推送，见「仓内直出」第 6 步。）
 
 **本仓工序止于第 4 步。** 之后人工会在外部平台嵌入插图、优化文字，那一版才是**给老师的终稿**——它**不回本仓**，也不进 `写作课件PPT输出\`。
 

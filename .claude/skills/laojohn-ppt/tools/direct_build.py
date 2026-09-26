@@ -87,9 +87,17 @@ def main():
     side = out.with_name(out.stem + "-动画分组.json")
     if side.exists():
         side.unlink()
-    print(f"\n完成：{out}（{n} 页）")
+    mb = out.stat().st_size / 1048576
+    print(f"\n完成：{out}（{n} 页，{mb:.1f}MB）")
     print("核验：" + ("shape id 无重复、无回跳" if not bad else "；".join(bad)))
-    print("下一步：COM 逐页导出目检 → 页标回注 → 重渲详案 docx（见 SKILL「仓内直出」节）")
+    if mb > 5:
+        print("⚠ 超过 5MB（pre-commit 软拦）：入库前先跑 scripts/shrink_pptx_media.py")
+    print("下一步：COM 逐页导出目检 → 页标回注 → 重渲详案 docx → 入库并推送（见 SKILL「仓内直出」节）")
+    rel = lambda p: p.relative_to(ROOT).as_posix()
+    print("入库清单（直出件本身就是终稿，图不入库、别处重渲不出来，所以 pptx 必须入库）：")
+    for p in (out, sheet, build, ROOT / "写作课详案输出" / f"{u}-写作课详案.md"):
+        print("   git add", rel(p))
+    print("   git add 写作课件中间稿输出/" + u + "/*页标映射.json   （页标回注后）")
 
 
 if __name__ == "__main__":
