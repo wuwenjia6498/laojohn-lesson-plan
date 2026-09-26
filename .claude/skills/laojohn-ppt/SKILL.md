@@ -1,22 +1,38 @@
 ---
 name: laojohn-ppt
-description: 把"老约翰深度阅读读书会"风格的课件中间稿 (.md) 编译为老师投屏用 .pptx；另承载写作课「外部 PPT 后处理链」（认领归位→读详案审查 PPT→注入点击动画→详案页标回注）。当用户要求"把课件中间稿做成 PPT""烘焙投屏课件"，或说"PPT 放好了""外部 PPT 处理一下""新做的课件处理一下""这份 PPT 是外面做的，加下动画"时使用本技能。
+description: 把"老约翰深度阅读读书会"风格的课件中间稿 (.md) 编译为老师投屏用 .pptx；另承载写作课两条线：「仓内直出」（按母版从详案直接出带图带动画的 pptx）与「外部 PPT 后处理链」（认领归位→读详案审查 PPT→注入点击动画→详案页标回注，可选添图）。当用户要求"把课件中间稿做成 PPT""烘焙投屏课件"，"从详案直出 PPT""按母版出课件"，或说"PPT 放好了""外部 PPT 处理一下""新做的课件处理一下""这份 PPT 是外面做的，加下动画"时使用本技能。
 ---
 
-# laojohn-ppt — 投屏 PPT 编译器 + 外部 PPT 后处理链
+# laojohn-ppt — 投屏 PPT 编译器 + 写作课仓内直出 + 外部 PPT 后处理链
 
 两条用途，**按线走、别混用**：
 
 | 线 | 走法 | 目录 |
 |---|---|---|
 | 读书会 | **编译**：中间稿 `.md` → `.pptx`（16:9，微软雅黑 + 宋体，零依赖） | `读书会课件PPT输出\` |
-| 写作课（2026-08-03 起） | **后处理链**：外部平台生成 pptx，本仓做归位/审查/动画/页标 | `写作课件PPT输出\` |
+| 写作课·仓内直出（2026-09-26 起，重写详案的课次走这条） | **直出**：按母版写 dc.html → 转 pptx → 审查 → 动画 → 页标 | `写作课件PPT输出\` |
+| 写作课·外部件（2026-08-03 起，存量课次） | **后处理链**：外部平台生成 pptx，本仓做归位/审查/动画/页标，可选添图 | `写作课件PPT输出\` |
 | 宣讲（2026-08-24 起） | **编译**：宣讲中间稿 `.md` → `.pptx`（对外产品宣讲件，非课堂件） | `写作课相关宣传文件\<宣讲件名>\` |
 
 ## 何时使用
 
 - "把中间稿做成 PPT""烘焙投屏课件"，或上游 `laojohn-ppt-draft` 刚出中间稿 → **编译**（见下方契约速览）
+- **"从详案直出 PPT""按母版出课件"** → **仓内直出**（下一节）
 - **"PPT 放好了""外部 PPT 处理一下""新做的课件处理一下""外面做的，加下动画"** → **后处理链**
+
+---
+
+## 仓内直出（写作课线 · 2026-09-26 起）
+
+> 用户定：**以后重写详案的课次一律走直出**；外部件那条链留给存量课次。六上五是试点（直出件与外部配图终稿并存，终稿仍用外部配图版）。来历与踩过的坑见记忆 `writing-ppt-direct-build-pilot-0926`。
+
+母版（规范单一源）在 `assets/writing-master/`：`framework.md` 是配色、骨架、版式库、文字、**本仓增补**（主题色胶囊＋吉祥物＋手指图标、§四之二 配图版式 9 条、§八 动画与核对、讲评环节不进 PPT）；`register-audit.md` 是起草后的语域审读清单。**写页面前整读 framework.md**。
+
+1. **备图**（课件配图工具，gpt-image）：场景图走 `run_lesson.py`；要立在底带／页边的人物、每课的吉祥物（`抠-吉祥物`）一律 `gen_cutouts.py` 出透明底；**已有、已认可的图直接复用**。处理好的图放 `课件配图工具/课件产出/<课次>/gpt-image/ppt配图缓存/直出/`，吉祥物命名 `吉祥物.png`。
+2. **写课件构建脚本** `写作课件中间稿输出/<课次>/<课次>-课件构建.py`（入库）：页序＝详案〖PPT第N页〗，用 `tools/writing_deck_kit.py` 的积木（cover／section_page／page／steps／bullets／card／strip／band／fig／worksheet_page／timer_badge／end_page）逐页写；点击分组写在 a／a0／fa 参数（按详案师话顺序、禁回跳）。范例＝六上五那份。写完做语域审读（register-audit.md）。
+3. **一条龙出件**：`python .claude/skills/laojohn-ppt/tools/direct_build.py <课次>`——截稿纸（`grab_worksheet.py`）→ 跑构建脚本出 dc.html → `html_to_pptx.py` 转 pptx → `inspect_pptx.py` → `audit_against_plan.py`（审查闸门）→ 并入分组 → `animate_pptx.py` → 回读核验（shape id、回跳）。目标文件已存在（如外部件动画版）会拒绝覆盖，`--force` 或 `--out` 另存。
+4. **目检**：COM 逐页导出（`tools/shot_assets.py` 或 PowerPoint 导出）看溢出、压图、断行。
+5. **页标回注＋重渲 docx**：同后处理链第 4 步。
 
 ---
 
@@ -89,6 +105,8 @@ PYTHONUTF8=1 python .claude\skills\laojohn-ppt\scripts\audit_against_plan.py "<�
 - 详案里的表格（对照表、骨架表、旁批表、评价标准表）是否都有页承载，行数对不对。
 - 配图占位是不是真图：`blipFill` 为 False 的大形状是空色块，图并没有贴上。
 - 各环节标称时长加总是否仍等于 45+45。
+- **稿纸页**：三套外部人工终稿都在自由写作说明页后插一页稿纸页（学生用第 2 页截图＋红色计时徽标）。仓内直出件自带、每次用 `tools/grab_worksheet.py` 现截；外部件由人工终稿补，本链不加。
+- **习作讲评页不该出现**（2026-09-26 用户定：详案「附：习作讲评指导环节」一律不进课件 PPT）。外部件带了讲评页，报用户删除；删页会让后面的页码前移，页标回注以删后的页序为准。
 
 **② 正确性**——逐页把 PPT 文字和详案对应段落比对：
 - 示范文、表格数据、评价标准这类**成篇成表的内容必须逐字一致**；差异要指名到行。
@@ -197,14 +215,20 @@ PYTHONUTF8=1 python .claude\skills\laojohn-lesson-plan\assets\insert_images_docx
 2. **写版式清单**：`课件配图工具/课件产出/<项目>/ppt配图版式.json`，逐页写 op（swap／add／geom／band／font／fill），全局写 theme、tip_icon、mascot。格式见工具头注释。
 3. **生成**：`python .claude/skills/laojohn-ppt/tools/illustrate_pptx.py <版式清单.json>`。原图位用 swap 在原形状里换图，shape id 不变，动画绑定保留；新加的图不进动画。
 4. **核验**：用 PowerPoint COM 导出全部页截图逐页看；再按上面「收尾核验」的思路查 shape id 有没有重复、anim.json 里的 id 是否都还在、有没有新增的动画回跳。
+5. **补齐终稿**（2026-09-26 六上五 v9 沉淀）：`tools/finalize_external.py`，对配图终稿与仓内动画版各跑一次——
+   - `--worksheet-after N --student-html 写作配套输出/<课次>/<课次>-学生用.html`：自由写作说明页（第 N 页）后插稿纸页；
+   - `--drop-match 习作讲评`：删讲评页；
+   - `--text-from 润色稿.pptx`：外部另有文字润色版时，按 shape_id 逐框换文字（几何、动画不动）；
+   - `--zh-cn`：外部件 run 一律标 en-US，PowerPoint 按英文断行、标点落行首——改 zh-CN，页题放不下的顺带加宽。
+   仓内动画版旁的 `-anim.json` 会按新页序自动重排；之后重跑 `audit_against_plan.py`、页标回注、重渲详案 docx。
 
-版式口径（用户逐条定过）：
+版式口径（用户逐条定过；**仓内直出件以母版 `assets/writing-master/framework.md` §四之二 为准，与下面同一口径**，本节只多出后期改外部件时才用的操作）：
 - 以图为主重排，不在原版式里找空地塞小图：正文让出右栏，人物落在浅色底带的底边或页面底边上，页脚提示句收窄，给人物让位。
 - 底带看页面加，不是每页都要：让人物有落脚处、页面显得饱满时才加；物件图（比如碎杯子）不需要。
 - 卡片页的小插画要收进卡片，贴在卡片右下角、略微探出卡边，不能孤零零放在卡片外面。
 - **分节页、结尾页一律不加图**（全线适用，工具的 `is_section` 会自动跳过）。封面照常放人物。
-- 表格页、整篇范文页、三栏已排满的页不放主图；判断题页的配图不能画出答案。
-- 全课统一：页题条浅蓝灰、分节页纯色、每页页题条右端立吉祥物、页脚提示句前加手指图标（`品牌资产/图标/手指点击.png`）、卡片表头上彩色。
+- 表格页、三栏已排满的页不放主图；**整篇示范文页要配图**（末尾几段收窄、人物立右下，v8 P18）；判断题页的配图不能画出答案。
+- 全课统一：页题条按本课主题从五色里选一色（粉 `FCE7EA`／浅绿 `E6F2E1`／浅蓝灰 `E3E9F2`／浅桃 `FDEBD9`／浅黄 `FFF3D6`，六上五外部件用的是浅蓝灰）、分节页纯色、每页页题条右端立吉祥物、页脚提示句前加手指图标（`品牌资产/图标/手指点击.png`）、卡片表头上彩色。**2026-09-26 用户定这三样（主题色页题条、吉祥物、手指图标）为默认**，仓内直出同一口径，写在母版 `assets/writing-master/framework.md`「本仓增补」。
 - ⚠ 收尾**不调** `normalize_paragraphs`：外部件的多 pPr 段落会被它改坏，改完 PowerPoint 就打不开。
 - 输出文件如果正在 WPS／PowerPoint 里打开，保存会 PermissionError，就改成新版本号另存。
 ### 收尾核验
@@ -333,7 +357,7 @@ python build_ppt.py --input "<项目根目录>\读书会课件中间稿输出\<�
 │   └── animate_pptx.py     第3步③ 按工作单注入点击动画（import helpers，幂等，回读核验＋绑定防呆＋审查闸门）
 ├── assets/    logo/ · reference-ppt/ · decorations/
 ├── examples/  mini-test.md（最小端到端样例）+ mini-test.pptx
-└── tools/     parse_slide.py（开发期 XML 侦察）；pptx_text_edit.py；shot_assets.py；illustrate_pptx.py（可选第 5 步·本仓添图）
+└── tools/     parse_slide.py（开发期 XML 侦察）；pptx_text_edit.py；shot_assets.py；illustrate_pptx.py（可选第 5 步·本仓添图）；finalize_external.py（添图后补稿纸页／删讲评／换润色文字／中文断行）；html_to_pptx.py＋writing_deck_kit.py＋direct_build.py＋grab_worksheet.py（仓内直出）
 ```
 
 ---

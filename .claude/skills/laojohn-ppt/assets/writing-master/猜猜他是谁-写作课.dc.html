@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  * { box-sizing: border-box; }
+  a { color:#C0392B; text-decoration:none; }
+  a:hover { color:#a5321f; }
+  image-slot { --is-bg:#eef1f5; }
+  /* 页面画布不铺白底：导出 PPTX 后无满版白色矩形 */
+</style>
+</helmet>
+
+<x-import component-from-global-scope="image-slot" from="./image-slot.js" hint-size="1px,1px" style="display:none;"></x-import>
+
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%">
+
+<section data-label="封面" data-screen-label="01">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;overflow:hidden;">
+   <img src="logo.png" alt="老约翰 深度阅读" style="position:absolute;top:34px;right:110px;height:66px;width:auto;">
+   <div style="position:absolute;top:120px;left:90px;width:1740px;height:600px;border-radius:16px;overflow:hidden;background:linear-gradient(105deg,#EE7B2E 0%,#F0A63C 42%,#57B0A6 100%);">
+     <div style="position:absolute;top:30px;left:220px;width:360px;height:360px;border-radius:50%;background:rgba(255,255,255,0.10);"></div>
+     <div style="position:absolute;top:320px;left:520px;width:430px;height:430px;border-radius:50%;background:rgba(255,255,255,0.08);"></div>
+   </div>
+   <div style="position:absolute;left:400px;top:280px;width:1120px;font-family:'Microsoft YaHei','微软雅黑',sans-serif;font-weight:700;font-style:italic;font-size:118px;line-height:1.25;color:#fff;">猜猜他是谁</div>
+   <div style="position:absolute;left:404px;top:470px;width:1120px;font-family:'Microsoft YaHei','微软雅黑',sans-serif;font-size:40px;font-style:italic;line-height:1.4;color:#fff;font-weight:400;">三年级上册 · 第一单元 · 校内同步写作（写人）</div>
+   <div data-om-raster="true" style="position:absolute;top:300px;left:0;width:0;height:0;border-top:70px solid transparent;border-bottom:70px solid transparent;border-left:112px solid #3D4A63;"></div>
+   <div style="position:absolute;right:130px;bottom:70px;width:430px;height:280px;" data-om-raster="true"><image-slot id="cover-scene" shape="rounded" radius="16" placeholder="配图：同学们的笑脸 / 班级合影（可选）"></image-slot></div>
+   <div style="position:absolute;left:110px;bottom:96px;font-size:34px;color:#3D4A63;font-weight:700;">三年级上册 · 第一单元</div>
+ </div>
+</section>
+
+<section data-label="课时分隔·01" data-screen-label="02">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;inset:84px;border-radius:16px;overflow:hidden;background:linear-gradient(120deg,#6FB8AD 0%,#4E93A0 60%,#3D6E82 100%);">
+     <div style="position:absolute;left:130px;top:250px;font-family:'Microsoft YaHei','微软雅黑',sans-serif;font-weight:700;font-size:190px;line-height:1.15;color:rgba(255,255,255,0.95);">01</div>
+     <div style="position:absolute;left:150px;top:512px;font-size:60px;line-height:1.3;color:#fff;font-weight:700;">写作指导课</div>
+     <div style="position:absolute;left:152px;top:606px;font-size:34px;color:rgba(255,255,255,0.95);">创设情境 · 回忆观察 · 学写法 · 人物特点卡 · 教师示范文</div>
+     <div style="position:absolute;left:130px;bottom:84px;background:#fff;border-radius:12px;padding:12px 20px;"><img src="logo.png" alt="老约翰 深度阅读" style="height:56px;width:auto;display:block;"></div>
+   </div>
+ </div>
+</section>
+
+<section data-label="创设情境·猜人游戏" data-screen-label="03">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;color:#2A2E37;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;top:64px;left:128px;font-size:32px;font-weight:700;">创设情境</div>
+   <img src="logo.png" alt="老约翰 深度阅读" style="position:absolute;top:48px;right:100px;height:72px;width:auto;">
+   <div style="position:absolute;top:150px;left:110px;"><div style="display:inline-block;background:#FCE7EA;border-radius:20px;padding:16px 44px;font-size:42.7px;font-weight:700;line-height:1.3;"><div>先来做一个游戏：<span style="color:#C0392B;">猜猜他是谁</span></div></div><div style="width:78px;height:7px;background:#C0392B;border-radius:4px;margin:18px 0 0 12px;"></div></div>
+   <div style="position:absolute;top:330px;left:110px;right:110px;display:grid;grid-template-columns:1fr 1fr;gap:44px;">
+     <div style="position:relative;background:#EAF1FB;border:2px solid #C3D6F0;border-radius:28px;padding:38px 44px;">
+       <div data-om-raster="true" style="position:absolute;left:70px;bottom:-28px;width:0;height:0;border-left:24px solid transparent;border-right:24px solid transparent;border-top:30px solid #EAF1FB;"></div>
+       <div style="font-size:31px;color:#8a929e;font-weight:700;margin-bottom:18px;">第一个</div>
+       <div style="font-size:34px;font-weight:700;line-height:1.65;">他穿一身<span style="color:#C0392B;">蓝色的紧身衣</span>，披着<span style="color:#C0392B;">红色的披风</span>；会飞、力气特别大，一有人遇到危险就飞过去救人；胸前还印着一个<span style="color:#C0392B;">大大的红色字母</span>。</div>
+     </div>
+     <div style="position:relative;background:#EAF1FB;border:2px solid #C3D6F0;border-radius:28px;padding:38px 44px;">
+       <div data-om-raster="true" style="position:absolute;left:70px;bottom:-28px;width:0;height:0;border-left:24px solid transparent;border-right:24px solid transparent;border-top:30px solid #EAF1FB;"></div>
+       <div style="font-size:31px;color:#8a929e;font-weight:700;margin-bottom:18px;">第二个</div>
+       <div style="font-size:34px;font-weight:700;line-height:1.65;">他从<span style="color:#C0392B;">石头缝里蹦出来</span>，一个跟头能翻<span style="color:#C0392B;">十万八千里</span>。<br>这一次是不是猜得更快了？</div>
+     </div>
+   </div>
+   <div style="position:absolute;bottom:150px;left:110px;right:110px;background:#FCF3EE;border:2px solid #F0CBB4;border-radius:18px;padding:28px 42px;font-size:32px;line-height:1.55;"><div>老师没有说出名字，只挑了一两处<span style="color:#C0392B;font-weight:700;">“只有他才有”</span>的地方，大家就立刻认出他了。</div></div>
+   <div style="position:absolute;bottom:54px;left:110px;right:110px;font-size:34.7px;color:#3D4A63;">会飞的英雄有很多，真正让你立刻猜中的，是<span style="color:#C0392B;font-weight:700;">红披风和胸前那个大字母</span>。</div>
+ </div>
+</section>
+
+<section data-label="创设情境·猜身边人" data-screen-label="04">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;color:#2A2E37;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;top:64px;left:128px;font-size:32px;font-weight:700;">创设情境</div>
+   <img src="logo.png" alt="老约翰 深度阅读" style="position:absolute;top:48px;right:100px;height:72px;width:auto;">
+   <div style="position:absolute;top:150px;left:110px;"><div style="display:inline-block;background:#FCE7EA;border-radius:20px;padding:16px 44px;font-size:42.7px;font-weight:700;line-height:1.3;"><div>再猜一个，这一次是<span style="color:#C0392B;">身边的人</span></div></div></div>
+   <div style="position:absolute;top:330px;left:110px;width:1020px;">
+     <div style="position:relative;background:#EAF1FB;border:2px solid #C3D6F0;border-radius:28px;padding:42px 50px;">
+       <div data-om-raster="true" style="position:absolute;left:-30px;top:70px;width:0;height:0;border-top:24px solid transparent;border-bottom:24px solid transparent;border-right:32px solid #EAF1FB;"></div>
+       <div style="font-size:40px;font-weight:700;line-height:1.7;color:#2A2E37;">“他每次提问前，总要先把<span style="color:#C0392B;">眼镜往上推一推</span>，<br>一笑起来，眼睛就<span style="color:#C0392B;">眯成一条缝</span>。”</div>
+     </div>
+     <div style="margin-top:44px;display:flex;flex-direction:column;gap:32px;">
+       <div style="display:flex;gap:22px;align-items:flex-start;"><div style="width:16px;height:16px;border-radius:50%;background:#3D4A63;margin-top:16px;flex:none;"></div><div style="font-size:36px;font-weight:700;line-height:1.45;">每个人猜的不一样，可每个人的脑海里，都有了一个<span style="color:#C0392B;">清清楚楚的人</span></div></div>
+       <div style="display:flex;gap:22px;align-items:flex-start;"><div style="width:16px;height:16px;border-radius:50%;background:#3D4A63;margin-top:16px;flex:none;"></div><div style="font-size:36px;font-weight:700;line-height:1.45;">认得的，<span style="color:#C0392B;">一口就能喊出名字</span>；不认得的，眼前也像<span style="color:#C0392B;">真的见过这个人</span></div></div>
+     </div>
+   </div>
+   <div style="position:absolute;top:350px;right:130px;width:520px;height:520px;" data-om-raster="true"><image-slot id="s04" shape="rounded" radius="18" placeholder="配图：推眼镜的同学 / 课堂猜谜场景"></image-slot></div>
+   <div style="position:absolute;bottom:54px;left:110px;right:110px;font-size:34.7px;color:#3D4A63;">特点抓准了，<span style="color:#C0392B;font-weight:700;">不用名字也能让人“认出”一个人</span>，这就是今天要学的本领。</div>
+ </div>
+</section>
+
+<section data-label="创设情境·任务" data-screen-label="05">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;color:#2A2E37;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;top:64px;left:128px;font-size:32px;font-weight:700;">创设情境</div>
+   <img src="logo.png" alt="老约翰 深度阅读" style="position:absolute;top:48px;right:100px;height:72px;width:auto;">
+   <div style="position:absolute;top:150px;left:110px;"><div style="display:inline-block;background:#FCE7EA;border-radius:20px;padding:16px 44px;font-size:42.7px;font-weight:700;line-height:1.3;"><div>今天的任务：做一本<span style="color:#C0392B;">《人物图鉴》</span></div></div></div>
+   <div style="position:absolute;top:280px;left:110px;right:110px;background:#DCE6F5;border-radius:16px;padding:22px 40px;font-size:34px;font-weight:700;color:#2c3a54;"><div>每人写一位同学，写完订成一本《人物图鉴》，全班传阅。从头到尾<span style="color:#C0392B;">不写出他的名字</span>，只能用“他”或“她”。</div></div>
+   <div style="position:absolute;top:400px;left:150px;width:400px;height:470px;" data-om-raster="true"><image-slot id="s05" shape="rounded" radius="16" placeholder="配图：手作小册子 / 人物图鉴封面"></image-slot></div>
+   <div style="position:absolute;top:406px;left:640px;right:120px;display:flex;flex-direction:column;gap:40px;">
+     <div style="display:flex;gap:26px;align-items:flex-start;">
+       <div style="width:53px;height:53px;flex:none;background:#3D4A63;color:#fff;font-size:28px;font-weight:700;border-radius:14px;display:flex;align-items:center;justify-content:center;"><div>1</div></div>
+       <div style="font-size:36px;font-weight:700;line-height:1.45;padding-top:6px;">认识他的同学一读就会说<span style="color:#C0392B;">“这不是某某吗”</span>，这一页就写成功了</div>
+     </div>
+     <div style="display:flex;gap:26px;align-items:flex-start;">
+       <div style="width:53px;height:53px;flex:none;background:#3D4A63;color:#fff;font-size:28px;font-weight:700;border-radius:14px;display:flex;align-items:center;justify-content:center;"><div>2</div></div>
+       <div style="font-size:36px;font-weight:700;line-height:1.45;padding-top:6px;">都不认识也没有关系，听完觉得<span style="color:#C0392B;">“这个人好特别，像真见过”</span>，也算写成功</div>
+     </div>
+     <div style="display:flex;gap:26px;align-items:flex-start;">
+       <div style="width:53px;height:53px;flex:none;background:#3D4A63;color:#fff;font-size:28px;font-weight:700;border-radius:14px;display:flex;align-items:center;justify-content:center;"><div>3</div></div>
+       <div style="font-size:36px;font-weight:700;line-height:1.45;padding-top:6px;">最怕写出的话<span style="color:#C0392B;">套在班上任何人身上都合适</span>，既猜不出，也想不出是怎样的人</div>
+     </div>
+   </div>
+ </div>
+</section>
+
+<section data-label="回忆观察·选人" data-screen-label="06">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;color:#2A2E37;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;top:64px;left:128px;font-size:32px;font-weight:700;">回忆观察</div>
+   <img src="logo.png" alt="老约翰 深度阅读" style="position:absolute;top:48px;right:100px;height:72px;width:auto;">
+   <div style="position:absolute;top:150px;left:110px;"><div style="display:inline-block;background:#FCE7EA;border-radius:20px;padding:16px 44px;font-size:42.7px;font-weight:700;line-height:1.3;"><div>先在心里选定一个人，<span style="color:#C0392B;">让他“活”在你的脑海里</span></div></div><div style="width:78px;height:7px;background:#C0392B;border-radius:4px;margin:18px 0 0 12px;"></div></div>
+   <div style="position:absolute;top:346px;left:110px;width:1000px;display:flex;flex-direction:column;gap:36px;">
+     <div style="display:flex;gap:22px;align-items:flex-start;"><div style="width:16px;height:16px;border-radius:50%;background:#3D4A63;margin-top:16px;flex:none;"></div><div style="font-size:37px;font-weight:700;line-height:1.45;">他<span style="color:#C0392B;">走进教室</span>是什么样？</div></div>
+     <div style="display:flex;gap:22px;align-items:flex-start;"><div style="width:16px;height:16px;border-radius:50%;background:#3D4A63;margin-top:16px;flex:none;"></div><div style="font-size:37px;font-weight:700;line-height:1.45;">高兴、着急的时候，<span style="color:#C0392B;">脸上、手上</span>又是什么样？</div></div>
+     <div style="display:flex;gap:22px;align-items:flex-start;"><div style="width:16px;height:16px;border-radius:50%;background:#3D4A63;margin-top:16px;flex:none;"></div><div style="font-size:37px;font-weight:700;line-height:1.45;">课间他<span style="color:#C0392B;">最爱做什么</span>？有没有帮过别人的小事？</div></div>
+     <div style="display:flex;gap:22px;align-items:flex-start;"><div style="width:16px;height:16px;border-radius:50%;background:#3D4A63;margin-top:16px;flex:none;"></div><div style="font-size:37px;font-weight:700;line-height:1.45;color:#C0392B;">想一想专属于他、一眼就能认出是他的那个瞬间。</div></div>
+   </div>
+   <div style="position:absolute;top:340px;right:120px;width:560px;height:560px;" data-om-raster="true"><image-slot id="s06" shape="rounded" radius="18" placeholder="配图：孩子闭眼回想 / 教室一角"></image-slot></div>
+   <div style="position:absolute;bottom:54px;left:110px;right:110px;font-size:34.7px;color:#3D4A63;">同桌、好朋友，或者那个你<span style="color:#C0392B;font-weight:700;">天天都会注意到的人</span>，悄悄选定一个，记住他。</div>
+ </div>
+</section>
+
+<section data-label="回忆观察·招牌动作" data-screen-label="07">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;color:#2A2E37;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;top:64px;left:128px;font-size:32px;font-weight:700;">回忆观察</div>
+   <img src="logo.png" alt="老约翰 深度阅读" style="position:absolute;top:48px;right:100px;height:72px;width:auto;">
+   <div style="position:absolute;top:150px;left:110px;"><div style="display:inline-block;background:#FCE7EA;border-radius:20px;padding:16px 44px;font-size:42.7px;font-weight:700;line-height:1.3;"><div>找一处<span style="color:#C0392B;">只有他才有</span>的地方，和同桌说一说</div></div></div>
+   <div style="position:absolute;top:320px;left:110px;right:110px;display:flex;flex-wrap:wrap;gap:20px;">
+     <div style="background:#FCE7EA;color:#C0392B;font-size:31px;font-weight:700;border-radius:14px;padding:20px 30px;"><div>总爱把眼镜往上推一推</div></div>
+     <div style="background:#FCE7EA;color:#C0392B;font-size:31px;font-weight:700;border-radius:14px;padding:20px 30px;"><div>一紧张就转笔</div></div>
+     <div style="background:#FCE7EA;color:#C0392B;font-size:31px;font-weight:700;border-radius:14px;padding:20px 30px;"><div>说话总要加一句“对吧对吧”</div></div>
+     <div style="background:#FCE7EA;color:#C0392B;font-size:31px;font-weight:700;border-radius:14px;padding:20px 30px;"><div>一笑就露出两个酒窝</div></div>
+   </div>
+   <div style="position:absolute;top:470px;left:110px;right:110px;background:#DCE6F5;border-radius:16px;padding:26px 40px;font-size:32px;font-weight:700;color:#2c3a54;"><div>同桌两两互说：<span style="color:#C0392B;">先不说他是谁</span>，只说这一处最特别的地方，听一听同桌的脑海里能不能浮现出一个人来。</div></div>
+   <div style="position:absolute;top:620px;left:110px;right:110px;background:#FCF3EE;border:2px solid #F0CBB4;border-radius:18px;padding:32px 44px;font-size:33px;line-height:1.6;"><div>这些<span style="color:#C0392B;font-weight:700;">不用提名字，单凭动作、说话就能认出他</span>的细节，就是一个人身上最与众不同的特点，把它记在心里，接下来就能用上。</div></div>
+   <div style="position:absolute;bottom:54px;left:110px;right:110px;font-size:34.7px;color:#3D4A63;">心里先有他<span style="color:#C0392B;font-weight:700;">具体的样子</span>，动笔时才写得出来。</div>
+ </div>
+</section>
+
+<section data-label="判断对比" data-screen-label="08">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;color:#2A2E37;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;top:64px;left:128px;font-size:32px;font-weight:700;">判断对比</div>
+   <img src="logo.png" alt="老约翰 深度阅读" style="position:absolute;top:48px;right:100px;height:72px;width:auto;">
+   <div style="position:absolute;top:150px;left:110px;"><div style="display:inline-block;background:#FCE7EA;border-radius:20px;padding:16px 44px;font-size:42.7px;font-weight:700;line-height:1.3;"><div>这两段话，哪一段能让人<span style="color:#C0392B;">猜出他是谁</span>？</div></div></div>
+   <div style="position:absolute;top:300px;left:110px;right:110px;display:grid;grid-template-columns:1fr 1fr;gap:44px;">
+     <div style="border:1px solid #e4e7ec;border-radius:18px;overflow:hidden;">
+       <div style="background:#3D4A63;color:#fff;text-align:center;font-size:32px;font-weight:700;padding:18px;"><div>猜不出</div></div>
+       <div style="background:#F7F8FA;padding:32px 34px;font-size:31px;line-height:1.7;text-indent:2em;min-height:300px;"><div>我的同桌，每天早上我们一起到校，上午一起上课，中午一起吃饭，下午一起做值日，放学一起回家。</div></div>
+     </div>
+     <div style="border:1px solid #e4e7ec;border-radius:18px;overflow:hidden;">
+       <div style="background:#3D4A63;color:#fff;text-align:center;font-size:32px;font-weight:700;padding:18px;"><div>立得起</div></div>
+       <div style="background:#F7F8FA;padding:32px 34px;font-size:31px;line-height:1.7;text-indent:2em;min-height:300px;"><div>我同桌有一手<span style="color:#C0392B;font-weight:700;">画画的本事</span>。课间十分钟，别人都在追跑打闹，他一个人趴在桌上，<span style="color:#C0392B;font-weight:700;">几笔就把窗外那棵树画活了</span>，叶子一片一片，跟真的一样。</div></div>
+     </div>
+   </div>
+   <div style="position:absolute;bottom:56px;left:110px;right:110px;display:flex;flex-direction:column;gap:16px;font-size:30px;line-height:1.45;">
+     <div>① 左边从早到晚记了一串事，<span style="color:#C0392B;font-weight:700;">班里几乎人人都这样</span>，读完猜不出，也记不住。</div>
+     <div>② 右边只写一件事：他会画画、画得好，<span style="color:#C0392B;font-weight:700;">这个人立刻就有了模样</span>。</div>
+   </div>
+ </div>
+</section>
+
+<section data-label="学写法·核心" data-screen-label="09">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;color:#2A2E37;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;top:64px;left:128px;font-size:32px;font-weight:700;">学写法</div>
+   <img src="logo.png" alt="老约翰 深度阅读" style="position:absolute;top:48px;right:100px;height:72px;width:auto;">
+   <div style="position:absolute;top:150px;left:110px;"><div style="display:inline-block;background:#FCE7EA;border-radius:20px;padding:16px 44px;font-size:42.7px;font-weight:700;line-height:1.3;"><div>今天学一个方法：抓住<span style="color:#C0392B;">一两个最特别的地方</span></div></div><div style="width:78px;height:7px;background:#C0392B;border-radius:4px;margin:18px 0 0 12px;"></div></div>
+   <div style="position:absolute;top:330px;left:110px;width:640px;height:600px;border-radius:22px;background:linear-gradient(135deg,#3D4A63 0%,#2c3650 100%);display:flex;align-items:center;justify-content:center;">
+     <div style="font-family:'Microsoft YaHei','微软雅黑',sans-serif;font-weight:700;font-size:104px;line-height:1.4;color:#fff;text-align:center;">写清楚<br>写具体</div>
+   </div>
+   <div style="position:absolute;top:352px;left:840px;right:110px;display:flex;flex-direction:column;gap:40px;">
+     <div style="display:flex;gap:22px;align-items:flex-start;"><div style="width:16px;height:16px;border-radius:50%;background:#3D4A63;margin-top:14px;flex:none;"></div><div style="font-size:36px;font-weight:700;line-height:1.5;">不要<span style="color:#C0392B;">面面俱到</span>：长相、性格、爱好什么都写一点，等于什么都没有写清楚</div></div>
+     <div style="display:flex;gap:22px;align-items:flex-start;"><div style="width:16px;height:16px;border-radius:50%;background:#3D4A63;margin-top:14px;flex:none;"></div><div style="font-size:36px;font-weight:700;line-height:1.5;">挑<span style="color:#C0392B;">一两个最与众不同</span>、一说出来大家就知道是谁的地方</div></div>
+     <div style="display:flex;gap:22px;align-items:flex-start;"><div style="width:16px;height:16px;border-radius:50%;background:#3D4A63;margin-top:14px;flex:none;"></div><div style="font-size:36px;font-weight:700;line-height:1.5;">围绕这一个，把它<span style="color:#C0392B;">写清楚、写具体</span>：挑得准、写得细，别人就猜得中</div></div>
+   </div>
+   <div style="position:absolute;bottom:54px;left:110px;right:110px;font-size:34.7px;color:#3D4A63;">“头发短短的、皮肤白白的、不高不矮”，班里这样的<span style="color:#C0392B;font-weight:700;">不止一个</span>，这不能算特点。</div>
+ </div>
+</section>
+
+<section data-label="学写法·扩句示范" data-screen-label="10">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;color:#2A2E37;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;top:64px;left:128px;font-size:32px;font-weight:700;">学写法</div>
+   <img src="logo.png" alt="老约翰 深度阅读" style="position:absolute;top:48px;right:100px;height:72px;width:auto;">
+   <div style="position:absolute;top:150px;left:110px;"><div style="display:inline-block;background:#FCE7EA;border-radius:20px;padding:16px 44px;font-size:42.7px;font-weight:700;line-height:1.3;"><div>看老师把<span style="color:#C0392B;">“他很急”</span>变成一小段</div></div></div>
+   <div style="position:absolute;top:300px;left:110px;right:110px;background:#FCF3EE;border:2px solid #F0CBB4;border-radius:18px;padding:36px 50px;font-size:33px;line-height:1.75;text-indent:2em;"><div>他呀，一刻也闲不住。下课铃一响，老师“下课”还没说完，他已经<span style="color:#2F72B8;font-weight:700;">“嗖”地冲出教室</span>，<span style="color:#4E9A57;font-weight:700;">像枚小火箭</span>。上课更急，问题才问一半，他的<span style="color:#C0392B;font-weight:700;">手就举得高高的</span>，嘴里直喊<span style="color:#2F72B8;font-weight:700;">“我知道！我知道！”</span>。</div></div>
+   <div style="position:absolute;top:600px;left:110px;right:110px;display:grid;grid-template-columns:repeat(4,1fr);gap:28px;">
+     <div style="background:#F7F8FA;border:1px solid #e4e7ec;border-radius:16px;padding:26px 28px;"><div style="font-size:29px;font-weight:700;color:#C0392B;margin-bottom:12px;">看得见的样子</div><div style="font-size:27px;line-height:1.5;color:#5b6470;">举得高高的手</div></div>
+     <div style="background:#F7F8FA;border:1px solid #e4e7ec;border-radius:16px;padding:26px 28px;"><div style="font-size:29px;font-weight:700;color:#2F72B8;margin-bottom:12px;">听得见的声音</div><div style="font-size:27px;line-height:1.5;color:#5b6470;">“嗖”、“我知道！我知道！”</div></div>
+     <div style="background:#F7F8FA;border:1px solid #e4e7ec;border-radius:16px;padding:26px 28px;"><div style="font-size:29px;font-weight:700;color:#3D4A63;margin-bottom:12px;">一件小事</div><div style="font-size:27px;line-height:1.5;color:#5b6470;">下课铃没响完就冲出教室</div></div>
+     <div style="background:#F7F8FA;border:1px solid #e4e7ec;border-radius:16px;padding:26px 28px;"><div style="font-size:29px;font-weight:700;color:#4E9A57;margin-bottom:12px;">打个比方</div><div style="font-size:27px;line-height:1.5;color:#5b6470;">像一枚小火箭</div></div>
+   </div>
+   <div style="position:absolute;bottom:54px;left:110px;right:110px;font-size:34.7px;color:#3D4A63;">老师没再说“他很急”，可<span style="color:#C0392B;font-weight:700;">处处都看得见他在急</span>。轮到你了，围绕你选定的那个人，也试着说一句。</div>
+ </div>
+</section>
+
+<section data-label="人物特点卡" data-screen-label="11">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;color:#2A2E37;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;top:64px;left:128px;font-size:32px;font-weight:700;">人物特点卡</div>
+   <img src="logo.png" alt="老约翰 深度阅读" style="position:absolute;top:48px;right:100px;height:72px;width:auto;">
+   <div style="position:absolute;top:150px;left:110px;font-size:52px;line-height:1.3;font-weight:700;">人物特点卡</div>
+   <div style="position:absolute;top:224px;left:110px;font-size:30px;color:#8a929e;">每栏只填两三个关键词，不写句子（先看老师填那位“急性子”同学的卡）</div>
+   <div style="position:absolute;top:296px;left:110px;right:110px;border-radius:14px;overflow:hidden;border:1px solid #dfe3e9;">
+     <div style="display:grid;grid-template-columns:660px 1fr;background:#3D4A63;color:#fff;font-size:30px;font-weight:700;"><div style="padding:18px 32px;"><div>观察角度</div></div><div style="padding:18px 32px;border-left:1px solid rgba(255,255,255,0.25);"><div>我想到的关键词</div></div></div>
+     <div style="display:grid;grid-template-columns:660px 1fr;background:#eef1f5;font-size:29px;"><div style="padding:17px 32px;font-weight:700;">外貌：发型、眼睛、个子、爱穿什么</div><div style="padding:17px 32px;border-left:1px solid #dfe3e9;color:#5b6470;">个子不高、瘦瘦的、总穿一双运动鞋</div></div>
+     <div style="display:grid;grid-template-columns:660px 1fr;background:#fff;font-size:29px;"><div style="padding:17px 32px;font-weight:700;">招牌动作 · 口头禅：他一……就……</div><div style="padding:17px 32px;border-left:1px solid #dfe3e9;color:#C0392B;font-weight:700;">下课像小火箭冲出去、抢答喊“我知道”、直抓头发</div></div>
+     <div style="display:grid;grid-template-columns:660px 1fr;background:#eef1f5;font-size:29px;"><div style="padding:17px 32px;font-weight:700;">性格：爱笑、文静、开朗、调皮……</div><div style="padding:17px 32px;border-left:1px solid #dfe3e9;color:#C0392B;font-weight:700;">急、风风火火、坐不住　◯←老师圈出的地方</div></div>
+     <div style="display:grid;grid-template-columns:660px 1fr;background:#fff;font-size:29px;"><div style="padding:17px 32px;font-weight:700;">爱好：看书、踢球、画画、唱歌……</div><div style="padding:17px 32px;border-left:1px solid #dfe3e9;color:#5b6470;">踢球、追着看球赛</div></div>
+     <div style="display:grid;grid-template-columns:660px 1fr;background:#eef1f5;font-size:29px;"><div style="padding:17px 32px;font-weight:700;">品质：热心、有礼貌、爱帮人……</div><div style="padding:17px 32px;border-left:1px solid #dfe3e9;color:#5b6470;">仗义、同学忘带笔随手就借</div></div>
+   </div>
+   <div style="position:absolute;bottom:52px;left:110px;right:110px;font-size:34.7px;color:#3D4A63;">最关键的一步：在卡上<span style="color:#C0392B;font-weight:700;">圈出最与众不同的一两处</span>；这一圈，决定你这一篇围绕什么写。</div>
+ </div>
+</section>
+
+<section data-label="填卡·围圈互说" data-screen-label="12">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;color:#2A2E37;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;top:64px;left:128px;font-size:32px;font-weight:700;">人物特点卡</div>
+   <img src="logo.png" alt="老约翰 深度阅读" style="position:absolute;top:48px;right:100px;height:72px;width:auto;">
+   <div style="position:absolute;top:150px;left:110px;"><div style="display:inline-block;background:#FCE7EA;border-radius:20px;padding:16px 44px;font-size:42.7px;font-weight:700;line-height:1.3;"><div>轮到你了：<span style="color:#C0392B;">先填卡，再圈一两处</span></div></div></div>
+   <div style="position:absolute;top:330px;left:110px;width:1010px;display:flex;flex-direction:column;gap:32px;">
+     <div style="display:flex;gap:26px;align-items:flex-start;">
+       <div style="width:53px;height:53px;flex:none;background:#3D4A63;color:#fff;font-size:28px;font-weight:700;border-radius:14px;display:flex;align-items:center;justify-content:center;"><div>1</div></div>
+       <div style="font-size:35px;font-weight:700;line-height:1.45;padding-top:8px;">只填<span style="color:#C0392B;">关键词</span>，填不出的角度可以空着；招牌动作、口头禅不要忘记填在第二行</div>
+     </div>
+     <div style="display:flex;gap:26px;align-items:flex-start;">
+       <div style="width:53px;height:53px;flex:none;background:#3D4A63;color:#fff;font-size:28px;font-weight:700;border-radius:14px;display:flex;align-items:center;justify-content:center;"><div>2</div></div>
+       <div style="font-size:35px;font-weight:700;line-height:1.45;padding-top:8px;">圈的时候想一想：<span style="color:#C0392B;">哪一处别人对不上、只有他才有</span></div>
+     </div>
+     <div style="display:flex;gap:26px;align-items:flex-start;">
+       <div style="width:53px;height:53px;flex:none;background:#3D4A63;color:#fff;font-size:28px;font-weight:700;border-radius:14px;display:flex;align-items:center;justify-content:center;"><div>3</div></div>
+       <div style="font-size:35px;font-weight:700;line-height:1.45;padding-top:8px;">前后桌四人一组，<span style="color:#C0392B;">只说圈出的那一两处</span>，先不说他是谁</div>
+     </div>
+   </div>
+   <div style="position:absolute;top:340px;right:120px;width:520px;height:420px;" data-om-raster="true"><image-slot id="s12" shape="rounded" radius="18" placeholder="配图：四人小组围圈讨论"></image-slot></div>
+   <div style="position:absolute;bottom:140px;left:110px;right:110px;background:#DCE6F5;border-radius:16px;padding:26px 40px;font-size:31px;color:#2c3a54;line-height:1.5;"><div><span style="font-weight:700;">听的同学来帮忙：</span>听完告诉他，只凭这一两处，<span style="color:#C0392B;font-weight:700;">你能不能想起一个人来</span>。大家都摇头，就回到卡上再换一处。</div></div>
+   <div style="position:absolute;bottom:54px;left:110px;right:110px;font-size:34.7px;color:#3D4A63;">一张卡，先把想法摊开，再圈出最特别的一两处，<span style="color:#C0392B;font-weight:700;">思路就清楚了</span>。</div>
+ </div>
+</section>
+
+<section data-label="教师示范文" data-screen-label="13">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;color:#2A2E37;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;top:64px;left:128px;font-size:32px;font-weight:700;">教师示范文</div>
+   <img src="logo.png" alt="老约翰 深度阅读" style="position:absolute;top:48px;right:100px;height:72px;width:auto;">
+   <div style="position:absolute;top:148px;left:110px;"><div style="display:inline-block;background:#FCE7EA;border-radius:20px;padding:16px 40px;font-size:42.7px;font-weight:700;"><div>老师的那张卡，变成了<span style="color:#C0392B;">能让人猜的短文</span></div></div></div>
+   <div style="position:absolute;top:238px;left:110px;right:110px;bottom:120px;background:#F7F5F2;border-radius:18px;padding:32px 58px;font-size:26px;line-height:1.5;text-align:justify;">
+     <p style="margin:0 0 9px;text-indent:2em;font-weight:700;">说他是个急性子，真是一点儿也没错。</p>
+     <p style="margin:0 0 9px;text-indent:2em;">下课铃<span style="color:#2F72B8;font-weight:700;">“叮铃铃”一响</span>，老师那句“下课”还没说完，他已经<span style="color:#4E9A57;font-weight:700;">像一枚小火箭</span>，<span style="color:#2F72B8;font-weight:700;">“嗖”地冲出了教室</span>，直奔操场。平时走路，他也总是<span style="color:#C0392B;font-weight:700;">连蹦带跳</span>，别人走三步，他恨不得一步就跨过去。</p>
+     <p style="margin:0 0 9px;text-indent:2em;">在学习上，他更是急得不得了。上课时，老师的问题才问了一半，他就把<span style="color:#C0392B;font-weight:700;">手举得高高的，身子都从凳子上欠了起来</span>，嘴里还小声直喊：<span style="color:#2F72B8;font-weight:700;">“我知道！我知道！”</span></p>
+     <p style="margin:0 0 9px;text-indent:2em;">放学收拾书包，他也急。别人把书本一本本理平整，他<span style="color:#C0392B;font-weight:700;">抓起课本、文具盒一股脑塞进书包</span>，拉链一拉就往外冲。结果第二天，不是作业本压得皱巴巴，就是忘带橡皮，<span style="color:#C0392B;font-weight:700;">急得在座位上直抓头发</span>。</p>
+     <p style="margin:0 0 9px;text-indent:2em;">别看他这么急，做起事来倒挺仗义。哪个同学忘带笔，他二话不说，从笔袋里抽出一支就扔了过去。</p>
+     <p style="margin:0;text-indent:2em;font-weight:700;">你猜出他是谁了吗？反正在我们班，要是有人风风火火、走到哪儿都比别人快半拍，那多半就是他。</p>
+   </div>
+   <div style="position:absolute;bottom:56px;left:110px;right:110px;display:flex;gap:36px;font-size:27px;font-weight:700;">
+     <span style="color:#C0392B;">■ 看得见的样子（动作·神态）</span><span style="color:#2F72B8;">■ 听得见的声音 · 话</span><span style="color:#4E9A57;">■ 打比方</span>
+   </div>
+ </div>
+</section>
+
+<section data-label="读样稿·两个问题" data-screen-label="14">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;color:#2A2E37;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;top:64px;left:128px;font-size:32px;font-weight:700;">读样稿</div>
+   <img src="logo.png" alt="老约翰 深度阅读" style="position:absolute;top:48px;right:100px;height:72px;width:auto;">
+   <div style="position:absolute;top:150px;left:110px;"><div style="display:inline-block;background:#FCE7EA;border-radius:20px;padding:16px 44px;font-size:42.7px;font-weight:700;line-height:1.3;"><div>读完，先想<span style="color:#C0392B;">两个问题</span></div></div></div>
+   <div style="position:absolute;top:310px;left:110px;right:110px;display:grid;grid-template-columns:1fr 1fr;gap:44px;">
+     <div style="background:#F7F8FA;border-radius:18px;padding:40px 44px;">
+       <div style="font-size:34px;font-weight:700;color:#3D4A63;margin-bottom:26px;">问题① 主要写了哪个特点？写了几次“急”？</div>
+       <div style="display:flex;flex-direction:column;gap:16px;font-size:30px;line-height:1.45;">
+         <div style="display:flex;gap:14px;"><span style="color:#C0392B;font-weight:700;flex:none;">急</span><div>下课“嗖”地冲出教室</div></div>
+         <div style="display:flex;gap:14px;"><span style="color:#C0392B;font-weight:700;flex:none;">↓</span><div>走路连蹦带跳</div></div>
+         <div style="display:flex;gap:14px;"><span style="color:#C0392B;font-weight:700;flex:none;">↓</span><div>上课抢答“我知道！我知道！”</div></div>
+         <div style="display:flex;gap:14px;"><span style="color:#C0392B;font-weight:700;flex:none;">急</span><div>放学一股脑塞书包</div></div>
+       </div>
+     </div>
+     <div style="background:#F7F8FA;border-radius:18px;padding:40px 44px;">
+       <div style="font-size:34px;font-weight:700;color:#3D4A63;margin-bottom:26px;">问题② “仗义”那一段呢？</div>
+       <div style="display:flex;flex-direction:column;gap:22px;font-size:31px;line-height:1.5;">
+         <div style="display:flex;gap:14px;"><span style="color:#7FA33C;font-weight:700;flex:none;">➤</span><div>只有<span style="color:#C0392B;font-weight:700;">短短两句</span>，一笔就收住了</div></div>
+         <div style="display:flex;gap:14px;"><span style="color:#7FA33C;font-weight:700;flex:none;">➤</span><div>别的特点至多在结尾<span style="color:#C0392B;font-weight:700;">轻轻带一笔</span>，不喧宾夺主</div></div>
+       </div>
+     </div>
+   </div>
+   <div style="position:absolute;bottom:56px;left:110px;right:110px;font-size:34.7px;color:#3D4A63;">一件接一件都在写“急”，这就叫<span style="color:#C0392B;font-weight:700;">围绕一个意思写，把最特别的那个特点写透</span>。</div>
+ </div>
+</section>
+
+<section data-label="旁批表" data-screen-label="15">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;color:#2A2E37;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;top:64px;left:128px;font-size:32px;font-weight:700;">旁批表</div>
+   <img src="logo.png" alt="老约翰 深度阅读" style="position:absolute;top:48px;right:100px;height:72px;width:auto;">
+   <div style="position:absolute;top:150px;left:110px;"><div style="display:inline-block;background:#FCE7EA;border-radius:20px;padding:16px 44px;font-size:42.7px;font-weight:700;line-height:1.3;"><div>每一句用了什么：把<span style="color:#C0392B;">写出“急”的方法</span>找出来</div></div></div>
+   <div style="position:absolute;top:308px;left:110px;right:110px;border-radius:14px;overflow:hidden;border:1px solid #dfe3e9;">
+     <div style="display:grid;grid-template-columns:1fr 560px;background:#3D4A63;color:#fff;font-size:31px;font-weight:700;"><div style="padding:20px 32px;"><div>示范文里的句子</div></div><div style="padding:20px 32px;border-left:1px solid rgba(255,255,255,0.25);"><div>这一句用了什么</div></div></div>
+     <div style="display:grid;grid-template-columns:1fr 560px;background:#eef1f5;font-size:30px;"><div style="padding:20px 32px;">手举得高高的、身子从凳子上欠了起来</div><div style="padding:20px 32px;border-left:1px solid #dfe3e9;font-weight:700;color:#C0392B;">看得见的样子（动作·神态）</div></div>
+     <div style="display:grid;grid-template-columns:1fr 560px;background:#fff;font-size:30px;"><div style="padding:20px 32px;">下课铃“叮铃铃”、“嗖”地冲出教室</div><div style="padding:20px 32px;border-left:1px solid #dfe3e9;font-weight:700;color:#2F72B8;">听得见的声音</div></div>
+     <div style="display:grid;grid-template-columns:1fr 560px;background:#eef1f5;font-size:30px;"><div style="padding:20px 32px;">像一枚小火箭</div><div style="padding:20px 32px;border-left:1px solid #dfe3e9;font-weight:700;color:#4E9A57;">打比方</div></div>
+     <div style="display:grid;grid-template-columns:1fr 560px;background:#fff;font-size:30px;"><div style="padding:20px 32px;">一股脑塞进书包、急得直抓头发</div><div style="padding:20px 32px;border-left:1px solid #dfe3e9;font-weight:700;color:#C0392B;">看得见的动作</div></div>
+     <div style="display:grid;grid-template-columns:1fr 560px;background:#eef1f5;font-size:30px;"><div style="padding:20px 32px;">“我知道！我知道！”</div><div style="padding:20px 32px;border-left:1px solid #dfe3e9;font-weight:700;color:#2F72B8;">听得见的话</div></div>
+   </div>
+   <div style="position:absolute;bottom:52px;left:110px;right:110px;font-size:34.7px;color:#3D4A63;">从头到尾没写一句“他很急”，全靠<span style="color:#C0392B;font-weight:700;">看得见的样子、听得见的声音</span>把“急”写了出来。</div>
+ </div>
+</section>
+
+<section data-label="长相也能写具体" data-screen-label="16">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;color:#2A2E37;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;top:64px;left:128px;font-size:32px;font-weight:700;">学写法</div>
+   <img src="logo.png" alt="老约翰 深度阅读" style="position:absolute;top:48px;right:100px;height:72px;width:auto;">
+   <div style="position:absolute;top:150px;left:110px;"><div style="display:inline-block;background:#FCE7EA;border-radius:20px;padding:16px 44px;font-size:42.7px;font-weight:700;line-height:1.3;"><div>圈的是长相？<span style="color:#C0392B;">同样可以写具体</span></div></div></div>
+   <div style="position:absolute;top:320px;left:110px;width:1020px;">
+     <div style="position:relative;background:#FCF3EE;border:2px solid #F0CBB4;border-radius:18px;padding:36px 46px;font-size:33px;line-height:1.75;text-indent:2em;"><div>她的头发<span style="color:#C0392B;font-weight:700;">一卷一卷的</span>，跑起来<span style="color:#C0392B;font-weight:700;">一颠一颠</span>，<span style="color:#4E9A57;font-weight:700;">像顶着一团小火苗</span>。上体育课怎么扎都扎不住，跑两圈就散开了，她一边跑，一边把头发往耳朵后面塞。</div></div>
+     <div style="margin-top:40px;display:flex;flex-direction:column;gap:28px;">
+       <div style="display:flex;gap:22px;align-items:flex-start;"><div style="width:16px;height:16px;border-radius:50%;background:#3D4A63;margin-top:15px;flex:none;"></div><div style="font-size:35px;font-weight:700;line-height:1.45;">只写<span style="color:#C0392B;">“卷”这一处</span>，把它写成看得清的样子</div></div>
+       <div style="display:flex;gap:22px;align-items:flex-start;"><div style="width:16px;height:16px;border-radius:50%;background:#3D4A63;margin-top:15px;flex:none;"></div><div style="font-size:35px;font-weight:700;line-height:1.45;">再配<span style="color:#C0392B;">一件小事</span>，长相也能让人立刻认出她来</div></div>
+     </div>
+   </div>
+   <div style="position:absolute;top:330px;right:120px;width:520px;height:460px;" data-om-raster="true"><image-slot id="s16" shape="rounded" radius="18" placeholder="配图：卷头发的女孩在操场跑步"></image-slot></div>
+   <div style="position:absolute;bottom:54px;left:110px;right:110px;font-size:34.7px;color:#3D4A63;">写你自己心里的那一个：最熟悉、一想起来就想笑的那个人；<span style="color:#C0392B;font-weight:700;">开头空两格，标点占一格</span>。休息之后动笔。</div>
+ </div>
+</section>
+
+<section data-label="课时分隔·02" data-screen-label="17">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;inset:84px;border-radius:16px;overflow:hidden;background:linear-gradient(120deg,#6FB8AD 0%,#4E93A0 60%,#3D6E82 100%);">
+     <div style="position:absolute;left:130px;top:250px;font-family:'Microsoft YaHei','微软雅黑',sans-serif;font-weight:700;font-size:190px;line-height:1.15;color:rgba(255,255,255,0.95);">02</div>
+     <div style="position:absolute;left:150px;top:512px;font-size:60px;line-height:1.3;color:#fff;font-weight:700;">当堂写作与评改课</div>
+     <div style="position:absolute;left:152px;top:606px;font-size:34px;color:rgba(255,255,255,0.92);">快问快答写开头 · 自由写作 · 猜猜他是谁 · 修改收束</div>
+     <div style="position:absolute;left:130px;bottom:84px;background:#fff;border-radius:12px;padding:12px 20px;"><img src="logo.png" alt="老约翰 深度阅读" style="height:56px;width:auto;display:block;"></div>
+   </div>
+ </div>
+</section>
+
+<section data-label="写作热身·快问快答" data-screen-label="18">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;color:#2A2E37;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;top:64px;left:128px;font-size:32px;font-weight:700;">写作热身</div>
+   <img src="logo.png" alt="老约翰 深度阅读" style="position:absolute;top:48px;right:100px;height:72px;width:auto;">
+   <div style="position:absolute;top:150px;left:110px;"><div style="display:inline-block;background:#FCE7EA;border-radius:20px;padding:16px 44px;font-size:42.7px;font-weight:700;line-height:1.3;"><div>快问快答，<span style="color:#C0392B;">四句写出一个开头</span></div></div></div>
+   <div style="position:absolute;top:318px;left:110px;right:110px;display:flex;flex-direction:column;gap:22px;">
+     <div style="display:flex;gap:26px;align-items:center;"><div style="width:150px;flex:none;background:#3D4A63;color:#fff;font-size:30px;font-weight:700;border-radius:14px;padding:16px 0;text-align:center;"><div>点特点</div></div><div style="font-size:31px;line-height:1.45;">开头空两格，一句话点出他最特别的地方　<span style="color:#5b6470;">，如“说他是个急性子，真是一点儿也没错。”</span></div></div>
+     <div style="display:flex;gap:26px;align-items:center;"><div style="width:150px;flex:none;background:#3D4A63;color:#fff;font-size:30px;font-weight:700;border-radius:14px;padding:16px 0;text-align:center;"><div>问动作</div></div><div style="font-size:31px;line-height:1.45;">他做这件事的时候，手和身体在做什么？<span style="color:#5b6470;">一着急，手和脚会不会跟着动？</span></div></div>
+     <div style="display:flex;gap:26px;align-items:center;"><div style="width:150px;flex:none;background:#3D4A63;color:#fff;font-size:30px;font-weight:700;border-radius:14px;padding:16px 0;text-align:center;"><div>问表情</div></div><div style="font-size:31px;line-height:1.45;">这时候他脸上是什么样子？<span style="color:#5b6470;">如一紧张就咬嘴唇、一得意眉毛就挑得高高的……</span></div></div>
+     <div style="display:flex;gap:26px;align-items:center;"><div style="width:150px;flex:none;background:#3D4A63;color:#fff;font-size:30px;font-weight:700;border-radius:14px;padding:16px 0;text-align:center;"><div>问声音</div></div><div style="font-size:31px;line-height:1.45;">他嘴里最可能说出哪一句话？<span style="color:#5b6470;">如“那还用说”、一兴奋就吹口哨；没有声音就写小动作。</span></div></div>
+   </div>
+   <div style="position:absolute;bottom:150px;left:110px;right:110px;background:#DCE6F5;border-radius:16px;padding:24px 38px;font-size:30px;color:#2c3a54;line-height:1.5;"><div><span style="font-weight:700;">圈的是长相？</span>换三个问法：那一处<span style="color:#C0392B;font-weight:700;">什么颜色、什么形状？比别人特别在哪里？像什么？</span>每项写一句。</div></div>
+   <div style="position:absolute;bottom:54px;left:110px;right:110px;font-size:34.7px;color:#3D4A63;">三五个字即可，<span style="color:#C0392B;font-weight:700;">错字不停笔、不会写的先用拼音</span>；写完连起来读一读，开头就有了。</div>
+ </div>
+</section>
+
+<section data-label="自由写作" data-screen-label="19">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;color:#2A2E37;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;top:64px;left:128px;font-size:32px;font-weight:700;">自由写作</div>
+   <img src="logo.png" alt="老约翰 深度阅读" style="position:absolute;top:48px;right:100px;height:72px;width:auto;">
+   <div style="position:absolute;top:150px;left:110px;"><div style="display:inline-block;background:#FCE7EA;border-radius:20px;padding:16px 44px;font-size:42.7px;font-weight:700;line-height:1.3;"><div>把整个人写出来，<span style="color:#C0392B;">抓住这两点</span></div></div></div>
+   <div style="position:absolute;top:320px;left:110px;right:110px;display:grid;grid-template-columns:1fr 1fr;gap:44px;">
+     <div style="background:#F7F8FA;border-radius:18px;padding:40px 44px;min-height:330px;">
+       <div style="font-size:80px;font-weight:700;color:#3D4A63;line-height:1;">一</div>
+       <div style="margin-top:20px;font-size:36px;font-weight:700;line-height:1.45;">全篇<span style="color:#C0392B;">不出现他的名字</span>，只用“他”或“她”</div>
+     </div>
+     <div style="background:#F7F8FA;border-radius:18px;padding:40px 44px;min-height:330px;">
+       <div style="font-size:80px;font-weight:700;color:#3D4A63;line-height:1;">二</div>
+       <div style="margin-top:20px;font-size:36px;font-weight:700;line-height:1.45;">紧扣圈出的那一处<span style="color:#C0392B;">多写几笔</span>：他在哪几件事上露出这个特点</div>
+     </div>
+   </div>
+   <div style="position:absolute;bottom:128px;left:110px;right:520px;font-size:30px;color:#3D4A63;line-height:1.45;">就像示范文写“急”，挑了下课、上课、放学几件事，一件一件写他的样子、声音、做了什么。不会写的字先用拼音，<span style="color:#C0392B;font-weight:700;">不要停下来</span>。</div>
+   <div style="position:absolute;bottom:66px;right:110px;background:#C0392B;color:#fff;border-radius:16px;padding:20px 40px;font-size:38px;font-weight:700;"><div>⏱ 写作时间约 18 分钟</div></div>
+ </div>
+</section>
+
+<section data-label="交流评议·猜猜他是谁" data-screen-label="20">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;color:#2A2E37;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;top:64px;left:128px;font-size:32px;font-weight:700;">交流评议</div>
+   <img src="logo.png" alt="老约翰 深度阅读" style="position:absolute;top:48px;right:100px;height:72px;width:auto;">
+   <div style="position:absolute;top:150px;left:110px;"><div style="display:inline-block;background:#FCE7EA;border-radius:20px;padding:16px 44px;font-size:42.7px;font-weight:700;line-height:1.3;"><div>来做一次真正的<span style="color:#C0392B;">“猜猜他是谁”</span></div></div></div>
+   <div style="position:absolute;top:330px;left:110px;width:1010px;display:flex;flex-direction:column;gap:32px;">
+     <div style="display:flex;gap:22px;align-items:flex-start;"><div style="width:16px;height:16px;border-radius:50%;background:#3D4A63;margin-top:16px;flex:none;"></div><div style="font-size:36px;font-weight:700;line-height:1.45;">上台读自己写的这一页，<span style="color:#C0392B;">只读内容，不读名字</span></div></div>
+     <div style="display:flex;gap:22px;align-items:flex-start;"><div style="width:16px;height:16px;border-radius:50%;background:#3D4A63;margin-top:16px;flex:none;"></div><div style="font-size:36px;font-weight:700;line-height:1.45;">认识这个人的同学，<span style="color:#C0392B;">猜猜他是谁</span>，猜中了就举手</div></div>
+     <div style="display:flex;gap:22px;align-items:flex-start;"><div style="width:16px;height:16px;border-radius:50%;background:#3D4A63;margin-top:16px;flex:none;"></div><div style="font-size:36px;font-weight:700;line-height:1.45;">不认识的同学也有任务：说一说<span style="color:#C0392B;">眼前有没有出现一个清清楚楚的人</span>、他大概是个怎样的人</div></div>
+   </div>
+   <div style="position:absolute;top:340px;right:120px;width:520px;height:420px;" data-om-raster="true"><image-slot id="s20" shape="rounded" radius="18" placeholder="配图：同学上台朗读 / 全班举手竞猜"></image-slot></div>
+   <div style="position:absolute;bottom:140px;left:110px;right:110px;background:#FCF3EE;border:2px solid #F0CBB4;border-radius:18px;padding:28px 42px;font-size:31px;line-height:1.5;"><div>能让人<span style="color:#C0392B;font-weight:700;">又快又准地猜中</span>、或者过后<span style="color:#C0392B;font-weight:700;">还记得这个人</span>，都说明这一页特点抓得准、写得清楚。</div></div>
+   <div style="position:absolute;bottom:54px;left:110px;right:110px;font-size:34.7px;color:#3D4A63;">读完猜不出？想一想：这些话是不是<span style="color:#C0392B;font-weight:700;">套在很多人身上都合适</span>？那正是接下来要改的地方。</div>
+ </div>
+</section>
+
+<section data-label="交流评议·同桌互读" data-screen-label="21">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;color:#2A2E37;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;top:64px;left:128px;font-size:32px;font-weight:700;">交流评议</div>
+   <img src="logo.png" alt="老约翰 深度阅读" style="position:absolute;top:48px;right:100px;height:72px;width:auto;">
+   <div style="position:absolute;top:150px;left:110px;"><div style="display:inline-block;background:#FCE7EA;border-radius:20px;padding:16px 44px;font-size:42.7px;font-weight:700;line-height:1.3;"><div>同桌互读，指出<span style="color:#C0392B;">“写得最像真人的一句”</span></div></div></div>
+   <div style="position:absolute;top:352px;right:130px;width:520px;height:520px;" data-om-raster="true"><image-slot id="s21" shape="rounded" radius="18" placeholder="配图：同桌交换稿子互读"></image-slot></div>
+   <div style="position:absolute;top:334px;left:110px;width:1010px;display:flex;flex-direction:column;gap:34px;">
+     <div style="display:flex;gap:22px;align-items:flex-start;"><div style="width:16px;height:16px;border-radius:50%;background:#3D4A63;margin-top:16px;flex:none;"></div><div style="font-size:37px;font-weight:700;line-height:1.45;">读完告诉对方：<span style="color:#C0392B;">你眼前是个怎样的人</span>？</div></div>
+     <div style="display:flex;gap:22px;align-items:flex-start;"><div style="width:16px;height:16px;border-radius:50%;background:#3D4A63;margin-top:16px;flex:none;"></div><div style="font-size:37px;font-weight:700;line-height:1.45;">哪一句最让你觉得<span style="color:#C0392B;">“这个人真特别、真像见过”</span>，把那一句指给他看</div></div>
+     <div style="display:flex;gap:22px;align-items:flex-start;"><div style="width:16px;height:16px;border-radius:50%;background:#3D4A63;margin-top:16px;flex:none;"></div><div style="font-size:37px;font-weight:700;line-height:1.45;">正好认识他写的人？<span style="color:#C0392B;">顺便猜一猜是谁</span></div></div>
+     <div style="background:#DCE6F5;border-radius:18px;padding:28px 42px;font-size:31px;line-height:1.5;color:#2c3a54;"><div><span style="font-weight:700;">被指出的那一句记下来</span>，它就是你这一页的亮点；同桌说不出他特别在哪里，那正是接下来要改的地方。</div></div>
+   </div>
+ </div>
+</section>
+
+<section data-label="修改收束·符号与标准" data-screen-label="22">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;color:#2A2E37;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;top:64px;left:128px;font-size:32px;font-weight:700;">修改收束</div>
+   <img src="logo.png" alt="老约翰 深度阅读" style="position:absolute;top:48px;right:100px;height:72px;width:auto;">
+   <div style="position:absolute;top:150px;left:110px;"><div style="display:inline-block;background:#FCE7EA;border-radius:20px;padding:16px 44px;font-size:42.7px;font-weight:700;line-height:1.3;"><div>改一改，<span style="color:#C0392B;">三个符号与三档标准</span></div></div></div>
+   <div style="position:absolute;top:308px;left:110px;width:660px;">
+     <div style="font-size:32px;font-weight:700;color:#3D4A63;margin-bottom:22px;">三个修改符号</div>
+     <div style="display:flex;flex-direction:column;gap:20px;">
+       <div style="background:#F7F8FA;border-radius:14px;padding:22px 30px;font-size:29px;line-height:1.4;"><div><span style="font-weight:700;">删除号　</span>多余的字或写错的字，用一道横线划去</div></div>
+       <div style="background:#F7F8FA;border-radius:14px;padding:22px 30px;font-size:29px;line-height:1.4;"><div><span style="font-weight:700;">增补号　</span>两字之间加字，画朝上的尖角符号，把字写在尖角上方</div></div>
+       <div style="background:#F7F8FA;border-radius:14px;padding:22px 30px;font-size:29px;line-height:1.4;"><div><span style="font-weight:700;">改正号　</span>写错的字划去，在旁边写上正确的字</div></div>
+     </div>
+   </div>
+   <div style="position:absolute;top:308px;right:110px;width:940px;">
+     <div style="font-size:32px;font-weight:700;color:#3D4A63;margin-bottom:22px;">对照三档标准，从下往上看（先自己修改）</div>
+     <div style="display:flex;flex-direction:column;gap:18px;">
+       <div style="border-left:8px solid #9aa6b6;background:#F7F8FA;border-radius:10px;padding:20px 28px;font-size:27px;line-height:1.4;"><div><span style="font-weight:700;">基础过关　</span>写出了一两个特点，句子大致通顺，能让人大致认出这是个怎样的人</div></div>
+       <div style="border-left:8px solid #E0A43B;background:#FBF3E6;border-radius:10px;padding:20px 28px;font-size:27px;line-height:1.4;"><div><span style="font-weight:700;">良好达标　</span>特点比较突出，围绕一个方面写清楚，认识的容易猜中，不认识的也记得住</div></div>
+       <div style="border-left:8px solid #C0392B;background:#FCE7EA;border-radius:10px;padding:20px 28px;font-size:27px;line-height:1.4;"><div><span style="font-weight:700;">优秀进阶　</span>特点非常突出，有具体画面或小事，抓住别人身上没有的细节，认识的同学一猜就中</div></div>
+     </div>
+   </div>
+   <div style="position:absolute;bottom:52px;left:110px;right:110px;font-size:34.7px;color:#3D4A63;">把“他很高”“他很好”这种空话，换成<span style="color:#C0392B;font-weight:700;">具体的样子或一件小事</span>；再改通顺、改错别字，开头空两格、标点占格。</div>
+ </div>
+</section>
+
+<section data-label="收束·人物图鉴" data-screen-label="23">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;color:#2A2E37;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;top:64px;left:128px;font-size:32px;font-weight:700;">收束</div>
+   <img src="logo.png" alt="老约翰 深度阅读" style="position:absolute;top:48px;right:100px;height:72px;width:auto;">
+   <div style="position:absolute;top:150px;left:110px;"><div style="display:inline-block;background:#FCE7EA;border-radius:20px;padding:16px 44px;font-size:42.7px;font-weight:700;line-height:1.3;"><div>订成一本<span style="color:#C0392B;">《人物图鉴》</span>，全班传阅</div></div></div>
+   <div style="position:absolute;top:346px;left:110px;width:1000px;display:flex;flex-direction:column;gap:40px;">
+     <div style="display:flex;gap:22px;align-items:flex-start;"><div style="width:16px;height:16px;border-radius:50%;background:#3D4A63;margin-top:16px;flex:none;"></div><div style="font-size:37px;font-weight:700;line-height:1.5;">今天写的这一页，就是图鉴里<span style="color:#C0392B;">属于你的那一页</span></div></div>
+     <div style="display:flex;gap:22px;align-items:flex-start;"><div style="width:16px;height:16px;border-radius:50%;background:#3D4A63;margin-top:16px;flex:none;"></div><div style="font-size:37px;font-weight:700;line-height:1.5;">以后再翻开，读着这几行字，<span style="color:#C0392B;">那位同学的样子就会再次浮现</span></div></div>
+     <div style="display:flex;gap:22px;align-items:flex-start;"><div style="width:16px;height:16px;border-radius:50%;background:#3D4A63;margin-top:16px;flex:none;"></div><div style="font-size:37px;font-weight:700;line-height:1.5;">收进班级成长档案，作为大家<span style="color:#C0392B;">第一次写人的纪念</span></div></div>
+   </div>
+   <div style="position:absolute;top:360px;right:130px;width:520px;height:500px;" data-om-raster="true"><image-slot id="s23" shape="rounded" radius="18" placeholder="配图：订好的班级人物图鉴小册"></image-slot></div>
+   <div style="position:absolute;bottom:54px;left:110px;right:110px;font-size:34.7px;color:#3D4A63;">写人，先看见，再写下：<span style="color:#C0392B;font-weight:700;">抓住最特别的一两处，围绕它写具体</span>，这就是今天学的本领。</div>
+ </div>
+</section>
+
+<section data-label="附·习作讲评" data-screen-label="24">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;color:#2A2E37;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;top:64px;left:128px;font-size:32px;font-weight:700;">附 · 习作讲评</div>
+   <img src="logo.png" alt="老约翰 深度阅读" style="position:absolute;top:48px;right:100px;height:72px;width:auto;">
+   <div style="position:absolute;top:148px;left:110px;"><div style="display:inline-block;background:#FCE7EA;border-radius:20px;padding:16px 40px;font-size:42.7px;font-weight:700;"><div>习作讲评环节<span style="color:#C0392B;">（可选 · 课后或下次课开场）</span></div></div></div>
+   <div style="position:absolute;top:270px;left:110px;font-size:30px;color:#8a929e;">挑 2–3 篇代表作投屏（不具名），每篇约 3–5 分钟，只围绕本课两个要点；＿＿＿处换成本班学生的真实句子。</div>
+   <div style="position:absolute;top:340px;left:110px;right:110px;display:grid;grid-template-columns:repeat(3,1fr);gap:34px;">
+     <div style="background:#F7F8FA;border:1px solid #e4e7ec;border-radius:18px;overflow:hidden;min-height:470px;display:flex;flex-direction:column;">
+       <div style="background:#4E9A57;font-size:30px;font-weight:700;padding:20px 28px;color:#fff;"><div>较好的一篇</div></div>
+       <div style="padding:30px 30px;font-size:30px;line-height:1.55;flex:1;">抓住一两处最特别的地方、围绕它写具体，认识的人一读就猜中。<br><br>读最传神的一两句：<span style="color:#C0392B;font-weight:700;">好在没停在“他很……”，给了具体的动作、声音或小事</span>。</div>
+     </div>
+     <div style="background:#F7F8FA;border:1px solid #e4e7ec;border-radius:18px;overflow:hidden;min-height:470px;display:flex;flex-direction:column;">
+       <div style="background:#E0A43B;font-size:30px;font-weight:700;padding:20px 28px;color:#fff;"><div>中等的一篇</div></div>
+       <div style="padding:30px 30px;font-size:30px;line-height:1.55;flex:1;">特点抓对了，但大多还停在“他很……”，细节没有展开。<br><br>全班帮他补一句：<span style="color:#C0392B;font-weight:700;">他那样的时候，做了一件什么事、是什么模样？</span></div>
+     </div>
+     <div style="background:#F7F8FA;border:1px solid #e4e7ec;border-radius:18px;overflow:hidden;min-height:470px;display:flex;flex-direction:column;">
+       <div style="background:#C0392B;font-size:30px;font-weight:700;padding:20px 28px;color:#fff;"><div>有典型问题的一篇</div></div>
+       <div style="padding:30px 30px;font-size:30px;line-height:1.55;flex:1;">特点太笼统：个子高、人很好，放在谁身上都合适，读完想不起是谁。<br><br>讨论：<span style="color:#C0392B;font-weight:700;">他身上有没有一处只属于他自己的？</span></div>
+     </div>
+   </div>
+   <div style="position:absolute;bottom:52px;left:110px;right:110px;font-size:34.7px;color:#3D4A63;">收尾点回：<span style="color:#C0392B;font-weight:700;">抓住一两个最特别的地方，围绕它写具体</span>；下次写人，不要只写“他很好”。</div>
+ </div>
+</section>
+
+<section data-label="尾页" data-screen-label="25">
+ <div style="position:absolute;inset:0;font-family:'Microsoft YaHei','微软雅黑',sans-serif;overflow:hidden;">
+   <div style="position:absolute;top:54px;left:-16px;width:104px;height:74px;background:#3D4A63;border-radius:3px;"></div>
+   <div style="position:absolute;inset:84px;border-radius:16px;overflow:hidden;background:linear-gradient(120deg,#6FB8AD 0%,#4E93A0 60%,#3D6E82 100%);">
+     <div style="position:absolute;left:120px;top:300px;font-family:'Microsoft YaHei','微软雅黑',sans-serif;font-weight:700;font-size:170px;line-height:1.15;color:#fff;">THE END</div>
+     <div style="position:absolute;left:132px;top:512px;font-size:38px;color:rgba(255,255,255,0.92);">写人，先看见，再写下：抓住最特别的一两处，围绕它写具体。</div>
+     <div style="position:absolute;right:120px;bottom:96px;display:flex;align-items:center;gap:24px;">
+       <div style="font-size:40px;color:#fff;font-weight:700;">下一次再见</div>
+       <div data-om-raster="true" style="width:0;height:0;border-top:28px solid transparent;border-bottom:28px solid transparent;border-left:44px solid #fff;"></div>
+     </div>
+     <div style="position:absolute;left:130px;bottom:84px;background:#fff;border-radius:12px;padding:12px 20px;"><img src="logo.png" alt="老约翰 深度阅读" style="height:56px;width:auto;display:block;"></div>
+   </div>
+ </div>
+</section>
+
+</x-import>
+</x-dc>
+
+
+</body></html>

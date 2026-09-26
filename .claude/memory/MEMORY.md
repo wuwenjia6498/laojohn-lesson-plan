@@ -41,7 +41,7 @@
 - [作文批改工具(0818立项)](writing-correction-tool-0818.md) — 给加盟商不做skill;判据从详案抽标准包JSON;主模型doubao-2-1-pro(必带thinking=disabled);闸门verified_by_human;0921经真稿实测已改到第七版栏目与判据(⚠「立得住」不禁·成语误用排第一·修辞改法禁另造喻体·起手式靠程序轮换角度治不住提示词);⚠改提示词必跑run_regression
 - [批改工具已部署Vercel(0824)](writing-correction-tool-vercel-deploy-0824.md) — 入口=部署根index.py不能放api/;.vercelignore挡config.json;正式地址grader.skyline666.top;⚠validate全绿≠包对
 - [⚠配套三侧文风0915与详案线同步换靶](writing-materials-retarget-0915.md) — 生成读三侧定稿样本不读对照表;polish_materials.py机检D每份必跑(同一张polish_rules,禁副本);存量42份已过一轮;样本卡=现行json快照,--check-exemplars防漂移(抄样本抄现行文件别抄git diff);⚠配套--all --dry-run是共享规则表第二回归面,首跑照出4条排除漏洞
-- ⚠**改配套共享模板一律「加可选字段、不动默认值」(0916–0922)**:45份共用`template_student.html`;已有 plan_name(工具名须与教师口头一致)／plan_hint(填表分钟数)／plan_label_width(首列宽);改它必跑零影响回归(判据=重渲存量,PDF页数与逐页文本逐字相等);⚠logo 0921换1200px致PDF涨137KB不是改坏,42份旧PDF待重渲;⚠**PPT稿纸页=学生用第2页截图**,配套一改即过期 — [详情](materials-template-optional-fields-0922.md)·[源](manhua-laoshi-5a-lesson-state.md)
+- ⚠**改配套共享模板一律「加可选字段、不动默认值」(0916–0922)**:45份共用`template_student.html`;已有 plan_name(工具名须与教师口头一致)／plan_hint(填表分钟数)／plan_label_width(首列宽);改它必跑零影响回归(判据=重渲存量,PDF页数与逐页文本逐字相等);⚠logo 0921换1200px致PDF涨137KB不是改坏,42份旧PDF待重渲;⚠**PPT稿纸页=学生用第2页截图**,配套一改即过期(直出件用grab_worksheet.py现截,不过期) — [详情](materials-template-optional-fields-0922.md)·[源](manhua-laoshi-5a-lesson-state.md)
 - [⚠写作课单元海报工具(0920立项)](writing-poster-tool-0920.md) — 独立skill;7份已出余17份未跑;**出图前先立意推敲**:AI给2-3方向(带立意·画风·元素数·风险)→用户拍板→才写subject,留痕_brief;⚠比喻题禁画喻体实体;⚠立意过关≠方向过关(多场景天然碎);**排新海报前整份打开**
 - [配套json富文本标记只有部分字段解析(0907)](writing-materials-richtext-field-scope.md) — 教师materials/家长oneline走textContent,写{b}会印成(b);⚠溢出/页数/Type3三道机检全绿也抓不到,渲完正则扫一遍PDF文本
 - [手改只改HTML必被重渲冲掉(0821)](writing-materials-handedits-lost-on-rerender.md) — 文字改动一律回写_data.json;⚠仓内9课json仍不含那批手改
@@ -95,6 +95,7 @@
 - [测评卷SKILL状态](reading-assessment-skill-state.md) / [测评事实以详案为准](assessment-facts-follow-lesson-plan.md) — 详案升深度蓝本(事实仍锁档案);与SKILL默认相反遇分叉先确认
 - [阅读指南拓展栏点名具体书/影片](reading-guide-extension-concrete-titles.md) — 仅此栏放宽红线,吃不准就不写
 ## 未决事项与交付风险（做完即删）
+- **写作课PPT仓内直出(0926)**:以后重写详案的课次走直出(direct_build.py+每课构建脚本);外部件添图收尾用finalize_external.py;六上五终稿用外部配图版v9(加稿纸页、删讲评,在桌面),其详案页标未同步待定;母版dc.html+自建html_to_pptx.py替代Design导出;六上五试点v2在桌面;主题色胶囊+吉祥物+手指图标已定为默认(写进母版增补);讲评环节一律不进课件PPT;认可后才改CLAUDE.md§3/外部链记忆 — [详情](writing-ppt-direct-build-pilot-0926.md)
 - **备课视频首批两支已出片(0921)**:五上四 17.8分钟为准片(外部终稿画面、增量39%、机检FAIL0、字幕零违规、零漂移);三上一 16.4分钟素材薄;六上四等PPT定稿;张视角二审三条已落地(bridge废除/locate与do重合/空泛点题词表);⚠闸门A记的是「用户指示直接出片(未逐页通读)」 — [详情](lesson-video-line-0921.md)
 - **仓库瘦身已完成(0920)**：759.67→303.41 MiB（两机一致）。**⏰ 唯一待办：2026-10-04 后删远端 `backup/pre-filter-20260920`**（删前 GitHub 网页体积数字不降，属正常；删后两台机器的负向 refspec 即可撤）；⚠ 新克隆必跑两条装机命令(core.hooksPath + 负向 refspec，见 docs\协作同步说明.md)，否则大文件闸门失效、一条 git pull 就把仓库撑回 635MiB — [详情](repo-slimming-plan-0920.md)
 - 三上五我们眼中的缤纷世界 0919 定稿、0922 两轮 50 处、**0923 五轮 70 余处**（**两条横向新规**：技法要当堂划适用边界〔变化三词只管当场看得完的〕＋并列多感官动词各归各位;**红线11扩第六项**＝带序数/方位/指示的回指仍要补中心词,⚠0922 我按第7条⑤判「不补」是判错;判断题的问法须在事实上站得住;⚠**提示层交代过≠学生话轮交代过**〔教具段写了的学习单,师话里一次没交代〕;⚠示范文改一个词必联动旁批表引句/示范卡/⑤两问,否则 essay_audit③ 判断链断）;机检全绿、docx 已重渲+style_front_page;PPT链0923已跑(5处PPT↔详案差异0924用户定不改)、配套三侧0923已出、批改标准包未做;短片不随教案分发（版权） — [详情](binfen-shijie-3a-lesson-state.md)
