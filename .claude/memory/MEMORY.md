@@ -71,7 +71,7 @@
 - [低段/合集建档差异](low-grade-collection-profile-formalized.md) — 区分变量是「低段」非「快乐读书吧」
 ## 引擎与下游物料
 - [直出PPT完成即入库并push(0926)](direct-ppt-commit-and-push-0926.md) — 给同事在GitHub上看;长期授权不必再问;直出用图不入库;打包收直出件PPT(认文档属性标记)
-- **写作课PPT仓内直出(0926)**:六上五终稿已改为桌面课件PPT-v12(新规则重排,0926晚);以后重写详案的课次走直出(direct_build.py+每课构建脚本);外部件添图收尾用finalize_external.py;六上五终稿用外部配图版v9(加稿纸页、删讲评,在桌面),其详案页标未同步待定;母版dc.html+自建html_to_pptx.py替代Design导出;六上五试点v2在桌面;主题色胶囊+吉祥物+手指图标已定为默认(写进母版增补);讲评环节一律不进课件PPT;认可后才改CLAUDE.md§3/外部链记忆 — [详情](writing-ppt-direct-build-pilot-0926.md)
+- **写作课PPT仓内直出(0926)**:六上五终稿v12(新规则重排,0926晚)存仓外共享盘,不在桌面;以后重写详案的课次走直出(direct_build.py+每课构建脚本);外部件添图收尾用finalize_external.py;六上五终稿用外部配图版v9(加稿纸页、删讲评,在桌面),其详案页标未同步待定;母版dc.html+自建html_to_pptx.py替代Design导出;六上五试点v2在桌面;主题色胶囊+吉祥物+手指图标已定为默认(写进母版增补);讲评环节一律不进课件PPT;认可后才改CLAUDE.md§3/外部链记忆 — [详情](writing-ppt-direct-build-pilot-0926.md)
 - [claude.ai 旧 skill 快照已删净(0920)](skill-snapshots-cloud-cleared-0920.md) — 三份 06 月快照连同 daily-post/picture-book-recommend 用户手动删除(有意);重名冲突根除,CLAUDE.md §5 警告块已压缩;⚠误用自查点(产物落 写作课输出\ 或文件名缺-第N单元-)日后再传 skill 仍管用
 **碰引擎/共享件前必读**：[下游六件抽共享层](downstream-shared-layer-and-token-facts.md)（改真源照该条回归法）· [0727上下文瘦身收官](context-engineering-slimdown-0727.md)（细节已下沉references别抄回）
 - [手绘风格库274条全改九项+按用途标签(0924)](handdraw-library-retune-0924.md) — style_tags.json封闭词表(媒介/年龄感/题材/基调/色彩/人物造型+写作课招生档);读书会/绘本按书气质组合筛;特征只写画风不写内容;gpt-image照抄参考图服装改特征治不了
