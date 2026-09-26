@@ -34,6 +34,7 @@ description: 把"老约翰深度阅读读书会"风格的课件中间稿 (.md) �
 4. **目检**：COM 逐页导出（`tools/shot_assets.py` 或 PowerPoint 导出）看溢出、压图、断行。
 5. **页标回注＋重渲 docx**：同后处理链第 4 步。
 6. **入库并推送**（2026-09-26 用户定：直出件要让同事在 GitHub 上看得到，**完成即推，不必再问**）：`direct_build.py` 末尾会打出入库清单（pptx、`-anim.json`、课件构建脚本、详案 md、页标映射 json），逐项 `git add` 后 commit，再 `git push`。推送前按 CLAUDE.md §9 确认提交身份是本人；>5MB 先跑 `scripts/shrink_pptx_media.py`。直出件就是终稿，**不适用**下面「交付边界」的「终稿不回仓」。
+7. **同事直接改 PPT 的字是允许的**：直出件的文字源头是课件构建脚本，重出会整份覆盖。所以 `direct_build.py` 每次出件存 `-文字快照.json`（随 pptx 入库），下次重出前先比对；有人改过字就停下列出改动，**先把改动写回构建脚本**，再加 `--accept-edits` 重出，重出后核对改动还在。
 
 ---
 

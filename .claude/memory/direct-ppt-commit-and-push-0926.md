@@ -12,3 +12,5 @@ metadata:
 **How to apply:** 直出一课走完 direct_build → 目检 → 页标回注 → 重渲 docx 后，按 `direct_build.py` 打出的入库清单（pptx、-anim.json、课件构建脚本、详案 md、页标映射 json）提交并 `git push`，属长期授权，不必逐次再问。推前确认提交身份是本人（CLAUDE.md §9）；>5MB 先跑 shrink_pptx_media。外部件的人工嵌图终稿仍不回仓，两条口径别混。相关：[[writing-ppt-direct-build-pilot-0926]]。
 
 **同日两项拍板**：①直出用的处理好的图（`ppt配图缓存/直出/`）**不入库**——同事只看成品，改稿重出只在本机做（别再提议入库）。②打包 `laojohn-writing-package` **收直出件 PPT**、外部件仍不收；认法是 pptx 文档属性「备注」里 `html_to_pptx.py` 写入的 `laojohn-direct-build`，不看构建脚本在不在（六上五有构建脚本但仓内是外部件）。
+
+**同事直接改 PPT 的字（0926 用户问）**：会被下次重出静默覆盖——直出件文字源头是构建脚本。已加防护：direct_build 存 `-文字快照.json`（入库清单里有），重出前比对、有改动就拦下列清单；写回构建脚本后 `--accept-edits`。模拟测过：改两处被拦、放行后快照更新、再出直接过。
