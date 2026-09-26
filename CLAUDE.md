@@ -92,7 +92,7 @@ laojohn-book-profile（建档 · 下游唯一事实来源）
 
 - **`anthropic-skills:laojohn-lesson-polish` 是用户在 claude.ai 网页端润色课案的常用件**，仓内本就没有、也不需要对应物；它出现在本机 `C:\Users\<用户>\.claude\skills\synced\` 只是账号同步的副作用。**网页端怎么用不受本条约束**——本条只管 Claude Code 里的本仓生产。**但本仓侧不使用它**：仓内润色走 `laojohn-writing-lesson/assets/polish_writing.py` ＋ 单一规则表 `assets/polish_rules.py`（详案与配套三侧共用，见 §3），由机检 A `tone_gate.py` 与机检 C 方向指标把回滚门；它自带 `references/register-rules.md` 是另一套词表，两套谁覆盖谁从未定义，在本仓混用会绕开回滚门。（其分层与 docx 改写口径本身与仓内同向——先分四层再动笔、反面例段一字不改、`参考：` 后保留学生口吻、直接改 XML 而禁用 python-docx 重建——不使用它无关质量，只因两条链互不知情。）
 
-- **`【PPT换页-PXX】` 已废弃**（lesson-plan、writing-lesson 详案均不再写）。分页权归 `laojohn-ppt-draft`，由它按"教学节拍"自行切页；详案只需 `## 第N课时 · 课型` 划课时、`### 一、xx` 划环节。
+- **`【PPT换页-PXX】` 已废弃**（lesson-plan、writing-lesson 详案均不再写）。分页权归 `laojohn-ppt-draft`（写作课仓内直出时由写构建脚本的人照它的 `writing-mode.md` 节拍切页，出件后回注页标），由它按"教学节拍"自行切页；详案只需 `## 第N课时 · 课型` 划课时、`### 一、xx` 划环节。
 - docx 引擎仍把残留换页点渲染成橙色，**仅为向后兼容旧 docx**，新稿一律不产出。
 
 ## 6. 两核心 SKILL 的边界（防混用）

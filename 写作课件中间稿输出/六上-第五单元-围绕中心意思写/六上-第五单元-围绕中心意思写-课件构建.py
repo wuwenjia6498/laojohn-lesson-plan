@@ -1,7 +1,7 @@
 """六上五《围绕中心意思写》课件构建脚本（仓内直出，2026-09-26 试点定稿）。
 
 按母版 framework.md 逐页写 dc.html；版式积木在 laojohn-ppt/tools/writing_deck_kit.py。
-页序＝详案〖PPT第N页〗页标；点击分组写在各元素的 a／a0／fa 参数里（按详案师话顺序）。
+页序＝详案〖PPT第N页〗页标（本课先有外部件页标；新课次没有页标时按 ppt-draft writing-mode 节拍切页，出件后回注）；点击分组写在各元素的 a／a0／fa 参数里（按详案师话顺序）。
 出件跑 laojohn-ppt/tools/direct_build.py（截稿纸 → 本脚本 → 转 PPT → 审查闸门 → 动画）。
 """
 import importlib.util

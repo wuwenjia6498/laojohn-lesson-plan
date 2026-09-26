@@ -29,7 +29,7 @@ description: 把"老约翰深度阅读读书会"风格的课件中间稿 (.md) �
 母版（规范单一源）在 `assets/writing-master/`：`framework.md` 是配色、骨架、版式库、文字、**本仓增补**（主题色胶囊＋吉祥物＋手指图标、§四之二 配图版式 9 条、§八 动画与核对、讲评环节不进 PPT）；`register-audit.md` 是起草后的语域审读清单。**写页面前整读 framework.md**。
 
 1. **备图**（课件配图工具，gpt-image）：场景图走 `run_lesson.py`；要立在底带／页边的人物、每课的吉祥物（`抠-吉祥物`）一律 `gen_cutouts.py` 出透明底；**已有、已认可的图直接复用**。处理好的图放 `课件配图工具/课件产出/<课次>/gpt-image/ppt配图缓存/直出/`，吉祥物命名 `吉祥物.png`。
-2. **写课件构建脚本** `写作课件中间稿输出/<课次>/<课次>-课件构建.py`（入库）：页序＝详案〖PPT第N页〗，用 `tools/writing_deck_kit.py` 的积木（cover／section_page／page／steps／bullets／card／strip／band／fig／worksheet_page／timer_badge／end_page）逐页写；点击分组写在 a／a0／fa 参数（按详案师话顺序、禁回跳）。范例＝六上五那份。写完做语域审读（register-audit.md）。
+2. **写课件构建脚本** `写作课件中间稿输出/<课次>/<课次>-课件构建.py`（入库）：**页序**：详案已有〖PPT第N页〗页标就照页标；**新详案还没有页标**（页标是出件后回注的），由写构建脚本的人切页——照 `laojohn-ppt-draft/references/writing-mode.md` 的写作课节拍与内容→页型映射（§2 映射、§2.6 连贯话语不强拆、§4 不进投屏的部分、讲评不进），一环节起一页、一次互动一页，切完第 5 步页标回注把页序写回详案。用 `tools/writing_deck_kit.py` 的积木（cover／section_page／page／steps／bullets／card／strip／band／fig／worksheet_page／timer_badge／end_page）逐页写；点击分组写在 a／a0／fa 参数（按详案师话顺序、禁回跳）。范例＝六上五那份。写完做语域审读（register-audit.md）。
 3. **一条龙出件**：`python .claude/skills/laojohn-ppt/tools/direct_build.py <课次>`——截稿纸（`grab_worksheet.py`）→ 跑构建脚本出 dc.html → `html_to_pptx.py` 转 pptx → `inspect_pptx.py` → `audit_against_plan.py`（审查闸门）→ 并入分组 → `animate_pptx.py` → 回读核验（shape id、回跳）。目标文件已存在（如外部件动画版）会拒绝覆盖，`--force` 或 `--out` 另存。
 4. **目检**：COM 逐页导出（`tools/shot_assets.py` 或 PowerPoint 导出）看溢出、压图、断行。
 5. **页标回注＋重渲 docx**：同后处理链第 4 步。

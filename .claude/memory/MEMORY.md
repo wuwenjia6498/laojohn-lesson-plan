@@ -45,7 +45,7 @@
 - [⚠写作课单元海报工具(0920立项)](writing-poster-tool-0920.md) — 独立skill;7份已出余17份未跑;**出图前先立意推敲**:AI给2-3方向(带立意·画风·元素数·风险)→用户拍板→才写subject,留痕_brief;⚠比喻题禁画喻体实体;⚠立意过关≠方向过关(多场景天然碎);**排新海报前整份打开**
 - [配套json富文本标记只有部分字段解析(0907)](writing-materials-richtext-field-scope.md) — 教师materials/家长oneline走textContent,写{b}会印成(b);⚠溢出/页数/Type3三道机检全绿也抓不到,渲完正则扫一遍PDF文本
 - [手改只改HTML必被重渲冲掉(0821)](writing-materials-handedits-lost-on-rerender.md) — 文字改动一律回写_data.json;⚠仓内9课json仍不含那批手改
-- **PPT链**(八条细节→[链索引](ppt-chain-index.md)):⚠本仓止于动画注入·终稿不回仓(0902,打包不收PPT,下一课次先确认收到的是初稿)｜⚠先读详案再审查再动画(0806,机检全过≠审查完成;PPT对详案错勿迁就)｜⚠[表头重影层每次顺手清·删在注入前(0915)](ppt-header-ghost-image-0915.md)｜⚠[动画禁由下向上(0915)](ppt-anim-no-upward-jump-0915.md) — 撤销0804「哪怕跳回顶部」;表格按行揭示;页脚条载任务指令须上移先出;交付前必跑回跳校验
+- **PPT链**(八条细节→[链索引](ppt-chain-index.md)):⚠外部件:本仓止于动画注入·嵌图终稿不回仓(0902,打包不收PPT,下一课次先确认收到的是初稿);直出件是终稿、入库并push｜⚠先读详案再审查再动画(0806,机检全过≠审查完成;PPT对详案错勿迁就)｜⚠[表头重影层每次顺手清·删在注入前(0915)](ppt-header-ghost-image-0915.md)｜⚠[动画禁由下向上(0915)](ppt-anim-no-upward-jump-0915.md) — 撤销0804「哪怕跳回顶部」;表格按行揭示;页脚条载任务指令须上移先出;交付前必跑回跳校验
 ## 看图写话（picture-writing）
 整区（跨课次通则＋规则体例）已外移 → **[看图写话线记忆](memory-index-picture-writing.md)**，排新课次或出图前打开；该线当前无未决项。
 ## 读书会详案（lesson-plan）
@@ -70,6 +70,8 @@
 - [可引用原文栏取成段](book-profile-quote-full-passage.md) / [类型字段禁空泛「儿童小说」](book-type-no-generic-children-fiction.md) — 下游需成段并保留原书弯引号;类型须具体文学类型
 - [低段/合集建档差异](low-grade-collection-profile-formalized.md) — 区分变量是「低段」非「快乐读书吧」
 ## 引擎与下游物料
+- [直出PPT完成即入库并push(0926)](direct-ppt-commit-and-push-0926.md) — 给同事在GitHub上看;长期授权不必再问;外部件嵌图终稿仍不回仓
+- **写作课PPT仓内直出(0926)**:以后重写详案的课次走直出(direct_build.py+每课构建脚本);外部件添图收尾用finalize_external.py;六上五终稿用外部配图版v9(加稿纸页、删讲评,在桌面),其详案页标未同步待定;母版dc.html+自建html_to_pptx.py替代Design导出;六上五试点v2在桌面;主题色胶囊+吉祥物+手指图标已定为默认(写进母版增补);讲评环节一律不进课件PPT;认可后才改CLAUDE.md§3/外部链记忆 — [详情](writing-ppt-direct-build-pilot-0926.md)
 - [claude.ai 旧 skill 快照已删净(0920)](skill-snapshots-cloud-cleared-0920.md) — 三份 06 月快照连同 daily-post/picture-book-recommend 用户手动删除(有意);重名冲突根除,CLAUDE.md §5 警告块已压缩;⚠误用自查点(产物落 写作课输出\ 或文件名缺-第N单元-)日后再传 skill 仍管用
 **碰引擎/共享件前必读**：[下游六件抽共享层](downstream-shared-layer-and-token-facts.md)（改真源照该条回归法）· [0727上下文瘦身收官](context-engineering-slimdown-0727.md)（细节已下沉references别抄回）
 - [手绘风格库274条全改九项+按用途标签(0924)](handdraw-library-retune-0924.md) — style_tags.json封闭词表(媒介/年龄感/题材/基调/色彩/人物造型+写作课招生档);读书会/绘本按书气质组合筛;特征只写画风不写内容;gpt-image照抄参考图服装改特征治不了
@@ -95,8 +97,6 @@
 - [测评卷SKILL状态](reading-assessment-skill-state.md) / [测评事实以详案为准](assessment-facts-follow-lesson-plan.md) — 详案升深度蓝本(事实仍锁档案);与SKILL默认相反遇分叉先确认
 - [阅读指南拓展栏点名具体书/影片](reading-guide-extension-concrete-titles.md) — 仅此栏放宽红线,吃不准就不写
 ## 未决事项与交付风险（做完即删）
-- [直出PPT完成即入库并push(0926)](direct-ppt-commit-and-push-0926.md) — 给同事在GitHub上看;长期授权不必再问;外部件嵌图终稿仍不回仓
-- **写作课PPT仓内直出(0926)**:以后重写详案的课次走直出(direct_build.py+每课构建脚本);外部件添图收尾用finalize_external.py;六上五终稿用外部配图版v9(加稿纸页、删讲评,在桌面),其详案页标未同步待定;母版dc.html+自建html_to_pptx.py替代Design导出;六上五试点v2在桌面;主题色胶囊+吉祥物+手指图标已定为默认(写进母版增补);讲评环节一律不进课件PPT;认可后才改CLAUDE.md§3/外部链记忆 — [详情](writing-ppt-direct-build-pilot-0926.md)
 - **备课视频首批两支已出片(0921)**:五上四 17.8分钟为准片(外部终稿画面、增量39%、机检FAIL0、字幕零违规、零漂移);三上一 16.4分钟素材薄;六上四等PPT定稿;张视角二审三条已落地(bridge废除/locate与do重合/空泛点题词表);⚠闸门A记的是「用户指示直接出片(未逐页通读)」 — [详情](lesson-video-line-0921.md)
 - **仓库瘦身已完成(0920)**：759.67→303.41 MiB（两机一致）。**⏰ 唯一待办：2026-10-04 后删远端 `backup/pre-filter-20260920`**（删前 GitHub 网页体积数字不降，属正常；删后两台机器的负向 refspec 即可撤）；⚠ 新克隆必跑两条装机命令(core.hooksPath + 负向 refspec，见 docs\协作同步说明.md)，否则大文件闸门失效、一条 git pull 就把仓库撑回 635MiB — [详情](repo-slimming-plan-0920.md)
 - 三上五我们眼中的缤纷世界 0919 定稿、0922 两轮 50 处、**0923 五轮 70 余处**（**两条横向新规**：技法要当堂划适用边界〔变化三词只管当场看得完的〕＋并列多感官动词各归各位;**红线11扩第六项**＝带序数/方位/指示的回指仍要补中心词,⚠0922 我按第7条⑤判「不补」是判错;判断题的问法须在事实上站得住;⚠**提示层交代过≠学生话轮交代过**〔教具段写了的学习单,师话里一次没交代〕;⚠示范文改一个词必联动旁批表引句/示范卡/⑤两问,否则 essay_audit③ 判断链断）;机检全绿、docx 已重渲+style_front_page;PPT链0923已跑(5处PPT↔详案差异0924用户定不改)、配套三侧0923已出、批改标准包未做;短片不随教案分发（版权） — [详情](binfen-shijie-3a-lesson-state.md)

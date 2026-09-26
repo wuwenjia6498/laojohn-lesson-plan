@@ -10,6 +10,7 @@
     S = [cover(...), section_page(...), page(...), ..., worksheet_page(25), end_page(...)]
     write(S)
 
+页序：详案有〖PPT第N页〗照页标；新详案没有页标时按 laojohn-ppt-draft/references/writing-mode.md 的写作课节拍自行切页，出件后回注页标。
 规则（配色、骨架、配图、动画、稿纸页、讲评不进 PPT……）的唯一源是 framework.md 的正文与「本仓增补」各节；
 本模块只把其中固定的像素值收成函数，改规则先改 framework.md 再改这里。
 文字里写「」，write() 统一换成中文弯引号。点击分组用各函数的 a／a0／fa 参数（写成 data-anim）。
