@@ -24,7 +24,7 @@ op 一览：
   swap  在原图位形状里换图（shape id 不变 → 动画绑定保留），并按 box/anchor 重设几何
   add   新增图片（不进动画，随页静态出现）
   geom  改已有形状几何：id + 任意 x/y/w/h（绝对值）或 dx/dy（位移）
-  band  通栏浅色底带：插到最底层，不遮任何内容
+  band  通栏浅色底带：插到最底层，不遮任何内容；可选 "round": 半径英寸（圆角底卡）、"line": 描边色
   font  只改某形状内所有 run 的字号（size＝磅），不动文字
   fill  改形状填充色（卡片表头换彩色）
 swap／add 可带 "click": N（1 基）：把这张图并进本页第 N 击，与那一击的文字同时淡入（0926 用户定：
@@ -199,10 +199,17 @@ def op_add(slide, o, img):
 
 def op_band(slide, o):
     x, y, w, h = o["box"]
-    b = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(x), Inches(y), Inches(w), Inches(h))
+    kind = MSO_SHAPE.ROUNDED_RECTANGLE if o.get("round") else MSO_SHAPE.RECTANGLE
+    b = slide.shapes.add_shape(kind, Inches(x), Inches(y), Inches(w), Inches(h))
+    if o.get("round"):
+        b.adjustments[0] = min(0.5, o["round"] / min(w, h))    # round＝圆角半径（英寸）
     b.fill.solid()
     b.fill.fore_color.rgb = RGBColor.from_string(o.get("color", "FFF6E5"))
-    b.line.fill.background()
+    if o.get("line"):
+        b.line.color.rgb = RGBColor.from_string(o["line"])
+        b.line.width = Inches(0.02)
+    else:
+        b.line.fill.background()
     b.shadow.inherit = False
     b.name = "底带"
     tree = slide.shapes._spTree
