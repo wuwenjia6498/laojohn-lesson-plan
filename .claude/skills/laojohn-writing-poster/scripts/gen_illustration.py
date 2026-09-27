@@ -59,7 +59,8 @@ def _load_shared(name):
 # 手绘风格解析 2026-09-24 抽到 课件配图工具/scripts/handdraw_style.py（与课件配图工具共用），这里只取名字
 _hs = _load_shared("handdraw_style")
 resolve_style, _positive_traits, _needs_color = _hs.resolve_style, _hs.positive_traits, _hs.needs_color
-REF_ISOLATION = _hs.REF_ISOLATION
+REF_ISOLATION, REF_ISOLATION_MIXED = _hs.REF_ISOLATION, _hs.REF_ISOLATION_MIXED
+_REPO = Path(__file__).resolve().parents[4]
 # 本工具的固定约束（无论走不走编号风格都要有）：构图/底色/无人无字/纸面空白
 # ⚠ 人物那一句分两档（2026-09-22 拆）：走编号风格时不能再说「形象简洁、不夸张」——
 #   风格库的人物类特征（脸型/头身比例/表情自成一套）正好被这句话压平，出来就是通用写实脸，
@@ -109,7 +110,7 @@ def judge_failed(obs):
     return None
 
 
-def build_prompt(subject, retry=False, style=None, no_people=False):
+def build_prompt(subject, retry=False, style=None, no_people=False, mixed=False):
     subj = subject.strip().rstrip("。")
     extra = NO_PEOPLE if no_people else ""
     if style:
@@ -118,7 +119,7 @@ def build_prompt(subject, retry=False, style=None, no_people=False):
         p = (("请用这种画风绘制：%s。" % traits if traits else "")
              + "画面内容：" + subj + "。"
              + _BG_STYLED + _needs_color(traits) + _PEOPLE_STYLED + _NO_TEXT_CONSTRAINT
-             + extra + REF_ISOLATION)
+             + extra + (REF_ISOLATION_MIXED if mixed else REF_ISOLATION))
     else:
         p = STYLE_PREFIX + subj + NEG_SUFFIX + extra
     return p + RETRY_SUFFIX if retry else p
@@ -148,13 +149,21 @@ def run(data_path, provider=None, ratio=None, seed=None, force=False, no_judge=F
         except (FileNotFoundError, ValueError) as e:
             print("  ⚠ 风格编号未生效，回退通用前缀：%s" % e, file=sys.stderr)
 
+    # 可选 illustration.char_refs（2026-09-27 加，缺省无 ⇒ 行为不变）：仓内相对路径的人物定妆图，
+    # 用来让海报人物与同课次 PPT 配图同一人；排在风格图之前，提示词改用 REF_ISOLATION_MIXED 分开说两类参考图
+    char_refs = [str(_REPO / r) for r in (ill.get("char_refs") or [])]
+    for r in char_refs:
+        if not Path(r).exists():
+            sys.exit("char_refs 指向的定妆图不存在：%s" % r)
+    images = char_refs + ([style["ref_path"]] if style else [])
     client = load_client(provider or DEFAULT_PROVIDER)
     verdict, obs = None, None
     for attempt in (0, 1):
-        prompt = build_prompt(subject, retry=bool(attempt), style=style, no_people=bool(ill.get("no_people")))
+        prompt = build_prompt(subject, retry=bool(attempt), style=style, no_people=bool(ill.get("no_people")),
+                              mixed=bool(char_refs and style))
         print("[生图 %d/2] %s · %s" % (attempt + 1, client.name, eff_ratio))
         img = client.generate(prompt, ratio=eff_ratio, seed=seed,
-                              images=[style["ref_path"]] if style else None)
+                              images=images or None)
         client.save(img, cand)
         prompt_file.write_text(prompt + "\n", encoding="utf-8")
         if no_judge:
