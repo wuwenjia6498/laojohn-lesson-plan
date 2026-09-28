@@ -26,9 +26,9 @@
     },
     "schema": 7,
     "audit": {
-      "script_md5": "0f188562c181efaaec58494809884c1f",
+      "script_md5": "247c2605dd811568f17d141dd5d1be0c",
       "by": "wuwenjia6498",
-      "at": "2026-09-28 15:02",
+      "at": "2026-09-28 17:47",
       "issues": [
         "画面无 AI 标识（meta.ai_label 空）；按《人工智能生成合成内容标识办法》，发布时应在平台勾选 AI 生成声明"
       ]
@@ -43,7 +43,8 @@
       "subtitle": "抓住最关键的一步，把小事写精彩",
       "illus": "repo:课件配图工具/课件产出/四上-第五单元-生活万花筒/gpt-image/抠图/抠-P05.png",
       "md5": "add80f9ad8a896d897f1b9be31c93778"
-    }
+    },
+    "bgm": "repo:品牌资产/背景音乐/A-WarmPiano-AtlasAudio.mp3"
   },
   "segments": [
     {

@@ -600,7 +600,8 @@ def main():
     ap.add_argument("--sample", type=int, default=0, help="只渲前 N 段（闸门 B 样片，不带片尾）")
     ap.add_argument("--only", help="只渲这些段（逗号分隔，按脚本顺序；样片，不带片尾）")
     ap.add_argument("--opening-only", action="store_true", help="只出片头首页图（-首页.png），不渲视频")
-    ap.add_argument("--bgm", help="背景音乐文件（须有商用授权）")
+    ap.add_argument("--bgm", help="背景音乐文件（须有商用授权）；不给则用脚本 meta.bgm")
+    ap.add_argument("--no-bgm", action="store_true", help="忽略 meta.bgm，出无音乐版")
     ap.add_argument("--bgm-level", type=float, default=BGM_LEVEL, help="BGM 无人声处的目标响度（dBFS RMS）；脚本先量曲子再算增益")
     a = ap.parse_args()
 
@@ -663,6 +664,8 @@ def main():
 
     name = "%s-宣传片%s.mp4" % (a.unit, "-样片" if sample else "")
     args = ["-i", "_video.mp4", "-i", "_voice.wav"]
+    if not a.bgm and sc["meta"].get("bgm") and not a.no_bgm:   # 脚本里定下的曲子（repo: 路径）
+        a.bgm = S.resolve(sc["meta"]["bgm"])
     if a.bgm:
         args += ["-stream_loop", "-1", "-i", os.path.abspath(a.bgm)]
         fo = max(total - 1.8, 0)

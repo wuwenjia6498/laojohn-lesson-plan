@@ -19,7 +19,7 @@ metadata:
 
 **第八版（0928 晚）节奏口径**：用户对「老师在两个画面之间闪一下」很敏感——讲解员全屏不足 1 秒即判闪，渲染器已自动吸附（含分屏切回全屏）；海报与片尾插画不重复出现；片尾停 4 秒；画面不放「本视频含 AI 生成内容」角标（用户定，发布时平台声明由用户自己勾）。
 
-**背景音乐（0928）**：用户要推荐曲目，从 Pixabay Music 取两首钢琴（授权可商用免署名，记录在 品牌资产\背景音乐\授权记录.md；页面标 Content ID，YouTube 可能认领）。Pixabay 页面有 Cloudflare 拦 curl，直链靠 huashu-chrome 在页面 innerHTML 里正则取 cdn.pixabay.com/download/audio/…mp3 再 curl。⚠旧的固定 -22 dB 增益在曲库曲子（本身约 -23 dBFS）上几乎听不见，已改为量响度自动定增益。
+**背景音乐（0928）**：用户要推荐曲目，从 Pixabay Music 取两首钢琴（授权可商用免署名，记录在 品牌资产\背景音乐\授权记录.md；页面标 Content ID，YouTube 可能认领）。Pixabay 页面有 Cloudflare 拦 curl，直链靠 huashu-chrome 在页面 innerHTML 里正则取 cdn.pixabay.com/download/audio/…mp3 再 curl。⚠旧的固定 -22 dB 增益在曲库曲子（本身约 -23 dBFS）上几乎听不见，已改为量响度自动定增益。**用户定用 A（Warm Piano），已写进脚本 meta.bgm**。
 
 **试过、用户否掉的三条路（别再提）**
 - 投屏墙：「不符合真实场景」。
