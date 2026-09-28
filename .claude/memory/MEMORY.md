@@ -42,7 +42,7 @@
 - [批改工具已部署Vercel(0824)](writing-correction-tool-vercel-deploy-0824.md) — 入口=部署根index.py不能放api/;.vercelignore挡config.json;正式地址grader.skyline666.top;⚠validate全绿≠包对
 - [⚠配套三侧文风0915与详案线同步换靶](writing-materials-retarget-0915.md) — 生成读三侧定稿样本不读对照表;polish_materials.py机检D每份必跑(同一张polish_rules,禁副本);存量42份已过一轮;样本卡=现行json快照,--check-exemplars防漂移(抄样本抄现行文件别抄git diff);⚠配套--all --dry-run是共享规则表第二回归面,首跑照出4条排除漏洞
 - ⚠**改配套共享模板一律「加可选字段、不动默认值」(0916–0922)**:45份共用`template_student.html`;已有 plan_name(工具名须与教师口头一致)／plan_hint(填表分钟数)／plan_label_width(首列宽);改它必跑零影响回归(判据=重渲存量,PDF页数与逐页文本逐字相等);⚠logo 0921换1200px致PDF涨137KB不是改坏,42份旧PDF待重渲;⚠**PPT稿纸页=学生用第2页截图**,配套一改即过期(直出件用grab_worksheet.py现截,不过期) — [详情](materials-template-optional-fields-0922.md)·[源](manhua-laoshi-5a-lesson-state.md)
-- [⚠写作课单元海报工具(0920立项)](writing-poster-tool-0920.md) — 独立skill;7份已出余17份未跑;**出图前先立意推敲**:AI给2-3方向(带立意·画风·元素数·风险)→用户拍板→才写subject,留痕_brief;⚠比喻题禁画喻体实体;⚠立意过关≠方向过关(多场景天然碎);**排新海报前整份打开**
+- [⚠写作课单元海报工具(0920立项)](writing-poster-tool-0920.md) — 独立skill;⚠0928文案三硬线(卡①现象→问题→解法·禁告别XX·禁半截指代);**出图前先立意推敲**:AI给2-3方向(带立意·画风·元素数·风险)→用户拍板→才写subject,留痕_brief;⚠比喻题禁画喻体实体;⚠立意过关≠方向过关(多场景天然碎);**排新海报前整份打开**
 - [配套json富文本标记只有部分字段解析(0907)](writing-materials-richtext-field-scope.md) — 教师materials/家长oneline走textContent,写{b}会印成(b);⚠溢出/页数/Type3三道机检全绿也抓不到,渲完正则扫一遍PDF文本
 - [手改只改HTML必被重渲冲掉(0821)](writing-materials-handedits-lost-on-rerender.md) — 文字改动一律回写_data.json;⚠仓内9课json仍不含那批手改
 - **PPT链**(八条细节→[链索引](ppt-chain-index.md)):⚠外部件:本仓止于动画注入·嵌图终稿不回仓(0902,打包不收PPT,下一课次先确认收到的是初稿);直出件是终稿、入库并push｜⚠先读详案再审查再动画(0806,机检全过≠审查完成;PPT对详案错勿迁就)｜⚠[表头重影层每次顺手清·删在注入前(0915)](ppt-header-ghost-image-0915.md)｜⚠[动画禁由下向上(0915)](ppt-anim-no-upward-jump-0915.md) — 撤销0804「哪怕跳回顶部」;表格按行揭示;页脚条载任务指令须上移先出;交付前必跑回跳校验
