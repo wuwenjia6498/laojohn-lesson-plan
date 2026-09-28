@@ -1,0 +1,49 @@
+{
+  "name": "讲解员C",
+  "pronoun": "she",
+  "portrait": "角色.jpg",
+  "scene": "场景.jpg",
+  "voice": "音色参考.wav",
+  "appearance_en": "a Chinese woman in her late thirties with a short dark bob haircut and thin round metal-framed glasses, wearing a muted sage-green blouse with a small stand collar and a keyhole neckline, tiny stud earrings; warm, experienced and approachable, with a bright, expressive face and a kind gaze",
+  "scene_en": "one cozy, warm small-group writing classroom with cream walls, light wood furniture, green plants and bright airy daylight from a side window; it has three areas: a light wood writing table with open lined notebooks, pencils and a small potted plant; a tall warm wooden bookshelf full of colorful children's books; and a reading corner with a soft cream fabric armchair, an arched brass floor lamp and a small round side table with a short stack of books",
+  "voice_en": "a calm, clear mid-pitched female Mandarin voice",
+  "delivery_en": "lively, warm and genuinely engaged",
+  "actions": {
+    "nod": "gives a small, understanding nod",
+    "lean_in": "leans slightly toward the camera as if sharing something important",
+    "open_palm": "raises one hand at chest height with an open palm in a gentle explaining gesture",
+    "count": "counts off on the fingers of one hand at chest height",
+    "smile": "breaks into a warm, reassuring smile",
+    "tilt_head": "tilts the head slightly with a thoughtful, questioning look",
+    "pull_book": "pulls a colorful picture book halfway out of the shelf, glances at it and smiles",
+    "hold_notebook": "lifts an open lined notebook from the table and tilts it toward the camera, the page showing only faint lines with no readable writing",
+    "lean_desk": "leans forward on the table with both forearms, as if chatting with a parent across it",
+    "sit_down": "settles into the chair at the table with a relaxed smile"
+  },
+  "md5": {
+    "portrait": "61e387e2883e66c8dbbb808f7842cdf6",
+    "scene": "f24925e1d72445f2d62ab5963e603761",
+    "voice": "f2695c3ad2df107ddf9ce206a56b1f37"
+  },
+  "confirmed_by": "wuwenjia6498",
+  "voice_source": "试音_ab7449.mp4",
+  "confirmed_at": "2026-09-27 17:15",
+  "stations": {
+    "desk": {
+      "en": "sitting at the light wood writing table, leaning slightly forward toward the camera, open lined notebooks just below the frame",
+      "pose": "seated"
+    },
+    "bookshelf": {
+      "en": "standing close in front of the tall wooden bookshelf, colorful book spines softly blurred behind her shoulders",
+      "pose": "standing"
+    },
+    "armchair": {
+      "en": "sitting relaxed in the soft cream armchair in the reading corner, the warm glow of the arched floor lamp behind her",
+      "pose": "seated"
+    }
+  },
+  "scene_history": [
+    "场景_v2单桌.jpg（单桌近景）",
+    "场景_v3投屏.jpg（多区域含投屏墙，2026-09-27 用户定不用投屏后换掉）"
+  ]
+}

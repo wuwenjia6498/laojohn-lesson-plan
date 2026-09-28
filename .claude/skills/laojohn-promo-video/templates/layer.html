@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<!-- 宣传片画面层模板。render_promo.py 用 Playwright 打开本页，调 render(spec) 后截 #stage。
+     字体路径由 Python 以 spec.fonts 注入（本机 file:// 绝对路径），不写死盘符。
+     ⚠ 禁 emoji/生僻符号：装饰一律 CSS 图形（同配套物料线的字表口径）。 -->
+<style>
+  html, body { margin: 0; padding: 0; background: transparent; }
+  #stage { position: relative; overflow: hidden; }
+  .sans { font-family: "PromoSans", "Microsoft YaHei", sans-serif; }
+  .brush { font-family: "PromoBrush", "PromoSans", serif; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+function esc(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+// {b}…{/b} → 强调色加底划线
+function rich(s, accent) {
+  return esc(s).replace(/\{b\}/g, '<span style="color:' + accent + ';background:linear-gradient(transparent 62%,' + accent + '33 62%);">')
+               .replace(/\{\/b\}/g, "</span>");
+}
+
+async function loadFonts(f) {
+  const faces = [];
+  if (f.sans) faces.push(new FontFace("PromoSans", "url('" + f.sans + "')", { weight: "100 900" }));
+  if (f.brush) faces.push(new FontFace("PromoBrush", "url('" + f.brush + "')"));
+  for (const ff of faces) { await ff.load(); document.fonts.add(ff); }
+  await document.fonts.ready;
+}
+
+// 外框层：1080×1920，奶油底 + 透明圆角窗（动图从窗里透出）+ 标题 + 标识
+function frameLayer(s) {
+  const T = s.theme, W = s.win;
+  const head = s.head_style === "brush"
+    ? '<div class="brush" style="font-size:132px;line-height:1.05;color:' + T.ink + ';">' + esc(s.head) + '</div>'
+    : '<div class="sans" style="font-size:64px;font-weight:800;line-height:1.25;color:' + T.ink + ';">' + esc(s.head) + '</div>';
+  return `
+  <svg width="1080" height="1920" style="position:absolute;left:0;top:0">
+    <defs><mask id="m"><rect width="1080" height="1920" fill="white"/>
+      <rect x="${W.x}" y="${W.y}" width="${W.w}" height="${W.h}" rx="${W.r}" fill="black"/></mask></defs>
+    <rect width="1080" height="1920" fill="${T.bg}" mask="url(#m)"/>
+    <rect x="${W.x - 6}" y="${W.y - 6}" width="${W.w + 12}" height="${W.h + 12}" rx="${W.r + 6}"
+          fill="none" stroke="${T.accent}" stroke-opacity="0.35" stroke-width="4"/>
+  </svg>
+  <div class="sans" style="position:absolute;left:0;right:0;top:188px;text-align:center;">
+    <span style="display:inline-block;padding:10px 30px;border-radius:40px;background:${T.accent};
+      color:#fff;font-size:34px;font-weight:700;letter-spacing:2px;">${esc(s.capsule)}</span>
+  </div>
+  <div style="position:absolute;left:60px;right:60px;top:${s.head_style === "brush" ? 258 : 272}px;
+       height:${W.y - (s.head_style === "brush" ? 258 : 272) - 20}px;display:flex;align-items:center;
+       justify-content:center;text-align:center;">${head}</div>
+  <div class="sans" style="position:absolute;right:40px;top:${W.y + W.h - 58}px;padding:6px 14px;
+       border-radius:8px;background:rgba(0,0,0,.38);color:#fff;font-size:22px;">${esc(s.ai_label)}</div>
+  <img src="${s.logo}" style="position:absolute;left:50%;transform:translateX(-50%);top:1660px;width:330px;">`;
+}
+
+// 字幕层：1080×200 透明，深字（放在奶油底的字幕带上）
+function subLayer(s) {
+  const lines = s.text.split("\n").map(esc).join("<br>");
+  return `<div class="sans" style="width:1080px;height:200px;display:flex;align-items:center;
+    justify-content:center;text-align:center;font-size:58px;font-weight:700;line-height:1.38;
+    color:${s.theme.ink};">${lines}</div>`;
+}
+
+// 引文卡：窗口尺寸，白纸 + 标签 + 引文 + 小注
+function quoteCard(s) {
+  const T = s.theme, c = s.card;
+  const tagBg = c.tone === "good" ? T.accent : "#8C8C8C";
+  return `<div style="width:${s.win.w}px;height:${s.win.h}px;box-sizing:border-box;padding:70px 72px;
+    background:${c.tone === "good" ? "#FFFDF8" : "#F4F2EE"};display:flex;flex-direction:column;justify-content:center;">
+    <div class="sans" style="align-self:flex-start;padding:10px 26px;border-radius:12px;background:${tagBg};
+      color:#fff;font-size:36px;font-weight:700;">${esc(c.tag)}</div>
+    <div class="sans" style="margin-top:44px;font-size:${c.size || 54}px;font-weight:600;line-height:1.62;
+      color:${T.ink};">${rich(c.text, T.accent)}</div>
+    ${c.note ? `<div class="sans" style="margin-top:40px;padding-top:28px;border-top:3px dashed ${T.accent}55;
+      font-size:36px;line-height:1.5;color:#6B6258;">${rich(c.note, T.accent)}</div>` : ""}
+  </div>`;
+}
+
+// 片尾卡：整屏
+function endCard(s) {
+  const T = s.theme, e = s.end;
+  if (e.style === "closing") {    // 呼应首页：米色底＋毛笔标题（深棕）＋短橙线＋副题＋海报插画＋商标；不放二维码、行动句
+    const INK = e.ink || "#4A2C17";
+    return `<div style="width:1080px;height:1920px;background:#FFF6E5;position:relative;">
+      <div class="brush" style="position:absolute;left:0;right:0;top:230px;text-align:center;font-size:178px;line-height:1.12;
+        letter-spacing:.04em;color:${INK};">${esc(e.title)}</div>
+      <div style="position:absolute;left:50%;top:470px;width:120px;height:6px;margin-left:-60px;border-radius:3px;background:${T.accent};"></div>
+      ${e.subtitle ? `<div class="sans" style="position:absolute;left:0;right:0;top:510px;text-align:center;font-size:48px;
+        font-weight:700;color:${INK};letter-spacing:2px;">${esc(e.subtitle)}</div>` : ""}
+      <div style="position:absolute;left:50%;top:630px;transform:translateX(-50%);width:640px;height:760px;border-radius:28px;
+        overflow:hidden;box-shadow:0 14px 40px rgba(90,60,30,.18);">
+        <img src="${e.illus}" style="display:block;width:100%;height:100%;object-fit:cover;object-position:50% 30%;"></div>
+      <img src="${s.logo}" style="position:absolute;left:50%;transform:translateX(-50%);top:1430px;width:300px;">
+    </div>`;
+  }
+  return `<div style="width:1080px;height:1920px;background:${T.bg};position:relative;">
+    <div class="sans" style="position:absolute;left:0;right:0;top:188px;text-align:center;">
+      <span style="display:inline-block;padding:10px 30px;border-radius:40px;background:${T.accent};
+        color:#fff;font-size:34px;font-weight:700;letter-spacing:2px;">${esc(s.capsule)}</span></div>
+    <div class="brush" style="position:absolute;left:0;right:0;top:282px;text-align:center;font-size:150px;
+      color:${T.ink};">${esc(e.title)}</div>
+    ${e.subtitle ? `<div class="sans" style="position:absolute;left:0;right:0;top:470px;text-align:center;
+      font-size:44px;font-weight:600;color:#6B6258;">${esc(e.subtitle)}</div>` : ""}
+    <div style="position:absolute;left:50%;top:600px;transform:translateX(-50%);padding:28px;background:#fff;
+      border-radius:28px;box-shadow:0 10px 40px rgba(120,80,20,.15);">
+      <img src="${e.qrcode}" style="display:block;width:400px;height:400px;"></div>
+    <div class="sans" style="position:absolute;left:0;right:0;top:1100px;text-align:center;font-size:64px;
+      font-weight:800;color:${T.accent};">${esc(e.cta)}</div>
+    ${e.note ? `<div class="sans" style="position:absolute;left:0;right:0;top:1200px;text-align:center;
+      font-size:36px;color:#6B6258;">${esc(e.note)}</div>` : ""}
+    ${e.address ? `<div class="sans" style="position:absolute;left:0;right:0;top:1260px;text-align:center;
+      font-size:32px;color:#6B6258;">${esc(e.address)}</div>` : ""}
+    <img src="${s.logo}" style="position:absolute;left:50%;transform:translateX(-50%);top:1660px;width:330px;">
+    <div class="sans" style="position:absolute;right:40px;top:1580px;padding:6px 14px;border-radius:8px;
+      background:rgba(0,0,0,.30);color:#fff;font-size:22px;">${esc(s.ai_label)}</div>
+  </div>`;
+}
+
+// ===== 讲解员口播版（2026-09-27）：全屏出血，以下各层都是 1080×1920 透明叠加 =====
+// 安全区：抖音/视频号顶部约 120px、底部约 380px、右侧约 140px 会被平台 UI 盖住。
+
+// 角标层：年级胶囊 + AI 标识，全片常驻，放左上安全区
+function badgeLayer(s) {
+  const T = s.theme;
+  return `<div class="sans" style="position:absolute;left:44px;top:150px;display:flex;flex-direction:column;gap:14px;align-items:flex-start;">
+    <span style="padding:8px 22px;border-radius:30px;background:${T.accent};color:#fff;font-size:30px;font-weight:700;
+      letter-spacing:1px;box-shadow:0 4px 14px rgba(0,0,0,.18);">${esc(s.capsule)}</span>
+    ${s.ai_label ? `<span style="padding:5px 14px;border-radius:8px;background:rgba(0,0,0,.40);color:#fff;font-size:22px;">${esc(s.ai_label)}</span>` : ""}
+  </div>`;
+}
+
+// 字幕：白字 + 半透明深底条，关键词强调色；放在下三分之一、底部 UI 之上
+function sub2Layer(s) {
+  const T = s.theme;
+  const html = s.text.split("\n").map(l => richWhite(l, T.accent)).join("<br>");
+  return `<div style="position:absolute;left:0;right:0;top:${s.sub_y}px;display:flex;justify-content:center;">
+    <div class="sans" style="max-width:900px;padding:14px 30px;border-radius:18px;background:rgba(20,16,12,.55);
+      color:#fff;font-size:56px;font-weight:700;line-height:1.36;text-align:center;letter-spacing:1px;">${html}</div></div>`;
+}
+function richWhite(s, accent) {
+  return esc(s).replace(/\{b\}/g, '<span style="color:' + accent + ';">').replace(/\{\/b\}/g, "</span>");
+}
+
+// 关键词卡（card:kw）：≤10 字大字，叠在讲解员上方空处
+function kwLayer(s) {
+  const T = s.theme;
+  return `<div style="position:absolute;left:0;right:0;top:${s.card_y}px;display:flex;justify-content:center;">
+    <div class="sans" style="padding:26px 48px;border-radius:28px;background:${T.accent};color:#fff;font-size:96px;
+      font-weight:900;letter-spacing:4px;box-shadow:0 14px 40px rgba(0,0,0,.28);transform:rotate(-2deg);">${richWhite(s.card.text, "#FFF3C4")}</div></div>`;
+}
+
+// 例句卡（card:line）：≤22 字，白纸条，像把作文里的一句话贴到屏幕上
+function lineLayer(s) {
+  const T = s.theme;
+  return `<div style="position:absolute;left:0;right:0;top:${s.card_y}px;display:flex;justify-content:center;">
+    <div style="width:900px;box-sizing:border-box;padding:40px 48px 44px;border-radius:26px;background:#FFFDF6;
+      box-shadow:0 14px 44px rgba(0,0,0,.30);border-left:14px solid ${T.accent};">
+      <div class="sans" style="font-size:62px;font-weight:700;line-height:1.5;color:${T.ink};">${rich(s.card.text, T.accent)}</div>
+    </div></div>`;
+}
+
+// 封面：讲解员画面上叠毛笔大标题 + 一句副题（封面图由 Python 叠在视频帧上）
+function coverLayer(s) {
+  const T = s.theme;
+  return `<div style="position:absolute;left:0;right:0;bottom:0;height:900px;
+      background:linear-gradient(transparent, rgba(20,16,12,.72) 55%);"></div>
+    <div class="brush" style="position:absolute;left:0;right:0;top:1180px;text-align:center;font-size:170px;color:#fff;
+      text-shadow:0 6px 24px rgba(0,0,0,.45);">${esc(s.title)}</div>
+    ${s.subtitle ? `<div class="sans" style="position:absolute;left:0;right:0;top:1420px;text-align:center;font-size:54px;
+      font-weight:700;color:#FFE7C2;">${esc(s.subtitle)}</div>` : ""}
+    <div class="sans" style="position:absolute;left:0;right:0;top:150px;text-align:center;">
+      <span style="padding:10px 30px;border-radius:40px;background:${T.accent};color:#fff;font-size:36px;font-weight:700;">${esc(s.capsule)}</span></div>`;
+}
+
+// 片头首页（简洁版）：米色底 + 商标 + 标头（取详案首页那一行）+ 毛笔大标题 + 细线 + 副题 + 课件插图；整屏不透明
+// 安全区同上（顶 120 / 底 380 / 右 140），插图压在 1520 以内；不加装饰碎片、光晕、胶囊
+function openingLayer(s) {
+  const T = s.theme, o = s.opening, INK = o.ink || "#4A2C17";      // 标题色同单元海报 --ink（深棕）
+  const h = o.header || [];
+  // 标头排版：第一行（年级·单元）两侧细线；第二行「XX（YY）」拆成加粗主名＋描边小标签，括号由标签框代替
+  const l1 = h[0] ? `<div style="display:flex;align-items:center;justify-content:center;gap:26px;">
+      <span style="width:90px;height:2px;background:${INK};opacity:.35;"></span>
+      <span style="font-size:38px;font-weight:500;letter-spacing:6px;color:#8A6A50;">${esc(h[0])}</span>
+      <span style="width:90px;height:2px;background:${INK};opacity:.35;"></span></div>` : "";
+  const m = h[1] ? h[1].match(/^(.*?)[（(](.+)[）)]$/) : null;
+  const l2 = !h[1] ? "" : `<div style="margin-top:22px;display:flex;align-items:center;justify-content:center;gap:18px;">
+      <span style="font-size:50px;font-weight:800;letter-spacing:4px;color:${INK};">${esc(m ? m[1] : h[1])}</span>
+      ${m ? `<span style="padding:4px 16px;border:2.5px solid ${T.accent};border-radius:10px;font-size:32px;font-weight:700;
+        letter-spacing:2px;color:${T.accent};">${esc(m[2])}</span>` : ""}</div>`;
+  return `<div style="width:1080px;height:1920px;background:#FFF6E5;position:relative;">
+    <img src="${s.logo}" style="position:absolute;left:50%;transform:translateX(-50%);top:190px;width:300px;">
+    <div class="sans" style="position:absolute;left:0;right:0;top:390px;">${l1}${l2}</div>
+    <div class="brush" style="position:absolute;left:0;right:0;top:584px;text-align:center;font-size:178px;line-height:1.12;
+      letter-spacing:.04em;color:${INK};">${esc(o.title)}</div>
+    <div style="position:absolute;left:50%;top:824px;width:120px;height:6px;margin-left:-60px;border-radius:3px;
+      background:${T.accent};"></div>
+    <div class="sans" style="position:absolute;left:0;right:0;top:864px;text-align:center;font-size:48px;font-weight:700;
+      color:${INK};letter-spacing:2px;">${esc(o.subtitle)}</div>
+    <img src="${o.illus}" style="position:absolute;left:50%;transform:translateX(-50%);top:980px;width:${o.illus_w || 700}px;
+      max-height:560px;object-fit:contain;
+      -webkit-mask-image:linear-gradient(#000 86%, transparent);mask-image:linear-gradient(#000 86%, transparent);">
+  </div>`;
+}
+
+async function render(spec) {
+  await loadFonts(spec.fonts || {});
+  const st = document.getElementById("stage");
+  const full = [1080, 1920];
+  const size = { frame: full, sub: [1080, 200], quote: [spec.win ? spec.win.w : 0, spec.win ? spec.win.h : 0], end: full,
+                 badge: full, sub2: full, kw: full, line: full, cover: full, opening: full }[spec.layer];
+  st.style.width = size[0] + "px";
+  st.style.height = size[1] + "px";
+  st.innerHTML = { frame: frameLayer, sub: subLayer, quote: quoteCard, end: endCard, badge: badgeLayer,
+                   sub2: sub2Layer, kw: kwLayer, line: lineLayer, cover: coverLayer, opening: openingLayer }[spec.layer](spec);
+  await Promise.all([...st.querySelectorAll("img")].map(i => i.complete ? 0 : new Promise(r => { i.onload = i.onerror = r; })));
+  await document.fonts.ready;
+  return size;
+}
+</script>
+</body>
+</html>

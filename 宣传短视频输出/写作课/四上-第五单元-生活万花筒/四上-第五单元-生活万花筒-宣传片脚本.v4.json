@@ -1,0 +1,157 @@
+{
+  "meta": {
+    "line": "写作课",
+    "unit": "四上-第五单元-生活万花筒",
+    "title": "生活万花筒",
+    "capsule": "四年级上册｜第五单元同步习作",
+    "ai_label": "本视频含 AI 生成内容",
+    "end": {
+      "subtitle": "抓住最关键的一步，把小事写精彩"
+    },
+    "sources": [
+      "写作课海报输出/四上-第五单元-生活万花筒/四上-第五单元-生活万花筒-习作海报.json",
+      "写作配套输出/四上-第五单元-生活万花筒/四上-第五单元-生活万花筒-家长用_data.json",
+      "写作课详案输出/四上-第五单元-生活万花筒-写作课详案.md"
+    ],
+    "presenter": "讲解员C",
+    "cover_seg": "s1",
+    "grade": {
+      "gamma": 1.1,
+      "brightness": 0.02,
+      "saturation": 1.03
+    },
+    "schema": 4,
+    "info_style": "paper",
+    "audit": {
+      "script_md5": "3ecc09e12cd3421f6df31ec204b59116",
+      "by": "wuwenjia6498",
+      "at": "2026-09-27 20:46",
+      "issues": []
+    }
+  },
+  "segments": [
+    {
+      "id": "s1",
+      "role": "hook",
+      "station": "desk",
+      "framing": "close-up",
+      "lines": [
+        "孩子写一件事，是不是总这样呀？",
+        "开头写了，结尾也写了，",
+        "中间最要紧的经过呢，一句话就带过去了。"
+      ],
+      "shot_en": "<Subject 1> sits at the table leaning forward on her forearms, her face close to the lens with eyebrows slightly raised in a knowing, playful look, as if she has just noticed something every parent will recognize. The camera starts close and eases in a little further. {SAY} As she says “是不是总这样呀”, she tilts her head and lets a small amused smile appear; as she says “开头写了，结尾也写了”, she lifts one hand into the lower frame and taps two fingertips in the air, once on the left and once on the right; as she says “一句话就带过去了”, she flicks that hand lightly sideways, and a single thin info card marked with one short straight line slides quickly past her fingers and out of frame, leaving the space between the two taps empty. Her expression turns into a gentle, sympathetic grimace.",
+      "broll": [
+        {
+          "at": 2,
+          "src": "card:line",
+          "dur": 3.0,
+          "card": {
+            "text": "我们俩费了好大的劲，终于把它打死了。"
+          }
+        }
+      ]
+    },
+    {
+      "id": "s2",
+      "role": "pain",
+      "station": "bookshelf",
+      "framing": "close-up",
+      "lines": [
+        "读的人看完，还是不知道这事到底怎么办成的。",
+        "其实呀，不是孩子没东西写，",
+        "是还没学会把经过拆开来写。"
+      ],
+      "shot_en": "<Subject 1> stands close in front of the bookshelf, turned a quarter toward the shelf with her fingertips resting on the spine of a picture book at shoulder height, and her eyes on the lens. The camera drifts slowly sideways, keeping her face large in frame. {SAY} During the first sentence she gives a small, puzzled shake of the head with a slight shrug. As she says “其实呀”, she lets go of the book, turns fully to the lens and leans in with an earnest, encouraging look; as she says “拆开来写”, she brings both hands up into the lower frame and opens them outward, palms up, with a reassuring smile. No info card appears in this shot.",
+      "broll": [
+        {
+          "at": 0,
+          "src": "assets:专注书写/专注书写 (19).jpg",
+          "dur": 3.0,
+          "motion": "in",
+          "focus": [
+            0.5,
+            0.35
+          ],
+          "md5": "852004f143f1183ed405ac766ec6c305"
+        }
+      ]
+    },
+    {
+      "id": "s3",
+      "role": "method",
+      "station": "armchair",
+      "framing": "medium close-up",
+      "lines": [
+        "老约翰同步习作，四年级上册第五单元，",
+        "这节课叫生活万花筒。",
+        "教孩子把经过拆成几步，挑出最关键的一步，写详细。"
+      ],
+      "shot_en": "<Subject 1> sits upright in the armchair, both hands raised at chest height in the lower part of the frame, holding one long horizontal info card between them, level with her collarbones. The camera pushes in very slowly. {SAY} During the first two sentences she glances down at the card and back to the lens with a proud, bright smile. As she says “拆成几步”, she pulls her hands apart and the long card splits cleanly into a row of three smaller cards floating side by side between her hands, each marked only with a simple footprint icon. As she says “挑出”, she reaches to the middle card and draws it up beside her face, where it grows larger and brighter while the other two dim and drift back behind it. On “写详细” she gives the raised card a small confident nod and looks straight back into the lens.",
+      "broll": []
+    },
+    {
+      "id": "s4",
+      "role": "compare",
+      "station": "desk",
+      "framing": "medium close-up",
+      "lines": [
+        "比如捉蚊子，写到最关键的那一步：",
+        "光柱在白墙上慢慢地移，",
+        "屋里静得能听见自己的心跳。",
+        "读的人，就像站在旁边看着。"
+      ],
+      "shot_en": "<Subject 1> sits at the table holding up one small info card beside her cheek; it shows a simple drawing of a plain wall at night with a small flashlight at one edge. The camera holds steady with a slight handheld drift. {SAY} As she says “慢慢地移”, she slowly draws one fingertip across the card and a soft beam of light on it glides along the drawn wall in step with her finger. As she says “心跳”, she rests her other hand lightly over her chest, widens her eyes and holds her breath for a beat, playful and suspenseful. As she says “就像站在旁边看着”, she lowers the card below the frame and breaks into a delighted smile at the lens.",
+      "broll": []
+    },
+    {
+      "id": "s5",
+      "role": "class",
+      "station": "bookshelf",
+      "framing": "close-up",
+      "lines": [
+        "两节课下来，孩子当堂就能写完一篇，",
+        "再读给同桌听，",
+        "让同桌说说，哪一步写得最详细。"
+      ],
+      "shot_en": "<Subject 1> stands facing the lens in front of the bookshelf, this time on the other side of the frame from the earlier bookshelf shot, with a proud, delighted expression. The camera arcs gently a few degrees around her. {SAY} As she says “当堂就能写完一篇”, she nods firmly once; as she says “读给同桌听”, she turns her head slightly to one side as if listening to a child reading beside her, then turns back to the lens with a warm smile on “写得最详细”. No info card appears in this shot.",
+      "broll": [
+        {
+          "at": 0,
+          "src": "assets:课堂群像/课堂群像 (3).jpg",
+          "dur": 3.0,
+          "motion": "right",
+          "focus": [
+            0.5,
+            0.5
+          ],
+          "md5": "402733a0aad6de4def345a90707e9c59"
+        },
+        {
+          "at": 1,
+          "src": "assets:课堂学生分享/学生分享 (24).jpg",
+          "dur": 3.0,
+          "motion": "left",
+          "focus": [
+            0.5,
+            0.5
+          ],
+          "md5": "b064db1dc4ad2660fad94e48695b9685"
+        }
+      ]
+    },
+    {
+      "id": "s6",
+      "role": "cta",
+      "station": "armchair",
+      "framing": "close-up",
+      "lines": [
+        "把一件小事写清楚，孩子就会发现，",
+        "平常的日子里，值得写的瞬间多着呢。",
+        "想让孩子试一试？扫码预约体验课吧！"
+      ],
+      "shot_en": "<Subject 1> sits relaxed in the armchair, the warm glow of the floor lamp soft behind her shoulder, looking into the lens with a calm, happy expression. The camera eases in slowly. {SAY} As she says “多着呢”, she opens one hand outward in the lower frame and a few small info cards with simple sun, leaf and pencil icons drift up around her hand like confetti, then fade. As she says “扫码预约体验课吧”, she leans toward the lens with a warm, inviting nod and a bright smile.",
+      "broll": []
+    }
+  ]
+}

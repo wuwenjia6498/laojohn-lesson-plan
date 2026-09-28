@@ -1,0 +1,17 @@
+{
+  "task": "t_c352bac6b845a7eb2bb01aa5",
+  "attempt": 1,
+  "verdict": "pass",
+  "sim": 0.971,
+  "asr_text": "两节课下来,孩子当堂就能写完一篇,再读给同桌听,让同桌说说哪一部写得最详细。",
+  "asr_segments": [
+    {
+      "start": 0.0,
+      "end": 9.0,
+      "text": "两节课下来,孩子当堂就能写完一篇,再读给同桌听,让同桌说说哪一部写得最详细。"
+    }
+  ],
+  "speech_start": 0.611,
+  "speech_end": 9.084,
+  "duration": 9.42
+}

@@ -1,0 +1,362 @@
+{
+  "meta": {
+    "line": "写作课",
+    "unit": "四上-第五单元-生活万花筒",
+    "title": "生活万花筒",
+    "capsule": "四年级上册｜第五单元同步习作",
+    "ai_label": "本视频含 AI 生成内容",
+    "end": {
+      "subtitle": "抓住最关键的一步，把小事写精彩"
+    },
+    "sources": [
+      "写作课海报输出/四上-第五单元-生活万花筒/四上-第五单元-生活万花筒-习作海报.json",
+      "写作配套输出/四上-第五单元-生活万花筒/四上-第五单元-生活万花筒-家长用_data.json",
+      "写作课详案输出/四上-第五单元-生活万花筒-写作课详案.md"
+    ],
+    "presenter": "讲解员C",
+    "cover_seg": "s1",
+    "grade": {
+      "auto": true,
+      "strength": 0.85,
+      "saturation": 1.0
+    },
+    "schema": 6,
+    "audit": {
+      "script_md5": "ca84c2166a2e866c94d0427f36925df3",
+      "by": "wuwenjia6498",
+      "at": "2026-09-28 12:45",
+      "issues": []
+    },
+    "opening": {
+      "header": [
+        "四年级上册·第五单元",
+        "校内同步写作（记事习作）"
+      ],
+      "header_src": "写作课详案输出/四上-第五单元-生活万花筒-写作课详案.md 第 2 行",
+      "title": "生活万花筒",
+      "subtitle": "抓住最关键的一步，把小事写精彩",
+      "illus": "repo:课件配图工具/课件产出/四上-第五单元-生活万花筒/gpt-image/抠图/抠-P05.png",
+      "md5": "add80f9ad8a896d897f1b9be31c93778"
+    }
+  },
+  "segments": [
+    {
+      "id": "s1",
+      "role": "hook",
+      "lines": [
+        "孩子写一件事，是不是总这样呀？",
+        "开头写了，结尾也写了，",
+        "中间最要紧的经过呢，一句话就带过去了。"
+      ],
+      "shots": [
+        {
+          "station": "desk",
+          "framing": "close-up",
+          "move": "push",
+          "from_line": 0,
+          "beats": [
+            {
+              "word": "是不是总这样呀",
+              "do": "tilt_head"
+            },
+            {
+              "word": "一句话就带过去了",
+              "do": "lean_desk"
+            }
+          ]
+        }
+      ],
+      "broll": [
+        {
+          "at": 2,
+          "src": "repo:宣传短视频输出/写作课/四上-第五单元-生活万花筒/_screen/ppt_P08.png",
+          "dur": 3.0,
+          "layout": "split",
+          "crop": [
+            0.057,
+            0.268,
+            0.491,
+            0.854
+          ],
+          "md5": "c7983975a5259dcfa7cda056432bd652"
+        }
+      ]
+    },
+    {
+      "id": "s2",
+      "role": "pain",
+      "lines": [
+        "读的人看完，还是不知道这事到底怎么办成的。",
+        "其实呀，不是孩子没东西写，",
+        "是还没学会把经过拆开来写。"
+      ],
+      "shots": [
+        {
+          "station": "bookshelf",
+          "framing": "medium close-up",
+          "move": "handheld",
+          "from_line": 0,
+          "beats": [
+            {
+              "word": "其实呀",
+              "do": "pull_book"
+            },
+            {
+              "word": "拆开来写",
+              "do": "open_palm"
+            }
+          ]
+        }
+      ],
+      "broll": [
+        {
+          "at": 0,
+          "src": "assets:专注书写/专注书写 (19).jpg",
+          "dur": 3.0,
+          "motion": "in",
+          "focus": [
+            0.5,
+            0.35
+          ],
+          "md5": "852004f143f1183ed405ac766ec6c305"
+        }
+      ]
+    },
+    {
+      "id": "s3",
+      "role": "method",
+      "lines": [
+        "四年级上册第五单元的单元同步习作，",
+        "生活万花筒。",
+        "我们教会孩子把经过拆成几步，",
+        "挑出最关键的一步，写详细。"
+      ],
+      "shots": [
+        {
+          "station": "armchair",
+          "framing": "three-quarter",
+          "move": "track",
+          "from_line": 0,
+          "beats": [
+            {
+              "word": "生活万花筒",
+              "do": "open_palm"
+            }
+          ]
+        },
+        {
+          "station": "armchair",
+          "framing": "close-up",
+          "move": "push",
+          "from_line": 2,
+          "beats": [
+            {
+              "word": "拆成几步",
+              "do": "count"
+            },
+            {
+              "word": "写详细",
+              "do": "nod"
+            }
+          ]
+        }
+      ],
+      "broll": [
+        {
+          "at": 0,
+          "src": "repo:宣传短视频输出/写作课/四上-第五单元-生活万花筒/_screen/ppt_cover.png",
+          "dur": 3.5,
+          "motion": "in",
+          "fit": "contain",
+          "md5": "394e0e2644339fbb6e98ac731cd1095f"
+        },
+        {
+          "at": 2,
+          "src": "repo:课件配图工具/课件产出/四上-第五单元-生活万花筒/gpt-image/抠图/抠-P10b.png",
+          "dur": 3.0,
+          "fit": "cutout",
+          "motion": "in",
+          "md5": "dc07c7ffdeaec09e44e1f66e3a052f42"
+        }
+      ],
+      "sub_breaks": {
+        "0": "四年级上册第五单元\n的单元同步习作，"
+      }
+    },
+    {
+      "id": "s4",
+      "role": "compare",
+      "lines": [
+        "比如拍蚊子，写到最关键的那一步：",
+        "光柱在白墙上慢慢地移，",
+        "屋里静得能听见自己的心跳。",
+        "读的人，就像站在旁边看着。"
+      ],
+      "shots": [
+        {
+          "station": "desk",
+          "framing": "medium close-up",
+          "move": "push",
+          "from_line": 0,
+          "beats": [
+            {
+              "word": "比如拍蚊子",
+              "do": "hold_notebook"
+            },
+            {
+              "word": "就像站在旁边看着",
+              "do": "smile"
+            }
+          ]
+        }
+      ],
+      "broll": [
+        {
+          "at": 0,
+          "src": "repo:宣传短视频输出/写作课/四上-第五单元-生活万花筒/_screen/ppt_P09.png",
+          "dur": 3.0,
+          "layout": "pan",
+          "crop": [
+            0.0586,
+            0.2736,
+            0.943,
+            0.7153
+          ],
+          "pan": [
+            0.141,
+            0.5
+          ],
+          "md5": "3d74d1ad0f47b27a4d522f354af4bb6f"
+        },
+        {
+          "at": 1,
+          "src": "repo:宣传短视频输出/写作课/四上-第五单元-生活万花筒/_screen/ppt_P09.png",
+          "dur": 3.5,
+          "layout": "split",
+          "crop": [
+            0.324,
+            0.2736,
+            0.678,
+            0.7153
+          ],
+          "md5": "3d74d1ad0f47b27a4d522f354af4bb6f"
+        },
+        {
+          "at": 2,
+          "src": "repo:宣传短视频输出/写作课/四上-第五单元-生活万花筒/_screen/ppt_P09.png",
+          "dur": 3.0,
+          "layout": "split",
+          "crop": [
+            0.324,
+            0.2736,
+            0.678,
+            0.7153
+          ],
+          "md5": "3d74d1ad0f47b27a4d522f354af4bb6f"
+        }
+      ]
+    },
+    {
+      "id": "s5",
+      "role": "class",
+      "lines": [
+        "两节课下来，孩子当堂就能写完一篇，",
+        "再读给同桌听，",
+        "让同桌说说，哪一步写得最详细。"
+      ],
+      "shots": [
+        {
+          "station": "bookshelf",
+          "framing": "medium close-up",
+          "move": "handheld",
+          "from_line": 0,
+          "beats": [
+            {
+              "word": "当堂就能写完一篇",
+              "do": "nod"
+            }
+          ]
+        }
+      ],
+      "broll": [
+        {
+          "at": 0,
+          "src": "assets:课堂群像/课堂群像 (3).jpg",
+          "dur": 3.0,
+          "motion": "right",
+          "focus": [
+            0.5,
+            0.5
+          ],
+          "md5": "402733a0aad6de4def345a90707e9c59"
+        },
+        {
+          "at": 1,
+          "src": "assets:课堂学生分享/学生分享 (24).jpg",
+          "dur": 3.0,
+          "motion": "left",
+          "focus": [
+            0.5,
+            0.5
+          ],
+          "md5": "b064db1dc4ad2660fad94e48695b9685"
+        },
+        {
+          "at": 2,
+          "src": "repo:宣传短视频输出/写作课/四上-第五单元-生活万花筒/_screen/ppt_P24.png",
+          "dur": 3.0,
+          "layout": "split",
+          "md5": "e43a3bd1023925d20b5d9812de065cc4"
+        }
+      ]
+    },
+    {
+      "id": "s6",
+      "role": "cta",
+      "lines": [
+        "把一件小事写清楚，孩子就会发现，",
+        "平常的日子里，值得写的瞬间多着呢。",
+        "想让孩子试一试？扫码预约体验课吧！"
+      ],
+      "shots": [
+        {
+          "station": "armchair",
+          "framing": "close-up",
+          "move": "push",
+          "from_line": 0,
+          "beats": [
+            {
+              "word": "多着呢",
+              "do": "open_palm"
+            },
+            {
+              "word": "扫码预约体验课吧",
+              "do": "lean_in"
+            }
+          ]
+        }
+      ],
+      "broll": [
+        {
+          "at": 0,
+          "src": "repo:课件配图工具/课件产出/四上-第五单元-生活万花筒/gpt-image/抠图/抠-P05.png",
+          "dur": 3.0,
+          "fit": "cutout",
+          "motion": "in",
+          "md5": "add80f9ad8a896d897f1b9be31c93778"
+        },
+        {
+          "at": 1,
+          "src": "repo:写作课海报输出/四上-第五单元-生活万花筒/四上-第五单元-生活万花筒-习作海报.jpg",
+          "dur": 3.0,
+          "motion": "down",
+          "focus": [
+            0.5,
+            0.0
+          ],
+          "md5": "4d8ca0deed68cd58ae7ebe98cab1a61a"
+        }
+      ]
+    }
+  ]
+}

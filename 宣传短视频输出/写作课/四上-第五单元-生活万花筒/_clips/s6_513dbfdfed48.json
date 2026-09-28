@@ -1,0 +1,17 @@
+{
+  "task": "t_3a4c415f74ff617fb1f12180",
+  "attempt": 1,
+  "verdict": "pass",
+  "sim": 1.0,
+  "asr_text": "把一件小事写清楚,孩子会慢慢发现原来生活里的很多瞬间都可以成为写作的素材。",
+  "asr_segments": [
+    {
+      "start": 0.0,
+      "end": 9.0,
+      "text": "把一件小事写清楚,孩子会慢慢发现原来生活里的很多瞬间都可以成为写作的素材。"
+    }
+  ],
+  "speech_start": 0.596,
+  "speech_end": 9.136,
+  "duration": 9.42
+}

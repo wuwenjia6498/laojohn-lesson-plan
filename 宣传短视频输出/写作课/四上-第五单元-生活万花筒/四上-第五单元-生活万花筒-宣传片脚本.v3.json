@@ -1,0 +1,281 @@
+{
+  "meta": {
+    "line": "写作课",
+    "unit": "四上-第五单元-生活万花筒",
+    "title": "生活万花筒",
+    "capsule": "四年级上册｜第五单元同步习作",
+    "ai_label": "本视频含 AI 生成内容",
+    "end": {
+      "subtitle": "抓住最关键的一步，把小事写精彩"
+    },
+    "sources": [
+      "写作课海报输出/四上-第五单元-生活万花筒/四上-第五单元-生活万花筒-习作海报.json",
+      "写作配套输出/四上-第五单元-生活万花筒/四上-第五单元-生活万花筒-家长用_data.json",
+      "写作课详案输出/四上-第五单元-生活万花筒-写作课详案.md"
+    ],
+    "presenter": "讲解员C",
+    "cover_seg": "s1",
+    "grade": {
+      "gamma": 1.1,
+      "brightness": 0.02,
+      "saturation": 1.03
+    },
+    "schema": 3,
+    "screens": {
+      "poster": {
+        "src": "repo:宣传短视频输出/写作课/四上-第五单元-生活万花筒/_screen/poster_16x9.jpg",
+        "desc_en": "the course poster: a large brown brush-calligraphy Chinese title on a cream background, a bold subtitle line, a dark rounded label, and a colorful kaleidoscope illustration of children below",
+        "md5": "61014e243d58a3b1e7f00aa72f3e6826"
+      },
+      "ppt_cover": {
+        "src": "repo:宣传短视频输出/写作课/四上-第五单元-生活万花筒/_screen/ppt_cover.png",
+        "from": "四上-第五单元-生活万花筒-课件PPT-配图版v5.pptx",
+        "slide": 1,
+        "desc_en": "the lesson's title slide: a wide orange-to-teal gradient banner with a large white Chinese title, a small subtitle line, and an illustrated curly-haired boy holding a notebook at the lower right",
+        "md5": "394e0e2644339fbb6e98ac731cd1095f"
+      }
+    },
+    "audit": {
+      "script_md5": "dd264c1a4b5593ea34f138d998aeb84d",
+      "by": "wuwenjia6498",
+      "at": "2026-09-27 18:49",
+      "issues": []
+    }
+  },
+  "segments": [
+    {
+      "id": "s1",
+      "role": "hook",
+      "lines": [
+        "孩子写一件事，是不是总这样呀？",
+        "开头写了，结尾也写了，",
+        "中间最要紧的经过呢，一句话就带过去了。"
+      ],
+      "shots": [
+        {
+          "station": "desk",
+          "framing": "close-up",
+          "move": "push",
+          "from_line": 0,
+          "beats": [
+            {
+              "word": "是不是总这样呀",
+              "do": "tilt_head"
+            },
+            {
+              "word": "一句话就带过去了",
+              "do": "lean_desk"
+            }
+          ]
+        }
+      ],
+      "broll": [
+        {
+          "at": 2,
+          "src": "card:line",
+          "dur": 3.0,
+          "card": {
+            "text": "我们俩费了好大的劲，终于把它打死了。"
+          }
+        }
+      ]
+    },
+    {
+      "id": "s2",
+      "role": "pain",
+      "lines": [
+        "读的人看完，还是不知道这事到底怎么办成的。",
+        "其实呀，不是孩子没东西写，",
+        "是还没学会把经过拆开来写。"
+      ],
+      "shots": [
+        {
+          "station": "bookshelf",
+          "framing": "medium close-up",
+          "move": "handheld",
+          "from_line": 0,
+          "beats": [
+            {
+              "word": "其实呀",
+              "do": "pull_book"
+            },
+            {
+              "word": "拆开来写",
+              "do": "open_palm"
+            }
+          ]
+        }
+      ],
+      "broll": [
+        {
+          "at": 0,
+          "src": "assets:专注书写/专注书写 (19).jpg",
+          "dur": 3.0,
+          "motion": "in",
+          "focus": [
+            0.5,
+            0.35
+          ],
+          "md5": "852004f143f1183ed405ac766ec6c305"
+        }
+      ]
+    },
+    {
+      "id": "s3",
+      "role": "method",
+      "screen": "poster",
+      "lines": [
+        "老约翰同步习作，四年级上册第五单元，",
+        "这节课叫生活万花筒。",
+        "教孩子把经过拆成几步，挑出最关键的一步，写详细。"
+      ],
+      "shots": [
+        {
+          "station": "screen",
+          "framing": "three-quarter",
+          "move": "track",
+          "from_line": 0,
+          "beats": [
+            {
+              "word": "生活万花筒",
+              "do": "point_screen"
+            }
+          ]
+        },
+        {
+          "station": "screen",
+          "framing": "close-up",
+          "move": "push",
+          "from_line": 2,
+          "beats": [
+            {
+              "word": "最关键的一步",
+              "do": "count"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "s4",
+      "role": "compare",
+      "lines": [
+        "比如捉蚊子，写到最关键的那一步：",
+        "光柱在白墙上慢慢地移，",
+        "屋里静得能听见自己的心跳。",
+        "读的人，就像站在旁边看着。"
+      ],
+      "shots": [
+        {
+          "station": "desk",
+          "framing": "medium close-up",
+          "move": "push",
+          "from_line": 0,
+          "beats": [
+            {
+              "word": "比如捉蚊子",
+              "do": "hold_notebook"
+            },
+            {
+              "word": "就像站在旁边看着",
+              "do": "smile"
+            }
+          ]
+        }
+      ],
+      "broll": [
+        {
+          "at": 1,
+          "src": "card:line",
+          "dur": 3.0,
+          "card": {
+            "text": "光柱在白墙上{b}慢慢地移{/b}"
+          }
+        }
+      ]
+    },
+    {
+      "id": "s5",
+      "role": "class",
+      "lines": [
+        "两节课，孩子当堂就能写完一篇，",
+        "再读给同桌听，",
+        "让同桌说说，哪一步写得最详细。"
+      ],
+      "shots": [
+        {
+          "station": "bookshelf",
+          "framing": "medium close-up",
+          "move": "handheld",
+          "from_line": 0,
+          "beats": [
+            {
+              "word": "当堂就能写完一篇",
+              "do": "nod"
+            }
+          ]
+        }
+      ],
+      "broll": [
+        {
+          "at": 0,
+          "src": "assets:课堂群像/课堂群像 (3).jpg",
+          "dur": 3.0,
+          "motion": "right",
+          "focus": [
+            0.5,
+            0.5
+          ],
+          "md5": "402733a0aad6de4def345a90707e9c59"
+        },
+        {
+          "at": 1,
+          "src": "assets:课堂学生分享/学生分享 (24).jpg",
+          "dur": 3.0,
+          "motion": "left",
+          "focus": [
+            0.5,
+            0.5
+          ],
+          "md5": "b064db1dc4ad2660fad94e48695b9685"
+        }
+      ]
+    },
+    {
+      "id": "s6",
+      "role": "cta",
+      "screen": "ppt_cover",
+      "lines": [
+        "把一件小事写清楚，孩子就会发现，",
+        "平常的日子里，值得写的瞬间多着呢。",
+        "想让孩子试一试？扫码预约体验课吧！"
+      ],
+      "shots": [
+        {
+          "station": "screen",
+          "framing": "three-quarter",
+          "move": "track",
+          "from_line": 0,
+          "beats": [
+            {
+              "word": "值得写的瞬间多着呢",
+              "do": "point_screen"
+            }
+          ]
+        },
+        {
+          "station": "screen",
+          "framing": "close-up",
+          "move": "push",
+          "from_line": 2,
+          "beats": [
+            {
+              "word": "扫码预约体验课吧",
+              "do": "smile"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

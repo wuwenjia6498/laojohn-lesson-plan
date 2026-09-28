@@ -1,0 +1,17 @@
+{
+  "task": "t_bec5a01d5f2dc8edb7e75e91",
+  "attempt": 1,
+  "verdict": "pass",
+  "sim": 1.0,
+  "asr_text": "我们就是想带着孩子从生活出发,把自己想写的事一点一点写清楚。",
+  "asr_segments": [
+    {
+      "start": 0.0,
+      "end": 8.0,
+      "text": "我们就是想带着孩子从生活出发,把自己想写的事一点一点写清楚。"
+    }
+  ],
+  "speech_start": 0.767,
+  "speech_end": 7.223,
+  "duration": 8.0
+}

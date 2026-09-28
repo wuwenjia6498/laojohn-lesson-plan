@@ -1,0 +1,22 @@
+subject_definitions:
+<Subject 1> is the presenter in <Picture 1>: a Chinese woman in her late thirties with a short dark bob haircut and thin round metal-framed glasses, wearing a muted sage-green blouse with a small stand collar and a keyhole neckline, tiny stud earrings; warm, experienced and approachable, with a bright, expressive face and a kind gaze
+<Subject 2> is the room in <Picture 2>: one cozy, warm small-group writing classroom with cream walls, light wood furniture, green plants and bright airy daylight from a side window; it has three areas: a light wood writing table with open lined notebooks, pencils and a small potted plant; a tall warm wooden bookshelf full of colorful children's books; and a reading corner with a soft cream fabric armchair, an arched brass floor lamp and a small round side table with a short stack of books
+<Audio 1> is the voice-timbre reference for <Subject 1> (S1).
+
+summary:
+[reference generation + audio reference] A 9-second vertical 9:16 clip in which <Subject 1> moves naturally within <Subject 2> and speaks directly to parents through the camera in 1 shot, using <Audio 1> as the voice-timbre reference.
+
+retention_analysis:
+<Subject 1> (appears in [Shot 1]): fully_preserved - face, hairstyle, glasses, clothing, and the bright facial exposure and skin tone of <Picture 1> are retained.
+<Subject 2> (appears in [Shot 1]): partially_preserved - the room's furniture, palette and lighting are retained; different areas of the same room are shown as the presenter moves.
+<Audio 1>: reference - the presenter follows <Audio 1>'s voice timbre without copying its words or signal.
+
+detailed_description:
+The target video is a realistic, brightly lit vertical clip with natural skin texture and shallow depth of field. Keep the presenter's face sharp, brightly lit and clearly visible in every shot; only close and medium-close framings. No subtitles, captions, logos, watermarks, screens or floating graphics; any paper or book in view shows no readable writing. Bright, soft, even frontal key light from a large diffused source just above the camera fully illuminates the face with the same bright, airy, high-key exposure and fair skin tone as <Picture 1>; no shadow across the face, no underexposure, no dim or moody look.
+[Shot 1] A medium close-up framing the presenter from mid-torso up, natural 50mm portrait perspective with the camera about 1.5 meters away, face clearly readable, eye-level. <Subject 1> is standing close in front of the tall wooden bookshelf, colorful book spines softly blurred behind her shoulders. The camera floats with a gentle, natural handheld sway. <Subject 1> (S1) looks straight into the lens and says in the voice timbre referenced from <Audio 1>, with a lively, warm, genuinely engaged delivery with a natural conversational rhythm; the eyebrows, eyes and hands animate the words, with big natural smiles and small head movements, never stiff, <d>[Chinese] 两节课下来，孩子当堂就能写完一篇，再读给同桌听，让同桌说说，哪一步写得最详细。</d> As she says “当堂就能写完一篇”, <Subject 1> gives a small, understanding nod. After the last line she closes her lips and holds a warm, bright smile toward the lens until the clip ends at 00:09.000.
+
+overall_soundscape:
+Quiet indoor room tone with faint soft ambience and soft footsteps or fabric rustle when the presenter moves; no other voices.
+
+non_diegetic_music:
+N/A

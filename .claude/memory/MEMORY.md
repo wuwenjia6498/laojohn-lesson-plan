@@ -15,7 +15,7 @@
 - **双人协作(0820)**:口径见 CLAUDE.md §9;记忆事实源=仓内 .claude/memory/,用户目录那份是目录联接;看板与commit前缀0911已取消 — [详情](two-person-sync-0820.md)
 - **skill停用归档0910立·0911撤回**:只省description 2.8k字符(窗口0.2%),误触发方向反;22个全部在架,别再重做;活线两处查找与gitignore skills*通配保留无害 — [详情](skills-parked-0910.md)
 - **⚠「版权材料仅限内部备课·不得转发」已删(0924用户拍板)**:本仓+`_assets`全部素材可对外用、可进图生视频;16处一次改齐;别再以此拒绝 — [详情](copyright-forwarding-restriction-removed-0924.md)
-- **家长短视频宣传片线(0924只出方案未写代码)**:9:16成片·运镜+图生视频+_assets课堂照片·豆包TTS+老师声音克隆;复用lesson-video底层走薄壳 — [详情](promo-video-line-plan-0924.md)
+- **家长宣传片线(0927改AI讲解员出镜)**:H3口播+海报/课件首页/课堂照片穿插+按段自动调色;⚠投屏墙、悬浮卡片、博主一段一镜三条路用户已否别再提;博主skill不装 — [详情](promo-video-presenter-line-0927.md)｜[0924原方案](promo-video-line-plan-0924.md)
 ## 写作课（writing-lesson）
 **写任何一篇前必读**:[0911换靶](generation-retarget-0911.md) · [文风定盘](writing-style-two-directions-conflict-0831.md) · [例子四判据](writing-lesson-example-must-be-unique-anchor.md) · [比喻反刻板](writing-lesson-metaphor-antistereotype.md) · [电报体红线](writing-lesson-telegraphese-and-coinage-redline.md) · [示范文「我」同龄](model-essay-persona-student-age-0914.md) · [跨课次通则子索引](memory-index-writing-lesson-rules.md) 整块
 ### 跨课次通则 → 已外移 [写作课跨课次通则子索引](memory-index-writing-lesson-rules.md)（0919，排新课次前整块打开；新通则加进那里、不回本文件）

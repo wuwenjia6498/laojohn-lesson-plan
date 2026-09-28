@@ -1,0 +1,105 @@
+{
+  "presenter": "讲解员C",
+  "model": "minimax-h3",
+  "segments": [
+    {
+      "id": "s1",
+      "seconds": 10,
+      "lines": [
+        "孩子写一件事，是不是总这样？",
+        "开头写了，结尾也写了，",
+        "中间最要紧的经过呢，一句话就带过去了。"
+      ],
+      "prompt": "_prompts/s1.txt",
+      "hash": "cff9629545a6",
+      "clip": "_clips/s1_cff9629545a6.mp4"
+    },
+    {
+      "id": "s2",
+      "seconds": 11,
+      "lines": [
+        "读的人看完，还是不知道这事到底怎么办成的。",
+        "其实呀，不是孩子没东西写，",
+        "是还没学会把经过拆开来写。"
+      ],
+      "prompt": "_prompts/s2.txt",
+      "hash": "660454017e8e",
+      "clip": "_clips/s2_660454017e8e.mp4"
+    },
+    {
+      "id": "s3",
+      "seconds": 12,
+      "lines": [
+        "四年级上册第五单元的单元同步习作，",
+        "生活万花筒。",
+        "我们教会孩子把经过拆成几步，",
+        "挑出最关键的一步，写详细。"
+      ],
+      "prompt": "_prompts/s3.txt",
+      "hash": "e72768e17864",
+      "clip": "_clips/s3_e72768e17864.mp4"
+    },
+    {
+      "id": "s4",
+      "seconds": 12,
+      "lines": [
+        "比如拍蚊子，写到最关键的那一步：",
+        "光柱在白墙上慢慢地移，",
+        "屋里静得能听见自己的心跳。",
+        "读的人，就像站在旁边看着。"
+      ],
+      "prompt": "_prompts/s4.txt",
+      "hash": "805c8391f649",
+      "clip": "_clips/s4_805c8391f649.mp4"
+    },
+    {
+      "id": "s5",
+      "seconds": 9,
+      "lines": [
+        "两节课下来，孩子当堂就能写完一篇，",
+        "再读给同桌听，",
+        "让同桌说说，哪一步写得最详细。"
+      ],
+      "prompt": "_prompts/s5.txt",
+      "hash": "6118f207f8da",
+      "clip": "_clips/s5_6118f207f8da.mp4"
+    },
+    {
+      "id": "s6",
+      "seconds": 9,
+      "lines": [
+        "把一件小事写清楚，孩子会慢慢发现，",
+        "原来生活里的很多瞬间，",
+        "都可以成为写作的素材。"
+      ],
+      "prompt": "_prompts/s6.txt",
+      "hash": "513dbfdfed48",
+      "clip": "_clips/s6_513dbfdfed48.mp4"
+    },
+    {
+      "id": "s7",
+      "seconds": 8,
+      "lines": [
+        "我们就是想带着孩子从生活出发，",
+        "把自己想写的事，一点一点写清楚。"
+      ],
+      "prompt": "_prompts/s7.txt",
+      "hash": "3e5751b8df6d",
+      "clip": "_clips/s7_3e5751b8df6d.mp4"
+    }
+  ],
+  "total_seconds": 71,
+  "approved": {
+    "by": "wuwenjia6498",
+    "at": "2026-09-28 13:08",
+    "hashes": [
+      "cff9629545a6",
+      "660454017e8e",
+      "e72768e17864",
+      "805c8391f649",
+      "6118f207f8da",
+      "513dbfdfed48",
+      "3e5751b8df6d"
+    ]
+  }
+}

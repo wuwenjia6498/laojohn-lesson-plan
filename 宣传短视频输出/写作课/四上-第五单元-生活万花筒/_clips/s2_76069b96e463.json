@@ -1,0 +1,22 @@
+{
+  "task": "t_35f155d19ef0fba2122ce506",
+  "attempt": 1,
+  "verdict": "pass",
+  "sim": 1.0,
+  "asr_text": "读的人看完,还是不知道这事是怎么办成的。 不是孩子没东西写,是还没学会把经过拆开。",
+  "asr_segments": [
+    {
+      "start": 1.0,
+      "end": 5.0,
+      "text": "读的人看完,还是不知道这事是怎么办成的。"
+    },
+    {
+      "start": 5.0,
+      "end": 10.0,
+      "text": "不是孩子没东西写,是还没学会把经过拆开。"
+    }
+  ],
+  "speech_start": 0.85,
+  "speech_end": 9.76,
+  "duration": 10.13
+}

@@ -1,0 +1,211 @@
+{
+  "meta": {
+    "line": "写作课",
+    "unit": "四上-第五单元-生活万花筒",
+    "title": "生活万花筒",
+    "capsule": "四年级上册｜第五单元同步习作",
+    "ai_label": "本视频含 AI 生成内容",
+    "end": {
+      "subtitle": "抓住最关键的一步，把小事写精彩"
+    },
+    "sources": [
+      "写作课海报输出/四上-第五单元-生活万花筒/四上-第五单元-生活万花筒-习作海报.json",
+      "写作配套输出/四上-第五单元-生活万花筒/四上-第五单元-生活万花筒-家长用_data.json",
+      "写作课详案输出/四上-第五单元-生活万花筒-写作课详案.md"
+    ],
+    "presenter": "讲解员C",
+    "cover_seg": "s1",
+    "schema": 2,
+    "audit": {
+      "script_md5": "c5e0f783056c4e1c041bc69b61a032a7",
+      "by": "wuwenjia6498",
+      "at": "2026-09-27 17:17",
+      "issues": []
+    },
+    "grade": {
+      "gamma": 1.1,
+      "brightness": 0.02,
+      "saturation": 1.03
+    }
+  },
+  "segments": [
+    {
+      "id": "s1",
+      "role": "hook",
+      "camera": "close-up",
+      "action": [
+        "tilt_head"
+      ],
+      "lines": [
+        "孩子写一件事，是不是总这样：",
+        "起因写了，结果也写了，",
+        "中间最要紧的经过，一句话就带过去了？"
+      ],
+      "broll": [
+        {
+          "at": 2,
+          "src": "card:line",
+          "dur": 3.0,
+          "card": {
+            "text": "我们俩费了好大的劲，终于把它打死了。"
+          }
+        }
+      ]
+    },
+    {
+      "id": "s2",
+      "role": "pain",
+      "camera": "medium close-up",
+      "action": [
+        "open_palm"
+      ],
+      "lines": [
+        "读的人看完，还是不知道这事是怎么办成的。",
+        "不是孩子没东西写，是还没学会把经过拆开。"
+      ],
+      "broll": [
+        {
+          "at": 0,
+          "src": "assets:专注书写/专注书写 (19).jpg",
+          "dur": 3.0,
+          "motion": "in",
+          "focus": [
+            0.5,
+            0.35
+          ],
+          "md5": "852004f143f1183ed405ac766ec6c305"
+        }
+      ]
+    },
+    {
+      "id": "s3",
+      "role": "method",
+      "camera": "close-up",
+      "action": [
+        "count"
+      ],
+      "lines": [
+        "老约翰同步习作，四年级上册第五单元，",
+        "这节课教孩子把经过分成几步，",
+        "再挑出最关键的一步，写详细。"
+      ],
+      "broll": [
+        {
+          "at": 0,
+          "src": "repo:写作课海报输出/四上-第五单元-生活万花筒/四上-第五单元-生活万花筒-插画.jpg",
+          "dur": 3.0,
+          "motion": "out",
+          "focus": [
+            0.5,
+            0.4
+          ],
+          "md5": "7aab6561b76c8c3f11c701feae04c5b5"
+        },
+        {
+          "at": 2,
+          "src": "card:kw",
+          "dur": 2.5,
+          "card": {
+            "text": "最关键的一步"
+          }
+        }
+      ]
+    },
+    {
+      "id": "s4",
+      "role": "compare",
+      "camera": "medium close-up",
+      "action": [
+        "lean_in"
+      ],
+      "lines": [
+        "比如捉蚊子，写到最关键的那一步：",
+        "光柱在白墙上慢慢地移，",
+        "屋里静得能听见自己的心跳。",
+        "读的人，就像站在旁边看着。"
+      ],
+      "broll": [
+        {
+          "at": 1,
+          "src": "card:line",
+          "dur": 3.0,
+          "card": {
+            "text": "光柱在白墙上{b}慢慢地移{/b}"
+          }
+        },
+        {
+          "at": 3,
+          "src": "card:kw",
+          "dur": 2.5,
+          "card": {
+            "text": "看见·听见·想到"
+          }
+        }
+      ]
+    },
+    {
+      "id": "s5",
+      "role": "class",
+      "camera": "medium close-up",
+      "action": [
+        "smile"
+      ],
+      "lines": [
+        "两节课，孩子当堂写完一篇记事习作，",
+        "再读给同桌听，",
+        "让同桌说出哪一步写得最详细。"
+      ],
+      "broll": [
+        {
+          "at": 0,
+          "src": "assets:课堂群像/课堂群像 (3).jpg",
+          "dur": 3.0,
+          "motion": "right",
+          "focus": [
+            0.5,
+            0.5
+          ],
+          "md5": "402733a0aad6de4def345a90707e9c59"
+        },
+        {
+          "at": 1,
+          "src": "assets:课堂学生分享/学生分享 (24).jpg",
+          "dur": 3.0,
+          "motion": "left",
+          "focus": [
+            0.5,
+            0.5
+          ],
+          "md5": "b064db1dc4ad2660fad94e48695b9685"
+        }
+      ]
+    },
+    {
+      "id": "s6",
+      "role": "cta",
+      "camera": "close-up",
+      "action": [
+        "smile",
+        "nod"
+      ],
+      "lines": [
+        "把一件小事写清楚，",
+        "孩子会发现，平常日子里值得写的瞬间很多。",
+        "想让孩子试一试，扫码预约体验课。"
+      ],
+      "broll": [
+        {
+          "at": 1,
+          "src": "assets:课堂学生分享/学生分享 (33).jpg",
+          "dur": 3.0,
+          "motion": "up",
+          "focus": [
+            0.5,
+            0.45
+          ],
+          "md5": "8ec3e70e96d0c9ec2bfa393595c6258f"
+        }
+      ]
+    }
+  ]
+}
