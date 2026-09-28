@@ -166,6 +166,7 @@ async function viewHome() {
       const charOK = p.闸门.char;
       c.innerHTML = `<h2>${p.名称}</h2>
         <p class="muted">角色件 ${p.角色已出}/${p.角色件}　页目 ${p.页目已出}/${p.页目}
+        ${p.抠图件 ? '　抠图件 ' + p.抠图已出 + '/' + p.抠图件 : ''}
         ${p.人工素材位 ? '　人工素材位 ' + p.人工素材位 : ''}</p>
         <div class="row">
           <span class="pill ${charOK ? 'ok' : ''}">定妆 ${charOK ? '已验 · ' + charOK : '未验收'}</span>
@@ -180,7 +181,7 @@ async function viewHome() {
     const del = el('button', 'small ghost del', '删除');
     del.onclick = async (ev) => {
       ev.stopPropagation();
-      const n = p.角色已出 + p.页目已出;
+      const n = p.角色已出 + p.页目已出 + (p.抠图已出 || 0);
       const msg = '删掉项目「' + p.名称 + '」？' + LF + LF
         + (n ? '已生成的 ' + n + ' 张图会一起挪走。' + LF : '')
         + '不是真删：项目和图都会移进 _已删除/ 目录，想找回来可以搬回去。';
@@ -201,7 +202,9 @@ async function viewHome() {
 
 let P = null, NAME = null;
 
-const imgUrl = (sub, fn) => `/img/${encodeURIComponent(NAME)}/${sub}/${encodeURIComponent(fn)}.jpg?t=${Date.now()}`;
+// 抠图件是透明底 PNG（gen_cutouts.py），其余都是 jpg —— 扩展名写死 .jpg 时抠图件一张也取不到。
+const imgExt = sub => sub === '抠图' ? '.png' : '.jpg';
+const imgUrl = (sub, fn) => `/img/${encodeURIComponent(NAME)}/${sub}/${encodeURIComponent(fn)}${imgExt(sub)}?t=${Date.now()}`;
 
 async function save(patch) {
   await api('/projects/' + encodeURIComponent(NAME),
@@ -210,9 +213,10 @@ async function save(patch) {
 
 function thumb(sub, id, exists) {
   if (!exists) { const d = el('div', 'thumb miss', '未生成'); return d; }
-  const i = el('img', 'thumb'); i.src = imgUrl(sub, id); i.loading = 'lazy';
+  const i = el('img', 'thumb' + (sub === '抠图' ? ' cutout' : ''));
+  i.src = imgUrl(sub, id) + (sub === '抠图' ? '&thumb=1' : ''); i.loading = 'lazy';
   i.onclick = () => {
-    const big = el('img'); big.src = imgUrl(sub, id);
+    const big = el('img', sub === '抠图' ? 'cutout' : ''); big.src = imgUrl(sub, id);
     openModal(id, big);
   };
   return i;
@@ -222,7 +226,10 @@ async function viewProject(name) {
   NAME = name;
   P = await api('/projects/' + encodeURIComponent(name));
   const v = $('#view'); v.innerHTML = '';
-  v.append(secHead(), secStyle(), secChars(), secSlides());
+  v.append(secHead(), secStyle(), secChars());
+  // 2026-09-25 起新课次只出抠图件、画面清单为空 —— 空清单就不占一屏，抠图件排前面。
+  if ((P.抠图件 || []).length) v.append(secCutouts());
+  if (P.slides.length || !(P.抠图件 || []).length) v.append(secSlides());
 }
 
 /* —— 顶栏：一行摘要 + 两个主操作 ——
@@ -260,6 +267,7 @@ function secHead() {
   bar.append(bAll, bExp); h.append(bar); c.append(h);
   c.append(el('p', 'muted',
     `页目 ${done}/${gen.length}　角色件 ${P.characters.length}` +
+    ((P.抠图件 || []).length ? `　抠图件 ${P.抠图件.filter(x => P.图状态.抠图?.[x.id]).length}/${P.抠图件.length}` : '') +
     (manual ? `　人工素材位 ${manual}` : '') + `　${P.通道}`));
   return c;
 }
@@ -344,6 +352,54 @@ function openChar(ch) {
   box.append(row);
   openModal(ch.id, box);
 }
+/* —— 抠图件：gen_cutouts.py 出的透明底 PNG，只看图与描述。
+ * 生成仍走命令行（python scripts/gen_cutouts.py 课件项目/<项目>.json），
+ * 出完刷新本页即显示。棋盘格底是为了看清透明区有没有残留底色。 —— */
+function secCutouts() {
+  const c = el('div', 'card');
+  const h = el('h2', '', '抠图件');
+  const bR = el('button', 'small ghost', '刷新');
+  bR.onclick = () => viewProject(NAME);
+  h.append(bR); c.append(h);
+  const g = el('div', 'grid slides');
+  for (const it of P.抠图件) {
+    const box = el('div', 'slide');
+    const has = !!P.图状态.抠图?.[it.id];
+    const t = has ? thumb('抠图', it.id, true) : el('div', 'thumb miss', '未生成');
+    t.style.width = '100%'; t.style.height = '150px';
+    t.onclick = () => openCutout(it, has);
+    box.append(t);
+    const cap = el('div', 'cap');
+    cap.append(el('b', '', it.id));
+    if (it.画幅) cap.append(el('span', 'tag', it.画幅));
+    box.append(cap, el('div', 'muted', (it.prompt || '').slice(0, 40)));
+    g.append(box);
+  }
+  c.append(g);
+  c.append(el('p', 'muted',
+    '抠图件由命令行生成：python scripts/gen_cutouts.py 课件项目/' + NAME + '.json，出完点「刷新」。'));
+  return c;
+}
+
+function openCutout(it, has) {
+  const box = el('div');
+  if (has) { const im = el('img', 'cutout'); im.src = imgUrl('抠图', it.id); box.append(im); }
+  else box.append(el('p', 'muted', '这张还没生成。'));
+  const lab = el('label', 'field');
+  lab.append(el('span', '', `描述（${it.画幅 || '4:3'}${(it.挂载 || []).length ? '　挂载：' + it.挂载.join('、') : ''}）`));
+  const t = el('textarea'); t.rows = 6; t.value = it.prompt || ''; t.readOnly = true;
+  lab.append(t); box.append(lab);
+  if (has) {
+    const row = el('div', 'row'); row.style.marginTop = '8px';
+    const dl = el('button', 'small ghost', '下载这张');
+    dl.onclick = () => {
+      location.href = `/dl/img/${encodeURIComponent(NAME)}/抠图/` + encodeURIComponent(it.id + '.png');
+    };
+    row.append(dl); box.append(row);
+  }
+  openModal(it.id, box);
+}
+
 /* —— 画面清单：缩略图网格。首屏就是一屏图，点某张才展开详情 ——
  * 原先是一张宽表：缩略图 + 用途 + 必现细节（带勾验框与来源）+ prompt 文本框 + 挂载 + 按钮，
  * 一行就占掉半屏，十几页看下来全是字。真正天天要做的事只有两件：看图、重出不满意的那张。

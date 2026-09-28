@@ -160,12 +160,16 @@ def img_state(d, outdir):
     界面上完全看不出来：封面描述已经改成「主角色剪影」，显示的还是早先那张帆布包，
     人对着看只会以为「描述和实际完全对不上」。
     """
-    st = {"角色": {}, "页目": {}, "过期": []}
+    st = {"角色": {}, "页目": {}, "抠图": {}, "过期": []}
     pj = PROJECTS / f"{outdir.parent.name}.json"
     proj_mtime = pj.stat().st_mtime if pj.exists() else None
     for c in d.get("characters", []):
         f = outdir / "角色" / f"{c['id']}.jpg"
         st["角色"][c["id"]] = f.exists()
+    # 抠图件（gen_cutouts.py 出的透明底 PNG，2026-09-25 起新课次只用这一种，
+    # 画面清单为空）。漏了它网页端就一张图都看不到。
+    for c in d.get("抠图件", []):
+        st["抠图"][c["id"]] = (outdir / "抠图" / f"{c['id']}.png").exists()
     for s in d.get("slides", []):
         f = outdir / "页目" / f"{s['页码']}.jpg"
         st["页目"][s["页码"]] = f.exists()
@@ -214,6 +218,8 @@ def project_brief(name):
         "页目": len(gen_slides),
         "页目已出": sum(1 for s in gen_slides if st["页目"].get(s["页码"])),
         "人工素材位": sum(1 for s in slides if s.get("通道") == "人工素材位"),
+        "抠图件": len(d.get("抠图件", [])),
+        "抠图已出": sum(1 for v in st["抠图"].values() if v),
         "闸门": {k: (gates.get(k) or {}).get("验收人") for k in ("char", "pages")},
         "通道": outdir.name,
     }
@@ -271,6 +277,7 @@ def api_project(name: str):
         "style_card": d.get("style_card", {}),
         "characters": d.get("characters", []),
         "slides": d.get("slides", []),
+        "抠图件": d.get("抠图件", []),
         "候选页": d.get("_逐页判断") or d.get("_候选页") or [],
         "角色盘点": d.get("_角色盘点", []),
         "图状态": img_state(d, outdir),
@@ -787,8 +794,8 @@ def api_dl_img(name: str, sub: str, fn: str):
     /img 是给页面显示用的，这个是让浏览器存盘的。
 
     文件名带上课名和页码 —— 存到本地一堆 P01.jpg 分不清是哪一课的。"""
-    if sub not in ("角色", "页目"):
-        raise HTTPException(400, "sub 只能是 角色/页目")
+    if sub not in ("角色", "页目", "抠图"):
+        raise HTTPException(400, "sub 只能是 角色/页目/抠图")
     if "/" in fn or "\\" in fn:
         raise HTTPException(400, "文件名不合法")
     d, outdir = load_proj(name)
@@ -797,7 +804,8 @@ def api_dl_img(name: str, sub: str, fn: str):
         raise HTTPException(404, "图不存在")
     pj = d.get("project")
     course = (pj.get("名称") if isinstance(pj, dict) else pj) or name
-    return FileResponse(f, media_type="image/jpeg", filename=f"{course}-{fn}")
+    mt = "image/png" if f.suffix.lower() == ".png" else "image/jpeg"
+    return FileResponse(f, media_type=mt, filename=f"{course}-{fn}")
 
 
 @app.get("/api/rules")
@@ -866,14 +874,28 @@ def api_hist_img(name: str, fn: str):
 
 
 @app.get("/img/{name}/{sub}/{fn}")
-def api_img(name: str, sub: str, fn: str):
-    """取图。加 mtime 查询参数即可绕过浏览器缓存（前端重跑后会带上）。"""
-    if sub not in ("角色", "页目", "导出"):
-        raise HTTPException(400, "sub 只能是 角色/页目/导出")
+def api_img(name: str, sub: str, fn: str, thumb: int = 0):
+    """取图。加 mtime 查询参数即可绕过浏览器缓存（前端重跑后会带上）。
+
+    thumb=1 给缩略图：抠图件是透明底 PNG、一张约 5MB，一课四十张原图直接铺网格
+    要拉 200MB，局域网同事那头会卡死。缩略图缓存在 `抠图/_缩略/`，原图比它新就重做。"""
+    if sub not in ("角色", "页目", "导出", "抠图"):
+        raise HTTPException(400, "sub 只能是 角色/页目/导出/抠图")
+    if "/" in fn or "\\" in fn or ".." in fn:
+        raise HTTPException(400, "文件名不合法")
     _, outdir = load_proj(name)
     f = outdir / sub / fn
     if not f.exists():
         raise HTTPException(404, "图不存在")
+    if thumb and f.suffix.lower() == ".png":
+        t = outdir / sub / "_缩略" / fn
+        if not t.exists() or t.stat().st_mtime < f.stat().st_mtime:
+            from PIL import Image
+            t.parent.mkdir(exist_ok=True)
+            with Image.open(f) as im:
+                im.thumbnail((480, 480))
+                im.save(t, optimize=True)
+        return FileResponse(t)
     return FileResponse(f)
 
 

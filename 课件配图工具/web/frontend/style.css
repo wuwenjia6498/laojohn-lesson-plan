@@ -137,3 +137,6 @@ details.card[open] > summary::before{content:"▾ "}
 .mounts{background:var(--soft);border-radius:8px;padding:8px 10px;font-size:13px}
 .mounts .muted{font-size:12px;margin:4px 0 3px}
 .mounts .row{gap:12px;margin-bottom:4px}
+/* 抠图件是透明底：棋盘格衬底，看得出透明区是否干净；contain 不裁人物 */
+img.cutout{object-fit:contain !important;
+  background:repeating-conic-gradient(#e6e6e6 0 25%,#fff 0 50%) 0 0/16px 16px}
