@@ -155,7 +155,8 @@ def main():
             continue
 
         # 子目录里的其它 pptx 会被打包一起收走，必须提醒
-        others = [f for f in os.listdir(dst_dir) if is_pptx(f)] if os.path.isdir(dst_dir) else []
+        # 并排入库的 `-配图版.pptx`（2026-09-29 立）是参考件、打包只认精确名，不算
+        others = [f for f in os.listdir(dst_dir) if is_pptx(f) and not f.endswith("-配图版.pptx")] if os.path.isdir(dst_dir) else []
         if others:
             print("   ! 该子目录已有 %d 份 pptx，打包会一并收走——确认是否作废件：" % len(others))
             for f in others:

@@ -88,7 +88,7 @@
 - [Write吞弯引号→必跑fix_quotes](write-tool-normalizes-curly-quotes.md) / [下游JSON引号统一弯引号禁「」](json-materials-curly-quotes.md) / [雅黑弯引号显示半角](curly-quotes-render-halfwidth-yahei.md) — 含引号段落Edit改用无引号锚点;字符层U+201C已对别改JSON,靠模板unicode-range落宋体
 - [配图工具：多页道具须定妆件+示范文的「我」是大人(0903)](imgtool-prop-consistency-and-owner-0903.md) — 帆布包三错同根因;道具定妆必开去人物条目;款式写到托特/书包这一级
 - **PPT引擎**:[第三profile宣讲(0824)](ppt-promo-profile-0824.md) / [按profile分层·原语不fork](ppt-profile-seam-architecture.md) / [中文变Calibri:latin须在ea前](ppt-font-ea-latin-order.md) / [表格](ppt-table-autofit.md)·[原文齐读](ppt-quote-autofit.md)自适应(存量须重烘) / [阅读单页型已下线](ppt-reading-sheet-page.md)
-- ⚠[课件添图风格样板(0925)](ppt-illustration-style-reference-0925.md) — 用户否了「原版式找空地塞小图」;要的是外部人工添图那套:每课吉祥物立页题条右端+主图占版面9–20%常出血+正文压左60%配底带;表格/稿纸/分节页不放；⚠0927 选图「画内容不画活动」(母版§四之二第11条)
+- ⚠[课件添图风格样板(0925)](ppt-illustration-style-reference-0925.md) — 用户否了「原版式找空地塞小图」;要的是外部人工添图那套:每课吉祥物立页题条右端+主图占版面9–20%常出血+正文压左60%配底带;表格/稿纸/分节页不放；0927选图画内容不画活动(母版§四之二11);⚠0929起配图版以-配图版.pptx并排入库
 - **PPT 视觉**：[副标题克制电报体](ppt-subtitle-no-telegraphese.md) / [参考答案红字上屏](ppt-reference-answer-on-slide.md) / [逐条点击动画](ppt-click-reveal-animation.md) / [四图网格](ppt-four-image-grid.md) / [逐页讲稿新增docx](lecture-notes-docx.md) — 末条:打包只收docx
 - **工程坑**:题目带全角＿＿则place_pptx必认领失败须手工归位;配图空占位机检查不出须肉眼看 — [源](woheguoyitian-4a-ppt-chain-state.md)
 - ⚠[改外部pptx三个静默坑(0916)](pptx-text-edit-three-silent-traps-0916.md) — 重复shape id／timing空容器／endParaRPr不在段末;三者python-pptx全读得出、PowerPoint一律拒开且不说是哪条;工具已固化`laojohn-ppt/tools/pptx_text_edit.py`;⚠0925:normalize_paragraphs遇多pPr段落反把文件改坏,只在append过run时调
