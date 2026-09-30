@@ -217,7 +217,7 @@ PYTHONUTF8=1 python .claude\skills\laojohn-lesson-plan\assets\insert_images_docx
    - **要立在底带或页边上的人物，一律单独生成透明底版**：`python 课件配图工具/scripts/gen_cutouts.py 课件项目/<项目>.json`，清单写在项目 JSON 的 `抠图件` 里，产出放在 `抠图/`。**不要拿页目图后期抠**，页目图自带水彩底晕，残边抠不干净，用户三次点名。
    - 吉祥物是项目里的一个角色件（本课主角男孩招手的半身像）。
 2. **写版式清单**：`课件配图工具/课件产出/<项目>/ppt配图版式.json`，逐页写 op（swap／add／geom／band／font／fill），全局写 theme、tip_icon、mascot。格式见工具头注释。
-3. **生成**：`python .claude/skills/laojohn-ppt/tools/illustrate_pptx.py <版式清单.json>`。原图位用 swap 在原形状里换图，shape id 不变，动画绑定保留；新加的图缺省是静态的，**对应某张卡、某一条或会露出答案的图，要写 `"click": N` 并进第 N 击**（逐页判断，见母版 §四之二第 10 条）。
+3. **生成**：`python .claude/skills/laojohn-ppt/tools/illustrate_pptx.py <版式清单.json>`。原图位用 swap 在原形状里换图，shape id 不变，动画绑定保留；新加的图缺省是静态的，**对应某张卡、某一条或会露出答案的图，要写 `"click": N` 并进第 N 击**（逐页判断，见母版 §四之二第 10 条）。工具收尾自动做两件事（2026-09-30 用户定）：全篇动画效果改为「出现」（清单 `effect` 可改回 `fade`），手指图标并进它那句页脚提示的那一击、一起出现。已出的配图版只补这两件用 `illustrate_pptx.py --retime <配图版.pptx>`，别重跑整份清单（会冲掉第 5 步补的稿纸页、删的讲评页）。
 4. **核验**：用 PowerPoint COM 导出全部页截图逐页看；再按上面「收尾核验」的思路查 shape id 有没有重复、anim.json 里的 id 是否都还在、有没有新增的动画回跳。
 5. **补齐终稿**（2026-09-26 六上五 v9 沉淀）：`tools/finalize_external.py`，对配图终稿与仓内动画版各跑一次——
    - `--worksheet-after N --student-html 写作配套输出/<课次>/<课次>-学生用.html`：自由写作说明页（第 N 页）后插稿纸页；

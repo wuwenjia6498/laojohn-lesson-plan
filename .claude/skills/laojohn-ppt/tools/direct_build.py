@@ -118,7 +118,7 @@ def main():
     run(SKILL / "scripts/inspect_pptx.py", out, "--quiet")
     run(SKILL / "scripts/audit_against_plan.py", out)
     run(HERE / "html_to_pptx.py", out, "--merge-anim")
-    run(SKILL / "scripts/animate_pptx.py", out, sheet, "--in-place")
+    run(SKILL / "scripts/animate_pptx.py", out, sheet, "--in-place", "--effect", "appear")
     n, bad = check(out, sheet)
     snap.write_text(json.dumps(text_map(out), ensure_ascii=False, indent=1), encoding="utf-8")
     side = out.with_name(out.stem + "-动画分组.json")

@@ -605,14 +605,18 @@ def _sptgt_xml(target):
     return f'<p:spTgt spid="{target}"/>'
 
 
-def add_click_reveal(slide, groups, *, dur=500):
+def add_click_reveal(slide, groups, *, dur=500, effect="fade"):
     """为 slide 注入"逐组点击淡入"动画时间树（PowerPoint 原生 mainSeq）。
 
     groups：列表，每元素是一组 target（同一次鼠标点击一起淡入）。
         target = int(shape_id)            —— 整个形状淡入
               或 (shape_id, paragraph_idx) —— 该形状第 paragraph_idx 段落淡入（按段落构建）
     每次点击推进一组；未点击的组初始隐藏（不支持动画的渲染器一般退化为全部直出）。
+    effect："fade"＝淡入（缺省，存量产物都是它）；"appear"＝出现（PowerPoint 预设 1，
+        只切可见性、无过渡，dur 不起作用）。写作课配图版用 appear（2026-09-30 用户定）。
     """
+    if effect not in ("fade", "appear"):
+        raise ValueError(f"未知动画效果：{effect}")
     groups = [g for g in groups if g]
     if not groups:
         return
@@ -633,8 +637,13 @@ def add_click_reveal(slide, groups, *, dur=500):
             if isinstance(target, tuple) and target[0] not in para_spids:
                 para_spids.append(target[0])
             set_id, anim_id, eff_id = nid(), nid(), nid()
+            fade_xml = (
+                f'<p:animEffect transition="in" filter="fade"><p:cBhvr>'
+                f'<p:cTn id="{anim_id}" dur="{dur}"/><p:tgtEl>{tgt}</p:tgtEl>'
+                f'</p:cBhvr></p:animEffect>') if effect == "fade" else ""
+            preset = "10" if effect == "fade" else "1"
             eff_xml.append(
-                f'<p:par><p:cTn id="{eff_id}" presetID="10" presetClass="entr"'
+                f'<p:par><p:cTn id="{eff_id}" presetID="{preset}" presetClass="entr"'
                 f' presetSubtype="0" fill="hold" grpId="0" nodeType="{node_type}">'
                 f'<p:stCondLst><p:cond delay="0"/></p:stCondLst><p:childTnLst>'
                 f'<p:set><p:cBhvr><p:cTn id="{set_id}" dur="1" fill="hold">'
@@ -642,9 +651,7 @@ def add_click_reveal(slide, groups, *, dur=500):
                 f'<p:tgtEl>{tgt}</p:tgtEl>'
                 f'<p:attrNameLst><p:attrName>style.visibility</p:attrName></p:attrNameLst>'
                 f'</p:cBhvr><p:to><p:strVal val="visible"/></p:to></p:set>'
-                f'<p:animEffect transition="in" filter="fade"><p:cBhvr>'
-                f'<p:cTn id="{anim_id}" dur="{dur}"/><p:tgtEl>{tgt}</p:tgtEl>'
-                f'</p:cBhvr></p:animEffect></p:childTnLst></p:cTn></p:par>'
+                f'{fade_xml}</p:childTnLst></p:cTn></p:par>'
             )
         outer_id, inner_id = nid(), nid()
         steps_xml.append(

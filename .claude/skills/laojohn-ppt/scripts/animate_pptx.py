@@ -140,6 +140,8 @@ def main():
     ap.add_argument("--allow-header", action="store_true",
                     help="放行「页顶元素被卷入动画」的防呆检查（默认拦截）")
     ap.add_argument("--dur", type=int, default=None, help="单个淡入时长 ms（默认取工作单的 dur，否则 500）")
+    ap.add_argument("--effect", choices=("fade", "appear"), default="fade",
+                    help="动画效果：fade 淡入（缺省，外部件链沿用）；appear 出现（仓内直出件，2026-09-30 用户定）")
     ap.add_argument("--no-lesson-plan", action="store_true",
                     help="该课确实没有详案时显式放行审查闸门")
     args = ap.parse_args()
@@ -176,7 +178,7 @@ def main():
                      % (idx, missing))
         if not args.allow_header:
             check_bindings(slide, groups, idx, page_h)
-        add_click_reveal(slide, groups, dur=dur)
+        add_click_reveal(slide, groups, dur=dur, effect=args.effect)
         expect[idx] = len(groups)
         done += 1
 
@@ -192,8 +194,9 @@ def main():
             print("P%02d 期望 %d 次点击，实际 %d 次" % (i, e, a))
         sys.exit("回读核验不通过")
 
-    print("注入完成：%d 页加动画、%d 页跳过，共 %d 次点击（每次淡入 %dms）"
-          % (done, skipped, sum(expect.values()), dur))
+    print("注入完成：%d 页加动画、%d 页跳过，共 %d 次点击（%s）"
+          % (done, skipped, sum(expect.values()),
+             "效果：出现" if args.effect == "appear" else "每次淡入 %dms" % dur))
     print("回读核验通过 -> %s" % out)
 
 

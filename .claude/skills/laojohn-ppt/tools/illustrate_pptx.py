@@ -6,6 +6,7 @@
 
 用法：
     python illustrate_pptx.py <版式清单.json>
+    python illustrate_pptx.py --retime <配图版.pptx> [--out 另存.pptx]   # 只改动画，不动图与版式
 
 版式清单（路径均相对仓库根）：
 {
@@ -27,7 +28,7 @@ op 一览：
   band  通栏浅色底带：插到最底层，不遮任何内容；可选 "round": 半径英寸（圆角底卡）、"line": 描边色
   font  只改某形状内所有 run 的字号（size＝磅），不动文字
   fill  改形状填充色（卡片表头换彩色）
-swap／add 可带 "click": N（1 基）：把这张图并进本页第 N 击，与那一击的文字同时淡入（0926 用户定：
+swap／add 可带 "click": N（1 基）：把这张图并进本页第 N 击，与那一击的文字同时出现（0926 用户定：
   图对应某张卡／某一条的，翻页不能先露出来；会露答案的图跟答案那一击）。不写 click＝静态，开场就在，
   只用于整页情境图。按原有点击组重注入，走 helpers.add_click_reveal（单一源，禁复制时间树）。
   ⚠ 图的顶端高于上一击时会造成回跳，这种图宁可并进更早的一击。
@@ -35,7 +36,11 @@ swap／add 可带 "click": N（1 基）：把这张图并进本页第 N 击，�
   del：{"op": "del", "id": 53}——删掉一个形状（如判断页上会露答案的图，挪到结果页重新 add）；
   被删的形状若在动画里会报错退出，不静默拆动画。
 分节页与结尾页一律不加图（is_section 自动跳过，0925 用户定）。
-全局可选：theme（页题条色＋分节页色）、tip_icon（页脚提示句前加手指图标）、mascot。
+全局可选：theme（页题条色＋分节页色）、tip_icon（页脚提示句前加手指图标）、mascot、
+  effect（动画效果，缺省 "appear"＝出现；"fade"＝淡入）。
+动画收尾（retime，2026-09-30 用户定）：全篇点击动画一律改用 effect 指定的效果；手指图标并进它右侧那句
+  页脚提示的那一击，与文字一起出现（提示句常驻则图标也常驻）。已出的配图版用 --retime 补做，
+  不必重跑整份清单（重跑会冲掉 finalize_external 补的稿纸页、删的讲评页）。
 图源是透明底 PNG（gen_cutouts.py 直出）时按不透明区域裁边，不走抠图。
 图源可带 "crop": [x0, y0, x1, y1]（像素，先裁再处理）；"cutout": true 把与四边连通的底（白底与浅色水彩底晕）抠成透明，
 "keep": "br" 表示右、下两边不起抠（出血贴页边的那侧）。
@@ -263,6 +268,44 @@ def click_groups(slide):
     return gs
 
 
+def pair_tip_icons(slide, gs):
+    """手指图标并进右侧那句页脚提示所在的一击；提示句不在动画里则图标照旧常驻。返回并入个数。"""
+    n = 0
+    for icon in [sh for sh in slide.shapes if sh.name == "提示图标"]:
+        for sh in slide.shapes:
+            if not (sh.has_text_frame and 0 < (sh.left - icon.left) / E < 1.2
+                    and abs(sh.top - icon.top) / E < 0.4):
+                continue
+            k = next((i for i, g in enumerate(gs)
+                      if any((t if isinstance(t, int) else t[0]) == sh.shape_id for t in g)), None)
+            if k is None:
+                break
+            for g in gs:
+                if icon.shape_id in g:
+                    g.remove(icon.shape_id)
+            gs[k].append(icon.shape_id)
+            n += 1
+            break
+    return n
+
+
+def retime(prs, effect="appear"):
+    """全篇重注入点击动画：手指图标随提示句同击，效果统一为 effect。分组与顺序不变。"""
+    pages = icons = 0
+    for slide in prs.slides:
+        gs = click_groups(slide)
+        if not gs:
+            continue
+        icons += pair_tip_icons(slide, gs)
+        gs = [g for g in gs if g]
+        for tag in ("p:timing", "p:bldLst"):
+            for node in slide.element.findall(qn(tag)):
+                slide.element.remove(node)
+        add_click_reveal(slide, gs, dur=500, effect=effect)
+        pages += 1
+    print(f"动画：{pages} 页改为「{'出现' if effect == 'appear' else '淡入'}」，手指图标随提示句同击 {icons} 处")
+
+
 def join_clicks(slide, no, joins):
     """joins：[(shape_id, 第几击)]。并进原有点击组后整页重注入。"""
     gs = click_groups(slide)
@@ -368,6 +411,7 @@ def run(cfg_path):
             p.name = "吉祥物"
             n += 1
         print(f"吉祥物：{n} 页")
+    retime(prs, cfg.get("effect", "appear"))
     pte.prune_timing(prs)
     out = pathlib.Path(cfg["out"])
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -375,5 +419,19 @@ def run(cfg_path):
     print(f"已写 {out}  {out.stat().st_size / 1e6:.2f} MB")
 
 
+def retime_file(src, out=None, effect="appear"):
+    prs = Presentation(src)
+    retime(prs, effect)
+    pte.prune_timing(prs)
+    prs.save(out or src)
+    print(f"已写 {out or src}")
+
+
 if __name__ == "__main__":
-    run(sys.argv[1])
+    if sys.argv[1] == "--retime":
+        args = sys.argv[2:]
+        out = args[args.index("--out") + 1] if "--out" in args else None
+        eff = args[args.index("--effect") + 1] if "--effect" in args else "appear"
+        retime_file(args[0], out, eff)
+    else:
+        run(sys.argv[1])
