@@ -99,7 +99,7 @@
 - [阅读指南拓展栏点名具体书/影片](reading-guide-extension-concrete-titles.md) — 仅此栏放宽红线,吃不准就不写
 ## 未决事项与交付风险（做完即删）
 - **备课视频首批两支已出片(0921)**:五上四 17.8分钟为准片(外部终稿画面、增量39%、机检FAIL0、字幕零违规、零漂移);三上一 16.4分钟素材薄;六上四等PPT定稿;张视角二审三条已落地(bridge废除/locate与do重合/空泛点题词表);⚠闸门A记的是「用户指示直接出片(未逐页通读)」 — [详情](lesson-video-line-0921.md)
-- **仓库瘦身已完成(0920)**：759.67→303.41 MiB（两机一致）。**⏰ 唯一待办：2026-10-04 后删远端 `backup/pre-filter-20260920`**（删前 GitHub 网页体积数字不降，属正常；删后两台机器的负向 refspec 即可撤）；⚠ 新克隆必跑两条装机命令(core.hooksPath + 负向 refspec，见 docs\协作同步说明.md)，否则大文件闸门失效、一条 git pull 就把仓库撑回 635MiB — [详情](repo-slimming-plan-0920.md)
+- **仓库瘦身已完成(0920)**：759.67→303.41 MiB；**远端备份分支 1005 已删**（GitHub 网页体积会随之回落）。⚠ 新克隆仍必跑两条装机命令(core.hooksPath＋负向 refspec，见 docs\协作同步说明.md)；salvage tag 待确认无用再删 — [详情](repo-slimming-plan-0920.md)
 - 写作课批改标准包未做：三上五／四上五／四上六；四上五、四上六 PPT 链未做；**四上六**教材页未核（unit-texts 待补条目）＋资料卡「＿＿」数据待老师填 — [三上五](binfen-shijie-3a-lesson-state.md)｜[四上五](shenghuo-wanhuatong-4a-lesson-state.md)｜[四上六](wenhua-yichan-4a-lesson-state.md)
 - 开场「不在场第三人」另2课待回改(用户定本次只改五上四):四上一推荐一个好地方L27-31「一位朋友带孩子来玩」+老师替他读心(改它须重找判据载体,非换几句话)、三下六L44敲门送伞的孩子 — [详情](opening-no-offstage-third-party.md)
 - 六上三让生活更美好：workflow③「三分型」实例仍写两把尺未改（详案已按一把尺落定） — [详情](shenghuo-meihao-6a-lesson-state.md)

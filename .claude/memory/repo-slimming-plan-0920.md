@@ -74,6 +74,7 @@ metadata:
 - **阶段③**：filter-repo 剥 583 blob / 380.4MB，**5.5 秒**；force push 303 MiB **1 分 12 秒**（实际约 4.2 MiB/s）。
 - **验证全过**：与备份镜像 diff 只有阶段①那 21 个文件；**HEAD 树指纹重写前后完全一致**（`acd085ba…`）；受保护三目录 315 文件 SHA 全不变；362 提交一个没少；120 pptx / 329 图 / 192 docx 完整性零损坏。
 - 远端留 `backup/pre-filter-20260920`（旧历史全量）与 `salvage/0805-honbei-dropped`。**观察期到 2026-10-04**，其间无异常即可删 backup 分支（删之前 GitHub 网页显示的仓库体积不会降，属正常）；salvage tag 确认无用后再删。
+- **2026-10-05 已删远端 `backup/pre-filter-20260920`**（`git push origin --delete`，删前本地无任何指向它的 ref）。A 机负向 refspec `^refs/heads/backup/*` 仍留着，无害，不必撤。
 
 ## ★ 核心通则：GC 根必须先摘干净（0920 由 B 机同事归纳 · 本次发作四回）
 
