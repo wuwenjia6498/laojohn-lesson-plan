@@ -7,7 +7,10 @@ metadata:
 
 # 写作课线 · 跨课次通则（子索引）
 
-> 2026-09-19 自 `MEMORY.md`「写作课」区整块外移（索引超 17,500 字符告警，按维护规则⑤归档区外移）。**写任何一篇写作课详案前，与 MEMORY.md「写任何一篇前必读」那一行一起打开。** 新增通则仍进本文件，不回 MEMORY.md；MEMORY.md 只留一行指针。
+> 2026-09-19 自 `MEMORY.md`「写作课」区整块外移（索引超 17,500 字符告警，按维护规则⑤归档区外移）。**写任何一篇写作课详案前，先读本文件头部「写任何一篇前必读」七篇。** 新增通则仍进本文件，不回 MEMORY.md；MEMORY.md 只留一行指针。
+
+### 写任何一篇前必读（1004 自 MEMORY.md 移入）
+[0911换靶](generation-retarget-0911.md) · [文风定盘](writing-style-two-directions-conflict-0831.md) · [例子四判据](writing-lesson-example-must-be-unique-anchor.md) · [比喻反刻板](writing-lesson-metaphor-antistereotype.md) · [电报体红线](writing-lesson-telegraphese-and-coinage-redline.md) · [示范文「我」同龄](model-essay-persona-student-age-0914.md) · [跨课次通则子索引](memory-index-writing-lesson-rules.md)
 
 ### 跨课次通则(写同类题目直接适用 · 展开见各源条)
 - **「要紧」是 AI 腔词一律换「最关键／最重要」（保留「不要紧」＝没关系）；跨环节指代须自足（那一步／那三句要就地复述所指，判据＝读到这句要不要往上翻）；不写常识性废话（题目不算／不集中在常发言的学生／不用像老师这一篇）**:三条 0922 立,分别落 style-criteria §二.9 词选层（另加两条通用判据:单字形容词不作评语、评语要落到差别上）＋polish_rules 规则23／红线第 11 条「指代与衔接须自足」五项（远距离回指·数量与产出对得上·类比不跳步·自判分支条件对得上·**量的类比两头须真的相当**「十一分钟≠一节课」）／红线第 5 条⑤;**示范文自身的 AI 味另立 model-essay §六第 8 问「AI 味六查」**(标题不直白·开头不用「那天」·结尾落点对得上题面·时间线与数字不断层·示范文与〔材料〕不省主语·**收束句无铺垫与反应失真**「偷字上文没提过／笑了半天把常事写成大事」,改法优先落回已有的话);⚠ 连带停写 workflow ④ 与 model-essay §四原本要求的「写出你自己的,不用像老师的」 — [源](ai-tics-0922-anaphora-yaojin-filler.md)

@@ -23,3 +23,5 @@ metadata:
 - [[external-pptx-duplicate-drop-0825]] — 重复投放先做三项比对判重（0825）。
 
 相关：[[writing-line-naming-flattened-0826]]（pptx 与 anim.json 必须同批改名，否则防覆盖闸门静默失效）。
+
+**动画方向补记**（1004 自 MEMORY.md 索引行下沉）：表格按行揭示；页脚条若承载任务指令，须上移、先出（详见 [[ppt-anim-no-upward-jump-0915]]）；交付前必跑回跳校验。

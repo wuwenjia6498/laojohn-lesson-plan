@@ -31,3 +31,8 @@ metadata:
 - **阅读单线（reading-sheet，已停用）**：[skill固化](reading-sheet-skill.md)/[模板18个](reading-sheet-template-expansion-18.md)/[默认同出PPTX](reading-sheet-always-pptx.md)/[可编辑PPTX](reading-sheet-editable-pptx.md)/[合订PDF不打ZIP](reading-sheet-no-auto-zip.md)/[鱼骨图横置](reading-sheet-fishbone-landscape.md)/[维恩图双椭圆](reading-sheet-venn-ellipse-rewrite.md) — 改几何只动#canvas内坐标并同步render_pptx
 - **建档 SKILL 状态**：[SKILL状态](book-profile-skill-state.md) — 黄金样例=洞;俗世奇人档案已重建
 - **一次性工程交付**：[桌面插图批量去豆包水印管线](doubao-watermark-removal-pipeline.md)（106张已交付;脚本在记忆目录;输入glob必须排除产物）· [目录口径大改名已收官](bookclub-materials-dir-consolidation.md)（读书会线顶层目录加前缀、两线课件目录拆分）
+
+**写作课 · 课次状态（1004 自 MEMORY.md 未决区外移，原文照录）**
+- 三上五我们眼中的缤纷世界 0919 定稿、0922 两轮 50 处、**0923 五轮 70 余处**（**两条横向新规**：技法要当堂划适用边界〔变化三词只管当场看得完的〕＋并列多感官动词各归各位;**红线11扩第六项**＝带序数/方位/指示的回指仍要补中心词,⚠0922 我按第7条⑤判「不补」是判错;判断题的问法须在事实上站得住;⚠**提示层交代过≠学生话轮交代过**〔教具段写了的学习单,师话里一次没交代〕;⚠示范文改一个词必联动旁批表引句/示范卡/⑤两问,否则 essay_audit③ 判断链断）;机检全绿、docx 已重渲+style_front_page;PPT链0923已跑(5处PPT↔详案差异0924用户定不改)、配套三侧0923已出、批改标准包未做;**0928「学习单」全改「阅读单」＋口头化残留清理**（⚠学生用页头大标题按用户定不动·45份共用模板·未推广全仓）;短片不随教案分发（版权）；0926本仓添图配图版v5已出(整页重排)(桌面,#105同海报) — [详情](binfen-shijie-3a-lesson-state.md)
+- 四上五生活万花筒 0922 两轮意见改稿定稿（一轮去 AI 腔 30 余条；二轮四处：材料衔接补过渡＋结尾改回与反例同句、示范文第二段换用户文本、「十一分钟≠一节课」、结尾讲解整段换）；**新立两条横向规则**：红线11第五项「量的类比两头须真的相当」、model-essay AI 味五查→六查（收束句无铺垫与反应失真）；0922 又压了提纲表核心技法行（99→85 字）、**配套三侧已出**（教师侧溢出须先按 15 行旁注封顶；与存量做过 10-gram 重合扫描，照出 6 处复用样本卡句已改写）、**单元海报 0922 已出**（#258 万花筒半身近景）；本仓添图配图版v5 0927按第11条换10页活动图(桌面)；PPT 链/批改标准包未做 — [详情](shenghuo-wanhuatong-4a-lesson-state.md)
+- [四上六中国的世界文化遗产](wenhua-yichan-4a-lesson-state.md)（1004首稿＋冷审＋张视角：资料卡发放、同卡核对／异卡读者两关、「找一处让你吃惊的地方」；数据全留空待填；教材页未核未引课文；下游全未做）
