@@ -50,6 +50,7 @@
 ## 看图写话（picture-writing）
 整区（跨课次通则＋规则体例）已外移 → **[看图写话线记忆](memory-index-picture-writing.md)**，排新课次或出图前打开；该线当前无未决项。
 ## 读书会详案（lesson-plan）
+- ⚠[回归读书会·语体边界(1005)](reading-line-return-style-boundary-1005.md) — 延续散文化口语亲切(样本一至五原文锚定);写作线文风/润色/机检/MEMORY写作条目只有已进lesson-plan规则的才适用;Pass B按本线rubric;试写稻草人做基线
 **写详案前必读**：[逐环节装载量双向核查](lesson-plan-per-step-load-audit.md) · [创意环节正向标准三件套](lesson-plan-positive-standard-over-negative.md) · [环节标题三段式](lesson-plan-step-title-format.md)
 - [环节标题=功能·内容三段式(0807)](lesson-plan-step-title-format.md) — 功能名≤10字、同课时内不重复;规则在style-and-format+checklist
 - [一节讲不完的根因](lesson-plan-lesson-total-load-fit.md) / [创意环节防平庸=正向标准三件套](lesson-plan-positive-standard-over-negative.md) — 课堂动作量必须按标称配时倒算;只堆负向约束→模型取平庸下限

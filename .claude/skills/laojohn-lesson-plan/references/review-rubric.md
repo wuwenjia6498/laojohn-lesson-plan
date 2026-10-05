@@ -109,6 +109,25 @@
 
 ---
 
+## Pass B · 行文遍的审查项（2026-10-05 立 · 只列归属，判据回原处读）
+
+> 上面五维是 **Pass A（结构与教学）**。Pass B 专审行文，另派一个 fresh agent——执行形态与四条职权（成批直改／回炉闸／反向护栏／计量落盘）见 `laojohn-detail-review/SKILL.md` 第 1.5 步，本节不复述。读书会线**没有**参与写作线的措辞层后移改制，生成侧规则照旧，Pass B 只是把行文这一层单独过一遍。
+
+**Pass B 的依据（读书会专用，与写作线方向不同）**：语体方向＝**散文化口语、亲切**。先通读 `laojohn-writing-lesson/references/prose-exemplars.md` 的**样本一至五原文**（AI 之前的人工读书会稿）定语感，再按下列原处判据逐句读师话：
+
+| 审查项 | 判据原处 |
+|---|---|
+| 口语亲切但不表演、不学术腔 | `style-and-format.md`「排版」节语体条 |
+| 分级口气（含高段过渡句比喻与保护性口吻、叠词儿化） | `style-and-format.md`「分级口气规则」整节 |
+| 不堆童话修饰／不喂道理不煽情／承接接住内容／不预演总结 | `style-and-format.md`「不分级的通用底线」 |
+| 导读课开场与跨书话术同质化 | `style-and-format.md` 与 `checklist.md` 对应条 |
+
+**⚠ 不加载、不套用**：写作线的 `style-criteria.md`、`prose-style-benchmark.md`、`generation-brief.md`，样本卡头的语体特征条，`polish_writing.py`，`tone_gate.py --profile writing`。它们的方向是规范书面语，词表与保护区按写作课骨架定，套到读书会会把口语亲切的师话改成书面腔。
+
+**Pass B 不审的**：真实性、装载量、衔接、策略与工具落地（均属 Pass A）。拿不准归属就归 Pass A。
+
+⚠ **报告末尾必写「Pass B 计量」行并追加进台账**（`laojohn-detail-review/references/measurement-ledger.md` 与 `-detail.md` 两处），格式见 `laojohn-detail-review/SKILL.md` 第 1.5 步职权 4。
+
 ## 报告格式（三件套 · 让用户不必开 .md 就能判断）
 
 通读完，按下面格式输出一份复盘报告。**每条都要带「现状摘录」**——把详案里相关的那句/那段原样摘出来，用户扫一眼即知所指，不必回翻源文件。
