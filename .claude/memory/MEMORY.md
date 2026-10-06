@@ -108,7 +108,7 @@
 - 六上三让生活更美好：workflow③「三分型」实例仍写两把尺未改（详案已按一把尺落定） — [详情](shenghuo-meihao-6a-lesson-state.md)
 - 示范文「我」视角普查余项 0924 用户定忽略、不回改（确证越界2课+存疑1课+标注未进引块1课照旧） — [源](model-essay-persona-student-age-0914.md)
 - 写作线 0913 通读审计第四档（多处完整判据去重、technique-levels/SKILL/rubric 九来历下沉）未做，等两三篇新稿后再清 — [清单](writing-line-audit-0913-remaining.md)
-- **⚠ 神笔马良 插-24 页码未裁，不得对外交付** — [详情](shenbi-maliang-lesson-plan-state.md)
+- 神笔马良：v9 PPT 两课已出(1006)；详案仍带「P31」等页码字样、插-13「白白的」未改、三段原文与档案字句不一致，待用户定 — [详情](shenbi-maliang-lesson-plan-state.md)
 - **⚠ 阅读单线 18 份 PDF 的 Type3 字体遗留未修** — [详情](pdf-type3-fonts-fixed.md)
 - 彼得·潘档案 line23/32 与机读块不一致待清理 — [详情](peterpan-book-profile-state.md)｜封面图缺(汉修先生/呼兰河传/骑鹅旅行记,骑鹅须补图重跑)·快乐王子下游未做·快乐读书吧6本已建2本余4本
 - **⚠三处「单元被搬空」待核实**:四下八、五下七、六下五(课程表与馆内海报均已标「待定」占位,63总数不变);两道全新题《我最喜爱的季节》《传承好家风》archive零命中、文体暂判,待教材页;总地图docx原件仍是换新前口径 — [详情](textbook-2026-five-retitles-0914.md)
