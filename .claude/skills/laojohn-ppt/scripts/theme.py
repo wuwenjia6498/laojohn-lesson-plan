@@ -219,3 +219,41 @@ COVER_META_X = pct_x(0.060)
 COVER_META_Y = pct_y(0.800)
 COVER_META_W = pct_x(0.700)
 COVER_META_H = pct_y(0.140)
+
+
+# ============ 读书会 v9 新样式 · 按书主题色（2026-10-06 立）============
+# 中间稿元信息 `主题色：<色名>` 声明了才走新样式（layouts_reading_v9）；不声明＝现行样式，
+# 上面的常量原样生效、存量书重烘逐形状不变。色值取自用户人工优化版（汉修蓝/呼兰橙/彼得潘灰蓝）实测；
+# 答案色＝主题色深色档，须在白底与底带上对比度都 ≥4.5:1（橙 E37907 本身只有 3:1，故另取 984807）。
+# 红色 COLOR_RED_ACCENT 只留给 LOGO 与标题关键词，不再用于答案。
+from dataclasses import dataclass as _dc
+
+
+@_dc(frozen=True)
+class ReadingTheme:
+    name: str
+    main: str      # 眉标色块 / 分节页底 / 编号方块 / 表头 / 封面三角
+    band: str      # 内容页通栏浅色底带
+    answer: str    # 参考答案字色（主题色深色档）
+    card: str      # 卡片描边 / 浅色卡底的描边色
+
+
+READING_THEMES = {
+    "蓝":   ReadingTheme("蓝",   "376092", "DCE6F2", "376092", "9DB5D6"),
+    "橙":   ReadingTheme("橙",   "E37907", "FCF5DB", "984807", "F2C287"),
+    "灰蓝": ReadingTheme("灰蓝", "44546A", "EEECE1", "44546A", "AEB6C2"),
+    "绿":   ReadingTheme("绿",   "2E6B5E", "E3EFE9", "2E6B5E", "9FC4B8"),
+}
+
+FONT_QUOTE_V9 = "楷体"     # v9 原文齐读正文（人工版统一改楷体）
+
+
+def resolve_reading_theme(name):
+    """色名 → ReadingTheme；空串返回 None（＝现行样式）。查不到显式报错，不静默回落。"""
+    name = (name or "").strip()
+    if not name:
+        return None
+    th = READING_THEMES.get(name)
+    if th is None:
+        raise ValueError(f"未知主题色：{name!r}（应为：{'、'.join(READING_THEMES)}）")
+    return th

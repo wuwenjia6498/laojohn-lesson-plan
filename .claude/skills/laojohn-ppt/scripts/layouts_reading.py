@@ -35,6 +35,8 @@ from theme import (
     pct_x, pct_y,
 )
 from helpers import add_logo
+from theme import resolve_reading_theme
+import layouts_reading_v9 as v9
 from layouts_common import (
     draw_anchor, draw_logo_inner, draw_page_num, maybe_placeholder,
     bullets_text, _real_suggestions, _split_title_keywords,
@@ -43,7 +45,15 @@ from layouts_common import (
 
 
 # ---------- 封面 ----------
+def _v9(ctx):
+    """声明了 `主题色` → ReadingTheme（走 v9 新样式）；未声明 → None（现行样式原样）。"""
+    return resolve_reading_theme(ctx.get("theme_color"))
+
+
 def render_cover(slide, page, ctx):
+    th = _v9(ctx)
+    if th:
+        return v9.render_cover(slide, page, ctx, th)
     # 读书会：标题是书名，自动补《》
     _render_cover_base(slide, page, ctx, wrap_brackets=True)
 
@@ -51,6 +61,9 @@ def render_cover(slide, page, ctx):
 # ---------- 环节标题 ----------
 def render_section(slide, page, ctx):
     """环节标题：多环节显示巨型序号；单环节自动隐藏序号、居中标题。"""
+    th = _v9(ctx)
+    if th:
+        return v9.render_section(slide, page, ctx, th)
     section_total = getattr(page, "_section_total", 1)
     is_solo = (section_total <= 1)
 
@@ -117,6 +130,9 @@ def render_guide(slide, page, ctx):
     四图网格模式：当本页带 ≥2 条配图建议时，标题下整幅排 2×2 占位网格
     （"给你们看 N 幅画面"类页），此模式不渲染要点文本。
     """
+    th = _v9(ctx)
+    if th:
+        return v9.render_guide(slide, page, ctx, th)
     grid_sugs = _real_suggestions(page)
     grid_mode = len(grid_sugs) >= 2
 
@@ -228,6 +244,9 @@ def _quote_fit(text):
 
 
 def render_quote(slide, page, ctx):
+    th = _v9(ctx)
+    if th:
+        return v9.render_quote(slide, page, ctx, th)
     draw_anchor(slide, page.eyebrow)
     draw_logo_inner(slide, ctx.get("logo_path"))
     draw_page_num(slide, ctx["page_index"], ctx["page_total"])
@@ -256,6 +275,9 @@ def render_quote(slide, page, ctx):
 # ---------- 要点小结 ----------
 def render_summary(slide, page, ctx):
     """要点小结（方案 A）：红方块编号 + 文字，永远单列。"""
+    th = _v9(ctx)
+    if th:
+        return v9.render_summary(slide, page, ctx, th)
     draw_anchor(slide, page.eyebrow)
     draw_logo_inner(slide, ctx.get("logo_path"))
     draw_page_num(slide, ctx["page_index"], ctx["page_total"])
@@ -320,7 +342,11 @@ def render_summary(slide, page, ctx):
 
 # ---------- 填空表格 ----------
 def render_table(slide, page, ctx):
-    draw_anchor(slide, page.eyebrow)
+    th = _v9(ctx)       # v9 只换色（眉标色块/表头），版式不变
+    if th:
+        draw_anchor(slide, page.eyebrow, bar_color=th.main)
+    else:
+        draw_anchor(slide, page.eyebrow)
     draw_logo_inner(slide, ctx.get("logo_path"))
     draw_page_num(slide, ctx["page_index"], ctx["page_total"])
 
@@ -349,7 +375,7 @@ def render_table(slide, page, ctx):
     _table, geom = add_table(
         slide, TABLE_AREA_X, TABLE_AREA_Y, TABLE_AREA_W, TABLE_AREA_H,
         page.table_headers, page.table_rows, reveal_cells=reveals,
-        cell_colors=cell_colors,
+        cell_colors=cell_colors, **({"head_bg": th.main} if th else {}),
     )
     if not reveals:
         return
@@ -395,5 +421,6 @@ RENDERERS_READING = {
     "原文齐读": render_quote,
     "要点小结": render_summary,
     "填空表格": render_table,
-    "_END": render_end,
+    "_END": lambda slide, page, ctx: (
+        v9.render_end(slide, page, ctx, _v9(ctx)) if _v9(ctx) else render_end(slide, page, ctx)),
 }

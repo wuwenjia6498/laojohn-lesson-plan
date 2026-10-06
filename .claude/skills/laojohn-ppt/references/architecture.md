@@ -64,6 +64,16 @@
 - 适用范围：写作 profile 用；`render_teach`/`render_task_intro` 认，`render_activity` 不认。
 - 不声明 = 默认版式，向后兼容；带 `参考：` 答案的页版式让位问答揭示。
 
+## 四点五、读书会 v9 新样式（按书主题色 + 图感知版式，2026-10-06）
+
+- **开关**：中间稿元信息 `主题色：<色名>`（parser → `Deck.theme_color` → ctx 透传）。不写＝现行样式，存量书重烘逐形状不变（回归基线：8 本 32 份读书会＋写作 4 份＋宣讲 1 份＋各 examples，共 41 份）。
+- **分派位置**：`layouts_reading.py` 各 renderer 开头 `th = _v9(ctx)`，声明了就转 `layouts_reading_v9.py` 的同名函数；旧代码一行不动。这是读书会 profile **内部**的样式变体，不是课型分支，共享层不知情。
+- **色板**：`theme.READING_THEMES`（蓝／橙／灰蓝／绿，每色含 main／band／answer／card 四槽），`resolve_reading_theme` 查不到即报错。用 ctx 传而不改 theme 模块属性：各模块 `from theme import X` 在 import 时就固定了名字，函数默认参数也在定义时求值，改模块属性传不过去，还会串到复用读书会 renderer 的写作 profile。
+- **共享层只加带默认值的参数与一个原语**：`draw_anchor(bar_color=)`、`draw_cover_triangle(color)`、`_render_cover_base(tri_color=, underlay=, title_box=, meta_box=)`、`render_end(anchor_color=)`、`resolve_image`（从 layouts_writing 提上来）、`helpers.add_picture_fit`（等比 contain、允许出血、按透明区裁边）、`image_has_alpha`。
+- **图感知**：带透明通道＝抠图，贴右下出血；否则＝场景图，放右栏圆角。缺图不画占位框、改全宽；文字放不下（问答字号低于 18pt、引文低于 20pt）就弃图。分节页、表格页、END 不放图。
+- **build_ppt 附带两项只读检查**（课型无关）：缺图清单、`jump_back_pages` 动画回跳；另有 `--strict-images` 参数，缺图时不出件。
+- 字段写法见 `laojohn-ppt-draft/references/field-extraction.md` §5b 与 `image-suggestion.md`；配图链路见 `课件配图工具/scripts/reading_deck.py` 头注释。
+
 ## 五、字段写法的唯一源
 
 写作页型字段写法（含 v8 实景观察 + 版式选择器合法值速查）的唯一源 = `laojohn-ppt-draft/references/writing-mode.md` §2 / §2.5 / §2.6 / §2.7。本文件不复述字段语法，只管架构与渲染归属。

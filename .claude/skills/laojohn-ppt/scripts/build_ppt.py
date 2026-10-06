@@ -46,10 +46,34 @@ def find_default_asset(filename_candidates, asset_subdir):
     return None
 
 
+def jump_back_pages(prs, tol_emu=274320):
+    """逐页查点击动画有没有「回跳」：后一击出现的内容顶边高于此前各击（超出 0.3 英寸容差）。
+    只读检查、课型无关，返回 [(第几张幻灯片, 第几击)]。"""
+    from pptx.oxml.ns import qn
+    out = []
+    for idx, slide in enumerate(prs.slides, 1):
+        seq = slide._element.find(".//" + qn("p:cTn") + "[@nodeType='mainSeq']")
+        if seq is None:
+            continue
+        tops = {sh.shape_id: sh.top for sh in slide.shapes if sh.top is not None}
+        steps = seq.find(qn("p:childTnLst"))
+        prev = None
+        for k, step in enumerate(steps if steps is not None else [], 1):
+            ids = {int(t.get("spid")) for t in step.iter(qn("p:spTgt"))}
+            ys = [tops[i] for i in ids if i in tops]
+            if not ys:
+                continue
+            top = min(ys)
+            if prev is not None and top < prev - tol_emu:
+                out.append((idx, k))
+            prev = top if prev is None else max(prev, top)
+    return out
+
+
 def build(input_md: str, output_pptx: str, *,
           course_name: str = "", book_title: str = "",
           logo_path: str = None, banner_path: str = None,
-          anim: bool = True) -> dict:
+          anim: bool = True, strict_images: bool = False) -> dict:
     with open(input_md, encoding="utf-8") as f:
         md = f.read()
 
@@ -110,6 +134,7 @@ def build(input_md: str, output_pptx: str, *,
     # 页码：仅对中间内容页计数（封面、END 不纳入）
     inner_total = sum(1 for p in pages if p.page_type not in {"封面", "_END"})
     placeholder_report = []
+    missing_images = []
     inner_idx = 0
 
     for page in pages:
@@ -128,6 +153,8 @@ def build(input_md: str, output_pptx: str, *,
             "banner_path": banner_path,
             "meta": "　·　".join(p for p in (deck.author, deck.grade) if p),
             "doc_kind": deck.doc_kind,
+            # 主题色：课型无关透传；读书会 v9 新样式据此选色板（缺省空＝现行样式）
+            "theme_color": deck.theme_color,
             "anim": anim,
             "input_dir": os.path.dirname(os.path.abspath(input_md)),
         }
@@ -135,6 +162,16 @@ def build(input_md: str, output_pptx: str, *,
         if renderer is None:
             raise ValueError(f"P{page.num} 无渲染器：{page.page_type}")
         renderer(slide, page, ctx)
+
+        # 缺图清单（课型无关）：页上有有效配图建议、但没有可用真图文件
+        if page.num not in {0, 999}:
+            _sugs = [s for s in (page.image_suggestions or []) if s.strip() not in
+                     {"无", "无（页面已满）", "—", "无配图"}]
+            _img = page.image_path
+            if _img and not os.path.isabs(_img):
+                _img = os.path.join(ctx["input_dir"], _img)
+            if _sugs and not (_img and os.path.isfile(_img)):
+                missing_images.append((page.num, page.page_type, page.image_path or _sugs[0]))
 
         # 演讲者备注 → pptx 自带备注页（放映时只有讲者看得到）。
         # 课型无关：中间稿不写 `备注：` 就是空字符串，此处直接跳过。
@@ -162,14 +199,21 @@ def build(input_md: str, output_pptx: str, *,
             placeholder_report.append((page.num, page.page_type, "—"))
 
     total = len(pages)
+    if strict_images and missing_images:
+        lines = "\n".join(f"  P{n:02d} {t}：{s}" for n, t, s in missing_images)
+        raise SystemExit(f"--strict-images：{len(missing_images)} 页缺图，未出件\n{lines}")
 
     os.makedirs(os.path.dirname(os.path.abspath(output_pptx)) or ".", exist_ok=True)
     prs.save(output_pptx)
+    jumps = jump_back_pages(prs) if deck.theme_color else []
 
     return {
         "pages": total,
         "output": os.path.abspath(output_pptx),
         "placeholders": placeholder_report,
+        "missing_images": missing_images,
+        "theme_color": deck.theme_color,
+        "jump_back": jumps,
         "logo": logo_path,
         "banner": banner_path,
     }
@@ -185,6 +229,8 @@ def main():
     ap.add_argument("--banner", default=None, help="封面横幅图片路径")
     ap.add_argument("--no-anim", dest="anim", action="store_false",
                     help="关闭逐条点击动画（默认开启：要点小结/引导问题追问逐条淡入）")
+    ap.add_argument("--strict-images", action="store_true",
+                    help="有配图建议却没有可用真图的页一律报错、不出件（新样式定稿用）")
     args = ap.parse_args()
 
     info = build(
@@ -194,6 +240,7 @@ def main():
         logo_path=args.logo,
         banner_path=args.banner,
         anim=args.anim,
+        strict_images=args.strict_images,
     )
 
     print(f"[OK] 已生成 {info['pages']} 页 -> {info['output']}")
@@ -203,6 +250,14 @@ def main():
     print("配图占位清单：")
     for num, ptype, sug in info["placeholders"]:
         print(f"  P{num:02d}  [{ptype}]  {sug}")
+    if info["theme_color"]:     # 新样式下缺图＝该页按无图版式出，须补图
+        print()
+        print(f"缺图清单（新样式·主题色{info['theme_color']}）：{len(info['missing_images'])} 页")
+        for num, ptype, sug in info["missing_images"]:
+            print(f"  P{num:02d}  [{ptype}]  {sug}")
+        jb = info["jump_back"]
+        print(f"动画回跳：{len(jb)} 处" + ("" if not jb else "（须改分组）：" +
+              "、".join(f"第{i}张幻灯片第{k}击" for i, k in jb)))
 
 
 if __name__ == "__main__":

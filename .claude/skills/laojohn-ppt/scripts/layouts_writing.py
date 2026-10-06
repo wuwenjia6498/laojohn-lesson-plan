@@ -36,6 +36,7 @@ from layouts_common import (
     draw_anchor, draw_logo_inner, draw_page_num, maybe_placeholder,
     bullets_text, _split_title_keywords, _real_suggestions,
     legend_to_colors,
+    resolve_image,
 )
 from layouts_reading import (
     render_section, render_quote, render_table,
@@ -479,15 +480,8 @@ def render_model_essay(slide, page, ctx):
 
 
 # ============ v8 图片路径解析 ============
-def _resolve_image(ctx, path):
-    """把中间稿里的相对图片路径解析为绝对路径（相对中间稿 .md 所在目录）。
-    绝对路径原样返回；空/不存在返回原值交给 add_image_cover 兜底占位。"""
-    if not path:
-        return path
-    if os.path.isabs(path):
-        return path
-    base = ctx.get("input_dir") or ""
-    return os.path.normpath(os.path.join(base, path))
+# 单一源已提到 layouts_common.resolve_image（读书会 v9 同用）；此处保留旧名供本模块调用。
+_resolve_image = resolve_image
 
 
 # ============ v8 要点多版式分派 ============

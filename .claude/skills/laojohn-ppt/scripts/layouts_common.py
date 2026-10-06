@@ -9,6 +9,7 @@
 它们 import 本模块复用这些公共件。**本模块禁止出现 `doc_kind` 分支**——
 两类课型的差异由各自的 layouts 模块、或经 ctx/参数传入决定，不在共享层判课型。
 """
+import os
 import re
 from pptx.util import Emu, Pt
 from pptx.enum.shapes import MSO_SHAPE
@@ -56,13 +57,14 @@ def legend_to_colors(legend, palette=CATEGORY_PALETTE):
 
 
 # ---------- 通用元素 ----------
-def draw_anchor(slide, label_text: str):
+def draw_anchor(slide, label_text: str, *, bar_color=COLOR_ANCHOR_BAR):
     """左上色条 + 章节铭牌（仅内页用）。
 
     label_text: 显示在色条右侧，通常是 page.eyebrow（如"情境导入""猜书名""作者的话"）。
+    bar_color: 色条颜色（缺省＝现行深灰蓝；读书会 v9 传本书主题色）。
     """
     add_rect(slide, ANCHOR_BAR_X, ANCHOR_BAR_Y, ANCHOR_BAR_W, ANCHOR_BAR_H,
-             COLOR_ANCHOR_BAR)
+             bar_color)
     add_textbox(
         slide, ANCHOR_LABEL_X, ANCHOR_LABEL_Y, ANCHOR_LABEL_W, ANCHOR_LABEL_H,
         label_text or "",
@@ -86,8 +88,8 @@ def draw_page_num(slide, idx: int, total: int):
     return
 
 
-def draw_cover_triangle(slide):
-    """封面左侧的深灰蓝朝右三角形装饰（▷），从横幅左边缘伸出。"""
+def draw_cover_triangle(slide, color=COLOR_ANCHOR_BAR):
+    """封面左侧的朝右三角形装饰（▷），从横幅左边缘伸出；color 缺省深灰蓝。"""
     x = COVER_TRI_X
     y = COVER_TRI_Y
     w = COVER_TRI_W
@@ -102,9 +104,20 @@ def draw_cover_triangle(slide):
     ], close=True)
     shape = builder.convert_to_shape()
     shape.fill.solid()
-    shape.fill.fore_color.rgb = rgb(COLOR_ANCHOR_BAR)
+    shape.fill.fore_color.rgb = rgb(color)
     shape.line.fill.background()
     _disable_shape_effects(shape)
+
+
+def resolve_image(ctx, path):
+    """把中间稿里的相对图片路径解析为绝对路径（相对中间稿 .md 所在目录）。
+    绝对路径原样返回；空/不存在返回原值，由调用方判断 isfile。"""
+    if not path:
+        return path
+    if os.path.isabs(path):
+        return path
+    base = ctx.get("input_dir") or ""
+    return os.path.normpath(os.path.join(base, path))
 
 
 def draw_eyebrow(slide, page):
@@ -157,12 +170,20 @@ def _split_title_keywords(title: str):
 
 
 # ---------- 封面基函数（参数化书名号，不判 doc_kind）----------
-def _render_cover_base(slide, page, ctx, *, wrap_brackets: bool):
+def _render_cover_base(slide, page, ctx, *, wrap_brackets: bool,
+                       tri_color=COLOR_ANCHOR_BAR, underlay=None,
+                       title_box=None, meta_box=None):
     """封面渲染公共体。
 
     wrap_brackets: 标题是否自动补《》——读书会传 True（标题是书名）、
     写作课传 False（标题是习作题目）。本函数不嗅探 doc_kind，决策权交给
     调用它的 reading / writing cover。
+
+    以下参数缺省＝现行版式（两 profile 存量不变），读书会 v9 新样式按需传：
+      tri_color —— 左侧三角颜色；
+      underlay  —— 回调 underlay(slide)，在横幅/三角/LOGO 之后、文字之前执行（放封面人物抠图，
+                   让标题压在图上）；
+      title_box / meta_box —— (x, y, w, h) 覆盖标题框、作者框几何（给人物让位）。
     """
     # 顶部横幅（四周留白边）
     add_image_or_skip(
@@ -171,9 +192,13 @@ def _render_cover_base(slide, page, ctx, *, wrap_brackets: bool):
         COVER_BANNER_W, COVER_BANNER_H,
     )
     # 左侧装饰三角（横幅左边缘伸出）
-    draw_cover_triangle(slide)
+    draw_cover_triangle(slide, tri_color)
     # LOGO（位于横幅内部右上角，仅宽度，保持原比例）
     draw_logo_cover(slide, ctx.get("logo_path"))
+    if underlay is not None:
+        underlay(slide)
+    tx, ty, tw_, th_ = title_box or (COVER_TITLE_X, COVER_TITLE_Y, COVER_TITLE_W, COVER_TITLE_H)
+    mx, my, mw, mh = meta_box or (COVER_META_X, COVER_META_Y, COVER_META_W, COVER_META_H)
 
     # 大标题（叠在横幅中央）；不加粗、斜体
     title_text = (page.title or ctx.get("book_title", "")).strip()
@@ -181,7 +206,7 @@ def _render_cover_base(slide, page, ctx, *, wrap_brackets: bool):
             and not (title_text.startswith("《") and title_text.endswith("》")):
         title_text = f"《{title_text}》"
     add_textbox(
-        slide, COVER_TITLE_X, COVER_TITLE_Y, COVER_TITLE_W, COVER_TITLE_H,
+        slide, tx, ty, tw_, th_,
         title_text,
         font=FONT_TITLE, size=SZ_COVER_TITLE, color=COLOR_TITLE,
         bold=False, italic=True, align="center", anchor="middle",
@@ -190,7 +215,7 @@ def _render_cover_base(slide, page, ctx, *, wrap_brackets: bool):
     sub = page.subtitle or ctx.get("course_name", "")
     if sub:
         add_textbox(
-            slide, COVER_SUB_X, COVER_SUB_Y, COVER_SUB_W, COVER_SUB_H,
+            slide, tx, COVER_SUB_Y, tw_, COVER_SUB_H,
             sub,
             font=FONT_TITLE, size=SZ_COVER_SUB, color=COLOR_TITLE,
             italic=True, align="center", anchor="middle",
@@ -199,7 +224,7 @@ def _render_cover_base(slide, page, ctx, *, wrap_brackets: bool):
     meta_text = page.body or ctx.get("meta", "")
     if meta_text:
         add_textbox(
-            slide, COVER_META_X, COVER_META_Y, COVER_META_W, COVER_META_H,
+            slide, mx, my, mw, mh,
             meta_text,
             font=FONT_BODY, size=SZ_COVER_META, color=COLOR_BODY,
             align="left", anchor="top", line_spacing=1.8,
@@ -207,7 +232,8 @@ def _render_cover_base(slide, page, ctx, *, wrap_brackets: bool):
 
 
 # ---------- END 结束页 ----------
-def render_end(slide, page, ctx):
+def render_end(slide, page, ctx, *, anchor_color=COLOR_ANCHOR_BAR,
+               bg=("1E7A79", "8FBBBA")):
     """每节课 PPT 末页：青绿渐变 + 居中 END + 老约翰白 LOGO + 右下"下一次再见 ▶"。
 
     不参与页码计数；page 参数仅占位，本函数不读取其内容。课型无关，两 profile 共用。
@@ -219,11 +245,11 @@ def render_end(slide, page, ctx):
     gw = pct_x(0.950)
     gh = pct_y(0.920)
     add_gradient_rect(slide, gx, gy, gw, gh,
-                      "1E7A79", "8FBBBA", angle_deg=225)
+                      bg[0], bg[1], angle_deg=225)   # 读书会 v9 传 (主题色, 主题色)＝纯色底
 
     # 左上深灰蓝小色块（与内页 anchor bar 同位）
     add_rect(slide, ANCHOR_BAR_X, ANCHOR_BAR_Y, ANCHOR_BAR_W, ANCHOR_BAR_H,
-             COLOR_ANCHOR_BAR)
+             anchor_color)
 
     # 中央 THE END（白色，120pt）
     add_textbox(

@@ -57,6 +57,13 @@ def check_file(target: str, expect_range=None) -> tuple[list[str], list[str], li
     for k in required_meta:
         if k not in head:
             errs.append(f'[meta] 缺 {k}')
+    # 读书会新样式（声明了主题色）：封面与原文齐读也配图，配图建议须带 形=/画面=，出处禁页码
+    m_theme = re.search(r'^主题色[:：]\s*(\S+)', head, re.MULTILINE)
+    is_v9 = bool(m_theme) and not is_writing
+    if is_v9:
+        field_matrix = {k: dict(v) for k, v in field_matrix.items()}
+        for pt_ in ('封面', '原文齐读'):
+            field_matrix[pt_]['禁用'] = [f for f in field_matrix[pt_]['禁用'] if f != '配图建议']
 
     # 页编号
     ids = [int(m.group(1)) for m in re.finditer(r'^## P(\d+) \|', text, re.MULTILINE)]
@@ -142,11 +149,34 @@ def check_file(target: str, expect_range=None) -> tuple[list[str], list[str], li
         for must in rules.get('必填', []):
             if is_image_grid and must == '要点':
                 continue  # 网格页豁免要点必填
+            if must == '要点' and '要点样式：对比' in p:
+                continue  # 对比版式内容写在 左/右正文
             if f'{must}：' not in p:
                 errs.append(f'[P{pid} {pt}] 缺必填字段: {must}')
         for ban in rules.get('禁用', []):
             if f'{ban}：' in p:
                 errs.append(f'[P{pid} {pt}] 出现禁用字段: {ban}')
+
+        if is_v9:
+            for sug in re.findall(r'^配图建议[:：]\s*(.+)$', p, re.MULTILINE):
+                if sug.strip() in ('无', '无配图', '—'):
+                    body_m = re.search(r'正文：([\s\S]*?)(?=\n配图建议|\n要点|\Z)', p)
+                    long_quote = pt == '原文齐读' and body_m and len(body_m.group(1)) > 150
+                    if pt in ('封面', '引导问题', '原文齐读') and not long_quote:
+                        warns.append(f'[P{pid} {pt}] 新样式此页应配图，却写了「无」')
+                    continue
+                if re.search(r'插\s*[=＝]\s*(封面|插-\d+)', sug):
+                    pass    # 原书插图／书封：不生图，形=、画面= 可省
+                elif not re.search(r'形\s*[=＝]\s*(抠图|场景)', sug):
+                    errs.append(f'[P{pid} {pt}] 配图建议缺 形=抠图|场景')
+                if not re.search(r'插\s*[=＝]', sug) and not re.search(r'画面\s*[=＝]', sug):
+                    errs.append(f'[P{pid} {pt}] 配图建议缺 画面=（生图描述）')
+                if re.search(r'书内\s*P|P\d+', sug.split('画面')[0]):
+                    errs.append(f'[P{pid} {pt}] 配图建议写了页码（档案无页码，改写章节）')
+            if pt in ('引导问题', '要点小结') and '要点样式：时间轴' not in p and not re.search(r'^配图建议[:：]', p, re.MULTILINE):
+                warns.append(f'[P{pid} {pt}] 新样式此页应配图，缺配图建议')
+            if pt == '原文齐读' and re.search(r'节选自.*P\d+', p):
+                errs.append(f'[P{pid} {pt}] 出处写了页码（档案无页码，只写章节）')
 
         # 要点用 - 列表
         kp = re.search(r'要点：\s*\n?([\s\S]+?)(?=\n[^-\s]|\Z)', p)

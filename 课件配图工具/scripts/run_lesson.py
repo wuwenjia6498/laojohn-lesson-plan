@@ -216,8 +216,18 @@ def compose(style, item, refs):
     if item.get("通道") == "编辑":
         return item["prompt"], refs
     hs = handdraw(style)
+    # 风格卡可选 `风格参考图`（相对仓库根，2026-10-06 读书会配图立）：本书有原书插图时，挂一张扫描件
+    # 顶替编号参考图，让 AI 图与原书插图同一画风；不写＝行为与改造前逐字一致。
+    scan = style.get("风格参考图")
+    scan = (ROOT.parent / scan) if scan else None
+    if scan is not None and not scan.exists():
+        raise FileNotFoundError(f"风格卡的风格参考图不存在：{scan}")
     if not hs:
-        return prefix_for(style, item) + " " + item["prompt"], refs
+        if scan is None:
+            return prefix_for(style, item) + " " + item["prompt"], refs
+        from handdraw_style import REF_ISOLATION, REF_ISOLATION_MIXED
+        note = REF_ISOLATION_MIXED if refs else REF_ISOLATION
+        return prefix_for(style, item) + " " + item["prompt"] + note, refs + [scan]
     from handdraw_style import needs_color, REF_ISOLATION, REF_ISOLATION_MIXED
     parts = []
     if hs["traits"]:
@@ -230,7 +240,7 @@ def compose(style, item, refs):
     note = REF_ISOLATION_MIXED if refs else REF_ISOLATION
     body = item["prompt"].strip().rstrip("。；，") + "。"
     prompt = "".join(parts) + "画面内容：" + body + note
-    return prompt, refs + [pathlib.Path(hs["ref_path"])]
+    return prompt, refs + [scan or pathlib.Path(hs["ref_path"])]
 
 
 def resolve_refs(names, outdir, made):

@@ -87,6 +87,12 @@ class Page:
     # 真实图片路径（相对中间稿目录或绝对路径）。来源=`配图建议：图=<路径>｜说明…` 的 图= 段。
     # 有路径→渲染端铺真图（add_image_cover）；无→退回虚线占位框。课型无关；仅写作 profile 用。
     image_path: str = ""
+    # 配图并进本页第 N 击（1 基；0＝静态，翻页即在）。来源=`配图建议：…｜击=N` 段。
+    # 读书会 v9 新样式用；`画面=`/`插=`/`形=` 三段是给配图脚本的生图/取图口径，引擎不读、不进占位说明。
+    image_click: int = 0
+    # 与 image_suggestions 平行：每条配图建议各自的 图= 路径（无则 ""）。读书会 v9 四图网格用；
+    # 旧字段 image_path 仍只取第一条，存量行为不变。
+    image_paths: List[str] = field(default_factory=list)
     course: str = ""           # 课时（如有）
     # —— 写作课页型用的通用数据字段（课型无关；reading profile 不产出即留默认空）——
     # 「双栏对照」(render_compare)：块模式用 left_body/right_body（各一大段），
@@ -126,6 +132,9 @@ class Deck:
     author: str = ""           # 作者
     grade: str = ""            # 年级
     doc_kind: str = ""         # 文体：""=读书会（缺省/向后兼容）、"写作"=写作课
+    # 主题色：""=现行样式（缺省/向后兼容）；声明了（如"蓝"）即走读书会 v9 新样式，
+    # 色名由 theme.resolve_reading_theme 查表，查不到显式报错。课型无关地透传，由呈现层解释。
+    theme_color: str = ""
     pages: List[Page] = field(default_factory=list)
 
 
@@ -172,7 +181,7 @@ def parse_md(md_text: str) -> Deck:
 
     # 第一阶段：扫元信息（可选 YAML front-matter 风格也行；这里用简单 key: value）
     i = 0
-    meta_pattern = re.compile(r"^(书名|课时|作者|年级|文体)\s*[:：]\s*(.+?)\s*$")
+    meta_pattern = re.compile(r"^(书名|课时|作者|年级|文体|主题色)\s*[:：]\s*(.+?)\s*$")
     while i < len(lines):
         ln = lines[i].strip()
         if not ln:
@@ -193,6 +202,8 @@ def parse_md(md_text: str) -> Deck:
                 deck.grade = val
             elif key == "文体":
                 deck.doc_kind = val
+            elif key == "主题色":
+                deck.theme_color = val
         i += 1
 
     # 第二阶段：扫分页
@@ -270,14 +281,23 @@ def parse_md(md_text: str) -> Deck:
                         # 其余段仍作占位说明文字（无图时退回虚线占位框、有图直接铺图）。
                         segs = [s.strip() for s in re.split(r"\s*[｜|]\s*", val) if s.strip()]
                         kept = []
+                        this_img = ""
                         for s in segs:
                             m_img = re.match(r"^图\s*[=＝]\s*(.+)$", s)
-                            if m_img and not current.image_path:
-                                current.image_path = m_img.group(1).strip()
+                            m_clk = re.match(r"^击\s*[=＝]\s*(\d+)$", s)
+                            if m_img and not this_img:
+                                this_img = m_img.group(1).strip()
+                                if not current.image_path:
+                                    current.image_path = this_img
+                            elif m_clk:
+                                current.image_click = int(m_clk.group(1))
+                            elif re.match(r"^(画面|插|形)\s*[=＝]", s):
+                                continue      # 配图脚本的口径段，引擎不用
                             else:
                                 kept.append(s)
                         sug = "｜".join(kept) if kept else val
                         current.image_suggestions.append(sug)
+                        current.image_paths.append(this_img)
                         if not current.image_suggestion:
                             current.image_suggestion = sug
                 elif key == "标题样式":
@@ -290,7 +310,7 @@ def parse_md(md_text: str) -> Deck:
                     if v == "卡片强调":
                         current.bullet_style = "卡片"
                         current.bullets_highlight_last = True
-                    elif v in {"竖排", "卡片", "步骤", "图文", "节点"}:
+                    elif v in {"竖排", "卡片", "步骤", "图文", "节点", "药丸", "流程", "时间轴", "对比"}:
                         current.bullet_style = v
                 elif key == "场景":
                     # `场景：图=<路径>｜名=<场景名>｜问=<问题>｜答=<答案>`（后三段可缺）

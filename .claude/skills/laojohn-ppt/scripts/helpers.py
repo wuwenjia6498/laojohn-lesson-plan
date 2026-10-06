@@ -362,6 +362,64 @@ def add_image_cover(slide, x, y, w, h, image_path, *,
     return pic, cap_shapes
 
 
+def image_has_alpha(image_path):
+    """图是否带有效透明区（＝抠图）。读不了的图返回 False。"""
+    try:
+        from PIL import Image
+        with Image.open(image_path) as im:
+            if im.mode not in ("RGBA", "LA") and not (im.mode == "P" and "transparency" in im.info):
+                return False
+            return im.convert("RGBA").getextrema()[3][0] < 250
+    except Exception:
+        return False
+
+
+def add_picture_fit(slide, image_path, x, y, w, h, *, anchor="br",
+                    trim_alpha=True, rounded=False, radius_frac=0.05):
+    """等比 contain 放图：整图放进 (x,y,w,h) 框、不拉伸不裁内容，按 anchor 贴边。
+
+    - anchor：水平 l/c/r 与垂直 t/c/b 的组合（如 "br"＝右下贴齐，"c"＝居中）；缺省一方按居中。
+    - 框可超出页面＝出血（人物从页边被裁掉，像坐在页里）。
+    - trim_alpha：抠图（带透明通道）先按不透明区域求外接框、用 pic.crop_* 裁掉透明边，
+      再按裁后尺寸 contain——这样「贴右下」贴的是人物本身而不是透明画布。不写临时文件。
+    - 文件不存在返回 None（由调用方决定退回无图版式）。
+    """
+    if not (image_path and os.path.isfile(image_path)):
+        return None
+    from PIL import Image
+    with Image.open(image_path) as im:
+        iw, ih = im.size
+        box = (0, 0, iw, ih)
+        if trim_alpha and image_has_alpha(image_path):
+            alpha = im.convert("RGBA").getchannel("A").point(lambda v: 255 if v > 8 else 0)
+            box = alpha.getbbox() or box
+    bw, bh = box[2] - box[0], box[3] - box[1]
+    scale = min(float(w) / bw, float(h) / bh)
+    dw, dh = int(bw * scale), int(bh * scale)
+    a = anchor or "c"
+    if "l" in a:
+        px = x
+    elif "r" in a:
+        px = x + w - dw
+    else:
+        px = x + (w - dw) // 2
+    if "t" in a:
+        py = y
+    elif "b" in a:
+        py = y + h - dh
+    else:
+        py = y + (h - dh) // 2
+    pic = slide.shapes.add_picture(image_path, Emu(int(px)), Emu(int(py)), Emu(dw), Emu(dh))
+    if box != (0, 0, iw, ih):
+        pic.crop_left = box[0] / iw
+        pic.crop_top = box[1] / ih
+        pic.crop_right = (iw - box[2]) / iw
+        pic.crop_bottom = (ih - box[3]) / ih
+    if rounded:
+        _round_picture(pic, radius_frac)
+    return pic
+
+
 def _round_rect_shape(shape, radius_frac=0.05):
     """把一个已存在的矩形 shape 的几何换成圆角矩形。"""
     try:
