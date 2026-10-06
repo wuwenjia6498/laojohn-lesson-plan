@@ -872,7 +872,7 @@ def cell_bg_color(data_row_idx, zebra_bg="F5F5F5"):
 def add_table(slide, x, y, w, h, headers, rows,
               head_bg="44546A", head_fg="FFFFFF",
               head_size=None, body_size=None,
-              zebra_bg="F5F5F5", reveal_cells=None, cell_colors=None):
+              zebra_bg="F5F5F5", reveal_cells=None, cell_colors=None, fill_ratio=0.0):
     """添加表格：无边框 + 表头深色 + 斑马纹，并**自适应塞进给定区域**。
 
     - `<br>` / `\n` 渲染为单元格内真实换行（多段落），不再印出字面量；
@@ -889,6 +889,9 @@ def add_table(slide, x, y, w, h, headers, rows,
     cell_colors：`{码: 颜色}`。给定时，单元格里 `[码:片段]` 标注的片段渲染成对应色并加粗
         （与示范文分句上色同语法、同一套码 → 全课"颜色=手法/感官"一致）；几何用剥标注纯文本算。
         不给（默认 None）时表格文字原样渲染——纯参数化加法，读书会调用不受影响。
+
+    fill_ratio：>0 时，行少表把数据行均匀加高，让全表撑到区域高度的这个比例（每行最多加到
+        约 4 行字高，免得空表格拉成大方块）；缺省 0＝不加高，存量产物不变。读书会 v9 传 0.85。
 
     返回：`(table, geom)`，geom = {x, y, col_x[相对左偏移], col_w, row_y[相对顶偏移],
         row_h, body_fs, marg_l, marg_t, zebra_bg}，供调用方放置答案叠层。
@@ -918,6 +921,14 @@ def add_table(slide, x, y, w, h, headers, rows,
     auto_fs, row_heights = _fit_table_font(calc_headers, calc_rows, widths, h, marg_pt, size_hi=size_hi)
     body_fs = auto_fs
     head_fs = head_size if head_size else min(auto_fs + 2, 18)
+    if fill_ratio and len(rows):
+        total = sum(int(r) for r in row_heights)
+        target = int(h * fill_ratio)
+        if total < target:
+            cap = Emu(int(body_fs * 1.32 * 4 / 72 * 914400))
+            extra = (target - total) // len(rows)
+            row_heights = [row_heights[0]] + [Emu(max(int(r), min(int(r) + extra, int(cap))))
+                                              for r in row_heights[1:]]
 
     shape = slide.shapes.add_table(n_rows, n_cols, x, y, w, h)
     table = shape.table
@@ -983,6 +994,8 @@ def add_table(slide, x, y, w, h, headers, rows,
     # 数据行（斑马纹：奇数行白，偶数行浅灰）
     for r, row in enumerate(rows, start=1):
         bg = "FFFFFF" if r % 2 == 1 else zebra_bg
+        if fill_ratio and not any(str(c).strip() for c in row):
+            bg = zebra_bg               # 整行空白（留给学生写）：白底无边框会看不见，改浅灰
         d = r - 1                       # 数据行 0 基索引
         for c in range(n_cols):
             text = row[c] if c < len(row) else ""

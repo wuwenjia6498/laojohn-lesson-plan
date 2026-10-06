@@ -90,15 +90,78 @@ def _page_image(page, ctx):
     return p if (p and os.path.isfile(p)) else None
 
 
-def _place_image(slide, path):
-    """按图的类型放图：抠图贴右下出血、场景图右栏圆角。"""
+def _place_image(slide, path, box=None, anchor=None, rounded=True):
+    """按图的类型放图：抠图贴右下出血、场景图按 box 等比 contain（不裁切）。"""
     if image_has_alpha(path):
-        x, y, w, h = CUT_BOX
+        x, y, w, h = box or CUT_BOX
         return add_picture_fit(slide, path, pct_x(x), pct_y(y), pct_x(w), pct_y(h),
-                               anchor="br")
-    x, y, w, h = SCENE_BOX
+                               anchor=anchor or "br")
+    x, y, w, h = box or SCENE_BOX
     return add_picture_fit(slide, path, pct_x(x), pct_y(y), pct_x(w), pct_y(h),
-                           anchor="c", trim_alpha=False, rounded=True, radius_frac=0.04)
+                           anchor=anchor or "c", trim_alpha=False,
+                           rounded=rounded, radius_frac=0.04)
+
+
+# ---------- 构图轮换（2026-10-06/07 用户两轮反馈：底带页太统一、原书插图关在色块里局促；
+# 底带不必都缩、位置不必统一、可穿插灰色）----------
+# 底带四种形态：通栏（文字区）、标题横带（只衬标题，正文落白底）、短底带（只铺文字栏）、无底带
+# （白底＋主题色竖线）；颜色在主题浅色与中性浅灰间穿插。
+# · 场景图（矩形，含原书插图）：一律站在白底上、放大；奇数页在右（短主题色底带）、偶数页在左
+#   （短灰底带）；横图在右侧贴右下出血。contain 不裁切——原书插图要让学生数东西、找细节。
+# · 抠图：页码 mod 4 轮换「通栏主题色、人物站在底带上」/「标题横带」/「灰通栏、图在左」/「白底竖线」。
+# · 无图问答页：页码 mod 4 轮换「通栏主题色」/「标题横带」/「灰通栏」/「白底竖线」。
+# 按页码定而不按计数（build_ppt 每页新建 ctx、存不住状态）；相邻页余数必不同，不会重样。
+LANDSCAPE_RATIO = 1.15
+GRAY_BAND = "EFEFEF"
+FULL = (0.0, 1.0, BAND_Y, BAND_B)          # 通栏底带 (x0, x1, y0, y1)
+STRIP = (0.0, 1.0, 0.185, 0.365)           # 标题横带
+
+
+def _aspect(path):
+    from PIL import Image
+    with Image.open(path) as im:
+        w, h = im.size
+    return w / float(h or 1)
+
+
+def _lay(kind, band=None, gray=False, line=False, text_x=BODY_X, img_box=None,
+         img_anchor=None, rounded=True, title_x=BODY_X, title_w=0.86):
+    return dict(kind=kind, band=band, gray=gray, line=line, text_x=text_x, img_box=img_box,
+                img_anchor=img_anchor, rounded=rounded, title_x=title_x, title_w=title_w)
+
+
+def _layout_for(page, img):
+    """返回本页构图（见上方注释）。img 为 None＝无图页。"""
+    k = page.num % 4
+    if img is None:
+        return (_lay("band", band=FULL), _lay("strip", band=STRIP),
+                _lay("gray", band=FULL, gray=True), _lay("line", line=True))[k]
+    if image_has_alpha(img):
+        if k == 0:
+            return _lay("cut_band", band=FULL, img_box=CUT_BOX, img_anchor="br",
+                        rounded=False, title_w=0.55)
+        if k == 1:
+            return _lay("cut_strip", band=STRIP, img_box=CUT_BOX, img_anchor="br",
+                        rounded=False, title_w=0.55)
+        if k == 2:
+            return _lay("cut_left", band=FULL, gray=True, text_x=0.43,
+                        img_box=(0.0, 0.38, 0.40, 0.62), img_anchor="bl", rounded=False)
+        return _lay("cut_line", line=True, img_box=CUT_BOX, img_anchor="br",
+                    rounded=False, title_w=0.55)
+    land = _aspect(img) >= LANDSCAPE_RATIO
+    if page.num % 2 == 1:               # 奇数页图在右，偶数页图在左
+        if land:
+            return _lay("right_bleed", band=(0.0, 0.60, BAND_Y, BAND_B),
+                        img_box=(0.60, 0.30, 0.40, 0.70), img_anchor="br", rounded=False,
+                        title_w=0.55)
+        return _lay("right", band=(0.0, 0.61, BAND_Y, BAND_B),
+                    img_box=(0.635, 0.19, 0.335, 0.765), img_anchor="c", title_w=0.55)
+    if land:                            # 横图在左：与右侧对称，贴左下出血
+        return _lay("left_bleed", band=(0.40, 1.0, BAND_Y, BAND_B), gray=True, text_x=0.43,
+                    img_box=(0.0, 0.30, 0.40, 0.70), img_anchor="bl", rounded=False,
+                    title_x=0.43, title_w=0.54)
+    return _lay("left", band=(0.40, 1.0, BAND_Y, BAND_B), gray=True, text_x=0.43,
+                img_box=(0.03, 0.19, 0.335, 0.765), img_anchor="c", title_x=0.43, title_w=0.54)
 
 
 # ---------- 文字估高 ----------
@@ -316,8 +379,7 @@ def _render_points(slide, page, ctx, th):
     sugs = _real_suggestions(page)
     if len(sugs) >= 2:
         _title(slide, page.title)
-        _band(slide, th)
-        _grid(slide, page, ctx, th)
+        _grid(slide, page, ctx, th)     # 多图直接放白底，不铺底带
         return
 
     img = _page_image(page, ctx)
@@ -354,12 +416,21 @@ def _render_points(slide, page, ctx, th):
     if size is None:
         size = Q_LADDER[-1]
 
-    cut = with_img and image_has_alpha(img)
-    _title(slide, page.title, w=0.55 if cut else 0.86)   # 抠图会伸到标题区，标题给它让位
-    _band(slide, th)
-    pic = _place_image(slide, img) if with_img else None
+    lay = _layout_for(page, img if with_img else None)
+    if lay["band"]:                     # 底带先画（标题横带要垫在标题下面）
+        x0, x1, y0, y1 = lay["band"]
+        r = add_rect(slide, pct_x(x0), pct_y(y0), pct_x(x1 - x0), pct_y(y1 - y0),
+                     GRAY_BAND if lay["gray"] else th.band)
+        _disable_shape_effects(r)
+    if lay["line"]:
+        ln = add_rect(slide, pct_x(BODY_X - 0.025), pct_y(BODY_Y), Pt(4),
+                      pct_y(BODY_B - BODY_Y), th.main)
+        _disable_shape_effects(ln)
+    _title(slide, page.title, x=lay["title_x"], w=lay["title_w"])   # 图会伸到标题区，标题让位
+    pic = (_place_image(slide, img, lay["img_box"], lay["img_anchor"], lay["rounded"])
+           if with_img else None)
 
-    x = pct_x(BODY_X)
+    x = pct_x(lay["text_x"])
     y = top
     groups = []
     if body_h:
@@ -448,8 +519,8 @@ def render_quote(slide, page, ctx, th):
 
     bg = add_rect(slide, pct_x(0.06), pct_y(0.22), pct_x(bg_w), pct_y(0.70), COLOR_BG_QUOTE)
     _disable_shape_effects(bg)
-    if with_img:
-        _place_image(slide, img)
+    if with_img:                        # 图移到书页底外的白底上、放大
+        _place_image(slide, img, None if image_has_alpha(img) else (0.64, 0.22, 0.33, 0.70))
     if page.title:
         add_textbox(slide, pct_x(0.10), pct_y(0.25), pct_x(bg_w - 0.06), pct_y(0.10),
                     page.title, font=FONT_TITLE, size=26, color=COLOR_TITLE, bold=True,

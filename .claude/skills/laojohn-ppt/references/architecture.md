@@ -70,7 +70,8 @@
 - **分派位置**：`layouts_reading.py` 各 renderer 开头 `th = _v9(ctx)`，声明了就转 `layouts_reading_v9.py` 的同名函数；旧代码一行不动。这是读书会 profile **内部**的样式变体，不是课型分支，共享层不知情。
 - **色板**：`theme.READING_THEMES`（蓝／橙／灰蓝／绿，每色含 main／band／answer／card 四槽），`resolve_reading_theme` 查不到即报错。用 ctx 传而不改 theme 模块属性：各模块 `from theme import X` 在 import 时就固定了名字，函数默认参数也在定义时求值，改模块属性传不过去，还会串到复用读书会 renderer 的写作 profile。
 - **共享层只加带默认值的参数与一个原语**：`draw_anchor(bar_color=)`、`draw_cover_triangle(color)`、`_render_cover_base(tri_color=, underlay=, title_box=, meta_box=)`、`render_end(anchor_color=)`、`resolve_image`（从 layouts_writing 提上来）、`helpers.add_picture_fit`（等比 contain、允许出血、按透明区裁边）、`image_has_alpha`。
-- **图感知**：带透明通道＝抠图，贴右下出血；否则＝场景图，放右栏圆角。缺图不画占位框、改全宽；文字放不下（问答字号低于 18pt、引文低于 20pt）就弃图。分节页、表格页、END 不放图。
+- **图感知**：带透明通道＝抠图，贴右下出血；否则＝场景图。缺图不画占位框、改全宽；文字放不下（问答字号低于 18pt、引文低于 20pt）就弃图。分节页、表格页、END 不放图。
+- **构图轮换**（2026-10-06/07 用户两轮反馈后定，`_layout_for`）：底带有四种形态——通栏、标题横带（只衬标题、正文落白底）、短底带（只铺文字栏）、无底带（白底＋主题色竖线），颜色在主题浅色与中性浅灰 `GRAY_BAND` 间穿插。场景图（含原书插图）一律站在白底上放大：奇数页在右配短主题色底带，偶数页在左配短灰底带，横图（宽高比 ≥1.15）在右时贴右下出血、在左时贴左下出血。抠图页按页码 mod 4 轮换「通栏、人物站在底带上」/「标题横带」/「灰通栏、图在左」/「白底竖线」；无图问答页按 mod 4 轮换「通栏」/「标题横带」/「灰通栏」/「白底竖线」。按页码而不按计数，是因为 build_ppt 每页新建 ctx、存不住状态；相邻页余数必不同，所以不会重样。底带先画、标题后画（横带要垫在标题下）。所有图一律 contain、**不裁切**——原书插图要让学生数东西、找细节。原文齐读页的图移到书页底外的白底；多图网格不铺底带。表格页（v9 才传）：`add_table(body_size=22, fill_ratio=0.85)`，行少的表把数据行加高到区域 85%（每行最多约 4 行字高），整行空白的留写行改浅灰底，免得白底无边框看不见；`fill_ratio` 缺省 0，旧样式与写作 profile 不受影响。
 - **build_ppt 附带两项只读检查**（课型无关）：缺图清单、`jump_back_pages` 动画回跳；另有 `--strict-images` 参数，缺图时不出件。
 - 字段写法见 `laojohn-ppt-draft/references/field-extraction.md` §5b 与 `image-suggestion.md`；配图链路见 `课件配图工具/scripts/reading_deck.py` 头注释。
 

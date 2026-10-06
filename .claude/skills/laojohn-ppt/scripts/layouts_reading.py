@@ -375,7 +375,9 @@ def render_table(slide, page, ctx):
     _table, geom = add_table(
         slide, TABLE_AREA_X, TABLE_AREA_Y, TABLE_AREA_W, TABLE_AREA_H,
         page.table_headers, page.table_rows, reveal_cells=reveals,
-        cell_colors=cell_colors, **({"head_bg": th.main} if th else {}),
+        cell_colors=cell_colors,
+        # v9：表头主题色；字号上限放到 22pt、行少表加高到区域 85%（投屏可读、不留大片空白）
+        **({"head_bg": th.main, "body_size": 22, "fill_ratio": 0.85} if th else {}),
     )
     if not reveals:
         return
