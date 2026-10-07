@@ -172,7 +172,7 @@ def _split_title_keywords(title: str):
 # ---------- 封面基函数（参数化书名号，不判 doc_kind）----------
 def _render_cover_base(slide, page, ctx, *, wrap_brackets: bool,
                        tri_color=COLOR_ANCHOR_BAR, underlay=None,
-                       title_box=None, meta_box=None):
+                       title_box=None, meta_box=None, title_size=None):
     """封面渲染公共体。
 
     wrap_brackets: 标题是否自动补《》——读书会传 True（标题是书名）、
@@ -183,7 +183,8 @@ def _render_cover_base(slide, page, ctx, *, wrap_brackets: bool,
       tri_color —— 左侧三角颜色；
       underlay  —— 回调 underlay(slide)，在横幅/三角/LOGO 之后、文字之前执行（放封面人物抠图，
                    让标题压在图上）；
-      title_box / meta_box —— (x, y, w, h) 覆盖标题框、作者框几何（给人物让位）。
+      title_box / meta_box —— (x, y, w, h) 覆盖标题框、作者框几何（给人物让位）；
+      title_size —— 覆盖标题字号（v9 按书名长度缩，长书名不在《》里折行）。
     """
     # 顶部横幅（四周留白边）
     add_image_or_skip(
@@ -208,7 +209,7 @@ def _render_cover_base(slide, page, ctx, *, wrap_brackets: bool,
     add_textbox(
         slide, tx, ty, tw_, th_,
         title_text,
-        font=FONT_TITLE, size=SZ_COVER_TITLE, color=COLOR_TITLE,
+        font=FONT_TITLE, size=title_size or SZ_COVER_TITLE, color=COLOR_TITLE,
         bold=False, italic=True, align="center", anchor="middle",
     )
     # 副标题/课时（叠在横幅，标题下方）；斜体

@@ -30,7 +30,7 @@ from theme import (
     FONT_TITLE, FONT_BODY, FONT_QUOTE_V9,
     COLOR_TITLE, COLOR_BODY, COLOR_RED_ACCENT, COLOR_BG_QUOTE,
     SLIDE_W, SLIDE_H,
-    LOGO_INNER_X, LOGO_INNER_Y, LOGO_INNER_W,
+    LOGO_INNER_X, LOGO_INNER_Y, LOGO_INNER_W, SZ_COVER_TITLE,
     pct_x, pct_y,
 )
 from layouts_common import (
@@ -578,6 +578,11 @@ def render_cover(slide, page, ctx, th):
     if img:
         kw = dict(title_box=(pct_x(0.04), pct_y(0.19), pct_x(0.64), pct_y(0.20)),
                   meta_box=(pct_x(0.06), pct_y(0.78), pct_x(0.58), pct_y(0.17)))
+        # 标题框约 600pt 宽、斜体 66pt：书名连《》超过 9 字（9 字及以内原样不动）就会把末字挤到第二行
+        # （《大头儿子和小头爸爸》实测折成「…小头爸 / 爸》」），按字数把字号压到一行放得下。
+        n = len((page.title or ctx.get("book_title", "")).strip().strip("《》")) + 2
+        if n * SZ_COVER_TITLE > 600:
+            kw["title_size"] = int(600 / n)
     _render_cover_base(slide, page, ctx, wrap_brackets=True, tri_color=th.main,
                        underlay=underlay, **kw)
 
