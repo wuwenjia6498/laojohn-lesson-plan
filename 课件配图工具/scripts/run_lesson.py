@@ -253,9 +253,19 @@ def resolve_refs(names, outdir, made):
     第 2 种是 2026-08-30 加的：对比图、同场景的多个变体，光靠文字说
     「和上一张同样构图」没用，模型看不到上一张。把那张真挂上去才管用。
     ⚠ 一页不能挂自己（会拿上一版当参考，越改越偏），调用方负责拦。
+
+    另认第 3 种（2026-10-07 读书会配图加）：**含 `/` 的仓库相对路径**，直接当参考图——
+    给定妆件挂原书插图当长相参考（如 `读书会原书插图/<书名>/插-10.jpg`）。角色 id 与页码
+    里都没有 `/`，存量挂载走不到这条。
     """
     paths = []
     for n in names or []:
+        if "/" in n:
+            f = ROOT.parent / n
+            if not f.exists():
+                raise FileNotFoundError(f"挂载的参考图不存在：{f}")
+            paths.append(f)
+            continue
         f = made.get(n) or (outdir / "角色" / f"{n}.jpg")
         if not pathlib.Path(f).exists():
             alt = outdir / "页目" / f"{n}.jpg"      # 不是角色件，那就当页码找
