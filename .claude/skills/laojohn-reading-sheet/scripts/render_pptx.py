@@ -828,10 +828,12 @@ def render_comic(slide, d):
     if d.get("banner"):
         bw = 300
         bx = (PAGE_W_PX - bw) / 2
-        add_line(slide, bx, y, bx + bw, y, "C9B89A", 2)
+        pc = (d.get("color") or "").lstrip("#")
+        bl = _mix_white(pc, 0.6) if pc else "C9B89A"
+        add_line(slide, bx, y, bx + bw, y, bl, 2)
         add_text(slide, bx, y + 8, bw, 26, d.get("banner"), size=18, bold=True,
-                 color="6B5644", align="center")
-        add_line(slide, bx, y + 44, bx + bw, y + 44, "C9B89A", 2)
+                 color=pc or "6B5644", align="center")
+        add_line(slide, bx, y + 44, bx + bw, y + 44, bl, 2)
         y += 70
     cells = d.get("cells", 3)
     if isinstance(cells, int):
@@ -865,6 +867,13 @@ def render_comic(slide, d):
         y += cell_h + 22
 
 
+def _mix_white(hex_str, a):
+    """把颜色按不透明度 a 叠到白底上，返回 6 位 hex（PPTX 侧模拟 rgba 浅色）。"""
+    h = hex_str.lstrip("#")
+    r, g, b = (int(h[i:i + 2], 16) for i in (0, 2, 4))
+    return "".join(f"{round(255 - (255 - v) * a):02X}" for v in (r, g, b))
+
+
 def render_profile(slide, d):
     header(slide, d, title_align="left", title_px=108, title_size=21, sub_px=142,
            title_color="2B2B2B", sub_color="8A8175", variant_color="A89B8A")
@@ -896,13 +905,20 @@ def render_profile(slide, d):
     for c in cards:
         box = c.get("box")
         card_h = card_h_of(c)
+        cc = (c.get("color") or d.get("color") or "").lstrip("#")
+        # 可选彩色（c.color / d.color）；不给则保持原默认配色
+        c_bg = _mix_white(cc, 0.10) if cc else "EEF3E6"
+        c_box = _mix_white(cc, 0.7) if cc else "A9BE8C"
+        c_lab = cc or "5C6E48"
+        c_ln = _mix_white(cc, 0.6) if cc else "ADB79C"
         add_round_rect(slide, CONTENT_X, y, CONTENT_W, card_h, radius=0.04,
-                       fill="EEF3E6", tf=tf)
+                       fill=c_bg, line=(_mix_white(cc, 0.55) if cc else None),
+                       line_w=(2 if cc else None), tf=tf)
         fx = CONTENT_X + 22
         if box:
             bw, bh = box.get("w", 150), box.get("h", 150)
             add_round_rect(slide, CONTENT_X + 22, y + 20, bw, bh, radius=0.06,
-                           line="A9BE8C", line_w=1.6, dash="dash", fill="FBFCF8", tf=tf)
+                           line=c_box, line_w=1.6, dash="dash", fill=("FFFFFF" if cc else "FBFCF8"), tf=tf)
             add_text(slide, CONTENT_X + 22, y + 20, bw, bh, box.get("label", "画像 / 贴图"),
                      size=13, color="A9A18C", align="center", anchor="middle", tf=tf)
             fx = CONTENT_X + 22 + bw + 22
@@ -910,23 +926,24 @@ def render_profile(slide, d):
         fy = y + 20
         for f in c.get("fields", []):
             add_text(slide, fx, fy, fw, 22, f.get("label", ""), size=14, bold=True,
-                     color="5C6E48", tf=tf)
+                     color=c_lab, tf=tf)
             fy += 24
             if _has_val(f.get("value")):
                 arr = f["value"] if isinstance(f["value"], list) else [f["value"]]
                 for item in arr:
                     add_text(slide, fx + 2, fy + 8, fw - 4, 26, item, size=14,
                              color="3A4A45", tf=tf)
-                    add_line(slide, fx, fy + 34, fx + fw, fy + 34, "ADB79C", 1.3,
+                    add_line(slide, fx, fy + 34, fx + fw, fy + 34, c_ln, 1.3,
                              dash="sysDot", tf=tf)
                     fy += 38
             else:
                 for _ in range(f.get("lines", 1)):
-                    add_line(slide, fx, fy + 30, fx + fw, fy + 30, "ADB79C", 1.3,
+                    add_line(slide, fx, fy + 30, fx + fw, fy + 30, c_ln, 1.3,
                              dash="sysDot", tf=tf)
                     fy += 38
             fy += 12
         y += card_h + 20
+    footer(slide, d, key="note", y=min(y, 1075))
 
 
 def render_relation(slide, d):
@@ -1368,6 +1385,67 @@ def _fit_tf(start_y, natural_h, bottom=1075):
     return TF(sx=1.0, sy=vk, tx=0.0, ty=start_y * (1 - vk))
 
 
+def render_radial(slide, d):
+    """彩色放射导图：搬 template_radial.html 的像素常量；弯曲虚线近似为直虚线。"""
+    header(slide, d, title_px=106, title_size=23, sub_px=148)
+    PALETTE = ["4FA3D9", "F08A5D", "F2B33D", "7CBF6A", "B07CC6", "E86A8A"]
+    PAD, GAP_X, TOP, LINE_H, HEAD, BOT_PAD, MID_GAP, ROW_GAP = 40, 26, 226, 56, 66, 22, 160, 40
+    br = d.get("branches", [])
+    n, cols = len(br), 2
+    rows = max(1, math.ceil(n / cols))
+    mid_after = math.ceil(rows / 2) - 1
+    card_w = (PAGE_W_PX - 2 * PAD - GAP_X) / cols
+    dl = d.get("lines", 4)
+    max_lines = max([b.get("lines", dl) for b in br] or [1])
+    card_h = HEAD + max_lines * LINE_H + BOT_PAD
+    row_y, y = [], TOP
+    for r in range(rows):
+        row_y.append(y)
+        y += card_h + (MID_GAP if (r == mid_after and rows > 1) else ROW_GAP)
+    CR, CX = 72, 397
+    CY = row_y[mid_after] + card_h + MID_GAP / 2 if rows > 1 else TOP + card_h + 100
+    ring = (d.get("color") or "#E0604E").lstrip("#")
+    for i, b in enumerate(br):
+        r, c = divmod(i, cols)
+        single = (r == rows - 1) and (n % cols == 1)
+        x = (PAGE_W_PX - card_w) / 2 if single else PAD + c * (card_w + GAP_X)
+        yy = row_y[r]
+        color = (b.get("color") or PALETTE[i % len(PALETTE)]).lstrip("#")
+        above = r <= mid_after
+        mid = x + card_w / 2
+        inner = 1 if mid < CX - 1 else (-1 if mid > CX + 1 else 0)
+        ex = x + card_w - 70 if inner == 1 else (x + 70 if inner == -1 else mid)
+        ey = yy + card_h if above else yy
+        sx = CX + (1 if ex > CX else -1 if ex < CX else 0) * CR * 0.6
+        sy = CY + (-1 if above else 1) * CR * 0.8
+        add_line(slide, sx, sy, ex, ey, color, 3, dash="sysDot")
+        add_oval(slide, ex - 6, ey - 6, 12, 12, fill=color)
+        add_round_rect(slide, x, yy, card_w, card_h, radius=0.06,
+                       fill=_mix_white(color, 0.07), line=color, line_w=2)
+        name = b.get("header", "")
+        pw = 36 + 19 * len(name)
+        px = x + card_w - 16 - pw if inner == -1 else x + 16
+        add_round_rect(slide, px, yy - 18, pw, 36, radius=0.5, fill=color)
+        add_text(slide, px, yy - 18, pw, 36, name, size=18, bold=True, color="FFFFFF",
+                 align="center", anchor="middle")
+        add_text(slide, x + 18, yy + 30, card_w - 36, 24, b.get("question", d.get("question", "")),
+                 size=14, color="6E6656")
+        for j in range(b.get("lines", dl)):
+            ly = yy + HEAD + (j + 1) * LINE_H - 6
+            add_line(slide, x + 18, ly, x + card_w - 18, ly, _mix_white(color, 0.55), 1.6, dash="dash")
+    add_oval(slide, CX - CR - 11, CY - CR - 11, 2 * CR + 22, 2 * CR + 22, fill=_mix_white(ring, 0.35))
+    add_oval(slide, CX - CR - 8, CY - CR - 8, 2 * CR + 16, 2 * CR + 16, fill="FFFFFF")
+    add_oval(slide, CX - CR, CY - CR, 2 * CR, 2 * CR, fill=ring)
+    center = d.get("center", "")
+    center = center.get("label", "") if isinstance(center, dict) else center
+    sub = d.get("center_sub", "")
+    add_text(slide, CX - CR, CY - (22 if sub else 14), 2 * CR, 30, center, size=22, bold=True,
+             color="FFFFFF", align="center")
+    if sub:
+        add_text(slide, CX - CR, CY + 12, 2 * CR, 20, sub, size=12.5, color="FFFFFF", align="center")
+    footer(slide, d, key="footer", y=row_y[-1] + card_h + 18)
+
+
 RENDERERS = {
     "table": render_table, "venn": render_venn, "ladder": render_ladder,
     "logic": render_logic, "voyage": render_voyage,
@@ -1376,7 +1454,7 @@ RENDERERS = {
     "writing": render_writing, "draw": render_draw, "comic": render_comic,
     "profile": render_profile, "relation": render_relation,
     "facets": render_facets, "lanes": render_lanes, "stance": render_stance,
-    "deduce": render_deduce,
+    "deduce": render_deduce, "radial": render_radial,
 }
 
 

@@ -24,6 +24,7 @@
   .frow { margin-bottom: 12px; }
   .frow .flab { font-size: 14px; font-weight: 700; color: #5C6E48; margin-bottom: 4px; }
   .frow .fline { border-bottom: 1.3px dotted #ADB79C; height: 38px; position: relative; }
+  .l-note { margin-top: 4px; font-size: 14px; color: #9A937F; line-height: 1.6; }
   .frow .fline .pre { position: absolute; left: 2px; bottom: 6px; font-size: 14px; color: #3A4A45; }
 </style>
 </head>
@@ -35,9 +36,12 @@
   <div class="sheet-sub" id="subtitle"></div>
   <div class="banner" id="banner"></div>
   <div id="cards"></div>
+  <div class="l-note" id="note"></div>
 </div>
 <script>
 const DATA = /*__DATA__*/ null;
+// 可选彩色：d.color（整页）或 c.color（单卡）给了才上色，不给则保持原默认配色
+function tint(hex, a){ const h = hex.replace('#',''); return 'rgba('+parseInt(h.slice(0,2),16)+','+parseInt(h.slice(2,4),16)+','+parseInt(h.slice(4,6),16)+','+a+')'; }
 function render(){
   const d = DATA;
   document.getElementById('logo').src = d.logo;
@@ -48,26 +52,32 @@ function render(){
   if (d.variant) tag.textContent = d.variant; else tag.style.display = 'none';
   const banner = document.getElementById('banner');
   if (d.banner) banner.textContent = d.banner; else banner.style.display = 'none';
+  if (d.color) { banner.style.color = d.color; banner.style.borderColor = tint(d.color, 0.6); }
 
   const wrap = document.getElementById('cards');
   (d.cards || []).forEach(c => {
     const card = document.createElement('div'); card.className = 'card';
+    const cc = c.color || d.color;
+    if (cc) { card.style.background = tint(cc, 0.10); card.style.border = '2px solid ' + tint(cc, 0.55); }
     if (c.box) {
       const box = document.createElement('div'); box.className = 'imgbox';
       box.style.width = (c.box.w || 150) + 'px';
       box.style.minHeight = (c.box.h || 150) + 'px';
       const ph = document.createElement('div'); ph.className = 'ph';
       ph.textContent = c.box.label || '画像 / 贴图'; box.appendChild(ph);
+      if (cc) { box.style.borderColor = tint(cc, 0.7); box.style.background = '#FFFFFF'; }
       card.appendChild(box);
     }
     const fields = document.createElement('div'); fields.className = 'fields';
     (c.fields || []).forEach(f => {
       const row = document.createElement('div'); row.className = 'frow';
       const lab = document.createElement('div'); lab.className = 'flab'; lab.textContent = f.label || ''; row.appendChild(lab);
+      if (cc) lab.style.color = cc;
       const pre = Array.isArray(f.value) ? f.value : (f.value ? [f.value] : []);
       const n = f.lines || 1;
       for (let i = 0; i < n; i++) {
         const ln = document.createElement('div'); ln.className = 'fline';
+        if (cc) ln.style.borderBottomColor = tint(cc, 0.6);
         if (pre[i] && pre[i].trim() !== '') { const t = document.createElement('div'); t.className = 'pre'; t.textContent = pre[i]; ln.appendChild(t); }
         row.appendChild(ln);
       }
@@ -76,6 +86,8 @@ function render(){
     card.appendChild(fields);
     wrap.appendChild(card);
   });
+  const note = document.getElementById('note');
+  if (d.note) note.textContent = d.note; else note.style.display = 'none';
   document.body.dataset.rendered = '1';
 }
 render();

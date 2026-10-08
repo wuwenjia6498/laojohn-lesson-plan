@@ -99,6 +99,7 @@
 - **备课视频线 laojohn-lesson-video(0921立)**:详案+PPT+教师用配套→15–25分钟备课视频,给加盟商老师自学(填师训空位);旁白＝备课解说不是照念师话,增量在教师用json三色旁注;逐句合成消掉字幕漂移;起手式靠程序轮换;⚠AiHubMix的TTS够跑管线不够交付(英文音色念中文) — [详情](lesson-video-line-0921.md)
 - **⚠仓内pptx不一定是终稿(0921用户纠正)**:拿仓内那份与详案页标对账,17课次13个对不上(五上二从P7起整齐差1页)——曾据此误判「详案页标错了」。**真相：页标对的是外部终稿,仓内可能是更早版本,对不上是预期、禁批量改详案**;按页消费PPT一律用终稿 — [详情](pagemap-json-page-offset-0921.md)
 - [测评卷SKILL状态](reading-assessment-skill-state.md) / [测评事实以详案为准](assessment-facts-follow-lesson-plan.md) — 详案升深度蓝本(事实仍锁档案);与SKILL默认相反遇分叉先确认
+- [低年级阅读单要活泼别全表格(1008)](reading-sheet-low-grade-lively-1008.md) — L1–L2优先radial/facets彩卡/profile上彩,table兜底;profile的note此前被静默丢弃已修
 - [阅读指南拓展栏点名具体书/影片](reading-guide-extension-concrete-titles.md) — 仅此栏放宽红线,吃不准就不写
 ## 未决事项与交付风险（做完即删）
 - **备课视频首批两支已出片(0921)**:五上四 17.8分钟为准片(外部终稿画面、增量39%、机检FAIL0、字幕零违规、零漂移);三上一 16.4分钟素材薄;六上四等PPT定稿;张视角二审三条已落地(bridge废除/locate与do重合/空泛点题词表);⚠闸门A记的是「用户指示直接出片(未逐页通读)」 — [详情](lesson-video-line-0921.md)

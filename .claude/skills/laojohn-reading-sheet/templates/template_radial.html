@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<!-- 彩色放射导图：中心圆 + N 张彩色分支卡（两列排布，中心圆落在中间两行之间），
+     弯曲虚线从中心连到每张卡。面向低年级：大字、亮色、圆角，卡内=名字胶囊 + 问题 + 书写线。
+     卡数 2–6（偶数最匀称）。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #page { width: 794px; min-height: 1123px; background: #FFFFFF; position: relative; }
+  .brand-logo { position: absolute; top: 32px; right: 42px; height: 48px; }
+  .variant-tag { position: absolute; top: 36px; left: 46px; font-size: 13px; color: #B3A98F; letter-spacing: 1px; }
+  .l-title { position: absolute; top: 106px; left: 40px; width: 714px; text-align: center;
+    font-size: 23px; font-weight: 700; color: #333; line-height: 1.4; }
+  .l-sub { position: absolute; top: 148px; left: 48px; width: 698px; text-align: center;
+    font-size: 15px; color: #8A8268; line-height: 1.5; }
+  svg.links { position: absolute; left: 0; top: 0; }
+  .card { position: absolute; border-radius: 18px; border: 2px solid; background: #FFFFFF; }
+  .pill { position: absolute; left: 16px; top: -18px; height: 36px; padding: 0 18px; border-radius: 18px;
+    color: #FFFFFF; font-size: 18px; font-weight: 700; line-height: 36px; letter-spacing: 2px; }
+  .q { position: absolute; left: 18px; right: 18px; top: 30px; font-size: 14px; color: #6E6656; line-height: 1.5; }
+  .ln { position: absolute; left: 18px; right: 18px; height: 0; border-bottom: 1.6px dashed; }
+  .center { position: absolute; border-radius: 50%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; color: #FFFFFF; text-align: center;
+    box-shadow: 0 0 0 8px #FFFFFF, 0 0 0 11px var(--ring); }
+  .c-main { font-size: 22px; font-weight: 700; letter-spacing: 2px; }
+  .c-sub { font-size: 12.5px; margin-top: 4px; opacity: .92; }
+  .dot { position: absolute; border-radius: 50%; }
+  .l-foot { position: absolute; left: 40px; width: 714px; font-size: 14px; color: #9A937F; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div id="page">
+  <img class="brand-logo" id="logo">
+  <div class="variant-tag" id="variantTag"></div>
+  <div class="l-title" id="title"></div>
+  <div class="l-sub" id="subtitle"></div>
+  <svg class="links" id="links" width="794" height="1123"></svg>
+  <div class="l-foot" id="foot"></div>
+</div>
+<script>
+const DATA = /*__DATA__*/ null;
+const PALETTE = ["#4FA3D9","#F08A5D","#F2B33D","#7CBF6A","#B07CC6","#E86A8A"];
+const PAD = 40, GAP_X = 26, TOP = 226, LINE_H = 56, HEAD = 66, BOT_PAD = 22, MID_GAP = 160, ROW_GAP = 40;
+function el(tag, attrs){ const e = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+function tint(hex, a){ const h = hex.replace('#',''); const r=parseInt(h.slice(0,2),16), g=parseInt(h.slice(2,4),16), b=parseInt(h.slice(4,6),16);
+  return 'rgba('+r+','+g+','+b+','+a+')'; }
+function render(){
+  const d = DATA, page = document.getElementById('page');
+  document.getElementById('logo').src = d.logo;
+  document.getElementById('title').textContent = d.title || '';
+  const sub = document.getElementById('subtitle'); if (d.subtitle) sub.textContent = d.subtitle; else sub.style.display = 'none';
+  const tag = document.getElementById('variantTag'); if (d.variant) tag.textContent = d.variant; else tag.style.display = 'none';
+
+  const br = d.branches || [];
+  const n = br.length, cols = 2, rows = Math.ceil(n / cols);
+  const midAfter = Math.ceil(rows / 2) - 1;          // 中心圆落在第 midAfter 行之后
+  const cardW = (794 - 2 * PAD - GAP_X) / cols;
+  const maxLines = Math.max(...br.map(b => b.lines != null ? b.lines : (d.lines != null ? d.lines : 4)), 1);
+  const cardH = HEAD + maxLines * LINE_H + BOT_PAD;
+  const rowY = []; let y = TOP;
+  for (let r = 0; r < rows; r++){ rowY.push(y); y += cardH + (r === midAfter && rows > 1 ? MID_GAP : ROW_GAP); }
+  const CR = 72, CX = 397;
+  const CY = rows > 1 ? rowY[midAfter] + cardH + MID_GAP / 2 : TOP + cardH + 100;
+  const ringColor = d.color || "#E0604E";
+  const svg = document.getElementById('links');
+
+  br.forEach((b, i) => {
+    const r = Math.floor(i / cols), c = i % cols;
+    const lastRowSingle = (r === rows - 1) && (n % cols === 1);
+    const x = lastRowSingle ? (794 - cardW) / 2 : PAD + c * (cardW + GAP_X);
+    const yy = rowY[r];
+    const color = b.color || PALETTE[i % PALETTE.length];
+    // 连线：中心圆 → 卡片靠近中心的那条边的中点
+    const above = r <= midAfter;
+    // 名字胶囊放在远离中心的一侧，连线落在靠近中心的内角，二者不打架
+    const inner = (x + cardW / 2 < CX - 1) ? 1 : (x + cardW / 2 > CX + 1 ? -1 : 0);
+    const ex = inner === 1 ? x + cardW - 70 : inner === -1 ? x + 70 : x + cardW / 2;
+    const ey = above ? yy + cardH : yy;
+    const sx = CX + (ex > CX ? 1 : ex < CX ? -1 : 0) * CR * 0.6, sy = CY + (above ? -1 : 1) * CR * 0.8;
+    const my = (sy + ey) / 2;
+    svg.appendChild(el('path', { d: `M${sx},${sy} C${sx},${my} ${ex},${my} ${ex},${ey}`,
+      fill: 'none', stroke: color, 'stroke-width': 3, 'stroke-dasharray': '2 7', 'stroke-linecap': 'round' }));
+    svg.appendChild(el('circle', { cx: ex, cy: ey, r: 6, fill: color }));
+
+    const card = document.createElement('div'); card.className = 'card';
+    Object.assign(card.style, { left: x + 'px', top: yy + 'px', width: cardW + 'px', height: cardH + 'px',
+      borderColor: color, background: tint(color, 0.07) });
+    const pill = document.createElement('div'); pill.className = 'pill';
+    pill.style.background = color; pill.textContent = b.header || '';
+    if (inner === -1){ pill.style.left = 'auto'; pill.style.right = '16px'; }
+    card.appendChild(pill);
+    const q = document.createElement('div'); q.className = 'q'; q.textContent = b.question || d.question || ''; card.appendChild(q);
+    const k = b.lines != null ? b.lines : (d.lines != null ? d.lines : 4);
+    for (let j = 0; j < k; j++){
+      const ln = document.createElement('div'); ln.className = 'ln';
+      ln.style.top = (HEAD + (j + 1) * LINE_H - 6) + 'px'; ln.style.borderColor = tint(color, 0.55);
+      card.appendChild(ln);
+    }
+    page.appendChild(card);
+  });
+
+  // 中心圆 + 点缀小圆点
+  const ctr = document.createElement('div'); ctr.className = 'center';
+  Object.assign(ctr.style, { left: (CX - CR) + 'px', top: (CY - CR) + 'px', width: 2 * CR + 'px', height: 2 * CR + 'px',
+    background: ringColor }); ctr.style.setProperty('--ring', tint(ringColor, 0.35));
+  const cm = document.createElement('div'); cm.className = 'c-main';
+  cm.textContent = (d.center && d.center.label) || d.center || ''; ctr.appendChild(cm);
+  if (d.center_sub){ const cs = document.createElement('div'); cs.className = 'c-sub'; cs.textContent = d.center_sub; ctr.appendChild(cs); }
+  page.appendChild(ctr);
+  [[-150, -18, 10, 0], [160, 22, 12, 1], [-120, 40, 7, 2], [130, -40, 8, 3]].forEach(([dx, dy, s, ci]) => {
+    const dt = document.createElement('div'); dt.className = 'dot';
+    Object.assign(dt.style, { left: (CX + dx - s) + 'px', top: (CY + dy - s) + 'px', width: 2 * s + 'px', height: 2 * s + 'px',
+      background: tint(PALETTE[ci], 0.5) }); page.appendChild(dt);
+  });
+
+  const foot = document.getElementById('foot');
+  const bottom = rowY[rows - 1] + cardH;
+  if (d.footer){ foot.textContent = d.footer; foot.style.top = (bottom + 18) + 'px'; } else foot.style.display = 'none';
+  page.style.height = Math.max(1123, bottom + 90) + 'px';
+  svg.setAttribute('height', Math.max(1123, bottom + 90));
+  document.body.dataset.rendered = '1';
+}
+render();
+</script>
+</body>
+</html>
