@@ -114,7 +114,7 @@ function render(){
   [[-150, -18, 10, 0], [160, 22, 12, 1], [-120, 40, 7, 2], [130, -40, 8, 3]].forEach(([dx, dy, s, ci]) => {
     const dt = document.createElement('div'); dt.className = 'dot';
     Object.assign(dt.style, { left: (CX + dx - s) + 'px', top: (CY + dy - s) + 'px', width: 2 * s + 'px', height: 2 * s + 'px',
-      background: tint(PALETTE[ci], 0.5) }); page.appendChild(dt);
+      background: tint(ci % 2 ? ringColor : ((br[0] && br[0].color) || PALETTE[0]), 0.45) }); page.appendChild(dt);
   });
 
   const foot = document.getElementById('foot');
