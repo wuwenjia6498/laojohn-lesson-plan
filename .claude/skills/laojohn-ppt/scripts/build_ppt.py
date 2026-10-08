@@ -9,6 +9,7 @@
 """
 import argparse
 import os
+import re
 
 from pptx import Presentation
 
@@ -206,6 +207,7 @@ def build(input_md: str, output_pptx: str, *,
     os.makedirs(os.path.dirname(os.path.abspath(output_pptx)) or ".", exist_ok=True)
     prs.save(output_pptx)
     jumps = jump_back_pages(prs) if deck.theme_color else []
+    lint = draft_lint(deck)
 
     return {
         "pages": total,
@@ -214,9 +216,30 @@ def build(input_md: str, output_pptx: str, *,
         "missing_images": missing_images,
         "theme_color": deck.theme_color,
         "jump_back": jumps,
+        "lint": lint,
         "logo": logo_path,
         "banner": banner_path,
     }
+
+
+# 上屏答案里的「判定口径」：教学生怎么答、老师怎么判对错的话，不是答案本身（2026-10-08 用户反馈）
+_GRADING_RE = re.compile(r"就算数|都算对|都对[，,]|就好[。！]?$|就很好|就是好的|都行|关键说清|重要的是有自己的理由")
+
+
+def draft_lint(deck) -> list:
+    """中间稿两项机检（只报警、不拦）：参考答案带判定口径；留白填写表没写 `列宽：`。"""
+    out = []
+    for pg in deck.pages:
+        for ans in pg.bullet_answers:
+            if ans and _GRADING_RE.search(ans):
+                out.append((pg.num, "参考答案带判定口径（只上答案本身，口径进讲稿）", ans[-24:]))
+        if pg.table_headers and not pg.col_weights:
+            has_blank = any(not str(row[c] if c < len(row) else "").strip()
+                            and (d, c) not in (pg.table_reveals or {})
+                            for d, row in enumerate(pg.table_rows) for c in range(len(pg.table_headers)))
+            if has_blank:
+                out.append((pg.num, "留白填写表未写 `列宽：`（按预估填写量分宽）", " | ".join(pg.table_headers)))
+    return out
 
 
 def main():
@@ -258,6 +281,11 @@ def main():
         jb = info["jump_back"]
         print(f"动画回跳：{len(jb)} 处" + ("" if not jb else "（须改分组）：" +
               "、".join(f"第{i}张幻灯片第{k}击" for i, k in jb)))
+    lint = info.get("lint") or []
+    print()
+    print(f"中间稿机检：{len(lint)} 处" + ("" if not lint else "（须回中间稿改）"))
+    for num, what, frag in lint:
+        print(f"  P{num:02d}  {what}：…{frag}")
 
 
 if __name__ == "__main__":

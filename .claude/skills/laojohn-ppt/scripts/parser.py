@@ -82,6 +82,9 @@ class Page:
     table_rows: List[List[str]] = field(default_factory=list)   # 存"完整答案版"（{{X}}→X）
     # 答案格：{(数据行0基, 列0基): {"blank": 占位版, "full": 完整版}}，供逐格点击叠层
     table_reveals: Dict[Tuple[int, int], dict] = field(default_factory=dict)
+    # 填空表格列宽比：来源=页内 `列宽：1:2`（`:`/`：`/`｜`/`/` 分隔皆可）。个数≠列数时渲染端忽略、
+    # 回落按内容估宽。留白填写表须写——空格无内容可估，只剩表头长短，常与预估填写量相反。
+    col_weights: List[float] = field(default_factory=list)
     image_suggestion: str = ""                                  # 单条（兼容旧逻辑/单图页）
     image_suggestions: List[str] = field(default_factory=list)  # 多条（≥2 触发四图网格）
     # 真实图片路径（相对中间稿目录或绝对路径）。来源=`配图建议：图=<路径>｜说明…` 的 图= 段。
@@ -233,7 +236,7 @@ def parse_md(md_text: str) -> Deck:
 
     field_single = {"眉标", "标题", "副标题", "配图建议",
                     "左标题", "右标题", "计时", "字数", "图例",
-                    "标题样式", "要点样式", "场景"}
+                    "标题样式", "要点样式", "场景", "列宽"}
 
     while i < len(lines):
         raw = lines[i]
@@ -260,7 +263,7 @@ def parse_md(md_text: str) -> Deck:
 
         # 字段头匹配："X：" 或 "X:"
         m_field = re.match(
-            r"^(眉标|标题样式|标题|副标题|正文|要点样式|要点|表格|配图建议|左标题|左正文|右标题|右正文|计时|字数|图例|场景|备注)\s*[:：]\s*(.*)$",
+            r"^(眉标|标题样式|标题|副标题|正文|要点样式|要点|表格|配图建议|左标题|左正文|右标题|右正文|计时|字数|图例|场景|备注|列宽)\s*[:：]\s*(.*)$",
             stripped)
         if m_field:
             # 切换字段前 flush
@@ -324,6 +327,9 @@ def parse_md(md_text: str) -> Deck:
                             "问": "question", "答": "answer"}[k2]] = v2
                     if any(sc.values()):
                         current.scenes.append(sc)
+                elif key == "列宽":
+                    nums = re.findall(r"\d+(?:\.\d+)?", tail)
+                    current.col_weights = [float(x) for x in nums]
                 elif key == "左标题":
                     current.left_title = tail.strip()
                 elif key == "右标题":
@@ -380,9 +386,18 @@ def parse_md(md_text: str) -> Deck:
                 current.bullets.append(_ordered_m.group(1).strip())
                 current.bullet_answers.append("")
                 current.bullets_ordered = True
-            elif REF_RE.match(stripped) and current.bullets:
-                # `参考：答案` 行：挂到上一条要点（红字逐段点击）
-                current.bullet_answers[-1] = REF_RE.match(stripped).group(1)
+            elif REF_RE.match(stripped):
+                # `参考：答案` 行：挂到上一条要点（红字逐段点击）。
+                # 同一条要点下连写几行 `参考：` → 拆成几段答案（\n 连接，渲染端各自成框、各自一击）；
+                # 紧跟 `要点：` 之下、前面没有问题 → 只出答案不出问题（问题空串）。
+                ans = REF_RE.match(stripped).group(1)
+                if not current.bullets:
+                    current.bullets.append("")
+                    current.bullet_answers.append(ans)
+                elif current.bullet_answers[-1]:
+                    current.bullet_answers[-1] += "\n" + ans
+                else:
+                    current.bullet_answers[-1] = ans
             elif stripped == "":
                 pass
             else:

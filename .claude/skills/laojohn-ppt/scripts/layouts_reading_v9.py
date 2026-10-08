@@ -54,6 +54,7 @@ SCENE_BOX = (0.605, 0.395, 0.355, 0.510)
 
 Q_LADDER = (24, 22, 20, 18)             # 问题字号梯；答案比问题小 2pt
 MIN_SIZE_WITH_IMAGE = 18
+NO_TITLE_BODY_Y = 0.275                 # 无标题页：正文从原标题位起
 
 
 def _P(v):
@@ -180,9 +181,11 @@ def _plan_items(items, width_emu, size, has_body_text=None):
     tw = width_emu - side - Pt(12)
     total = 0
     for q, a in items:
-        total += max(_text_h(q, tw, size, 1.3), side) + Pt(4)
+        if q:
+            total += max(_text_h(q, tw, size, 1.3), side) + Pt(4)
         if a:
-            total += _text_h(a, tw, size - 2, 1.35)
+            segs = a.split("\n")
+            total += sum(_text_h(s, tw, size - 2, 1.35) for s in segs) + Pt(8) * (len(segs) - 1)
         total += Pt(14)
     return total
 
@@ -203,29 +206,51 @@ def _qa_blocks(slide, items, x, y, w, size, th, numbered=True):
     tw = w - (side + gap if numbered else 0)
     cy = y
     groups = []
-    for i, (q, a) in enumerate(items):
+    no = 0
+    for q, a in items:
         grp = []
+        if q.startswith("➢"):
+            # 收束句（`- ➢ …`）：不编号、不占序号，引号内关键词标红，自成一击
+            segs = [(t, {"color": COLOR_RED_ACCENT if kw else COLOR_TITLE, "bold": True})
+                    for t, kw in _split_title_keywords(q)]
+            qh = _text_h(q, w, size, 1.3)
+            qb = add_rich_textbox(slide, x, cy, w, qh, segs, font=FONT_TITLE, size=size,
+                                  align="left", anchor="top", line_spacing=1.3)
+            groups.append([qb.shape_id])
+            cy += qh + Pt(14)
+            continue
         if numbered:
             sq = add_rect(slide, x, cy + Pt(3), side, side, th.main)
             _disable_shape_effects(sq)
-            num = add_textbox(slide, x, cy + Pt(3), side, side, str(i + 1),
-                              font=FONT_TITLE, size=size - 4, color="FFFFFF",
-                              bold=True, align="center", anchor="middle")
-            set_ascii_font(num, "Bahnschrift")
-            grp += [sq.shape_id, num.shape_id]
-        qh = max(_text_h(q, tw, size, 1.3), side)
-        qb = add_textbox(slide, tx, cy, tw, qh, q, font=FONT_TITLE, size=size,
-                         color=COLOR_TITLE, bold=bool(a), align="left", anchor="top",
-                         line_spacing=1.3)
-        grp.append(qb.shape_id)
-        groups.append(grp)
-        cy += qh + Pt(4)
+            grp.append(sq.shape_id)
+            if q:                       # 只有答案、没有问题的项：方块不标号
+                no += 1
+                num = add_textbox(slide, x, cy + Pt(3), side, side, str(no),
+                                  font=FONT_TITLE, size=size - 4, color="FFFFFF",
+                                  bold=True, align="center", anchor="middle")
+                set_ascii_font(num, "Bahnschrift")
+                grp.append(num.shape_id)
+        if q:
+            qh = max(_text_h(q, tw, size, 1.3), side)
+            qb = add_textbox(slide, tx, cy, tw, qh, q, font=FONT_TITLE, size=size,
+                             color=COLOR_TITLE, bold=bool(a), align="left", anchor="top",
+                             line_spacing=1.3)
+            grp.append(qb.shape_id)
+            cy += qh + Pt(4)
+        if grp:
+            groups.append(grp)
         if a:
-            ah = _text_h(a, tw, size - 2, 1.35)
-            ab = add_textbox(slide, tx, cy, tw, ah, a, font=FONT_BODY, size=size - 2,
-                             color=th.answer, align="left", anchor="top", line_spacing=1.35)
-            groups.append([ab.shape_id])
-            cy += ah
+            for j, seg in enumerate(a.split("\n")):   # 多行 `参考：` → 各自成框、各自一击
+                if j:
+                    cy += Pt(8)
+                ah = _text_h(seg, tw, size - 2, 1.35)
+                ab = add_textbox(slide, tx, cy, tw, ah, seg, font=FONT_BODY, size=size - 2,
+                                 color=th.answer, align="left", anchor="top", line_spacing=1.35)
+                if not q and j == 0 and groups:
+                    groups[-1].append(ab.shape_id)   # 无问题：答案与方块同一击出
+                else:
+                    groups.append([ab.shape_id])
+                cy += ah
         cy += Pt(14)
     return groups
 
@@ -394,6 +419,9 @@ def _render_points(slide, page, ctx, th):
 
     top = pct_y(BODY_Y)
     bottom = pct_y(BODY_B)
+    no_title = not page.title           # 不写标题（如收束句并进要点 `- ➢ …`）：正文上提，标题横带不画
+    if no_title:
+        top = pct_y(NO_TITLE_BODY_Y)
 
     def layout(with_img):
         col_w = pct_x(COL_W_IMG if with_img else COL_W_FULL)
@@ -417,6 +445,8 @@ def _render_points(slide, page, ctx, th):
         size = Q_LADDER[-1]
 
     lay = _layout_for(page, img if with_img else None)
+    if no_title and lay["band"] == STRIP:
+        lay["band"] = None
     if lay["band"]:                     # 底带先画（标题横带要垫在标题下面）
         x0, x1, y0, y1 = lay["band"]
         r = add_rect(slide, pct_x(x0), pct_y(y0), pct_x(x1 - x0), pct_y(y1 - y0),

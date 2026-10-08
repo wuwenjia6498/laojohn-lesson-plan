@@ -762,6 +762,26 @@ def _remove_cell_borders(cell):
         etree.SubElement(ln, qn("a:noFill"))
 
 
+def _set_cell_borders(cell, color, width_emu=19050):
+    """单元格四边设实线边框（color 为 6 位 hex，缺省 1.5pt）。OOXML 顺序 lnL/lnR/lnT/lnB 须在 fill 之前。"""
+    tc = cell._tc
+    tcPr = tc.get_or_add_tcPr()
+    for side in ("lnL", "lnR", "lnT", "lnB"):
+        for ln in tcPr.findall(qn(f"a:{side}")):
+            tcPr.remove(ln)
+    anchor = tcPr[0] if len(tcPr) else None
+    for side in ("lnL", "lnR", "lnT", "lnB"):
+        ln = etree.Element(qn(f"a:{side}"))
+        ln.set("w", str(int(width_emu)))
+        fill = etree.SubElement(ln, qn("a:solidFill"))
+        clr = etree.SubElement(fill, qn("a:srgbClr"))
+        clr.set("val", color)
+        if anchor is not None:
+            anchor.addprevious(ln)
+        else:
+            tcPr.append(ln)
+
+
 # 单元格分类上色标注：`[码:片段]`（与示范文分句上色同语法）。传 add_table(cell_colors=)
 # 时，标注片段渲染成该码对应的颜色；几何计算用剥掉标注后的纯文本。
 _CELL_ANNOT_RE = re.compile(r"\[([^:：\]]+)[:：]([^\]]+)\]")
@@ -782,13 +802,20 @@ def _cell_maxlen(text):
     return max((len(s) for s in _cell_segments(text)), default=0)
 
 
-def _content_col_widths(headers, rows, total_w):
+def _content_col_widths(headers, rows, total_w, weights=None):
     """按各列"最长一行内容"自适应列宽：短列窄、长列宽。
 
     用 len^0.7 软化极端差异，避免某一长列吃掉几乎全部宽度；每列设字符数下限 3。
+    weights：显式列宽比（如 [1, 2]，来自中间稿 `列宽：`），个数与列数相符时直接按比分配、
+        不再按内容估——留白填写表的格是空的，只能看表头长短，常与「预估要填多少」相反。
     返回 EMU 整数列表，合计 == total_w。
     """
     ncols = len(headers)
+    if weights and len(weights) == ncols and all(wt > 0 for wt in weights):
+        tot = float(sum(weights))
+        widths = [int(int(total_w) * wt / tot) for wt in weights]
+        widths[-1] = int(total_w) - sum(widths[:-1])
+        return widths
     maxlen = [max(3, _cell_maxlen(headers[c])) for c in range(ncols)]
     for row in rows:
         for c in range(ncols):
@@ -872,7 +899,8 @@ def cell_bg_color(data_row_idx, zebra_bg="F5F5F5"):
 def add_table(slide, x, y, w, h, headers, rows,
               head_bg="44546A", head_fg="FFFFFF",
               head_size=None, body_size=None,
-              zebra_bg="F5F5F5", reveal_cells=None, cell_colors=None, fill_ratio=0.0):
+              zebra_bg="F5F5F5", reveal_cells=None, cell_colors=None, fill_ratio=0.0,
+              col_weights=None, blank_grid=None):
     """添加表格：无边框 + 表头深色 + 斑马纹，并**自适应塞进给定区域**。
 
     - `<br>` / `\n` 渲染为单元格内真实换行（多段落），不再印出字面量；
@@ -893,8 +921,15 @@ def add_table(slide, x, y, w, h, headers, rows,
     fill_ratio：>0 时，行少表把数据行均匀加高，让全表撑到区域高度的这个比例（每行最多加到
         约 4 行字高，免得空表格拉成大方块）；缺省 0＝不加高，存量产物不变。读书会 v9 传 0.85。
 
+    col_weights：显式列宽比（个数须等于列数，否则忽略、回落按内容估）。缺省 None＝存量行为不变。
+
+    blank_grid：格线颜色（6 位 hex）。给定且表里有「留给学生写」的空格（非答案格）时转「填写表」
+        样式：数据行一律白底 + 该色实线格线——无边框的整片浅灰空行投屏看着就是一个色块、
+        看不出是表。缺省 None＝存量行为不变（写作/宣讲 profile 不传）。
+
     返回：`(table, geom)`，geom = {x, y, col_x[相对左偏移], col_w, row_y[相对顶偏移],
-        row_h, body_fs, marg_l, marg_t, zebra_bg}，供调用方放置答案叠层。
+        row_h, body_fs, marg_l, marg_t, zebra_bg, form}，供调用方放置答案叠层
+        （form=True 时数据格底色一律白，叠层底色须跟着用白）。
     """
     reveal_cells = reveal_cells or {}
     n_cols = len(headers)
@@ -914,7 +949,12 @@ def add_table(slide, x, y, w, h, headers, rows,
         calc_headers, calc_rows = headers, rows
 
     # 列宽（内容自适应，按完整答案版 rows）
-    widths = _content_col_widths(calc_headers, calc_rows, w)
+    widths = _content_col_widths(calc_headers, calc_rows, w, weights=col_weights)
+
+    # 填写表判定：有非答案格的空单元格（学生要动笔写的格）
+    form = bool(blank_grid) and any(
+        not str(row[c] if c < len(row) else "").strip() and (d, c) not in reveal_cells
+        for d, row in enumerate(rows) for c in range(n_cols))
 
     # 自适应字号 + 逐行行高（确保合计 ≤ 区域高度 h，按完整答案版 rows）
     size_hi = body_size if body_size else 16
@@ -994,7 +1034,9 @@ def add_table(slide, x, y, w, h, headers, rows,
     # 数据行（斑马纹：奇数行白，偶数行浅灰）
     for r, row in enumerate(rows, start=1):
         bg = "FFFFFF" if r % 2 == 1 else zebra_bg
-        if fill_ratio and not any(str(c).strip() for c in row):
+        if form:
+            bg = "FFFFFF"               # 填写表：白底 + 格线（下方 style_cell 后补边框）
+        elif fill_ratio and not any(str(c).strip() for c in row):
             bg = zebra_bg               # 整行空白（留给学生写）：白底无边框会看不见，改浅灰
         d = r - 1                       # 数据行 0 基索引
         for c in range(n_cols):
@@ -1008,6 +1050,8 @@ def add_table(slide, x, y, w, h, headers, rows,
                 fill_color=bg, font_color=COLOR_BODY,
                 size=body_fs, bold=False, align="left",
             )
+            if form:
+                _set_cell_borders(table.cell(r, c), blank_grid)
 
     # 几何：相对偏移（调用方加 x/y 得绝对坐标），用于放置答案叠层
     col_x, acc = [], 0
@@ -1021,7 +1065,7 @@ def add_table(slide, x, y, w, h, headers, rows,
         "col_x": col_x, "col_w": [int(wd) for wd in widths],
         "row_y": row_y, "row_h": [int(rh) for rh in row_heights],
         "body_fs": body_fs, "marg_l": marg_l, "marg_t": marg_t,
-        "zebra_bg": zebra_bg,
+        "zebra_bg": zebra_bg, "form": form,
     }
     return table, geom
 

@@ -50,6 +50,7 @@
 ## 看图写话（picture-writing）
 整区（跨课次通则＋规则体例）已外移 → **[看图写话线记忆](memory-index-picture-writing.md)**，排新课次或出图前打开；该线当前无未决项。
 ## 读书会详案（lesson-plan）
+- ⚠[读书会PPT通用问题四条(1008)](reading-ppt-general-feedback-1008.md) — 参考答案只上答案不带「就算数/都算对」;上屏原文带页码(只搬详案);填写表白底灰格线;`列宽：`按预估填写量;build_ppt末尾「中间稿机检」非零须改
 - ⚠[读书会PPT新样式v9·学人工优化版(1006)](reading-ppt-v9-human-optimized-1006.md) — 写`主题色：`才走新样式；每页大图+底带+问答拆框+卡片版式；写全名完整句；配图链路reading_deck.py；AI图不入库；答案改主题色(推翻红字)
 - ⚠[回归读书会·语体边界(1005)](reading-line-return-style-boundary-1005.md) — 延续散文化口语亲切(样本一至五原文锚定);写作线文风/润色/机检/MEMORY写作条目只有已进lesson-plan规则的才适用;Pass B按本线rubric;试写稻草人做基线
 - [张祖庆视角·读书会线暂不接入(1005)](zhang-perspective-reading-line-declined-1005.md) — 一手材料缺+处方与规格冲突;两张清点表收益小(稻草人三轮冷审已抓到);重启条件=连续几本同类问题漏网

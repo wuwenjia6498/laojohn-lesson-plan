@@ -36,6 +36,7 @@ from theme import (
 )
 from helpers import add_logo
 from theme import resolve_reading_theme
+import math
 import layouts_reading_v9 as v9
 from layouts_common import (
     draw_anchor, draw_logo_inner, draw_page_num, maybe_placeholder,
@@ -341,6 +342,9 @@ def render_summary(slide, page, ctx):
 
 
 # ---------- 填空表格 ----------
+TABLE_GRID_COLOR = "BFBFBF"     # 填写表格线：白幕投屏可见、不抢表头主题色
+
+
 def render_table(slide, page, ctx):
     th = _v9(ctx)       # v9 只换色（眉标色块/表头），版式不变
     if th:
@@ -350,15 +354,22 @@ def render_table(slide, page, ctx):
     draw_logo_inner(slide, ctx.get("logo_path"))
     draw_page_num(slide, ctx["page_index"], ctx["page_total"])
 
+    # 副标题折成多行时，标题与副标题整体上移、副标题框加高，表格位置不动（免得压到表头）
+    sub_lines = 1
+    if page.subtitle:
+        cpl = max(1, int(TABLE_SUBTITLE_W / 12700 / SZ_SUBTITLE))
+        sub_lines = max(1, math.ceil(len(page.subtitle) / cpl - 0.1))
+    extra = int((sub_lines - 1) * SZ_SUBTITLE * 1.6 * 12700)
     add_textbox(
-        slide, TABLE_TITLE_X, TABLE_TITLE_Y, TABLE_TITLE_W, TABLE_TITLE_H,
+        slide, TABLE_TITLE_X, TABLE_TITLE_Y - extra, TABLE_TITLE_W, TABLE_TITLE_H,
         page.title,
         font=FONT_TITLE, size=SZ_HEADING - 2, color=COLOR_TITLE, bold=True,
         align="left", anchor="middle",
     )
     if page.subtitle:
         add_textbox(
-            slide, TABLE_SUBTITLE_X, TABLE_SUBTITLE_Y, TABLE_SUBTITLE_W, TABLE_SUBTITLE_H,
+            slide, TABLE_SUBTITLE_X, TABLE_SUBTITLE_Y - extra, TABLE_SUBTITLE_W,
+            TABLE_SUBTITLE_H + extra,
             page.subtitle,
             font=FONT_BODY, size=SZ_SUBTITLE, color=COLOR_MUTED,
             align="left", anchor="middle",
@@ -376,6 +387,8 @@ def render_table(slide, page, ctx):
         slide, TABLE_AREA_X, TABLE_AREA_Y, TABLE_AREA_W, TABLE_AREA_H,
         page.table_headers, page.table_rows, reveal_cells=reveals,
         cell_colors=cell_colors,
+        # 列宽：中间稿 `列宽：` 显式比优先；留白填写表转白底+灰格线，投屏一眼看得出是表
+        col_weights=page.col_weights or None, blank_grid=TABLE_GRID_COLOR,
         # v9：表头主题色；字号上限放到 22pt、行少表加高到区域 85%（投屏可读、不留大片空白）
         **({"head_bg": th.main, "body_size": 22, "fill_ratio": 0.85} if th else {}),
     )
@@ -398,7 +411,7 @@ def render_table(slide, page, ctx):
         cx = bx + col_x[c]
         cy = by + row_y[tr]
         cw, ch = col_w[c], row_h[tr]
-        bg = cell_bg_color(d, zebra)
+        bg = "FFFFFF" if geom.get("form") else cell_bg_color(d, zebra)
 
         rect = add_rect(slide, cx, cy, cw, ch, bg)
         _disable_shape_effects(rect)
