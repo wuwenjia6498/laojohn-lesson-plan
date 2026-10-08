@@ -32,7 +32,7 @@ import sys
 import json
 import os
 from docx import Document
-from docx.shared import Pt, RGBColor
+from docx.shared import Pt, RGBColor, Cm
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 SLOGAN_1 = "更好的协助者,"
@@ -79,7 +79,13 @@ def add_title(doc, book_title):
     _set_font(r, bold=True, size=15)
 
 
-def add_segment(doc, seg):
+def add_card_image(doc, path):
+    """书目卡图片：居中、宽 9cm（长图按比例），供家长群转发时一眼看到书。"""
+    p = _add_para(doc, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=6)
+    p.add_run().add_picture(path, width=Cm(9))
+
+
+def add_segment(doc, seg, card=None):
     # 小标题前空一行
     _add_para(doc, space_after=0)
     # 小标题
@@ -100,6 +106,10 @@ def add_segment(doc, seg):
         r = p.add_run(seg["intro"])
         _set_font(r, size=11)
 
+    # 书目卡图片（仅第一段、插在第一条任务「天天爱读书」之前）
+    if card:
+        add_card_image(doc, card)
+
     # 编号任务
     for i, task in enumerate(seg.get("tasks", []), start=1):
         p = _add_para(doc, space_after=4)
@@ -115,15 +125,23 @@ def add_segment(doc, seg):
         _set_font(r, size=11)
 
 
+def find_card(content, output):
+    """同目录下的 `<书名>_书目卡.jpg`（书目卡物料的固定产物名）；没有就返回 None、照旧不插图。"""
+    path = os.path.join(os.path.dirname(os.path.abspath(output)),
+                        f"{content.get('book_title', '')}_书目卡.jpg")
+    return path if os.path.isfile(path) else None
+
+
 def render(content, output):
     doc = Document(TEMPLATE)
+    card = find_card(content, output)
 
     add_title(doc, content.get("book_title", ""))
     add_slogan(doc)
 
     segments = content["segments"]
     for idx, seg in enumerate(segments):
-        add_segment(doc, seg)
+        add_segment(doc, seg, card=card if idx == 0 else None)
         # 段间(及末尾)用标语分隔
         add_slogan(doc)
 

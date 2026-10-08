@@ -888,15 +888,16 @@ def render_profile(slide, d):
         y += 70
 
     cards = d.get("cards", [])
+    LH = int(d.get("line_height") or 38)   # 书写行距（可选；缺省 38 = 存量不变）
 
     def card_h_of(c):
         fh = 0
         for f in c.get("fields", []):
             if _has_val(f.get("value")):
                 arr = f["value"] if isinstance(f["value"], list) else [f["value"]]
-                fh += 22 + 38 * len(arr) + 12
+                fh += 22 + LH * len(arr) + 12
             else:
-                fh += 22 + 38 * f.get("lines", 1) + 12
+                fh += 22 + LH * f.get("lines", 1) + 12
         box_h = (c["box"].get("h", 150) if c.get("box") else 0)
         return max(fh, box_h) + 40
 
@@ -931,16 +932,16 @@ def render_profile(slide, d):
             if _has_val(f.get("value")):
                 arr = f["value"] if isinstance(f["value"], list) else [f["value"]]
                 for item in arr:
-                    add_text(slide, fx + 2, fy + 8, fw - 4, 26, item, size=14,
+                    add_text(slide, fx + 2, fy + LH - 30, fw - 4, 26, item, size=14,
                              color="3A4A45", tf=tf)
-                    add_line(slide, fx, fy + 34, fx + fw, fy + 34, c_ln, 1.3,
+                    add_line(slide, fx, fy + LH - 4, fx + fw, fy + LH - 4, c_ln, 1.3,
                              dash="sysDot", tf=tf)
-                    fy += 38
+                    fy += LH
             else:
                 for _ in range(f.get("lines", 1)):
-                    add_line(slide, fx, fy + 30, fx + fw, fy + 30, c_ln, 1.3,
+                    add_line(slide, fx, fy + LH - 8, fx + fw, fy + LH - 8, c_ln, 1.3,
                              dash="sysDot", tf=tf)
-                    fy += 38
+                    fy += LH
             fy += 12
         y += card_h + 20
     footer(slide, d, key="note", y=min(y, 1075))
