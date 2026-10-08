@@ -54,10 +54,24 @@ let __AO = 0;
 function mark(e){ e.setAttribute('data-answer','1'); e.setAttribute('data-order', __AO++); return e; }
 const PALETTE = ["#4F86C6","#D9883A","#C49B3E","#6FA85A","#4E8C7D","#5B7FA6","#A8504F"];
 
-const AX_Y = 200, X0 = 64, X1 = 1059;
+const AX_Y = 200, X0 = 64;
+let X1 = 1059;
+// 可选 portrait_rotate：纸改竖版 A4（与其余单子同叠打印），内容画布整体逆时针转 90°，logo 留在画布外保持正向。
+// 默认不开，横版行为逐字不变。转后画布右下角落在纸面右上角，故轴右端略收，给正向 logo 让位。
+function applyPortraitRotate(){
+  const page = document.getElementById('page');
+  const canvas = document.createElement('div');
+  canvas.style.cssText = 'position:absolute; top:164.5px; left:-164.5px; width:1123px; height:794px;'
+    + ' transform:rotate(-90deg); transform-origin:50% 50%;';
+  ['variantTag','title','subtitle','svg','foot'].forEach(id=>canvas.appendChild(document.getElementById(id)));
+  page.appendChild(canvas);
+  page.style.width = '794px'; page.style.height = '1123px';
+  X1 = 1019;
+}
 function render(){
   __AO = 0;
   const d = DATA;
+  if (d.portrait_rotate) applyPortraitRotate();
   document.getElementById('logo').src = d.logo;
   document.getElementById('title').textContent = d.title || '';
   const sub = document.getElementById('subtitle'); if(d.subtitle) sub.textContent = d.subtitle; else sub.style.display='none';

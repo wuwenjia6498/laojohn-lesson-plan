@@ -135,7 +135,8 @@
             "header": "第五步",
             "lines": 8
           }
-        ]
+        ],
+        "portrait_rotate": true
       }
     },
     {
