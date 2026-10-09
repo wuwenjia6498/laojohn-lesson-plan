@@ -1,0 +1,170 @@
+{
+  "provider": "volc",
+  "voice": "zh_female_xiaohe_uranus_bigtts",
+  "instruction": "像一位温和的老师跟家长聊孩子写作文的事：语气亲切、平实、真诚，不要播音腔，不要广告腔，语速自然，句子之间留一点停顿。",
+  "lines": [
+    {
+      "shot": "s1",
+      "i": 0,
+      "text": "孩子写一件事，常常是这样：",
+      "file": "audio/s1_01_cbbbbd656d95.wav",
+      "sec": 2.832,
+      "cached": false
+    },
+    {
+      "shot": "s1",
+      "i": 1,
+      "text": "“我们俩费了好大的劲，终于把它打死了。”",
+      "file": "audio/s1_02_98bca5a75f56.wav",
+      "sec": 3.648,
+      "cached": false
+    },
+    {
+      "shot": "s2",
+      "i": 0,
+      "text": "起因写了，感受也写了，",
+      "file": "audio/s2_01_32ddc46dd6a7.wav",
+      "sec": 2.832,
+      "cached": false
+    },
+    {
+      "shot": "s2",
+      "i": 1,
+      "text": "中间最关键的经过，一句话就带过去了。",
+      "file": "audio/s2_02_defe86fba3ab.wav",
+      "sec": 3.864,
+      "cached": false
+    },
+    {
+      "shot": "s2",
+      "i": 2,
+      "text": "读的人看完，还是不知道这事是怎么办成的。",
+      "file": "audio/s2_03_7dfb248974d7.wav",
+      "sec": 3.864,
+      "cached": false
+    },
+    {
+      "shot": "s3",
+      "i": 0,
+      "text": "老约翰同步习作，四年级上册第五单元。",
+      "file": "audio/s3_01_d1e231341df9.wav",
+      "sec": 4.032,
+      "cached": false
+    },
+    {
+      "shot": "s3",
+      "i": 1,
+      "text": "这节课教孩子把经过分成几步，",
+      "file": "audio/s3_02_cc8fae72ffb3.wav",
+      "sec": 3.048,
+      "cached": false
+    },
+    {
+      "shot": "s3",
+      "i": 2,
+      "text": "选出最关键的一步，写详细。",
+      "file": "audio/s3_03_a86267601f90.wav",
+      "sec": 2.832,
+      "cached": false
+    },
+    {
+      "shot": "s4",
+      "i": 0,
+      "text": "同一件事，写到最关键的那一步：",
+      "file": "audio/s4_01_9eeb6a166702.wav",
+      "sec": 2.664,
+      "cached": false
+    },
+    {
+      "shot": "s4",
+      "i": 1,
+      "text": "光柱在白墙上慢慢地移，",
+      "file": "audio/s4_02_bc2147d115fa.wav",
+      "sec": 2.448,
+      "cached": false
+    },
+    {
+      "shot": "s4",
+      "i": 2,
+      "text": "屋里静得能听见自己的心跳，",
+      "file": "audio/s4_03_d4128be6c5c0.wav",
+      "sec": 2.64,
+      "cached": false
+    },
+    {
+      "shot": "s4",
+      "i": 3,
+      "text": "心里想，这只蚊子可千万别再飞走了。",
+      "file": "audio/s4_04_b635b40a1405.wav",
+      "sec": 3.864,
+      "cached": false
+    },
+    {
+      "shot": "s4",
+      "i": 4,
+      "text": "读的人，就像站在旁边看着。",
+      "file": "audio/s4_05_1c0c39cfec28.wav",
+      "sec": 2.832,
+      "cached": false
+    },
+    {
+      "shot": "s5",
+      "i": 0,
+      "text": "两节课，孩子当堂写完一篇记事习作，",
+      "file": "audio/s5_01_a8f2850f0110.wav",
+      "sec": 3.48,
+      "cached": false
+    },
+    {
+      "shot": "s5",
+      "i": 1,
+      "text": "再读给同桌听，",
+      "file": "audio/s5_02_2f92b5f8f8f4.wav",
+      "sec": 1.632,
+      "cached": false
+    },
+    {
+      "shot": "s5",
+      "i": 2,
+      "text": "同桌要能指出，哪一步写得最详细。",
+      "file": "audio/s5_03_12363b65204b.wav",
+      "sec": 3.24,
+      "cached": false
+    },
+    {
+      "shot": "s6",
+      "i": 0,
+      "text": "把一件小事写清楚，",
+      "file": "audio/s6_01_1b4ca791a742.wav",
+      "sec": 1.848,
+      "cached": false
+    },
+    {
+      "shot": "s6",
+      "i": 1,
+      "text": "孩子会发现，平常的日子里，",
+      "file": "audio/s6_02_2b85d19a907a.wav",
+      "sec": 2.832,
+      "cached": false
+    },
+    {
+      "shot": "s6",
+      "i": 2,
+      "text": "值得写下来的瞬间其实很多。",
+      "file": "audio/s6_03_21c8281a1c85.wav",
+      "sec": 2.688,
+      "cached": false
+    },
+    {
+      "shot": "s7",
+      "i": 0,
+      "text": "想让孩子试一试，扫码预约体验课。",
+      "file": "audio/s7_01_2018571bcc08.wav",
+      "sec": 3.24,
+      "cached": false
+    }
+  ],
+  "voice_sec": 60.36,
+  "chars": 287,
+  "new_chars": 287
+}

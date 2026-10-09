@@ -1,0 +1,442 @@
+[
+ {
+  "number": "056",
+  "name": "Pop Magazine Doodle Overlay",
+  "traits": "线条：清晰黑色细线，轮廓流畅；上色：数码平涂加少量阴影；色板：正红、黑、牛仔蓝、土黄、粉；人物：头身约1比5，鹅蛋脸，身形修长；头发：乌黑头发，大块黑色加白色高光；表情：微笑，神情自信；动作：动作松弛随性，肢体线条流畅；质感：干净的数码感；背景：白底，周围点缀几笔黑色、粉色涂鸦符号。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/056.webp"
+ },
+ {
+  "number": "057",
+  "name": "Retro Geometric City Cartoon",
+  "traits": "线条：主要靠色块成形，少量细线；上色：高饱和平涂，带轻微印刷颗粒；色板：橙红、钴蓝、草绿、明黄、奶白；人物：头身约1比5，几何化方圆脸，身体由大块梯形组成；头发：深棕黑短发一块平涂；表情：小点眼、弯嘴笑，神情开朗；动作：动作幅度较大，肢体摆动节奏明确；质感：丝网印刷颗粒；背景：白底，环境概括成几何块面剪影。",
+  "poster_tier": "推荐",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/057.webp"
+ },
+ {
+  "number": "058",
+  "name": "Minimal Bold-Color Fashion Geometry",
+  "traits": "线条：只靠色块边缘成形；上色：纯色大块平涂；色板：朱红、钴蓝、黑、肉粉、米白；人物：头身约1比7，小头长腿，画孩子收到1比4；头发：黑色头发，一整块纯黑几何形；表情：闭眼弧线、小红嘴、红腮，神情惬意；动作：动作幅度较大，身体线条流畅；质感：平整的印刷色；背景：纯白底，大片留白。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/058.webp"
+ },
+ {
+  "number": "059",
+  "name": "High-Contrast Negative-Space Figure",
+  "traits": "线条：只用黑白边界成形；上色：纯黑大面积与白底互切；色板：黑、白；人物：头身约1比4，圆脸，五官极简；头发：乌黑头发成一大块黑色剪影，与身体相连；表情：闭眼弧线、微笑，神情安静满足；动作：姿态收拢、轮廓圆顺；质感：平整剪影；背景：纯白底。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/059.webp"
+ },
+ {
+  "number": "060",
+  "name": "Negative-Space Visual-Pun Graphic",
+  "traits": "负空间、双重图像、极少颜色、视觉双关；人物轮廓优先于细节堆砌，脸型、头身比例与手脚形状要形成清楚而独立的视觉语言；表情与肢体动作要服从该风格的人格机制，避免回落为统一的标准Q版表情。",
+  "poster_tier": "不推荐",
+  "rewrite": true,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/060.webp"
+ },
+ {
+  "number": "061",
+  "name": "Midcentury Geometric Fairytale",
+  "traits": "线条：靠色块边缘成形，只用细深棕线勾五官和少量轮廓；上色：纯色平涂色块，叠一层细颗粒纸纹；色板：番茄红、墨绿、芥黄、奶油白、深棕；人物：头身约1比3，大圆脸，身体概括成三角或梯形块面，四肢细短；头发：深棕色头发，整块平涂，边缘圆顺；表情：两颗小黑点眼、弯弯小嘴，两团粉红圆脸蛋；动作：动作轻快，肢体有舞动的节奏；质感：复古印刷颗粒与纸纹；背景：白底，零星几何小形点缀。",
+  "poster_tier": "推荐",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/061.webp"
+ },
+ {
+  "number": "062",
+  "name": "Ultra-Geometric Nature Character",
+  "traits": "线条：靠色块边缘成形，仅用细黑线勾闭眼和嘴；上色：三角、叶形等几何块面平涂拼接，带纸纹颗粒；色板：墨绿、芥黄、橄榄黄、奶油白、黑；人物：身体由三角与菱形块面拼成，头身约1比4，脸型为尖长几何形；头发：一块纯色几何块面；表情：闭眼弧线加一道小嘴，神情安静；动作：姿态端正对称，动作很少；质感：细颗粒纸纹；背景：白底，大量留白。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/062.webp"
+ },
+ {
+  "number": "063",
+  "name": "Rough Cut-Paper Modernist Graphic",
+  "traits": "线条：靠撕纸色块边缘成形，边缘毛糙；上色：色块内布满细碎撕纸纹理，平涂为主；色板：钴蓝、橙红、黑、肉粉、奶油白；人物：头身约1比3，方圆脸，四肢粗短，手掌张开成扇形；头发：黑色短发，一整块撕纸块面；表情：三角小眼、张大笑口，两团淡红脸蛋；动作：动作幅度大，四肢舒展，节奏跳跃；质感：粗糙撕纸与纸浆颗粒；背景：白底，大面积留白。",
+  "poster_tier": "推荐",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/063.webp"
+ },
+ {
+  "number": "064",
+  "name": "Playful Modernist Collage Character",
+  "traits": "线条：靠拼贴纸片边缘成形，少量细黑线勾五官；上色：不同花纹纸片拼接，波点、条纹、纸纹并置；色板：芥黄、墨绿、珊瑚红、钴蓝、黑、奶油白；人物：头身约1比3，圆脸，身体由不规则纸片拼成，手掌画得较大；头发：深色短发，一块剪纸块面；表情：点状黑眼、弯弯笑嘴、两团红脸蛋；动作：动作幅度中等，姿态带玩具感；质感：剪贴纸片的纹理与微影；背景：白底，留白干净。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/064.webp"
+ },
+ {
+  "number": "065",
+  "name": "Retro Pop Editorial Figure",
+  "traits": "线条：细深色轮廓线，线形流畅利落；上色：大块纯色平涂，少量细颗粒；色板：玫红、黑、奶油黄、肉粉、白；人物：头身约1比6，小脸尖下巴，四肢修长；头发：浅金色短发，用几块平涂色面概括；表情：嘴角上扬的自信笑容，脸颊淡红；动作：动作舒展放松，肢体线条修长；质感：轻微复古印刷颗粒；背景：白底，大面积留白。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/065.webp"
+ },
+ {
+  "number": "066",
+  "name": "Bold Retro Advertising Cartoon",
+  "traits": "线条：粗黑描边，线条圆润有粗细变化；上色：纯色平涂，色块边界清楚；色板：大红、钴蓝、肉粉、黑、白；人物：头身约1比2.5，大圆头，眼睛椭圆，手脚画得较大；头发：黑色短发，整块黑色加少量高光；表情：眨眼、张口大笑，两团红脸蛋；动作：手势明确有力，旁边加几道短动作线；质感：复古印刷感；背景：白底，干净留白。",
+  "poster_tier": "推荐",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/066.webp"
+ },
+ {
+  "number": "067",
+  "name": "Decorative Retro Commercial Illustration",
+  "traits": "线条：细深色轮廓线，边缘圆顺；上色：纯色平涂，衣物带大块花纹图案；色板：珊瑚红、墨绿、奶油白、黑、肉粉；人物：头身约1比5，小圆脸，身形纤细；头发：黑色头发，蓬松块面加少量细线；表情：闭眼微笑，两团红脸蛋；动作：动作轻快，肢体线条上扬；质感：复古印刷颗粒；背景：白底，大面积留白。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/067.webp"
+ },
+ {
+  "number": "068",
+  "name": "Freeform Cut-Paper Figure",
+  "traits": "线条：靠剪纸色块边缘成形，只用细线勾眼和嘴；上色：大面积纯色平涂，带细颗粒；色板：橙红、钴蓝、芥黄、深墨蓝、肉粉；人物：头身约1比5，小圆脸，身体与四肢是自由弯曲的剪纸形；头发：深墨蓝头发，一整块波浪边缘的块面；表情：点状眼、弯笑嘴、淡红脸蛋；动作：动作幅度大，肢体弯曲舒展，舞动感强；质感：纸纹颗粒；背景：白底，大片留白。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/068.webp"
+ },
+ {
+  "number": "069",
+  "name": "Poetic Single-Line Figure",
+  "traits": "线条：一根连续到底的细黑线勾出全身，线条流畅绕圈；上色：只用黑线，纸面保持白色；色板：黑、白；人物：头身约1比7，小椭圆脸，四肢修长；头发：头发用一两圈线条概括，发量很少；表情：闭眼弧线和一道小嘴，神情安静；动作：伸展舒展的姿态，线条随动作延伸成弧；质感：干净的墨线；背景：纯白，完全留白。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/069.webp"
+ },
+ {
+  "number": "070",
+  "name": "Abstract Continuous-Line Figure",
+  "traits": "连续线、抽象人体、几何变形、符号化。",
+  "poster_tier": "不推荐",
+  "rewrite": true,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/070.webp"
+ },
+ {
+  "number": "071",
+  "name": "Bold Kinetic Street-Pictogram",
+  "traits": "线条：粗黑实心轮廓，整个人物是一块黑色剪影；上色：纯黑填满，白色只留作笑脸；色板：黑、白；人物：头身约1比3，圆头，四肢是粗圆管状；头发：头部是整块圆形黑面，头顶用几道放射短线表示活力；表情：白线勾出弯弯笑嘴与小点眼；动作：动作幅度大，周身加多道短动作线；质感：马克笔般厚实的墨色；背景：白底，留白。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/071.webp"
+ },
+ {
+  "number": "072",
+  "name": "Raw Symbolic Graffiti Figure",
+  "traits": "原始涂鸦、皇冠与符号、文字碎片、爆裂能量。",
+  "poster_tier": "不推荐",
+  "rewrite": true,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/072.webp"
+ },
+ {
+  "number": "073",
+  "name": "Punk Ink-and-Text Editorial",
+  "traits": "黑墨速写、朋克线稿、文字并置、粗粝社论；保留明显手绘笔压、停顿与轻微不齐整感，让轮廓产生真实纸上绘制的节奏；表情与肢体动作要服从该风格的人格机制，避免回落为统一的标准Q版表情。",
+  "poster_tier": "不推荐",
+  "rewrite": true,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/073.webp"
+ },
+ {
+  "number": "074",
+  "name": "Grotesque Classical-Comic Portrait",
+  "traits": "扭曲五官、怪表情、古典人物与漫画混合；人物轮廓优先于细节堆砌，脸型、头身比例与手脚形状要形成清楚而独立的视觉语言；表情与肢体动作要服从该风格的人格机制，避免回落为统一的标准Q版表情。",
+  "poster_tier": "不推荐",
+  "rewrite": true,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/074.webp"
+ },
+ {
+  "number": "075",
+  "name": "Flat Belle-Époque Poster Figure",
+  "traits": "海报式人物、简化轮廓、平面色块、都市生活。",
+  "poster_tier": "不推荐",
+  "rewrite": true,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/075.webp"
+ },
+ {
+  "number": "076",
+  "name": "Angular Expressive Figure Line",
+  "traits": "断裂敏感线条、细瘦人体、扭曲姿态、强情绪。",
+  "poster_tier": "不推荐",
+  "rewrite": true,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/076.webp"
+ },
+ {
+  "number": "077",
+  "name": "Raw Art-Brut Figure",
+  "traits": "线条：粗糙蜡笔线，抖动、重复描画；上色：蜡笔涂色不均匀，笔触外露、留有纸白；色板：橙红、钴蓝、明黄、黑、粉红；人物：头身约1比2，大圆头，四肢是单线或细长条，手指画成放射短线；头发：黑色乱蓬蓬的蜡笔粗线，向四周支棱；表情：圆眼大黑珠、露齿大笑，两团粉红脸蛋；动作：动作简单，肢体线条稚拙；质感：蜡笔颗粒与纸纹；背景：白底，零星简笔小装饰。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/077.webp"
+ },
+ {
+  "number": "078",
+  "name": "Poetic Geometric Symbol Figure",
+  "traits": "线条：少量细黑线，色块边缘成形；上色：三角、弧形色块平涂拼接，带纸纹颗粒；色板：芥黄、灰蓝、黑、橙红、奶油白；人物：身体由三角块面构成，头身约1比4，脸型为半圆几何形；头发：一块深色三角或半圆块面；表情：闭眼弧线、一点小红嘴，神情安静；动作：动作简单，肢体用块面概括；质感：细颗粒纸纹；背景：白底，散落小圆点与细线点缀。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/078.webp"
+ },
+ {
+  "number": "079",
+  "name": "Biomorphic Symbolic Character",
+  "traits": "生物符号、原始线条、红蓝黄点色、自由空间。",
+  "poster_tier": "不推荐",
+  "rewrite": true,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/079.webp"
+ },
+ {
+  "number": "080",
+  "name": "Fluid Single-Line Motion Figure",
+  "traits": "单线人物、流畅连续线、极简动态。",
+  "poster_tier": "不推荐",
+  "rewrite": true,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/080.webp"
+ },
+ {
+  "number": "081",
+  "name": "Cinematic Grainy Flat-Shape Illustration",
+  "traits": "线条：描线极少，靠明暗色块分形；上色：大色块平涂叠强烈逆光与剪影，带细密颗粒；色板：橙红、琥珀黄、深藏蓝、灰褐、暖白；人物：头身约1比7，常取背影或侧影，五官极少；头发：深色短发，一整块暗色块面；表情：多为背影，情绪靠姿态传达；动作：动作极少，情绪靠轮廓传达；质感：浓重胶片颗粒；背景：满铺色块，远近层次分明，逆光强烈。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/081.webp"
+ },
+ {
+  "number": "082",
+  "name": "Retro Silkscreen Geometric Figure",
+  "traits": "线条：靠色块边缘成形，细黑线勾五官；上色：厚重几何色层平涂拼接，带丝网套印颗粒；色板：橙红、钴蓝、芥黄、黑、奶油白；人物：身体由方块和三角拼成，头身约1比5，小脸侧面；头发：深色一块几何块面；表情：闭眼弧线加微笑嘴；动作：动作幅度较大，四肢概括成块面；质感：丝网颗粒与旧纸纹；背景：米白底，配一个大圆等单个几何形。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/082.webp"
+ },
+ {
+  "number": "083",
+  "name": "Dynamic East-Asian Ink Editorial",
+  "traits": "线条：浓淡变化的毛笔墨线，起收笔锋明显；上色：黑白水墨晕染，仅一处朱红点色；色板：浓墨黑、淡墨灰、朱红、纸白；人物：头身约1比7，瓜子脸，身形挺拔；头发：黑色头发，用飞白笔触甩出发丝；表情：眼神坚定、嘴唇紧抿；动作：动作幅度大，衣摆随势飞扬，笔势连贯；质感：墨点飞溅与宣纸晕染；背景：白底留白，几点墨渍。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/083.webp"
+ },
+ {
+  "number": "084",
+  "name": "Quiet Low-Saturation Japanese Editorial",
+  "traits": "线条：细而均匀的深灰线，线条轻；上色：低饱和平涂，带轻微纹理；色板：燕麦米、雾灰蓝、浅棕、灰绿、奶白；人物：头身约1比6，小圆脸，身形匀称；头发：棕色短发，平涂色块加几道细发丝线；表情：小黑眼、淡淡平静神情，脸颊微红；动作：动作幅度小，节奏安静；质感：细纸纹；背景：白底，大面积留白，环境只用少量简笔带过。",
+  "poster_tier": "推荐",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/084.webp"
+ },
+ {
+  "number": "085",
+  "name": "Minimal Fashion Line Figure",
+  "traits": "线条：细黑钢笔线，线条简洁利落；上色：黑白为主，局部黑色实面；色板：黑、白、浅灰；人物：头身约1比8，小脸，身形修长；头发：浅色头发，用几道细线概括；表情：五官极简，神情冷静；动作：动作松弛，肢体线条修长利落；质感：干净线稿；背景：纯白，完全留白。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/085.webp"
+ },
+ {
+  "number": "086",
+  "name": "Cool Minimal Black-and-White Figure",
+  "traits": "线条：细黑线勾轮廓，衣褶线条简练；上色：黑白关系，大块黑色实面与留白对比；色板：黑、白；人物：头身约1比7，小脸瘦长，身形高挑；头发：黑色短发，用细线与小块黑面画出蓬松感；表情：眼神淡、嘴形平直；动作：动作松弛，肢体线条简练；质感：干净墨线；背景：纯白，大面积留白。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/086.webp"
+ },
+ {
+  "number": "087",
+  "name": "Showa Retro Commercial Cartoon",
+  "traits": "线条：粗黑描边，圆润流畅有粗细变化；上色：复古纯色平涂，少量高光；色板：朱红、牛仔蓝、肉粉、奶油白、黑；人物：头身约1比3，大圆头，圆眼带高光，手脚画得较大；头发：黑色短发，整块黑面加一两笔高光；表情：张口大笑，两团红脸蛋；动作：动作幅度大，动作线清楚；质感：复古印刷感；背景：白底，简单留白。",
+  "poster_tier": "推荐",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/087.webp"
+ },
+ {
+  "number": "088",
+  "name": "Airy Transparent Watercolor Figure",
+  "traits": "线条：极细淡棕线，时断时续；上色：透明水彩轻染，湿边晕开，大量纸白透出；色板：淡天蓝、浅鹅黄、嫩草绿、浅棕、粉红；人物：头身约1比4，圆脸，小巧四肢；头发：浅棕色短发，水彩晕染加几道细发丝；表情：小黑眼、浅浅微笑，脸颊粉红晕；动作：动作幅度小，姿态轻柔；质感：水彩纸纹与湿边；背景：白底，大量留白，下缘淡彩晕染。",
+  "poster_tier": "推荐",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/088.webp"
+ },
+ {
+  "number": "089",
+  "name": "Showa Everyday Family Comic",
+  "traits": "线条：干净均匀的黑色描线，线形圆润；上色：明快平涂，轻微阴影；色板：暖黄、樱桃红、棕、白、浅粉；人物：头身约1比3，圆脸，手脚圆小；头发：深棕色头发，用平涂块面加几道细线；表情：眯眼弯弧大笑，两团粉红脸蛋；动作：动作幅度大、节奏热闹，周围画短动作线；质感：干净的漫画平涂；背景：白底，留白干净。",
+  "poster_tier": "推荐",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/089.webp"
+ },
+ {
+  "number": "090",
+  "name": "Folklore Monster Ink Cartoon",
+  "traits": "朴拙漫画线、民俗怪谈、妖怪造型、黑白纹理。",
+  "poster_tier": "不推荐",
+  "rewrite": true,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/090.webp"
+ },
+ {
+  "number": "091",
+  "name": "Classic Rounded Manga Character",
+  "traits": "线条：清晰黑色描线，圆润流畅；上色：纯色平涂，少量阴影；色板：大红、肉粉、黑、墨绿、白；人物：头身约1比3，圆脸，大眼睛带高光；头发：黑色头发整块平涂，发型用几个尖角轮廓概括；表情：张口开心笑，眉眼灵动；动作：动作幅度大且清楚，肢体线条有力；质感：干净的漫画平涂；背景：白底，留白。",
+  "poster_tier": "推荐",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/091.webp"
+ },
+ {
+  "number": "092",
+  "name": "Rebellious Big-Head Deadpan Figure",
+  "traits": "线条：细黑描线，轮廓圆润；上色：低饱和平涂，黑灰为主；色板：黑、灰、白、淡粉；人物：头身约1比2，大头，脸型宽圆；头发：黑色短发，整块黑面；表情：半睁的眼、下垂眼皮、嘴抿成小弧，一脸不耐烦；动作：动作极少，肢体线条僵直；质感：干净平涂；背景：白底，大面积留白。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/092.webp"
+ },
+ {
+  "number": "093",
+  "name": "80s Clean-Line Urban Pop Girl",
+  "traits": "线条：干净细黑描线，线条流畅；上色：高纯度撞色平涂，阴影极少；色板：青绿、玫粉、牛仔蓝、明黄、白；人物：头身约1比6，瓜子脸，大眼有高光；头发：黑色头发，整块黑面加几道白色高光线；表情：温和微笑、眼神明亮；动作：动作放松，肢体线条柔和；质感：清爽的平面印刷感；背景：白底，大块留白。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/093.webp"
+ },
+ {
+  "number": "094",
+  "name": "Ornate Strange Botanical Ink",
+  "traits": "线条：精细钢笔线，细节密集；上色：淡彩轻涂，灰绿与粉为主；色板：灰绿、淡粉、米白、浅棕、墨灰；人物：头身约1比5，小圆脸，大眼睛；头发：浅棕色头发，用大量细密线条画出一缕缕发丝；表情：神情安静、略带怔忡；动作：动作幅度小，姿态轻柔；质感：钢笔排线与纸纹；背景：白底，主体周围装饰繁密。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/094.webp"
+ },
+ {
+  "number": "095",
+  "name": "Fashion Diary Sketch Girl",
+  "traits": "线条：松弛的黑色钢笔速写线，带轻微抖动；上色：淡彩轻涂，留大量纸白；色板：驼色、浅牛仔蓝、奶白、黑、灰；人物：头身约1比7，小脸，身形修长；头发：棕色头发，几笔细线概括；表情：五官简练，神情轻松；动作：动作幅度适中，姿态自然；质感：速写本纸纹；背景：白底，留白。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/095.webp"
+ },
+ {
+  "number": "096",
+  "name": "Loose Deadpan Everyday Sketch",
+  "traits": "线条：松散的黑色细线，带排线与重复描线；上色：几乎纯线稿，局部淡灰铅笔阴影；色板：黑、灰、白、浅驼；人物：头身约1比4，圆脸，身形松垮；头发：黑色蓬乱短发，用多道细乱线画出翘起的发丝；表情：半睁眼、嘴成一横，一脸没睡醒；动作：动作懒散，身体线条松垮；质感：铅笔排线与纸纹；背景：白底，大面积留白。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/096.webp"
+ },
+ {
+  "number": "097",
+  "name": "Yuru-Surreal Minimal Everyday Cartoon",
+  "traits": "线条：黑色细线，线条圆润简单；上色：几乎纯白，局部极少淡彩；色板：黑、白、浅驼、淡绿；人物：身体是圆顶长条的一体形，头身连成一体，四肢是小短条；头发：头部光滑，只以圆顶轮廓代替；表情：两颗小黑点眼，神情呆呆的；动作：动作极少，姿态呆萌；质感：干净线稿；背景：白底，脚下几笔短线。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/097.webp"
+ },
+ {
+  "number": "098",
+  "name": "Notebook Lifestyle Doodle",
+  "traits": "线条：细黑钢笔线，轻松略带抖动；上色：淡彩轻涂，留大量纸白；色板：浅棕、淡黄、灰蓝、嫩绿、橙棕；人物：头身约1比3，圆脸，四肢小巧；头发：浅棕色头发，用几道细线勾发丝；表情：眯眼微笑，脸颊淡红；动作：动作幅度小，节奏安静；质感：手帐纸纹；背景：白底，大量留白，零星点缀手绘小笔画。",
+  "poster_tier": "推荐",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/098.webp"
+ },
+ {
+  "number": "099",
+  "name": "Cute Essay-Manga Everyday",
+  "traits": "线条：柔和的深棕细线，线条圆顺；上色：淡水彩平涂，轻微阴影；色板：奶白、浅棕、淡橙、嫩绿、浅灰；人物：头身约1比3，圆脸，大眼有高光；头发：棕色头发，平涂块面加细发丝线；表情：大眼含笑、嘴角上扬，粉红脸颊；动作：动作轻松、幅度小，头边画几道小情绪线；质感：淡彩纸纹；背景：白底，少量环境用简笔勾勒。",
+  "poster_tier": "推荐",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/099.webp"
+ },
+ {
+  "number": "100",
+  "name": "Rough Gag-Manga Reaction",
+  "traits": "线条：粗细变化的黑色漫画线，笔触快；上色：几乎纯黑白，局部淡色；色板：黑、白、灰、咖啡棕；人物：头身约1比4，脸型变形，眼睛是大白圈；头发：黑色乱发，粗线条向四周炸开；表情：眼睛瞪成白圈、嘴巴张到最大，额头冒汗；动作：动作幅度极大，身周画多道速度线；质感：漫画网点与粗线；背景：白底，留白。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/100.webp"
+ },
+ {
+  "number": "101",
+  "name": "Clean Young-Lifestyle Manga Line",
+  "traits": "线条：细而柔的深棕线，线条清秀；上色：淡彩平涂，轻阴影；色板：奶白、浅灰、淡棕、灰绿、浅粉；人物：头身约1比5，鹅蛋脸，身形匀称；头发：深棕色头发，细线画出几缕碎发；表情：眼神柔和、嘴角微扬，脸颊淡红；动作：动作放松，肢体线条舒缓；质感：干净纸纹；背景：白底，少量环境简笔带过。",
+  "poster_tier": "推荐",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/101.webp"
+ },
+ {
+  "number": "102",
+  "name": "Friendly Girl-Diary Cartoon",
+  "traits": "线条：细黑描线，线形圆润简洁；上色：柔和平涂，阴影极少；色板：燕麦米、灰蓝、浅棕、白、淡粉；人物：头身约1比4，圆脸，四肢小巧；头发：棕色短发，平涂块面加几道细线；表情：小黑眼、张嘴开心笑，脸颊淡红；动作：动作轻快，肢体线条有弹性；质感：干净平涂；背景：白底，留白。",
+  "poster_tier": "推荐",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/102.webp"
+ },
+ {
+  "number": "103",
+  "name": "Minimal Absurd Short-Gag Cartoon",
+  "traits": "线条：细黑线，线条圆润简单；上色：浅肉色与少量明黄平涂；色板：浅肉色、明黄、白、橙、黑；人物：身体是圆顶方块一体形，头身连成一体，四肢是细线；头发：光头轮廓，或以一块纯色形状代替；表情：两颗小黑点眼加一道短横嘴，神情呆呆的；动作：动作极少，旁边配省略号；质感：干净平涂；背景：白底，大面积留白。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/103.webp"
+ },
+ {
+  "number": "104",
+  "name": "Warm Slightly-Strange Everyday Line",
+  "traits": "线条：细黑线，略带抖动与发丝细节；上色：淡彩平涂，轻阴影；色板：橄榄棕、深牛仔蓝、奶白、芥黄、浅粉；人物：头身约1比3，圆脸，大眼睛；头发：深棕色蓬乱短发，用多道细线画出翘起发丝；表情：圆眼微愣、小嘴，脸颊粉红；动作：动作幅度小，姿态放松；质感：细纸纹；背景：白底，留白。",
+  "poster_tier": "推荐",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/104.webp"
+ },
+ {
+  "number": "105",
+  "name": "Fast Family-Essay Sketch",
+  "traits": "线条：快速的灰黑铅笔速写线，松散、有重复描线和断笔；头发：蓬松乱翘，一缕缕发丝向四周支棱，发梢参差不齐，头顶有几根翘起的呆毛；表情：眼睛笑成两道弯弯的弧线，嘴巴张得很大、露出舌头，脸颊有淡红晕，整张脸笑得皱起来；动作：身体和手都在动，头部和手边画几道短动作线，周围有飞溅的小点和小碎片；人物：圆脸、短鼻子，头身约1比4；上色：极少，只有淡灰棕和米色点染；质感：速写本质感，笔触外露；背景：白底，道具简笔勾勒。",
+  "poster_tier": "推荐",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/105.webp"
+ },
+ {
+  "number": "106",
+  "name": "Minimal Quirky Motion Character",
+  "traits": "线条：粗细均匀的黑色描线，形状圆润；上色：纯色平涂，色块少；色板：橙红、黑、白、浅肉色；人物：头身约1比2.5，圆脸，四肢简化成粗短条；头发：黑色头发，整块黑面；表情：两颗小黑点眼、一道小嘴，神情专注；动作：动作幅度大、节奏轻快，脚下画一小片投影；质感：干净平涂；背景：白底，大面积留白。",
+  "poster_tier": "推荐",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/106.webp"
+ },
+ {
+  "number": "107",
+  "name": "Elegant Sparse-Line Girl",
+  "traits": "极少线条、纤细女孩、优雅留白；线条轻细并保留呼吸感，人物比例偏修长，眉眼与嘴角的小变化承担主要表情；人物姿态松弛自然，服装靠清楚剪影体现时尚感，避免模板化甜美脸。",
+  "poster_tier": "不推荐",
+  "rewrite": true,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/107.webp"
+ },
+ {
+  "number": "108",
+  "name": "Delicate Emotional Female Line",
+  "traits": "线条：极细的灰黑线，长线条流动；上色：几乎纯线稿，局部淡粉淡灰；色板：灰黑、白、淡粉、浅灰；人物：头身约1比6，瓜子脸，眉眼细长；头发：深灰色头发，用大量飘逸细长线条画出一缕缕发丝；表情：眼神迷离、双唇微抿，脸颊淡红；动作：动作幅度小，姿态安静；质感：细线与纸纹；背景：白底，大面积留白。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/108.webp"
+ },
+ {
+  "number": "109",
+  "name": "Pop-Culture Minimal Figure",
+  "traits": "线条：干净黑色描线，粗细均匀；上色：高纯度平涂撞色，阴影极少；色板：宝蓝、牛仔蓝、黑、奶白、白；人物：头身约1比4，小圆脸，五官极简；头发：黑色头发，整块黑面；表情：眼睛为小点，神情放空；动作：动作松弛，肢体收拢；质感：干净平涂；背景：白底，留白。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/109.webp"
+ },
+ {
+  "number": "110",
+  "name": "Modern Editorial Female Line",
+  "traits": "线条：细黑线，线条利落带轻微排线；上色：淡彩平涂，局部黑色实面；色板：黑、白、驼色、米灰、浅棕；人物：头身约1比7，小脸尖下巴，身形修长；头发：深棕色头发，几道细线画碎发；表情：神情淡定，嘴角平；动作：动作随意，肢体线条利落；质感：细纸纹；背景：白底，留白。",
+  "poster_tier": "慎用",
+  "rewrite": false,
+  "image": "C:/Users/69491/.claude/skills/handdraw-style-prompter/images/individual/001-200/110.webp"
+ }
+]

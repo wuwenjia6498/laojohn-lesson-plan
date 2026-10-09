@@ -64,14 +64,19 @@ def _han(c):
     return "一" <= c <= "龥"
 
 
-def wrap(text):
+def wrap(text, sub_max=None, line_max=None):
     """长句折成两行显示，不改时间轴。
 
     切点规则：行首不许是标点或任何引号，行尾不许是开引号／开括号。
     满足这两条的位置里，取**离中点最近**的一个；落在逗号句号之后的给 6 字折扣，
     好让切点尽量跟着自然停顿走。一个合法位置都没有就不折（整句全是引号块时）。
+
+    `sub_max`/`line_max` 缺省取模块常量（横屏备课视频）；竖屏宣传片
+    （laojohn-promo-video）经薄壳传入更窄的值。**只加参数、不动缺省**。
     """
-    if len(text) <= SUB_MAX:
+    sub_max = SUB_MAX if sub_max is None else sub_max
+    line_max = LINE_MAX if line_max is None else line_max
+    if len(text) <= sub_max:
         return text
     mid = len(text) // 2
     best = None
@@ -86,7 +91,7 @@ def wrap(text):
             score += 4
         # 重罚超宽的那一行：避词惩罚会把切点推到很偏的位置，
         # 实测出现过 39 字的一行（几乎顶满画面）。只要有不超宽的切点就必选它。
-        if max(c, len(text) - c) > LINE_MAX:
+        if max(c, len(text) - c) > line_max:
             score += 100
         if best is None or score < best[0]:
             best = (score, c)

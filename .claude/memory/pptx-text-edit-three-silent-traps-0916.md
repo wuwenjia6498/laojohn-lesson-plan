@@ -21,3 +21,5 @@ metadata:
 **⚠ 0925 反例：`normalize_paragraphs` 自己也会把文件改坏。** 六上五外部 pptx 有 26 个 slide 的段落是「pPr, r, pPr, r…」多个 `pPr` 交错的写法（PowerPoint 认）。`normalize_paragraphs` 会把每个 `pPr` 都挪到段首，挤成一串，结果原件只跑这一个函数就打不开。**所以「收尾必调」要改成「往段落里 append 过 run 才调」**；只换图或只挪几何的改动不要调它。工具本身还没修（应当只处理单个 `pPr` 的段落），修之前照此执行。排查法：拿原件分别只跑 `prune_timing`、只跑 `normalize_paragraphs`，各自用 COM 打开，看是哪一个导致打不开。
 
 与 [[manhua-laoshi-5a-lesson-state]]、[[revise-finalized-lesson-plan-pitfalls-0915]] 同族。
+
+**0929 补·整页复制的第四坑**（改宣讲件 0904→1008 踩中）：WPS 改过的 pptx 每个形状带 `p:custDataLst` 指向 `/tags` 部件。整页复制时若不带 tags 关系，r:id 悬空；若让新页与原页共用同一 tag 部件，PowerPoint 照样拒开。可行做法＝复制时删掉 custDataLst、不复制 tags 关系。另：`set_text` 也会 append run，改完同样要 `normalize_paragraphs`，否则 PowerPoint 能打开但**整框文字不显示**（不报错）。
