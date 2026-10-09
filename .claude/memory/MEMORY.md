@@ -101,6 +101,7 @@
 - **⚠仓内pptx不一定是终稿(0921用户纠正)**:拿仓内那份与详案页标对账,17课次13个对不上(五上二从P7起整齐差1页)——曾据此误判「详案页标错了」。**真相：页标对的是外部终稿,仓内可能是更早版本,对不上是预期、禁批量改详案**;按页消费PPT一律用终稿 — [详情](pagemap-json-page-offset-0921.md)
 - [测评卷SKILL状态](reading-assessment-skill-state.md) / [测评事实以详案为准](assessment-facts-follow-lesson-plan.md) — 详案升深度蓝本(事实仍锁档案);与SKILL默认相反遇分叉先确认
 - ⚠[阅读单/物料内容严格照详案(1008)](reading-materials-follow-plan-strictly-1008.md) — 版式可活内容不能加:不加画一画/汇总格,计划统称7天阅读计划;主题词对人物身份(邻居≠亲情);反馈话术自动插书目卡
+- [阅读单PPTX文字挤压根因(1009)](reading-sheet-pptx-text-overlap-1009.md) — PDF正常≠PPTX正常;定高文本框低估雅黑行高;voyage棕框/deduce卡头已修;判版式用COM按A4导出别用shot_assets
 - [低年级阅读单要活泼别全表格(1008)](reading-sheet-low-grade-lively-1008.md) — L1–L2优先radial/facets彩卡/profile上彩,table兜底;profile的note此前被静默丢弃已修
 - [阅读指南拓展栏点名具体书/影片](reading-guide-extension-concrete-titles.md) — 仅此栏放宽红线,吃不准就不写
 ## 未决事项与交付风险（做完即删）

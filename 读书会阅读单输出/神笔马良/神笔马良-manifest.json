@@ -44,7 +44,7 @@
       "template": "voyage",
       "data": {
         "title_main": "《神笔马良》",
-        "title_sub": "一只盒子，三个故事",
+        "title_sub": "一本书，三个故事",
         "variant": "空白版",
         "footer": "每读完一个故事，就填一个分支：一个故事读到底，再翻开下一个。不会写的字，用拼音代替。",
         "branches": [

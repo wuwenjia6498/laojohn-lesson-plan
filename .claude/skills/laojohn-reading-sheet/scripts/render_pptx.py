@@ -545,12 +545,17 @@ def render_voyage(slide, d):
     tb_w = 320
     tbx = (PAGE_W_PX - tb_w) / 2
     tby = 116
-    th = 64
+    # 书名与副题行高按雅黑实测（≈字号×1.33×1.2）排，旧版 28px 间距让两行贴在一起
+    th = 84 if d.get("title_sub") else 64
     add_round_rect(slide, tbx, tby, tb_w, th, radius=0.18, fill="6B5644")
-    add_text(slide, tbx, tby + 10, tb_w, 30, d.get("title_main", ""), size=23,
-             bold=True, color="FFFFFF", align="center")
     if d.get("title_sub"):
-        add_text(slide, tbx, tby + 38, tb_w, 22, d.get("title_sub"), size=15,
+        add_text(slide, tbx, tby + 8, tb_w, 38, d.get("title_main", ""), size=23,
+                 bold=True, color="FFFFFF", align="center")
+    else:
+        add_text(slide, tbx, tby, tb_w, th, d.get("title_main", ""), size=23,
+                 bold=True, color="FFFFFF", align="center", anchor="middle")
+    if d.get("title_sub"):
+        add_text(slide, tbx, tby + 50, tb_w, 26, d.get("title_sub"), size=15,
                  color="FFFFFF", align="center")
     add_line(slide, PAGE_W_PX / 2, tby + th, PAGE_W_PX / 2, tby + th + 28, "B89A6E", 2)
 
@@ -580,8 +585,9 @@ def render_voyage(slide, d):
         add_line(slide, x + 22, y + 44, x + w - 22, y + 44, "E3D8C2", 1, tf=tf)
         fy = y + 54
         for f in br.get("fields", []):
+            # 小号栏目字用常规体：雅黑粗体在 14px 上笔画糊成一团，缩小看像重影
             add_text(slide, x + 22, fy, 76, 30, f.get("label", ""), size=14,
-                     bold=True, color="8A6F4E", tf=tf)
+                     color="6B5644", tf=tf)
             vx, vw = x + 110, w - 132
             if _has_val(f.get("value")):
                 arr = f["value"] if isinstance(f["value"], list) else [f["value"]]
@@ -1296,16 +1302,21 @@ def render_deduce(slide, d):
                          y + 8 + (k + 1) * 56, "CFC8BA", 1.2)
 
     if layout == "matrix":
-        STEPW, HEAD_H, ARROW_H = 168, 46, 16
+        STEPW, ARROW_H = 168, 16
         n = len(cards) or 1
         colW = (PAGE_W_PX - 2 * PAD - STEPW - n * GAP) / n
         colX = lambda i: PAD + STEPW + GAP + i * (colW + GAP)
+        # 卡头按最多行数撑高：雅黑实际行高≈字号×1.33×行距，两行卡头写死 46px 会被下方格子盖住第二行
+        head_lines = max([_wrap_lines(str(cd.get("header", "")), colW - 12, 14.5)
+                          for cd in cards] or [1])
+        HEAD_H = max(46, 14 + math.ceil(head_lines * 14.5 * 1.33 * 1.3))
         for i, cd in enumerate(cards):
             color = (cd.get("color") or PAL[i % len(PAL)]).lstrip("#")
             add_rect(slide, colX(i), top, colW, HEAD_H, fill=color)
-            add_text(slide, colX(i) + 6, top + 6, colW - 12, HEAD_H - 10,
+            add_text(slide, colX(i) + 6, top + 4, colW - 12, HEAD_H - 8,
                      str(cd.get("header", f"线索{i+1}")),
-                     size=14.5, bold=True, color="FFFFFF", align="center", line_spacing=1.3)
+                     size=14.5, bold=True, color="FFFFFF", align="center", anchor="middle",
+                     line_spacing=1.3)
         y = top + HEAD_H
         for si, st in enumerate(shared):
             if si:
