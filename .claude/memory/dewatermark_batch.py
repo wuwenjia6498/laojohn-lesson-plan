@@ -28,6 +28,7 @@ ROI_H, ROI_W = 110, 340
 TARGET_W = 800
 JPG_QUALITY = 92
 ITERS = 4
+BG_MAX = 200
 MIN_GROUP = 4
 MATCH_TH = 0.45        # 形状匹配分数下限（组与单张同用）
 K3 = np.ones((3, 3), np.uint8)
@@ -64,8 +65,11 @@ def evidence(gray_list, T_dil):
     for g in gray_list:
         B = cv2.inpaint(g, T_dil, 5, cv2.INPAINT_TELEA).astype(np.float32)
         e = (g.astype(np.float32) - B) / np.maximum(255.0 - B, 12.0)
+        e[B > BG_MAX] = np.nan   # 近白底提亮被分母下限压扁，会把α中位数拉低（1009）
         evid.append(e)
-    return np.median(np.stack(evid), axis=0)
+    with np.errstate(all="ignore"):
+        m = np.nanmedian(np.stack(evid), axis=0)
+    return np.nan_to_num(m, nan=0.0)
 
 def emin_map(gray_roi_min):
     se = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (25, 25))
