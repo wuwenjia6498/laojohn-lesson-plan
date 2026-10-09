@@ -26,3 +26,5 @@ metadata:
 5. 有封面页的详案是**两节**，页眉在 `sections[1]`；`sections[0]`（封面节）页眉刻意为空，探针只看 sec0 会误判「页眉丢了」。
 
 相关：[[docx-engine-title-heading-layout]]、[[picture-writing-generate-locally]]、[[downstream-shared-layer-and-token-facts]]
+
+**2026-10-09 入库插图裁成画面本身（用户要求）**：九本已去掉书脊/邻页/页边阴影，半页图裁掉空白，**图片不再统一 3:4**；新批次入库同样要裁（流程＝网格审图逐张定框，框记进各书 `_清洗记录.json`「裁切」）。跨页图中缝不处理。比例变了→已出的 PPT/配图版 docx 须重烘焙/重渲。（四）待补图后一起裁。
