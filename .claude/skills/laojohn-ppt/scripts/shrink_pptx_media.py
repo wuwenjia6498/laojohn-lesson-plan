@@ -51,9 +51,13 @@ def _md5(b):
     return hashlib.md5(b).hexdigest()
 
 
-def quantize_png(raw, colors):
-    """PNG 量化。带透明走 FASTOCTREE（MEDIANCUT 不支持 RGBA），否则 MEDIANCUT（质量更好）。"""
+def quantize_png(raw, colors, max_side=None):
+    """PNG 量化。带透明走 FASTOCTREE（MEDIANCUT 不支持 RGBA），否则 MEDIANCUT（质量更好）。
+    max_side：可选，先把长边缩到此值（形状尺寸按 EMU 记、srcRect 按比例记，缩像素不改版面）。"""
     im = Image.open(io.BytesIO(raw))
+    if max_side and max(im.size) > max_side:
+        im.load()
+        im.thumbnail((max_side, max_side), Image.LANCZOS)
     has_alpha = (im.mode in ("RGBA", "LA")
                  or (im.mode == "P" and "transparency" in im.info))
     if has_alpha:
@@ -65,7 +69,7 @@ def quantize_png(raw, colors):
     return buf.getvalue(), has_alpha
 
 
-def shrink(path, colors=256, min_gain=0.15, dry_run=False, sidecar=True):
+def shrink(path, colors=256, min_gain=0.15, dry_run=False, sidecar=True, max_side=None):
     src_size = os.path.getsize(path)
     with open(path, "rb") as f:
         origin_bytes = f.read()
@@ -87,7 +91,7 @@ def shrink(path, colors=256, min_gain=0.15, dry_run=False, sidecar=True):
             stat["n_png"] += 1
             stat["before"] += len(data)
             try:
-                new, has_alpha = quantize_png(data, colors)
+                new, has_alpha = quantize_png(data, colors, max_side)
                 if has_alpha:
                     stat["alpha"] += 1
                 # 只在确有收益时替换，避免反向增大
@@ -147,6 +151,8 @@ def main():
     ap.add_argument("--colors", type=int, default=256)
     ap.add_argument("--min-gain", type=float, default=0.15,
                     help="单张至少省这么多比例才替换（默认 0.15）")
+    ap.add_argument("--max-side", type=int, default=None,
+                    help="可选：PNG 长边先缩到此像素（读书会 AI 图 1536×2048 投屏用 1200 足够）；默认不缩")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--no-sidecar", action="store_true",
                     help="不写原件指纹（不推荐，会丢判重能力）")
@@ -161,7 +167,7 @@ def main():
             continue
         try:
             b, a, _ = shrink(p, args.colors, args.min_gain,
-                             args.dry_run, not args.no_sidecar)
+                             args.dry_run, not args.no_sidecar, args.max_side)
             tb += b
             ta += a
         except Exception as ex:

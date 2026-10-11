@@ -251,6 +251,54 @@ def add_image_grid(slide, x, y, w, h, suggestions, *, gap=None):
         add_image_placeholder(slide, cx, cy, cell_w, cell_h, sug)
 
 
+# ── 嵌图瘦身（2026-10-11）──────────────────────────────────────────
+# AI 抠图是 1536×2048 无损 PNG、每张 4–6MB，原样嵌入使读书会 v9 课件一份 20–50MB；
+# 投屏时它们最多显示到约 1000px 高。故嵌入前把「大 PNG」缩长边、量化 256 色，
+# 只替换嵌进去的字节：版面坐标与 crop 比例仍按原图像素算（等比缩放、比例不变），
+# 所以页面结构与形状位置逐一不变。小 PNG（logo、图标、截图）与 JPG 一律原样。
+EMBED_PNG_MIN_BYTES = 1_500_000   # 小于此值的 PNG 不动
+EMBED_MAX_SIDE = 1600             # 长边上限（1080p 投屏绰绰有余）
+_EMBED_CACHE = {}
+
+
+def _embed_source(image_path):
+    """返回交给 add_picture 的图源：大 PNG 给瘦身后的 BytesIO，其余原路径。
+
+    失败或无收益时退回原路径——宁可大，不可坏。同一张图同一次运行只算一次，
+    且量化结果确定，python-pptx 按内容去重，同图多页仍只占一份媒体。
+    """
+    try:
+        if not str(image_path).lower().endswith(".png"):
+            return image_path
+        size = os.path.getsize(image_path)
+        if size < EMBED_PNG_MIN_BYTES:
+            return image_path
+        key = (os.path.abspath(image_path), size, os.path.getmtime(image_path))
+        if key not in _EMBED_CACHE:
+            import io
+            from PIL import Image
+            with Image.open(image_path) as im:
+                im.load()
+                has_alpha = (im.mode in ("RGBA", "LA")
+                             or (im.mode == "P" and "transparency" in im.info))
+                im = im.convert("RGBA" if has_alpha else "RGB")
+                if max(im.size) > EMBED_MAX_SIDE:
+                    im.thumbnail((EMBED_MAX_SIDE, EMBED_MAX_SIDE), Image.LANCZOS)
+                # MEDIANCUT 不支持 RGBA，带透明须走 FASTOCTREE
+                q = im.quantize(colors=256, method=Image.FASTOCTREE if has_alpha else Image.MEDIANCUT)
+                buf = io.BytesIO()
+                q.save(buf, "PNG", optimize=True)
+            data = buf.getvalue()
+            _EMBED_CACHE[key] = data if len(data) < size * 0.85 else None
+        data = _EMBED_CACHE[key]
+        if data is None:
+            return image_path
+        import io
+        return io.BytesIO(data)
+    except Exception:
+        return image_path
+
+
 def add_logo(slide, logo_path, x, y, w, h=None):
     """添加 LOGO。h=None 时按图片原比例自动缩放（推荐，避免拉伸变形）。"""
     if logo_path and os.path.isfile(logo_path):
@@ -263,7 +311,7 @@ def add_logo(slide, logo_path, x, y, w, h=None):
 def add_image_or_skip(slide, image_path, x, y, w, h):
     """安全添加图片：文件不存在时静默跳过。"""
     if image_path and os.path.isfile(image_path):
-        slide.shapes.add_picture(image_path, x, y, w, h)
+        slide.shapes.add_picture(_embed_source(image_path), x, y, w, h)
 
 
 def _crop_to_fill(pic, target_w, target_h):
@@ -340,7 +388,7 @@ def add_image_cover(slide, x, y, w, h, image_path, *,
                     align="center", anchor="middle", line_spacing=1.4)
         return None, []
 
-    pic = slide.shapes.add_picture(image_path, x, y, width=w, height=h)
+    pic = slide.shapes.add_picture(_embed_source(image_path), x, y, width=w, height=h)
     _crop_to_fill(pic, w, h)
     if rounded:
         _round_picture(pic, radius_frac)
@@ -409,7 +457,7 @@ def add_picture_fit(slide, image_path, x, y, w, h, *, anchor="br",
         py = y + h - dh
     else:
         py = y + (h - dh) // 2
-    pic = slide.shapes.add_picture(image_path, Emu(int(px)), Emu(int(py)), Emu(dw), Emu(dh))
+    pic = slide.shapes.add_picture(_embed_source(image_path), Emu(int(px)), Emu(int(py)), Emu(dw), Emu(dh))
     if box != (0, 0, iw, ih):
         pic.crop_left = box[0] / iw
         pic.crop_top = box[1] / ih
