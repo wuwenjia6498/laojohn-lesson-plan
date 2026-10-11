@@ -1,6 +1,6 @@
 ---
 name: reading-sheet-low-grade-lively-1008
-description: 低年级(L1–L2)阅读单要活泼、别一律表格；radial 模板与 profile 可选 color/note 由此而来
+description: 阅读单别一律表格(1008低年级→1011扩到L3)；详案点名的图形工具用专用模板；radial/profile color/note、timeline fields 由此而来
 metadata:
   type: feedback
 ---
@@ -9,5 +9,7 @@ metadata:
 
 **Why:** 表格/棕色调是给中高年级的版式，低年级学生面对整页格子没兴趣，也不适合他们边写边画。
 
-**How to apply:** L1–L2 的书出阅读单时，先挑非表格版式——中心+分支导图用 `radial`（1008 新增，亮色卡片+中心圆）、逐日记录用 `facets` 逐卡给亮色 `color`、需要写一写画一画的用 `profile`（可选 `color` 上彩）；table 只作兜底。L3 以上照旧。
+**How to apply:** L1–L2 的书出阅读单时，先挑非表格版式——中心+分支导图用 `radial`（1008 新增，亮色卡片+中心圆）、逐日记录用 `facets` 逐卡给亮色 `color`、需要写一写画一画的用 `profile`（可选 `color` 上彩）；table 只作兜底。
+
+**1011 扩到 L3（稻草人）**：用户反馈「阅读单太单一，基本以表格为主，流程图，维恩图，思辨阅读单调整下形式」。详案就算写了「阅读单上我们用表格来填」，**名为流程图/维恩图/思辨单的照样用专用模板**（timeline／venn／stance），那句话只说上屏形式。流程图每站要写多样东西时用 timeline 的可选 `nodes[].fields`（1011 新增，零影响已回归）；stance 的 `verdict.lines: 0` 此前 HTML 侧不认（`||`→`??` 已修）。只有纯清单类（逐日记录、十二篇各说一句）才留 table。
 附带修了 profile 模板静默丢弃 `note` 的老问题——神笔马良心愿卡的 note 以前从没印出来，manifest 已把画框高 760→700 以便 note 放得下，但其存量 PDF 未重渲。相关：[[downstream-shared-layer-and-token-facts]]

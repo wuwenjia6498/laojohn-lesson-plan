@@ -175,7 +175,7 @@ function finishVerdict(d, sides){
     }
     vd.appendChild(lb);
     const box = document.createElement('div'); box.className = 'v-lines';
-    for(let k=0;k<(v.lines || 3);k++) box.appendChild(document.createElement('div'));
+    for(let k=0;k<(v.lines ?? 3);k++) box.appendChild(document.createElement('div'));
     vd.appendChild(box);
   } else { vd.style.display = 'none'; }
 }

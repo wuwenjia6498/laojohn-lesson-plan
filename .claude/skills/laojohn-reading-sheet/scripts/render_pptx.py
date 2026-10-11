@@ -721,9 +721,11 @@ def render_timeline(slide, d):
     header(slide, d, title_px=64, title_size=24, sub_px=98)
     nodes = d.get("nodes", [])
     n = len(nodes)
-    AX_Y, X0, X1 = 200, 64, 1059
+    X0, X1 = 64, 1059
+    # 可选 fields（每站多栏书写）：给了才把轴上移；不给则轴位与变换逐字不变
+    AX_Y = d.get("axis_y") or (96 if any(isinstance(nd.get("fields"), list) for nd in nodes) else 200)
     k = (PAGE_W_PX - 24) / 1123.0
-    tf = TF(sx=k, sy=k, tx=12, ty=210 - k * 142)
+    tf = TF(sx=k, sy=k, tx=12, ty=210 - k * (AX_Y - 58))
     PALETTE = ["#4F86C6", "#D9883A", "#C49B3E", "#6FA85A", "#4E8C7D", "#5B7FA6", "#A8504F"]
     add_line(slide, X0, AX_Y, X1, AX_Y, "9A937F", 2.5, tf=tf)
     add_triangle(slide, X1, AX_Y - 9, 18, 18, "9A937F", rotation=90, tf=tf)
@@ -742,6 +744,16 @@ def render_timeline(slide, d):
         if val:
             add_text(slide, bx, by + 6, cw, 200, "\n".join(val), size=14,
                      color="3A3A33", align="center", line_spacing=1.3, tf=tf)
+        elif isinstance(nd.get("fields"), list):
+            yy = by + 6
+            for f in nd["fields"]:
+                add_text(slide, bx, yy, cw, 22, f.get("label", ""), size=14, bold=True,
+                         color=color.lstrip("#"), tf=tf)
+                yy += 22
+                for _ in range(f.get("lines", 1)):
+                    yy += 44
+                    add_line(slide, bx, yy, bx + cw, yy, "CFC8BA", 1.2, tf=tf)
+                yy += 14
         else:
             rows = nd.get("lines", 7)
             for kk in range(rows):

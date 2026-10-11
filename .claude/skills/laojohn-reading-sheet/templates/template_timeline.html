@@ -16,6 +16,7 @@
   .l-foot { position: absolute; bottom: 26px; left: 0; width: 100%; text-align: left; font-size: 14px; color: #9A937F; padding: 0 60px; }
   .chip { font-size: 14px; font-weight: 700; fill: #FFFFFF; }
   .ftxt { font-size: 14px; fill: #3A3A33; }
+  .flab { font-size: 14px; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -54,7 +55,7 @@ let __AO = 0;
 function mark(e){ e.setAttribute('data-answer','1'); e.setAttribute('data-order', __AO++); return e; }
 const PALETTE = ["#4F86C6","#D9883A","#C49B3E","#6FA85A","#4E8C7D","#5B7FA6","#A8504F"];
 
-const AX_Y = 200, X0 = 64;
+let AX_Y = 200; const X0 = 64;
 let X1 = 1059;
 // 可选 portrait_rotate：纸改竖版 A4（与其余单子同叠打印），内容画布整体逆时针转 90°，logo 留在画布外保持正向。
 // 默认不开，横版行为逐字不变。转后画布右下角落在纸面右上角，故轴右端略收，给正向 logo 让位。
@@ -81,6 +82,8 @@ function render(){
   const svg = document.getElementById('svg');
   const nodes = d.nodes || [];
   const n = nodes.length;
+  // 可选 fields（每站多栏书写）：给了才把轴上移腾出书写区；不给则轴位逐字不变
+  if (d.axis_y) AX_Y = d.axis_y; else if (nodes.some(nd=>Array.isArray(nd.fields))) AX_Y = 96;
 
   // 轴线 + 右箭头
   svg.appendChild(el("line",{x1:X0, y1:AX_Y, x2:X1, y2:AX_Y, stroke:"#9A937F", "stroke-width":2.5}));
@@ -114,6 +117,14 @@ function render(){
       let yy = by + 10;
       val.forEach(item=>{ wrap(String(item), Math.max(6, Math.floor(cw/15))).forEach(ln=>{ const t=el("text",{x:cx, y:yy, class:"ftxt", "text-anchor":"middle"}); t.textContent=ln; g.appendChild(t); yy+=20; }); yy+=6; });
       svg.appendChild(g);
+    } else if (Array.isArray(nd.fields)){
+      let yy = by + 6;
+      nd.fields.forEach(f=>{
+        const lt = el("text",{x:bx, y:yy + 14, class:"flab", fill:color}); lt.textContent = f.label || ''; svg.appendChild(lt);
+        yy += 22;
+        for(let k=0;k<(f.lines || 1);k++){ yy += 44; svg.appendChild(el("line",{x1:bx, y1:yy, x2:bx+cw, y2:yy, stroke:"#CFC8BA", "stroke-width":1.2})); }
+        yy += 14;
+      });
     } else {
       const rows = nd.lines || 7;
       for(let k=0;k<rows;k++){ const ly = by + 22 + k*46; svg.appendChild(el("line",{x1:bx, y1:ly, x2:bx+cw, y2:ly, stroke:"#CFC8BA", "stroke-width":1.2})); }
