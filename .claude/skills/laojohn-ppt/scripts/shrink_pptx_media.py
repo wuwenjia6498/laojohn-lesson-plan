@@ -69,7 +69,8 @@ def quantize_png(raw, colors, max_side=None):
     return buf.getvalue(), has_alpha
 
 
-def shrink(path, colors=256, min_gain=0.15, dry_run=False, sidecar=True, max_side=None):
+def shrink(path, colors=256, min_gain=0.15, dry_run=False, sidecar=True, max_side=None,
+           min_bytes=0):
     src_size = os.path.getsize(path)
     with open(path, "rb") as f:
         origin_bytes = f.read()
@@ -87,7 +88,8 @@ def shrink(path, colors=256, min_gain=0.15, dry_run=False, sidecar=True, max_sid
         if i.filename.startswith(MEDIA_PREFIX):
             origin_media[i.filename] = _md5(data)
         if (i.filename.startswith(MEDIA_PREFIX)
-                and i.filename.lower().endswith(".png")):
+                and i.filename.lower().endswith(".png")
+                and len(data) >= min_bytes):
             stat["n_png"] += 1
             stat["before"] += len(data)
             try:
@@ -153,6 +155,8 @@ def main():
                     help="单张至少省这么多比例才替换（默认 0.15）")
     ap.add_argument("--max-side", type=int, default=None,
                     help="可选：PNG 长边先缩到此像素（读书会 AI 图 1536×2048 投屏用 1200 足够）；默认不缩")
+    ap.add_argument("--min-bytes", type=int, default=0,
+                    help="可选：只处理不小于此字节数的 PNG（对齐 helpers 嵌图规则用 1500000）；默认全处理")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--no-sidecar", action="store_true",
                     help="不写原件指纹（不推荐，会丢判重能力）")
@@ -167,7 +171,8 @@ def main():
             continue
         try:
             b, a, _ = shrink(p, args.colors, args.min_gain,
-                             args.dry_run, not args.no_sidecar, args.max_side)
+                             args.dry_run, not args.no_sidecar, args.max_side,
+                             args.min_bytes)
             tb += b
             ta += a
         except Exception as ex:
