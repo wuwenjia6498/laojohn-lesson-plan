@@ -53,7 +53,9 @@ CUT_BOX = (0.585, 0.215, 0.415, 0.785)
 SCENE_BOX = (0.605, 0.395, 0.355, 0.510)
 
 Q_LADDER = (24, 22, 20, 18)             # 问题字号梯；答案比问题小 2pt
-MIN_SIZE_WITH_IMAGE = 18
+MIN_SIZE_WITH_IMAGE = 16
+# 有图时文字放不下，先往下降字号保住图（2026-10-14 用户：没图的页调小字号，图还是要插）
+Q_LADDER_WITH_IMAGE = Q_LADDER + (17, 16)
 NO_TITLE_BODY_Y = 0.275                 # 无标题页：正文从原标题位起
 
 
@@ -85,10 +87,41 @@ def _band(slide, th, top=BAND_Y, bottom=BAND_B):
 
 
 def _page_image(page, ctx):
-    """本页可用真图的绝对路径（无/不存在 → None）。"""
+    """本页可用真图的绝对路径（无/不存在 → None）。场景图先裁掉四周白边（见 _trim_white）。"""
     p = resolve_image(ctx, getattr(page, "image_path", ""))
     import os
-    return p if (p and os.path.isfile(p)) else None
+    if not (p and os.path.isfile(p)):
+        return None
+    return p if image_has_alpha(p) else _trim_white(p)
+
+
+def _trim_white(path, thresh=236, pad=0.03, min_gain=0.08):
+    """裁掉场景图四周的大片白底，让画面本身撑满图框（2026-10-14 用户：图不能硬挤在角落）。
+
+    AI 场景图常是白底小插画，画面只占图的一半，原样放进框里就缩成一小块。只在白边
+    能省下 ≥8% 面积时才裁；裁后留 3% 白边，产物缓存进系统临时目录、不碰原图。
+    原书扫描件纸色偏暗、四周无大片纯白，基本不触发。
+    """
+    import hashlib, os, tempfile
+    from PIL import Image
+    with Image.open(path) as im:
+        rgb = im.convert("RGB")
+        w, h = rgb.size
+        mask = rgb.convert("L").point(lambda v: 255 if v < thresh else 0)
+        box = mask.getbbox()
+        if not box:
+            return path
+        x0, y0, x1, y1 = box
+        if (x1 - x0) * (y1 - y0) > w * h * (1 - min_gain):
+            return path
+        px, py = int(w * pad), int(h * pad)
+        box = (max(0, x0 - px), max(0, y0 - py), min(w, x1 + px), min(h, y1 + py))
+        key = hashlib.md5((path + repr(box) + str(os.path.getmtime(path))).encode("utf-8")).hexdigest()[:16]
+        out = os.path.join(tempfile.gettempdir(), "laojohn_v9_trim", key + ".jpg")
+        if not os.path.isfile(out):
+            os.makedirs(os.path.dirname(out), exist_ok=True)
+            rgb.crop(box).save(out, quality=92)
+        return out
 
 
 def _place_image(slide, path, box=None, anchor=None, rounded=True):
@@ -152,14 +185,14 @@ def _layout_for(page, img):
     land = _aspect(img) >= LANDSCAPE_RATIO
     if page.num % 2 == 1:               # 奇数页图在右，偶数页图在左
         if land:
-            return _lay("right_bleed", band=(0.0, 0.60, BAND_Y, BAND_B),
-                        img_box=(0.60, 0.30, 0.40, 0.70), img_anchor="br", rounded=False,
+            return _lay("right_bleed", band=(0.0, 0.58, BAND_Y, BAND_B),
+                        img_box=(0.575, 0.24, 0.425, 0.76), img_anchor="br", rounded=False,
                         title_w=0.55)
         return _lay("right", band=(0.0, 0.61, BAND_Y, BAND_B),
                     img_box=(0.635, 0.19, 0.335, 0.765), img_anchor="c", title_w=0.55)
     if land:                            # 横图在左：与右侧对称，贴左下出血
         return _lay("left_bleed", band=(0.40, 1.0, BAND_Y, BAND_B), gray=True, text_x=0.43,
-                    img_box=(0.0, 0.30, 0.40, 0.70), img_anchor="bl", rounded=False,
+                    img_box=(0.0, 0.24, 0.415, 0.76), img_anchor="bl", rounded=False,
                     title_x=0.43, title_w=0.54)
     return _lay("left", band=(0.40, 1.0, BAND_Y, BAND_B), gray=True, text_x=0.43,
                 img_box=(0.03, 0.19, 0.335, 0.765), img_anchor="c", title_x=0.43, title_w=0.54)
@@ -432,7 +465,7 @@ def _render_points(slide, page, ctx, th):
         avail = bottom - y0 - (body_h + Pt(14) if body_h else 0)
         if style or not page.bullets:
             return col_w, body_h, None, avail
-        size = _fit_size(items, col_w, avail)
+        size = _fit_size(items, col_w, avail, Q_LADDER_WITH_IMAGE if with_img else Q_LADDER)
         return col_w, body_h, size, avail
 
     with_img = bool(img)
@@ -534,8 +567,11 @@ def render_quote(slide, page, ctx, th):
     _theme_ctx(slide, page, ctx, th)
     img = _page_image(page, ctx)
 
+    wide = bool(img) and not image_has_alpha(img) and _aspect(img) >= LANDSCAPE_RATIO
+
     def geom(with_img):
-        bg_w = 0.56 if with_img else 0.88
+        # 横幅场景图要占得开：引文框收到 0.50，右侧留 0.46 给图（2026-10-14 用户：图不能挤在角落）
+        bg_w = (0.50 if wide else 0.56) if with_img else 0.88
         return bg_w, pct_x(bg_w - 0.08), pct_y(0.50)
 
     with_img = bool(img)
@@ -550,7 +586,12 @@ def render_quote(slide, page, ctx, th):
     bg = add_rect(slide, pct_x(0.06), pct_y(0.22), pct_x(bg_w), pct_y(0.70), COLOR_BG_QUOTE)
     _disable_shape_effects(bg)
     if with_img:                        # 图移到书页底外的白底上、放大
-        _place_image(slide, img, None if image_has_alpha(img) else (0.64, 0.22, 0.33, 0.70))
+        if image_has_alpha(img):
+            _place_image(slide, img)
+        elif _aspect(img) >= LANDSCAPE_RATIO:   # 横幅场景图贴右下出血、放大，不缩在角落
+            _place_image(slide, img, (0.575, 0.20, 0.425, 0.80), "br", rounded=False)
+        else:
+            _place_image(slide, img, (0.64, 0.20, 0.33, 0.74))
     if page.title:
         add_textbox(slide, pct_x(0.10), pct_y(0.25), pct_x(bg_w - 0.06), pct_y(0.10),
                     page.title, font=FONT_TITLE, size=26, color=COLOR_TITLE, bold=True,

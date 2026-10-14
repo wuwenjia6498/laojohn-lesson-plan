@@ -128,6 +128,7 @@ description: 把"老约翰深度阅读读书会"风格的课案详案(.md)按教
     （默认输出同名 .docx）。md 是事实源、docx 是渲染产物；后续若改讲稿务必重转。
 6. **回标详案页标（必做 · 2026-07-18 用户拍板）**：按 `references/detail-pageback-annotation.md`，依据中间稿页序 + 讲稿回溯，把 `〖PPT 第N页 · 页型 · 眉标〗` 页标**就地内联回注**进详案（备课交叉对照用）。`第N页`=课件实际页码（**封面=第1页、正文从第2页起**，对齐课件系统翻页显示；封面/END 不标）。回注幂等（先清旧标再重插）。**PPT 链每次产出/重产中间稿后都要执行，不等用户点名**；回注改动了详案 .md，**必须随后重渲详案 .docx**：读书会详案跑 `laojohn-lesson-plan/assets/md_to_laojohn_docx.py` 一步即可；**写作课详案是两步——共享引擎（带 `--header-left/--header-right`）＋ `laojohn-lesson-plan/assets/style_front_page.py`**，漏第二步会静默把首页打回朴素版式（命令见 `laojohn-ppt/SKILL.md` 第 3 步）。docx 被 Word/WPS 占用报 PermissionError 时，请用户关闭文档后重跑。
 7. **自检**：跑下方"产出前自检清单"。
+7b. **配图（默认自动 · 2026-10-14 用户定）**：中间稿定稿后，原书插图与书封先 `reading_deck.py backfill` 回填；**其余缺图页直接调 AiHubMix 生图，不询问用户**，链路与验收口径见 `references/image-suggestion.md` §三点五。回填后交 `laojohn-ppt` 重烘，**逐页看截图**，图挤在角落或压字的页回中间稿调（拆页／改 `形=`／长引文改「无」）。
 8. **交付**：依次产出 N 份中间稿 + N 份讲稿（.md + .docx 各 N，N = 课时数），另交回注页标后的详案（.md + 重渲的 .docx）。
 
 ## 核心约束（违反即返工）

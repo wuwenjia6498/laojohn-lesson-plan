@@ -51,6 +51,7 @@
 整区（跨课次通则＋规则体例）已外移 → **[看图写话线记忆](memory-index-picture-writing.md)**，排新课次或出图前打开；该线当前无未决项。
 ## 读书会详案（lesson-plan）
 - [读书会v9 PPT体积大·已根治(1011)](reading-ppt-v9-media-size-1011.md) — 病因=1536×2048无损PNG抠图;helpers._embed_source嵌图前缩1600+量化,九份回归结构全同;不必再事后shrink;大头儿子/神笔马良已事后瘦身(重烘会连版式一起变,别为瘦身重烘)
+- ⚠[读书会PPT缺图默认自动生图·不问(1014)](reading-ppt-auto-ai-images-1014.md) — 缺原书插图的页直接跑reading_deck全链，验收由出图人目视；插图进页后版式跟着调，不许挤角落
 - ⚠[读书会PPT通用问题四条(1008)](reading-ppt-general-feedback-1008.md) — 参考答案只上答案不带「就算数/都算对」;上屏原文带页码(只搬详案);填写表白底灰格线;`列宽：`按预估填写量;build_ppt末尾「中间稿机检」非零须改
 - ⚠[读书会PPT新样式v9·学人工优化版(1006)](reading-ppt-v9-human-optimized-1006.md) — 写`主题色：`才走新样式；每页大图+底带+问答拆框+卡片版式；写全名完整句；配图链路reading_deck.py；AI图不入库；答案改主题色(推翻红字)
 - ⚠[回归读书会·语体边界(1005)](reading-line-return-style-boundary-1005.md) — 延续散文化口语亲切(样本一至五原文锚定);写作线文风/润色/机检/MEMORY写作条目只有已进lesson-plan规则的才适用;Pass B按本线rubric;试写稻草人做基线
