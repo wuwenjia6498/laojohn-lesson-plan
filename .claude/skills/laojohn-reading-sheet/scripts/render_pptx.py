@@ -1470,7 +1470,61 @@ def render_radial(slide, d):
     footer(slide, d, key="footer", y=row_y[-1] + card_h + 18)
 
 
+def render_tree(slide, d):
+    """树形图：根节点 → 总线 → N 支并排垂下。搬 template_tree.html 的像素常量（两边须同步）。"""
+    header(slide, d, title_px=74, title_size=23, sub_px=116)
+    OFF = 150
+    PALETTE = ["#5B8C7B", "#C18A3A", "#5B7FA6", "#8268A0", "#A8634F", "#7A8C3A"]
+    MARGIN, GAP = 34, 14
+    ROOT_Y, ROOT_W, ROOT_H = 40, 380, 66
+    BUS_Y, COL_TOP, COL_BOTTOM, LINE_GAP, STROKE = 146, 182, 872, 56, "A8957A"
+    branches = d.get("branches", [])
+    n = len(branches) or 1
+    colW = (794 - 2 * MARGIN - (n - 1) * GAP) / n
+    root_color = (d.get("color") or "#6B5442").lstrip("#")
+    # 根节点
+    add_round_rect(slide, 397 - ROOT_W / 2, ROOT_Y + OFF, ROOT_W, ROOT_H, radius=0.18, fill=root_color)
+    root_txt = d.get("root", "") + (("\n" + d["root_sub"]) if d.get("root_sub") else "")
+    add_text(slide, 397 - ROOT_W / 2 + 10, ROOT_Y + OFF, ROOT_W - 20, ROOT_H, root_txt,
+             size=19, bold=True, color="FFFFFF", align="center", anchor="middle", line_spacing=1.15)
+    per_line = max(4, int((colW - 18) / 15.5))
+    head_rows = max([1] + [min(3, math.ceil(len(b.get("header", "")) / per_line)) for b in branches])
+    HEAD_H = 20 + head_rows * 21
+    cxs = [MARGIN + i * (colW + GAP) + colW / 2 for i in range(len(branches))]
+    add_line(slide, 397, ROOT_Y + ROOT_H + OFF, 397, BUS_Y + OFF, STROKE, 2)
+    if len(cxs) > 1:
+        add_line(slide, cxs[0], BUS_Y + OFF, cxs[-1], BUS_Y + OFF, STROKE, 2)
+    add_oval(slide, 397 - 4.5, BUS_Y - 4.5 + OFF, 9, 9, fill=STROKE)
+    for i, b in enumerate(branches):
+        x, cx = MARGIN + i * (colW + GAP), cxs[i]
+        color = (b.get("color") or PALETTE[i % len(PALETTE)]).lstrip("#")
+        add_line(slide, cx, BUS_Y + OFF, cx, COL_TOP + OFF, STROKE, 2)
+        add_oval(slide, cx - 4, BUS_Y - 4 + OFF, 8, 8, fill=STROKE)
+        add_round_rect(slide, x, COL_TOP + OFF, colW, COL_BOTTOM - COL_TOP, radius=0.04,
+                       fill=_mix_white(color, 0.07), line=color, line_w=1.5)
+        add_rect(slide, x, COL_TOP + OFF, colW, HEAD_H, fill=color)
+        add_text(slide, x + 8, COL_TOP + OFF, colW - 16, HEAD_H, b.get("header", ""),
+                 size=15, bold=True, color="FFFFFF", align="center", anchor="middle", line_spacing=1.15)
+        y = COL_TOP + HEAD_H + 10
+        label = b["label"] if b.get("label") is not None else d.get("label", "")
+        if label:
+            rows = min(3, math.ceil(len(label) / max(4, int((colW - 24) / 12.8))))
+            add_text(slide, x + 12, y + 2 + OFF, colW - 24, rows * 17 + 4, label,
+                     size=12.5, color="8A8268", line_spacing=1.15)
+            y += 8 + rows * 17
+        first_y = y + LINE_GAP - 8
+        auto = max(1, int((COL_BOTTOM - 14 - first_y) // LINE_GAP) + 1)
+        lines = b.get("lines", d.get("lines", auto))
+        for k in range(lines):
+            ly = first_y + k * LINE_GAP
+            if ly > COL_BOTTOM - 10:
+                break
+            add_line(slide, x + 12, ly + OFF, x + colW - 12, ly + OFF, _mix_white(color, 0.45), 1.2, dash="dash")
+    footer(slide, d, key="footer", y=1064)
+
+
 RENDERERS = {
+    "tree": render_tree,
     "table": render_table, "venn": render_venn, "ladder": render_ladder,
     "logic": render_logic, "voyage": render_voyage,
     "story_mountain": render_story_mountain, "fishbone": render_fishbone,
