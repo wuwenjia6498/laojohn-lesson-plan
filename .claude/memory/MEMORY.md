@@ -105,6 +105,7 @@
 - [阅读单PPTX文字挤压根因(1009)](reading-sheet-pptx-text-overlap-1009.md) — PDF正常≠PPTX正常;定高文本框低估雅黑行高;voyage棕框/deduce卡头已修;判版式用COM按A4导出别用shot_assets
 - [阅读单别全表格(1008低年级·1011扩到L3)](reading-sheet-low-grade-lively-1008.md) — 流程图/维恩图/思辨单用专用模板(详案说「用表格填」也照用);L1–L2优先radial/facets/profile;table只留纯清单
 - [阅读指南拓展栏点名具体书/影片](reading-guide-extension-concrete-titles.md) — 仅此栏放宽红线,吃不准就不写
+- ⚠[拓展阅读不推自家课表书·须适龄(1014)](extension-reading-exclude-own-catalog-1014.md) — 去年的树(L2)/安徒生童话已在册,快乐王子L5不给L3;仓内无完整课表,交付提醒用户核对
 ## 未决事项与交付风险（做完即删）
 - **备课视频首批两支已出片(0921)**:五上四 17.8分钟为准片(外部终稿画面、增量39%、机检FAIL0、字幕零违规、零漂移);三上一 16.4分钟素材薄;六上四等PPT定稿;张视角二审三条已落地(bridge废除/locate与do重合/空泛点题词表);⚠闸门A记的是「用户指示直接出片(未逐页通读)」 — [详情](lesson-video-line-0921.md)
 - **仓库瘦身已完成(0920)**：759.67→303.41 MiB；**远端备份分支 1005 已删**（GitHub 网页体积会随之回落）。⚠ 新克隆仍必跑两条装机命令(core.hooksPath＋负向 refspec，见 docs\协作同步说明.md)；salvage tag 待确认无用再删 — [详情](repo-slimming-plan-0920.md)
