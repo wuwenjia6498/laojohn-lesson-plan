@@ -42,7 +42,7 @@
 - [作文批改工具(0818立项)](writing-correction-tool-0818.md) — 给加盟商不做skill;判据从详案抽标准包JSON;主模型doubao-2-1-pro(必带thinking=disabled);闸门verified_by_human;0921经真稿实测已改到第七版栏目与判据(⚠「立得住」不禁·成语误用排第一·修辞改法禁另造喻体·起手式靠程序轮换角度治不住提示词);⚠改提示词必跑run_regression
 - [批改工具已部署Vercel(0824)](writing-correction-tool-vercel-deploy-0824.md) — 入口=部署根index.py不能放api/;.vercelignore挡config.json;正式地址grader.skyline666.top;⚠validate全绿≠包对
 - [⚠配套三侧文风0915与详案线同步换靶](writing-materials-retarget-0915.md) — 生成读三侧定稿样本不读对照表;polish_materials.py机检D每份必跑(同一张polish_rules,禁副本);存量42份已过一轮;样本卡=现行json快照,--check-exemplars防漂移(抄样本抄现行文件别抄git diff);⚠配套--all --dry-run是共享规则表第二回归面,首跑照出4条排除漏洞
-- ⚠**改配套共享模板只加可选字段、不动默认值(0916–0922)**:45份共用`template_student.html`,改它必跑零影响回归(重渲存量逐字相等);PPT稿纸页是截图,配套一改即过期 — [详情](materials-template-optional-fields-0922.md)·[源](manhua-laoshi-5a-lesson-state.md)
+- ⚠**改配套共享模板只加可选字段、不动默认值(0916–0922)**:45份共用`template_student.html`,改它必跑零影响回归(重渲存量逐字相等);⚠0928有意破例改过一次默认值(构思表格线--plan-rule调深);PPT稿纸页是截图,配套一改即过期 — [详情](materials-template-optional-fields-0922.md)·[源](manhua-laoshi-5a-lesson-state.md)
 - [⚠写作课单元海报工具(0920立项)](writing-poster-tool-0920.md) — 独立skill;⚠0928文案三硬线(卡①现象→问题→解法·禁告别XX·禁半截指代);**出图前先立意推敲**:AI给2-3方向(带立意·画风·元素数·风险)→用户拍板→才写subject,留痕_brief;⚠比喻题禁画喻体实体;⚠立意过关≠方向过关(多场景天然碎);**排新海报前整份打开**
 - [配套json富文本标记只有部分字段解析(0907)](writing-materials-richtext-field-scope.md) — 教师materials/家长oneline走textContent,写{b}会印成(b);⚠溢出/页数/Type3三道机检全绿也抓不到,渲完正则扫一遍PDF文本
 - [手改只改HTML必被重渲冲掉(0821)](writing-materials-handedits-lost-on-rerender.md) — 文字改动一律回写_data.json;⚠仓内9课json仍不含那批手改

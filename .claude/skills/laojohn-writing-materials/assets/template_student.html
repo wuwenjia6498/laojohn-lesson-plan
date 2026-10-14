@@ -14,6 +14,10 @@
     --brown-deep:#7D7468;
     --brown-cell:#EFEBE3;
     --brown-line:#C9C0B0;
+    /* 构思表/提纲表的格线单列一个变量：#C9C0B0 压在 --brown-cell(#EFEBE3) 的行名列上
+       对比不足，打印出来相邻两行会连成一块（四上五「我写的这件事／时间、地点、在场的人」
+       被当成同一栏），故只把这两张表的格线调深，不动其余边框用的 --brown-line。 */
+    --plan-rule:#B0A48F;
     --zebra:#F7F5F0;
     --blue-head:#5B7A99;
     --blue-soft:#E7EEF3;
@@ -69,9 +73,9 @@
   table{width:100%;border-collapse:collapse;font-size:12px;}
   .plan th{
     background:var(--brown-head);color:#fff;font-weight:700;padding:7px 9px;text-align:left;
-    font-size:12px;border:1px solid var(--brown-line);
+    font-size:12px;border:1px solid var(--plan-rule);
   }
-  .plan td{border:1px solid var(--brown-line);padding:0;vertical-align:top;}
+  .plan td{border:1px solid var(--plan-rule);padding:0;vertical-align:top;}
   .plan .rowlabel{
     background:var(--brown-cell);font-weight:700;color:var(--brown-deep);padding:9px;width:34%;
     font-size:11.5px;line-height:1.45;
