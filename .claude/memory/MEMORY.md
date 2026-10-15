@@ -3,6 +3,7 @@
 ## 用户偏好
 - 中文回复;简洁直接不堆客套;重要决策先列选项让用户拍板;视觉迭代常用截图反馈
 - **问「有没有做到X」时是要判断、不是指出问题**——先自己核查给结论,别把判断权反问回去
+- ⚠[编辑器未保存的手改会被我冲掉(1015)](editor-unsaved-edits-lost-1015.md) — 我只见磁盘;Cursor已开自动保存;用户开着的文件动手前提醒先保存;docx被锁先比对再重渲
 ## 跨技能硬约束（三条详案线通用）
 **动笔写任何详案前必读**：[约束分层](constraint-layering-generation-vs-coldreview-0804.md) · [机构课场景](venue-is-institution-not-school.md) · [真实情境官方锚点](real-situation-official-anchor-first.md)
 - [约束分层:措辞层后移到冷审PassB(0804)](constraint-layering-generation-vs-coldreview-0804.md) — 判据=修这处要不要动教学设计;生成只读简报+正样本;冷审PassA结构/PassB行文各派fresh agent;⚠改规则文件勿破tone_gate四解析锚｜[首次实测四项全过](layering-first-measurement-0804.md)
