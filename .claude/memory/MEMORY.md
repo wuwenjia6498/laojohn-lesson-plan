@@ -1,5 +1,5 @@
 # Project Memory: laojohn-lesson-plan
-> **索引维护规则(0818立·0901补)**:①新增课次/单本书状态→进[归档索引](memory-index-archived-deliveries.md),不占索引行;②横向通则→各线「跨课次通则」块,不埋进课次条目;③未决/交付风险→「未决事项」块,做完即删;④优先级集中在各区头行;⑤行数≤150、单条钩子≤200字符、细节下沉主题文件,超限先归档,机检挂SessionStart hook自动跑;⑥CLAUDE.md只写现行规则,来历/日期/旧口径进记忆;压缩前快照=[1004](memory-index-archive-20261004.md)
+> **索引维护规则(0818立·0901补)**:①新增课次/单本书状态→进[归档索引](memory-index-archived-deliveries.md),不占索引行;②横向通则→各线「跨课次通则」块,不埋进课次条目;③未决/交付风险→「未决事项」块,做完即删;④优先级集中在各区头行;⑤行数≤150、单条钩子≤200字符、细节下沉主题文件,超限先归档,机检挂SessionStart hook自动跑;⑥CLAUDE.md只写现行规则,来历/日期/旧口径进记忆;压缩前快照=[1015](memory-index-archive-20261015.md)
 ## 用户偏好
 - 中文回复;简洁直接不堆客套;重要决策先列选项让用户拍板;视觉迭代常用截图反馈
 - **问「有没有做到X」时是要判断、不是指出问题**——先自己核查给结论,别把判断权反问回去
@@ -79,13 +79,12 @@
 ## 引擎与下游物料
 - [直出PPT完成即入库并push(0926)](direct-ppt-commit-and-push-0926.md) — 给同事在GitHub上看;长期授权不必再问;直出用图不入库;打包收直出件PPT(认文档属性标记)
 - **写作课PPT仓内直出(0926)**:重写详案的课次走直出(direct_build.py＋每课构建脚本),外部件添图收尾用finalize_external.py;讲评环节不进课件;六上五各版本存放位置与页标待定见详情 — [详情](writing-ppt-direct-build-pilot-0926.md)
-- [claude.ai 旧 skill 快照已删净(0920)](skill-snapshots-cloud-cleared-0920.md) — 三份 06 月快照连同 daily-post/picture-book-recommend 用户手动删除(有意);重名冲突根除,CLAUDE.md §5 警告块已压缩;⚠误用自查点(产物落 写作课输出\ 或文件名缺-第N单元-)日后再传 skill 仍管用
 **碰引擎/共享件前必读**：[下游六件抽共享层](downstream-shared-layer-and-token-facts.md)（改真源照该条回归法）· [0727上下文瘦身收官](context-engineering-slimdown-0727.md)（细节已下沉references别抄回）
-- [手绘风格库274条全改九项+按用途标签(0924)](handdraw-library-retune-0924.md) — style_tags.json封闭词表(媒介/年龄感/题材/基调/色彩/人物造型+写作课招生档);读书会/绘本按书气质组合筛;特征只写画风不写内容;gpt-image照抄参考图服装改特征治不了
-- [课件配图工具接手绘风格库+缺省gpt-image(0924)](imgtool-handdraw-gptimage-0924.md) — 解析抽成与海报共用的handdraw_style.py;风格卡`手绘编号`走compose();通道钉project.通道、老项目按已有图目录认(七个全gemini);⚠规则库在gpt-image上未重验
+- [手绘风格库274条全改九项+按用途标签(0924)](handdraw-library-retune-0924.md) — style_tags.json封闭词表;读书会/绘本按书气质组合筛;特征只写画风不写内容;gpt-image照抄参考图服装改特征治不了
+- [课件配图工具接手绘风格库+缺省gpt-image(0924)](imgtool-handdraw-gptimage-0924.md) — 与海报共用handdraw_style.py;风格卡`手绘编号`走compose();通道钉project.通道、老项目按已有图目录认;⚠规则库在gpt-image上未重验
 - [宣传件渲染链+PDF反查源三指纹(0826)](promo-materials-render-chain.md) — 手改PDF前先三指纹反查源html;馆内海报scale须0.98;海报html已改入库
 - [配套PDF的Type3字体病已修两线(0817)](pdf-type3-fonts-fixed.md) — 装饰图标改纯CSS图形非换emoji;.mark .sym字体栈中间那档雅黑勿删;已装check_type3
-- [外部改稿docx回贴md(0902-0915)](external-docx-backfill-0902.md) — 骨架继承+文本整替;⚠判新旧看措辞不看哈希;⚠先互比外部历次版本(同晚两份或是平行方案须问采哪份);⚠外部统一术语会并掉配套上两样东西;⚠清扫噪音正则禁\s用[ 　];三方不同步以PPT+配套为基准;取舍权在用户;先读首页[授课提示]
+- [外部改稿docx回贴md(0902-0915)](external-docx-backfill-0902.md) — 骨架继承+文本整替;⚠判新旧看措辞不看哈希;⚠先互比外部历次版本;⚠清扫正则禁\s用[ 　];三方不同步以PPT+配套为基准;取舍权在用户
 - [下游六件抽共享层+token账实测](downstream-shared-layer-and-token-facts.md) — 合并skill省不了token;三条真源+薄壳;改真源照该条回归法(PDF比字节数不比md5)
 - [两个常驻文件的分层重构(0818)](memory-index-structure-over-size-0818.md) — MEMORY真病灶=通则被埋进课次条目;CLAUDE下沉判据=脚本docstring才是细则唯一源;机检脚本见L2
 - [读书会详案原书插图链路(0730)](lesson-plan-book-illustration-chain.md) — 详案写【图位:插-01｜图注】禁md图语法;⚠PROFILES字段CLI默认值一律None;PPT与阅读单吃图未做
@@ -95,21 +94,21 @@
 - [Write吞弯引号→必跑fix_quotes](write-tool-normalizes-curly-quotes.md) / [下游JSON引号统一弯引号禁「」](json-materials-curly-quotes.md) / [雅黑弯引号显示半角](curly-quotes-render-halfwidth-yahei.md) — 含引号段落Edit改用无引号锚点;字符层U+201C已对别改JSON,靠模板unicode-range落宋体
 - [配图工具：多页道具须定妆件+示范文的「我」是大人(0903)](imgtool-prop-consistency-and-owner-0903.md) — 帆布包三错同根因;道具定妆必开去人物条目;款式写到托特/书包这一级
 - **PPT引擎**:[第三profile宣讲(0824)](ppt-promo-profile-0824.md) / [按profile分层·原语不fork](ppt-profile-seam-architecture.md) / [中文变Calibri:latin须在ea前](ppt-font-ea-latin-order.md) / [表格](ppt-table-autofit.md)·[原文齐读](ppt-quote-autofit.md)自适应(存量须重烘) / [阅读单页型已下线](ppt-reading-sheet-page.md)
-- ⚠[课件添图风格样板(0925)](ppt-illustration-style-reference-0925.md) — 用户否了「原版式找空地塞小图」;要的是外部人工添图那套:每课吉祥物立页题条右端+主图占版面9–20%常出血+正文压左60%配底带;表格/稿纸/分节页不放；0927选图画内容不画活动(母版§四之二11);⚠0929起配图版以-配图版.pptx并排入库
+- ⚠[课件添图风格样板(0925)](ppt-illustration-style-reference-0925.md) — 用户否了「找空地塞小图」;要外部人工添图那套:吉祥物立页题条右端+主图9–20%常出血+正文压左60%;画内容不画活动;配图版以-配图版.pptx并排入库
 - **PPT 视觉**：[副标题克制电报体](ppt-subtitle-no-telegraphese.md) / [参考答案红字上屏](ppt-reference-answer-on-slide.md) / [逐条点击动画](ppt-click-reveal-animation.md) / [四图网格](ppt-four-image-grid.md) / [逐页讲稿新增docx](lecture-notes-docx.md) — 末条:打包只收docx
 - **工程坑**:题目带全角＿＿则place_pptx必认领失败须手工归位;配图空占位机检查不出须肉眼看 — [源](woheguoyitian-4a-ppt-chain-state.md)
-- ⚠[改外部pptx三个静默坑(0916)](pptx-text-edit-three-silent-traps-0916.md) — 重复shape id／timing空容器／endParaRPr不在段末;三者python-pptx全读得出、PowerPoint一律拒开且不说是哪条;工具已固化`laojohn-ppt/tools/pptx_text_edit.py`;⚠0925:normalize_paragraphs遇多pPr段落反把文件改坏,只在append过run时调
-- **备课视频线 laojohn-lesson-video(0921立)**:详案+PPT+教师用配套→15–25分钟备课视频,给加盟商老师自学(填师训空位);旁白＝备课解说不是照念师话,增量在教师用json三色旁注;逐句合成消掉字幕漂移;起手式靠程序轮换;⚠AiHubMix的TTS够跑管线不够交付(英文音色念中文) — [详情](lesson-video-line-0921.md)
-- **⚠仓内pptx不一定是终稿(0921用户纠正)**:拿仓内那份与详案页标对账,17课次13个对不上(五上二从P7起整齐差1页)——曾据此误判「详案页标错了」。**真相：页标对的是外部终稿,仓内可能是更早版本,对不上是预期、禁批量改详案**;按页消费PPT一律用终稿 — [详情](pagemap-json-page-offset-0921.md)
+- ⚠[改外部pptx三个静默坑(0916)](pptx-text-edit-three-silent-traps-0916.md) — 重复shape id/timing空容器/endParaRPr不在段末,PowerPoint拒开不说原因;工具`laojohn-ppt/tools/pptx_text_edit.py`;normalize_paragraphs只在append过run时调
+- **备课视频线lesson-video(0921立)**:给加盟商老师自学;旁白＝备课解说不照念师话,增量在教师用json三色旁注;逐句合成防字幕漂移;⚠AiHubMix TTS够跑管线不够交付 — [详情](lesson-video-line-0921.md)
+- **⚠仓内pptx不一定是终稿(0921)**:详案页标对的是外部终稿,仓内版对不上是预期,禁批量改详案;按页消费PPT一律用终稿 — [详情](pagemap-json-page-offset-0921.md)
 - [测评卷SKILL状态](reading-assessment-skill-state.md) / [测评事实以详案为准](assessment-facts-follow-lesson-plan.md) — 详案升深度蓝本(事实仍锁档案);与SKILL默认相反遇分叉先确认
 - ⚠[阅读单/物料内容严格照详案(1008)](reading-materials-follow-plan-strictly-1008.md) — 版式可活内容不能加:不加画一画/汇总格,计划统称7天阅读计划;主题词对人物身份(邻居≠亲情);反馈话术自动插书目卡
 - [阅读单PPTX文字挤压根因(1009)](reading-sheet-pptx-text-overlap-1009.md) — PDF正常≠PPTX正常;定高文本框低估雅黑行高;voyage棕框/deduce卡头已修;判版式用COM按A4导出别用shot_assets
 - [阅读单别全表格(1008低年级·1011扩到L3)](reading-sheet-low-grade-lively-1008.md) — 流程图/维恩图/思辨单用专用模板(详案说「用表格填」也照用);L1–L2优先radial/facets/profile;table只留纯清单
 - [阅读指南拓展栏点名具体书/影片](reading-guide-extension-concrete-titles.md) — 仅此栏放宽红线,吃不准就不写
-- ⚠[拓展阅读不推自家课表书·须适龄(1014)](extension-reading-exclude-own-catalog-1014.md) — 去年的树(L2)/安徒生童话已在册,快乐王子L5不给L3;仓内无完整课表,交付提醒用户核对
+- ⚠[拓展阅读·课表书处理(1014)](extension-reading-exclude-own-catalog-1014.md) — 课表=pipeline/references/reading-club-catalog.md+书籍档案书名;低年级书只能写「你可能在X年级读过,再读一遍」,同级及以上不推;课表外须适龄
 ## 未决事项与交付风险（做完即删）
-- **备课视频首批两支已出片(0921)**:五上四 17.8分钟为准片(外部终稿画面、增量39%、机检FAIL0、字幕零违规、零漂移);三上一 16.4分钟素材薄;六上四等PPT定稿;张视角二审三条已落地(bridge废除/locate与do重合/空泛点题词表);⚠闸门A记的是「用户指示直接出片(未逐页通读)」 — [详情](lesson-video-line-0921.md)
-- **仓库瘦身已完成(0920)**：759.67→303.41 MiB；**远端备份分支 1005 已删**（GitHub 网页体积会随之回落）。⚠ 新克隆仍必跑两条装机命令(core.hooksPath＋负向 refspec，见 docs\协作同步说明.md)；salvage tag 待确认无用再删 — [详情](repo-slimming-plan-0920.md)
+- **备课视频首批两支已出片(0921)**:五上四17.8分钟为准片;三上一素材薄;六上四等PPT定稿;⚠闸门A记的是「用户指示直接出片(未逐页通读)」 — [详情](lesson-video-line-0921.md)
+- 仓库瘦身0920已完成(→303MiB);⚠新克隆必跑两条装机命令(见docs\协作同步说明.md);余salvage tag待确认无用再删 — [详情](repo-slimming-plan-0920.md)
 - 写作课批改标准包未做：三上五／四上五／四上六；四上五、四上六 PPT 链未做；**四上六**教材页未核（unit-texts 待补条目）＋资料卡「＿＿」数据待老师填 — [三上五](binfen-shijie-3a-lesson-state.md)｜[四上五](shenghuo-wanhuatong-4a-lesson-state.md)｜[四上六](wenhua-yichan-4a-lesson-state.md)
 - 开场「不在场第三人」另2课待回改(用户定本次只改五上四):四上一推荐一个好地方L27-31「一位朋友带孩子来玩」+老师替他读心(改它须重找判据载体,非换几句话)、三下六L44敲门送伞的孩子 — [详情](opening-no-offstage-third-party.md)
 - 六上三让生活更美好：workflow③「三分型」实例仍写两把尺未改（详案已按一把尺落定） — [详情](shenghuo-meihao-6a-lesson-state.md)
@@ -118,11 +117,11 @@
 - 神笔马良详案【作者介绍】动画片/国际大奖/其他作品等生平档案无据（物料已避开），待用户定改不改；「马良一惊」段已降为复述 — [详情](shenbi-maliang-lesson-plan-state.md)
 - **⚠ 阅读单线 18 份 PDF 的 Type3 字体遗留未修** — [详情](pdf-type3-fonts-fixed.md)
 - 彼得·潘档案 line23/32 与机读块不一致待清理 — [详情](peterpan-book-profile-state.md)｜封面图缺(汉修先生/呼兰河传/骑鹅旅行记,骑鹅须补图重跑)·快乐王子下游未做·快乐读书吧6本已建2本余4本
-- **⚠三处「单元被搬空」待核实**:四下八、五下七、六下五(课程表与馆内海报均已标「待定」占位,63总数不变);两道全新题《我最喜爱的季节》《传承好家风》archive零命中、文体暂判,待教材页;总地图docx原件仍是换新前口径 — [详情](textbook-2026-five-retitles-0914.md)
+- **⚠三处「单元被搬空」待核实**:四下八、五下七、六下五(已标「待定」占位);两道全新题《我最喜爱的季节》《传承好家风》archive零命中待教材页;总地图docx仍是旧口径 — [详情](textbook-2026-five-retitles-0914.md)
 - 《推荐一个好地方》两处详案↔PPT微差未拍板 · writing 竞品借鉴 D3–D5/N1 待做 · ppt-profile Phase3 待办
 - 五上三故事新编批改标准包未开工(PPT/docx回贴0917已收官,见归档索引)｜我来编童话PPT六类页须外部重做+Vercel未重部署 — [详情](textbook-revision-same-title-new-page-0902.md)｜漫画老师0820对方改动未合入 — [详情](manhua-laoshi-5a-lesson-state.md)
-- **⚠L5-L6起步0830改判「定起点」后,余1篇五年级稿未回改**(自由写作低于25分钟新下限;故事新编0908·二十年后0915·心爱之物0916·漫画老师0916已回改,缩写故事已下线) — [详情](writing-lesson-destress-onramp.md)｜0924用户定暂缓
+- **⚠L5-L6起步「定起点」后余1篇五年级稿未回改**(自由写作低于25分钟新下限;0924用户定暂缓) — [详情](writing-lesson-destress-onramp.md)
 - 五年级存量按现行写作线回改(0915起·「存量不回溯」的例外):五上一/二/三/四已完成(见归档索引「五年级回改批」),**余五下八未回改**(0924用户定暂缓)
-- **六上四篇下游**：六上一 PPT链+配套三侧已出；六上二配套三侧已出·PPT未做；六上三 PPT链0916+配套0917已出；六上四 0924 外部改词新版已入库（能开、旧词清零；⚠页序变、详案页标P26起差1页、anim.json过期，用户定不回注 — [源](bijian-liuchu-6a-lesson-state.md)）；三篇批改标准包未做；四篇⑥⑦避让串已下沉 variation-pools（0915 机检已拦）
+- **六上四篇下游**:六上二PPT未做;三篇批改标准包未做;六上四0924外部改词版入库后页标P26起差1页、anim.json过期,用户定不回注 — [源](bijian-liuchu-6a-lesson-state.md)
 ## 已交付归档
 全部课次/书目状态钩子已移至[归档索引](memory-index-archived-deliveries.md),排新课次前按需打开;已落地/已验完的规则历史条目在[规则归档](memory-index-archived-rules.md)。
