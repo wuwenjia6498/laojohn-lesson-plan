@@ -8,10 +8,12 @@ import sys
 import os
 import re
 
+# 缺省清单按脚本所在目录（项目根）定位，不写死盘符（移动硬盘盘符会变）。
+ROOT = os.path.dirname(os.path.abspath(__file__))
 FILES = [
-    r'e:\laojohn-lesson-plan\读书会详案输出\洞-课案详案.md',
-    r'e:\laojohn-lesson-plan\读书会详案输出\俗世奇人-课案详案.md',
-    r'e:\laojohn-lesson-plan\读书会详案输出\手斧男孩-课案详案.md',
+    os.path.join(ROOT, '读书会详案输出', '洞-课案详案.md'),
+    os.path.join(ROOT, '读书会详案输出', '俗世奇人-课案详案.md'),
+    os.path.join(ROOT, '读书会详案输出', '手斧男孩-课案详案.md'),
 ]
 
 

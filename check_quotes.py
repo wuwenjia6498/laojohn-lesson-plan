@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 import os
+import sys
 
-files = [
-    r'e:\laojohn-lesson-plan\读书会详案输出\洞-课案详案.md',
-    r'e:\laojohn-lesson-plan\读书会详案输出\俗世奇人-课案详案.md',
-    r'e:\laojohn-lesson-plan\读书会详案输出\手斧男孩-课案详案.md',
-    r'e:\laojohn-lesson-plan\写作课详案输出\三下-第六单元-身边那些有特点的人-写作课详案.md',
+# 用法：python check_quotes.py [文件.md ...]；不给参数则查下面的缺省清单。
+# 缺省清单按脚本所在目录（项目根）定位，不写死盘符（移动硬盘盘符会变）。
+ROOT = os.path.dirname(os.path.abspath(__file__))
+files = sys.argv[1:] or [
+    os.path.join(ROOT, '读书会详案输出', '洞-课案详案.md'),
+    os.path.join(ROOT, '读书会详案输出', '俗世奇人-课案详案.md'),
+    os.path.join(ROOT, '读书会详案输出', '手斧男孩-课案详案.md'),
+    os.path.join(ROOT, '写作课详案输出', '三下-第六单元-身边那些有特点的人-写作课详案.md'),
 ]
 
 for f in files:
