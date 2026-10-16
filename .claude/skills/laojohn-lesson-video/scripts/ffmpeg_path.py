@@ -4,8 +4,9 @@ r"""ffmpeg / ffprobe 定位。单一源，链上各脚本 import。
 发现顺序（**禁硬编码盘符**——项目在移动硬盘，CLAUDE.md §1）：
     1. 环境变量 FFMPEG_EXE / FFPROBE_EXE（显式覆盖，最高优先）
     2. PATH 里的 ffmpeg
-    3. <项目根>\工具\ffmpeg\bin\ffmpeg.exe（便携版，整目录 gitignore）
-    4. 都没有 → 抛异常，消息里直接给安装命令
+    3. winget 装的 Gyan.FFmpeg：WinGet\Links 别名，或 WinGet\Packages\Gyan.FFmpeg*\*\bin（装完不必重开 shell）
+    4. <项目根>\工具\ffmpeg\bin\ffmpeg.exe（便携版，整目录 gitignore）
+    5. 都没有 → 抛异常，消息里直接给安装命令
 
 ⚠ **Playwright 自带的那个 ffmpeg 不能用**，别去试（2026-09-21 实测）：
 `%LOCALAPPDATA%\ms-playwright\ffmpeg-1011\ffmpeg-win64.exe` 是 `--disable-everything`
@@ -65,6 +66,14 @@ def find(name="ffmpeg", root=None):
         cand = os.path.join(la, "Microsoft", "WinGet", "Links", name + ".exe")
         if os.path.exists(cand):
             return cand
+        # 新版 winget 不放 Links 别名，改把包内 bin 直接写进用户 PATH（同样要重开 shell）。
+        # 认包目录；多个版本并存时取最新装的（按修改时间，版本号按字符串排会 9 > 10）。
+        import glob
+        hits = sorted(glob.glob(os.path.join(
+            la, "Microsoft", "WinGet", "Packages", "Gyan.FFmpeg*", "*", "bin", name + ".exe")),
+            key=os.path.getmtime)
+        if hits:
+            return hits[-1]
     r = root or _project_root()
     if r:
         cand = os.path.join(r, "工具", "ffmpeg", "bin", name + ".exe")
