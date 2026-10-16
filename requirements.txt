@@ -1,0 +1,37 @@
+# 老约翰工作台 · 全仓 Python 依赖（换机器一条命令装齐）
+# 安装：python -m pip install -r requirements.txt
+# 版本是 2026-10-16 在 Python 3.15.0 上实测可用的下限，不是上限。
+# 换机全流程见 docs\换机装机清单.md；装完跑 python setup_check.py 自检。
+
+# ---- 文档 / 课件引擎 ----
+python-docx>=1.2.0        # docx 引擎 md_to_laojohn_docx.py、style_front_page、图回插
+lxml>=6.1.3
+python-pptx>=1.0.2        # 读书会 build_ppt、写作课直出/后处理链、阅读单 PPTX
+Pillow>=12.3.0            # 几乎所有出图、抠图、海报、插图回插
+pypdf>=6.20.1             # 阅读单、写作课/看图写话配套 PDF 渲染
+PyMuPDF>=1.28.2           # PDF 读图与校验（import fitz）
+openpyxl>=3.1.5
+pywin32>=312              # Office COM：shot_assets.py 转 PDF/PNG（仅 Windows）
+playwright>=1.64.0        # HTML→PDF/JPG；装完还要 python -m playwright install chromium
+
+# ---- 生图 / 视频 / TTS 客户端（联网四处，CLAUDE.md §1）----
+requests>=2.34.2          # imgclient、ttsclient、videoclient
+openai>=3.31.0            # 看图写话 generate_images.py
+google-genai>=2.31.0      # imgclient 的 Gemini 通道（import google.genai）
+numpy>=2.5.4              # 写作课海报、宣传片
+opencv-python>=5.0.0      # 宣传片、原书插图去水印
+
+# ---- 写作课海报毛笔字（woff2 解码）----
+fonttools>=4.67.0
+brotlicffi>=1.2.0         # brotli 的替代；Python 3.15 下 brotli 无现成 wheel，缺它标题静默退回楷体
+
+# ---- 本地网页工具（课件配图工具 web、作文批改工具）----
+fastapi>=0.115.6
+uvicorn>=0.32.1
+httpx>=0.28.1
+python-multipart>=0.0.20  # 少了它服务能起、一上传就 500
+
+# ---- 官方 docx/pdf skill 读外部文件时用（本仓只读改外部件，CLAUDE.md §5）----
+defusedxml>=0.7.1
+pdfplumber>=0.11.10
+pyyaml>=6.0; python_version < "3.15"   # 仅 skill-creator 校验脚本用；3.15 暂无 wheel，跳过不影响生产

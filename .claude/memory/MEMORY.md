@@ -14,6 +14,7 @@
 ## 架构速览（骨架事实 · 细节在各 SKILL）
 - 主链与平行分支见 CLAUDE.md §2｜每课时双产出中间稿+讲稿页序1:1;页号唯一口径=中间稿P号==讲稿##第N页==详案页标〖PPT第N页〗;PPT不标页码角标;中间稿不写师话(师话→讲稿);眉标禁写课型
 - **双人协作(0820)**:口径见 CLAUDE.md §9;记忆事实源=仓内 .claude/memory/,用户目录那份是目录联接;看板与commit前缀0911已取消 — [详情](two-person-sync-0820.md)
+- **换机/重装(1016)**:照docs/换机装机清单.md做,跑setup_check.py全绿;py3.15下brotli用brotlicffi;本机课件产出无AI图·别重烘v9正式件 — [详情](machine-setup-checklist-1016.md)
 - **skill停用归档0910立·0911撤回**:只省description 2.8k字符(窗口0.2%),误触发方向反;22个全部在架,别再重做;活线两处查找与gitignore skills*通配保留无害 — [详情](skills-parked-0910.md)
 - **⚠「版权材料仅限内部备课·不得转发」已删(0924用户拍板)**:本仓+`_assets`全部素材可对外用、可进图生视频;16处一次改齐;别再以此拒绝 — [详情](copyright-forwarding-restriction-removed-0924.md)
 - **家长宣传片线(0927改AI讲解员出镜)**:H3口播+海报/课件首页/课堂照片穿插+按段自动调色;⚠投屏墙、悬浮卡片、博主一段一镜三条路用户已否别再提;博主skill不装 — [详情](promo-video-presenter-line-0927.md)｜[0924原方案](promo-video-line-plan-0924.md)
