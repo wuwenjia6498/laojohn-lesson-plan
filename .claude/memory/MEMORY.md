@@ -104,6 +104,7 @@
 - **⚠仓内pptx不一定是终稿(0921)**:详案页标对的是外部终稿,仓内版对不上是预期,禁批量改详案;按页消费PPT一律用终稿 — [详情](pagemap-json-page-offset-0921.md)
 - [测评卷SKILL状态](reading-assessment-skill-state.md) / [测评事实以详案为准](assessment-facts-follow-lesson-plan.md) — 详案升深度蓝本(事实仍锁档案);与SKILL默认相反遇分叉先确认
 - ⚠[阅读单/物料内容严格照详案(1008)](reading-materials-follow-plan-strictly-1008.md) — 版式可活内容不能加:不加画一画/汇总格,计划统称7天阅读计划;主题词对人物身份(邻居≠亲情);反馈话术自动插书目卡
+- ⚠[对外物料主题/特色用大众说法(1016)](outward-materials-plain-wording-1016.md) — 机读块「主题」海报直印,别搬第八节备课词;抢先看主题对齐海报;特色写特色不写情节、不造词;改完看渲染图防折行出界
 - [阅读单PPTX文字挤压根因(1009)](reading-sheet-pptx-text-overlap-1009.md) — PDF正常≠PPTX正常;定高文本框低估雅黑行高;voyage棕框/deduce卡头已修;判版式用COM按A4导出别用shot_assets
 - [阅读单别全表格(1008低年级·1011扩到L3)](reading-sheet-low-grade-lively-1008.md) — 流程图/维恩图/思辨单用专用模板(详案说「用表格填」也照用);L1–L2优先radial/facets/profile;table只留纯清单
 - [阅读指南拓展栏点名具体书/影片](reading-guide-extension-concrete-titles.md) — 仅此栏放宽红线,吃不准就不写
