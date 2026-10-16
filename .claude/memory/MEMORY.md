@@ -25,7 +25,7 @@
 - ⚠[无Python时5.0润色静默缺席(1004)](no-python-skips-det-polish-1004.md) — 机械替换靠polish_writing，脚本跑不了成稿口语残留多；本机1004已装3.13
 - [⚠规则效力评估0915:素材层做到了·咬合三条零落地](model-essay-rules-effect-eval-0915.md) — 四篇同尺盲评;0912够得着需与0914叠加才判得出丙;C2旁批表双标准四篇全未达标;根因=checklist把三条压进同一个勾;要领数上限缺「补进核心技法行」出口;机检②③④全绿≠合格
 - [示范文规则0912补五条+机检E+瘦身](model-essay-rules-supplement-0912.md) — 够得着上限=优等学生;旁批表最见功夫两句必入表;不教第四招;起笔不与③反例同型;§六第7问;essay_audit.py每份必跑;⚠已拆条文+history,生成只读顶部一屏卡,别把来历写回条文
-- [⚠用张视角审详案的四口径+三条不采纳(0918)](zhang-perspective-audit-checks-0918.md) — 先取数(师话朗读时长/逐环节占比/伪问题逐条/材料套数);⚠**他的处方默认是「删」而仓内内容被档案与规则锁**,正确动作＝保内容减讲法;别把「设计好的缺口」当伪问题删掉
+- [⚠用张视角审详案的四口径+三条不采纳(0918)](zhang-perspective-audit-checks-0918.md) — 先取数(师话朗读时长/逐环节占比/伪问题逐条/材料套数);⚠他的处方默认「删」,正确动作＝保内容减讲法
 - [张祖庆视角接入写作课线(0912)](zhang-zuqing-on-writing-line-0912.md) — 三处落位:生成侧generation-brief§一.8减法三问/冷审rubric跨维九+维三三问/示范文链;体系审计8条已拍板采5不采3(讲评按需·审题依需·三档表);话语比不能当判据;三档优先级标记不推广
 - [⚠0911换靶:生成侧语体=规范教案·瘦身41%来历下沉·polish_writing机械层·PassB四个不执行机制](generation-retarget-0911.md) — 生成只读简报§一.7+prose-exemplars;避让卡替代整读pools/ledger;A/B待做
 - [⚠文风定盘0831·0901收敛一主三从](writing-style-two-directions-conflict-0831.md) — 方向=向规范书面靠;AI痕迹=破折号/导演腔/省主语/术语漂移;**PassC已撤别重开**;主判据唯一源style-criteria+执行位在PassB;改写工序跑完必看--baseline方向指标;批量修文件脚本每步立即写盘;⚠方言词表已实测否掉勿加回
@@ -36,7 +36,7 @@
 - [③引本单元课文佐证技法·匹配则引(0821)](writing-lesson-cite-unit-text-0821.md) — 不配就不引不许硬上;判据=有一篇「最突出的写法」正是本课这一招;判不引≠欠账;事实源unit-texts.md先联网核实后落笔;口径=禁指向动作不禁指代进度
 - [教学指令一律正向表述(0824)](writing-lesson-positive-framing-not-prohibition.md) — 写法偏好类不判对错走三步对比,题目要求类可判;五落点(提纲表技法行/③④⑥/⑦最易漏);最大复发路径=档案自己写「避免笼统地说…」;反向刹车见源条
 - **承接学生发言要复述他说的具体内容再往下讲(0918)**:只写「是的/对」＝空承接;判据＝遮住`参考：`行师话还读得通就是没接住;四形态(单一答案直接确认/分散答案复述再归类/有分歧点出两边/多人各说一例压成短语或结论前置);⚠复述别照抄学生口语(「念」在方向指标口语词表)、别写成预演式 — [源](prose-exemplars-echo-student-answer-0918.md)
-- [电报体/生造词红线第7条·十形态(0731→0921)](writing-lesson-telegraphese-and-coinage-redline.md) — ⚠**0921把六～十形态补进规则文件四处+tone_gate候选清单**(此前只在记忆里,三篇连着复发);⑥偏僻动词扩散⑦宣告式任务句⑧「X好了，就…」⑨动宾自造⑩隐喻化动词(立起/长成/挂到中心上/写得最厚)与术语半截化(说明方法说全名);判据改问「单独读给没上过这课的人,知道说的是什么、落在哪吗」;⚠`参考：`保留口语粗糙不保生造搭配;打磨完必复跑tone_gate
+- [电报体/生造词红线第7条·十形态(0731→0921)](writing-lesson-telegraphese-and-coinage-redline.md) — 六～十形态已进规则文件四处+tone_gate候选清单;判据「单独读给没上过这课的人,知道说的是什么、落在哪吗」;打磨完必复跑tone_gate
 - [学段口气全线没分级(0817)](writing-lesson-grade-tone-not-differentiated.md) — 判断分三层(用词/技法深度/思维层级);判据=降两级反问;0828复发:并列短语重难点只落实一半,拆开逐个问落点
 - [技法N件套须练全N件](technique-set-practice-all-parts.md) — 定稿前做「每件×是否产出过」对账;机检与checklist都抓不到｜⚠**同族第二病:自拟材料要按「步」拆开核要素是否齐全**(四上五正例中间一步无听觉、师话却把落在第一步的嗡嗡声算进去,通读查不到——整体读起来三样都有,漏的是「都在同一步里」) — [源](shenghuo-wanhuatong-4a-lesson-state.md)
 - [首页无区头单表6行+两行文案体例(现行)](writing-lesson-front-page-single-table.md) — 0831两行体例推翻0828:目标行一句话说清学会写哪类文章;技法行首句固定「使用+构思工具名」且与正文一字一致;写详案或改style_front_page前必读
@@ -78,6 +78,7 @@
 - [图单判读四类失败模式(0807)](illustration-judgement-failure-modes.md) — 人工核对结论不写回图单=没核;⚠页码压画面交人工别用脚本
 - [可引用原文栏取成段](book-profile-quote-full-passage.md) / [类型字段禁空泛「儿童小说」](book-type-no-generic-children-fiction.md) — 下游需成段并保留原书弯引号;类型须具体文学类型
 - [低段/合集建档差异](low-grade-collection-profile-formalized.md) — 区分变量是「低段」非「快乐读书吧」
+- ⚠[低段建档以实书为准(1016)](low-grade-profile-from-physical-book.md) — docx丢页码/注音/配图/署名;最低要目录页＋精读篇页照片;和大人二三四未复核
 ## 引擎与下游物料
 - [直出PPT完成即入库并push(0926)](direct-ppt-commit-and-push-0926.md) — 给同事在GitHub上看;长期授权不必再问;直出用图不入库;打包收直出件PPT(认文档属性标记)
 - **写作课PPT仓内直出(0926)**:重写详案的课次走直出(direct_build.py＋每课构建脚本),外部件添图收尾用finalize_external.py;讲评环节不进课件;六上五各版本存放位置与页标待定见详情 — [详情](writing-ppt-direct-build-pilot-0926.md)
