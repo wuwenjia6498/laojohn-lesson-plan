@@ -14,6 +14,6 @@ metadata:
 三个坑：
 - Python 3.15 下 brotli、pyyaml 无现成 wheel，整批 pip install 会全失败——brotli 用 brotlicffi 替代（fontTools 认），pyyaml 只 skill-creator 用、加了版本标记跳过。
 - 新版 winget 装 Gyan.FFmpeg 不放 WinGet\Links 别名、改写用户 PATH，当前会话找不到；`ffmpeg_path.py` 已补 WinGet\Packages 回退。
-- 本机 `课件配图工具\课件产出\` 无 AI 图（不入库），用户定不重新生成：**别在本机重烘 v9 读书会 PPT 正式件**，会出没图的件。
+- **协作者那台（git 身份 weiweicui27-ops）** `课件配图工具\课件产出\` 无 AI 图（不入库），用户定不重新生成：**在那台上别重烘 v9 读书会 PPT 正式件**，会出没图的件。主理人那台若有图则不受此限——先看 `setup_check.py` 第 5 组报几张图再判断。
 
 自检话术已换成只在记忆里的问题，见 [[two-person-sync-0820]]；相关 [[editor-unsaved-edits-lost-1015]]。
