@@ -125,13 +125,13 @@ def build(profile, seg, dur):
             look = ("glances aside and back to the lens" if s.get("framing") == "three-quarter"
                     else "looks straight into the lens")
             txt += ("<Subject 1> (S1) %s and says %s, with %s, <d>[Chinese] %s</d> "
-                    % (look, voice, ACTING, spoken(seg_lines)))
+                    % (look, voice, seg.get("acting") or ACTING, spoken(seg_lines)))   # 段级 acting 覆盖缺省表演
         for bt in s.get("beats", []):
             cue = ("As %s says \u201c%s\u201d" % (sub, bt["word"])) if bt.get("word") else "While speaking"
             txt += "%s, <Subject 1> %s. " % (cue, act_text(profile, bt["do"]))
         if i == len(shots) - 1:
-            txt += ("After the last line %s closes %s lips and holds a warm, bright smile toward the lens until "
-                    "the clip ends at %s." % (sub, pos, ts(dur)))
+            txt += ("After the last line %s closes %s lips and holds %s toward the lens until "
+                    "the clip ends at %s." % (sub, pos, seg.get("end_hold") or "a warm, bright smile", ts(dur)))
         body.append(txt.strip())
     parts = [("subject_definitions", "\n".join(subj)), ("summary", summary),
              ("retention_analysis", "\n".join(ret)), ("detailed_description", "\n".join(body)),
