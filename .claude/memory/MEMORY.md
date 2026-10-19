@@ -4,6 +4,7 @@
 - 中文回复;简洁直接不堆客套;重要决策先列选项让用户拍板;视觉迭代常用截图反馈
 - **问「有没有做到X」时是要判断、不是指出问题**——先自己核查给结论,别把判断权反问回去
 - ⚠[编辑器未保存的手改会被我冲掉(1015)](editor-unsaved-edits-lost-1015.md) — 我只见磁盘;Cursor已开自动保存;用户开着的文件动手前提醒先保存;docx被锁先比对再重渲
+- ⚠[360清理Pro定时删%TEMP%旧文件(1019)](temp-cleaner-wipes-scratchpad-1019.md) — scratchpad超1–2小时的文件会被删、目录留着;跨小时要复用的脚本/备份放%LOCALAPPDATA%等持久目录
 ## 跨技能硬约束（三条详案线通用）
 **动笔写任何详案前必读**：[约束分层](constraint-layering-generation-vs-coldreview-0804.md) · [机构课场景](venue-is-institution-not-school.md) · [真实情境官方锚点](real-situation-official-anchor-first.md)
 - [约束分层:措辞层后移到冷审PassB(0804)](constraint-layering-generation-vs-coldreview-0804.md) — 判据=修这处要不要动教学设计;生成只读简报+正样本;冷审PassA结构/PassB行文各派fresh agent;⚠改规则文件勿破tone_gate四解析锚｜[首次实测四项全过](layering-first-measurement-0804.md)
@@ -71,6 +72,7 @@
 - [⚠一轮冷审后的多轮局部改稿必须二次冷审(0918)](local-edits-need-second-cold-review-0918.md) — 6/10项A块伤是改稿自己引入的(含真实性与机构课两条红线);固定查三类＝可数断言重测/回指逐处验/术语表对全文;一轮绿灯不继承;两轮意见相反时找第三条路不选边
 - [详案复盘冷启动化](detail-review-cold-start.md) / [复盘三文件去冗余](review-rubric-single-source-dedup.md) — 派fresh子agent冷审;review-rubric是五维/协议唯一源｜[冷审报告可删·台账分层0915](cold-review-report-retention-0915.md) — 三件齐即删报告;判读表≤250字符/行,明细进detail档;阈值8按31点定案维持(外部生成稿不适用)
 - [PPT链产出后详案页标回注必做](ppt-draft-pageback-mandatory.md) / [ppt-draft参考答案上屏从宽](ppt-draft-reference-answer-generous.md) — 〖PPT第N页〗必做并重渲docx(docx常被WPS锁须先关)
+- [旧版阅读单空框补提示·全部完成(1019)](worksheet-blank-box-fix-1019.md) — D:\00000读书会课案 二～六年级77页已修；产出在各书「阅读单优化后文件」同名；工具在 AppData\Local\laojohn-wsfix；3处待对原书核实
 ## 建档（book-profile）
 **给任何书建档前必读**：[全文通读红线](book-profile-full-read-redline.md) · [插图前置到建档阶段](book-profile-read-images-during-profiling.md)
 - [建档必须全文通读(红线)](book-profile-full-read-redline.md) — 严禁框架/选读代替;骑鹅框架式建档实测出三硬伤
