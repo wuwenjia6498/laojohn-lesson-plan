@@ -80,7 +80,7 @@
 - [图单判读四类失败模式(0807)](illustration-judgement-failure-modes.md) — 人工核对结论不写回图单=没核;⚠页码压画面交人工别用脚本
 - [可引用原文栏取成段](book-profile-quote-full-passage.md) / [类型字段禁空泛「儿童小说」](book-type-no-generic-children-fiction.md) — 下游需成段并保留原书弯引号;类型须具体文学类型
 - [低段/合集建档差异](low-grade-collection-profile-formalized.md) — 区分变量是「低段」非「快乐读书吧」
-- ⚠[低段建档以实书为准(1016)](low-grade-profile-from-physical-book.md) — docx丢页码/注音/配图/署名;最低要目录页＋精读篇页照片;和大人二三四未复核
+- ⚠[低段建档以实书为准(1016)](low-grade-profile-from-physical-book.md) — docx丢页码/注音/配图/署名;最低要目录页＋精读篇页照片;和大人一～四已对全书扫描件订正(1019)
 ## 引擎与下游物料
 - [直出PPT完成即入库并push(0926)](direct-ppt-commit-and-push-0926.md) — 给同事在GitHub上看;长期授权不必再问;直出用图不入库;打包收直出件PPT(认文档属性标记)
 - **写作课PPT仓内直出(0926)**:重写详案的课次走直出(direct_build.py＋每课构建脚本),外部件添图收尾用finalize_external.py;讲评环节不进课件;六上五各版本存放位置与页标待定见详情 — [详情](writing-ppt-direct-build-pilot-0926.md)
