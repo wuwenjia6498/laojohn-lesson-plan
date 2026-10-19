@@ -55,6 +55,12 @@ function render(){
   if (d.color) { banner.style.color = d.color; banner.style.borderColor = tint(d.color, 0.6); }
 
   const wrap = document.getElementById('cards');
+  // 可选 columns：多卡排成网格（同行等高）；不给=单列，存量不变
+  if ((d.columns || 1) > 1) {
+    wrap.style.display = 'grid';
+    wrap.style.gridTemplateColumns = 'repeat(' + d.columns + ', 1fr)';
+    wrap.style.columnGap = '20px';
+  }
   (d.cards || []).forEach(c => {
     const card = document.createElement('div'); card.className = 'card';
     const cc = c.color || d.color;

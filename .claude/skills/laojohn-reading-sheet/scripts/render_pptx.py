@@ -919,29 +919,39 @@ def render_profile(slide, d):
         box_h = (c["box"].get("h", 150) if c.get("box") else 0)
         return max(fh, box_h) + 40
 
-    natural = sum(card_h_of(c) + 20 for c in cards)
+    # 可选 columns：多卡排成网格、同行等高（同 HTML）；不给=单列，存量不变
+    cols = max(1, int(d.get("columns") or 1))
+    CGAP = 20
+    cw = (CONTENT_W - (cols - 1) * CGAP) / cols
+    rows = [cards[i:i + cols] for i in range(0, len(cards), cols)]
+    row_h = [max(card_h_of(c) for c in r) for r in rows]
+    natural = sum(h + 20 for h in row_h)
     tf = _fit_tf(y, natural)
-    for c in cards:
+    y0 = y
+    for ci, c in enumerate(cards):
+        ri, cj = divmod(ci, cols)
+        y = y0 + sum(h + 20 for h in row_h[:ri])
+        cx0 = CONTENT_X + cj * (cw + CGAP)
         box = c.get("box")
-        card_h = card_h_of(c)
+        card_h = row_h[ri]
         cc = (c.get("color") or d.get("color") or "").lstrip("#")
         # 可选彩色（c.color / d.color）；不给则保持原默认配色
         c_bg = _mix_white(cc, 0.10) if cc else "EEF3E6"
         c_box = _mix_white(cc, 0.7) if cc else "A9BE8C"
         c_lab = cc or "5C6E48"
         c_ln = _mix_white(cc, 0.6) if cc else "ADB79C"
-        add_round_rect(slide, CONTENT_X, y, CONTENT_W, card_h, radius=0.04,
+        add_round_rect(slide, cx0, y, cw, card_h, radius=0.04,
                        fill=c_bg, line=(_mix_white(cc, 0.55) if cc else None),
                        line_w=(2 if cc else None), tf=tf)
-        fx = CONTENT_X + 22
+        fx = cx0 + 22
         if box:
             bw, bh = box.get("w", 150), box.get("h", 150)
-            add_round_rect(slide, CONTENT_X + 22, y + 20, bw, bh, radius=0.06,
+            add_round_rect(slide, cx0 + 22, y + 20, bw, bh, radius=0.06,
                            line=c_box, line_w=1.6, dash="dash", fill=("FFFFFF" if cc else "FBFCF8"), tf=tf)
-            add_text(slide, CONTENT_X + 22, y + 20, bw, bh, box.get("label", "画像 / 贴图"),
+            add_text(slide, cx0 + 22, y + 20, bw, bh, box.get("label", "画像 / 贴图"),
                      size=13, color="A9A18C", align="center", anchor="middle", tf=tf)
-            fx = CONTENT_X + 22 + bw + 22
-        fw = CONTENT_X + CONTENT_W - 22 - fx
+            fx = cx0 + 22 + bw + 22
+        fw = cx0 + cw - 22 - fx
         fy = y + 20
         for f in c.get("fields", []):
             add_text(slide, fx, fy, fw, 22, f.get("label", ""), size=14, bold=True,
@@ -961,7 +971,7 @@ def render_profile(slide, d):
                              dash="sysDot", tf=tf)
                     fy += LH
             fy += 12
-        y += card_h + 20
+    y = y0 + natural
     footer(slide, d, key="note", y=min(y, 1075))
 
 
@@ -1348,7 +1358,11 @@ def render_deduce(slide, d):
     else:
         cols = d.get("columns") or len(cards) or 1
         cardW = (PAGE_W_PX - 2 * PAD - (cols - 1) * 12) / cols
-        HEAD_H, ARROW_H = 46, 30
+        ARROW_H = 30
+        # 卡头同 matrix 按最多行数撑高，两行卡头写死 46px 会压进正文
+        head_lines = max([_wrap_lines(str(cd.get("header", "")), cardW - 16, 14.5)
+                          for cd in cards] or [1])
+        HEAD_H = max(46, 14 + math.ceil(head_lines * 14.5 * 1.33 * 1.3))
         body_h = 0
         for cd in cards:
             sts = cd.get("steps") or shared
@@ -1363,7 +1377,8 @@ def render_deduce(slide, d):
             add_rect(slide, x, top, cardW, HEAD_H, fill=color)
             add_text(slide, x + 8, top + 6, cardW - 16, HEAD_H - 10,
                      str(cd.get("header", f"线索{i+1}")), size=14.5,
-                     bold=True, color="FFFFFF", align="center", line_spacing=1.3)
+                     bold=True, color="FFFFFF", align="center", anchor="middle",
+                     line_spacing=1.3)
             fy = top + HEAD_H + 10
             sts = cd.get("steps") or shared
             for si, st in enumerate(sts):

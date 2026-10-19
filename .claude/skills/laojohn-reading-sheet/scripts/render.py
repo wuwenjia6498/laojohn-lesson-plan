@@ -229,7 +229,8 @@ def main():
                 "return {w: Math.ceil(p.getBoundingClientRect().width),"
                 " h: Math.ceil(p.scrollHeight)};}")
             if box["w"] <= A4_W + 1:                 # 竖版 A4
-                pw, ph = A4_W, max(A4_H, box["h"] + 16)
+                # 装得下一页就出标准 A4；#page 自带 min-height=A4_H，旧写法恒 +16 会让每张都变成 1140px
+                pw, ph = A4_W, (A4_H if box["h"] <= A4_H else box["h"] + 16)
             else:                                     # 横版（模板自带更宽 #page）
                 pw, ph = box["w"], box["h"]
             written = safe_pdf(page, out_dir / (s["file"] + ".pdf"), pw, ph)

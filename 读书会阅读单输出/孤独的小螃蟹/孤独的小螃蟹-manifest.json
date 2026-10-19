@@ -9,14 +9,15 @@
         "subtitle": "读到小青蟹走了这里，先停一停：猜一猜，再说说你凭什么这么猜",
         "variant": "空白版",
         "columns": 2,
+        "layout": "cards",
         "steps": [
           {
             "label": "我猜",
-            "lines": 3
+            "lines": 4
           },
           {
             "label": "我这样猜的理由",
-            "lines": 5
+            "lines": 6
           },
           {
             "label": "读完以后，我猜对了吗",
@@ -46,7 +47,7 @@
         "title": "《孤独的小螃蟹》阅读单 · 7天阅读计划",
         "subtitle": "前三天读完《孤独的小螃蟹》，后四天读《恐龙鲁鲁》；不会写的字，用拼音代替",
         "variant": "空白版",
-        "columns": 2,
+        "columns": 3,
         "lines": 3,
         "facets": [
           {
@@ -187,7 +188,8 @@
         ],
         "note": "想不起来的小节，就翻书去找。不会写的字，用拼音代替。",
         "color": "#5B7FA6",
-        "line_height": 52
+        "columns": 2,
+        "line_height": 46
       }
     },
     {

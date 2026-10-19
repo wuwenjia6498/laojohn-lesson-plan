@@ -9,6 +9,7 @@
         "subtitle": "三位都用足了狠劲，小车却一点儿也没动：先猜一猜，写下你的依据，读完全篇再填最后一格",
         "variant": "空白版",
         "columns": 1,
+        "layout": "cards",
         "steps": [
           {
             "label": "我的预测：小车为什么不动",
@@ -16,7 +17,7 @@
           },
           {
             "label": "我的依据",
-            "lines": 5
+            "lines": 6
           },
           {
             "label": "读完以后，猜对了吗",
@@ -239,7 +240,7 @@
         "subtitle": "可以从“帮了倒忙”“爱听好话”写起，也可以从爱吹牛、越弄越糟、没找准关键写起",
         "variant": "空白版",
         "banner": "创编卡",
-        "line_height": 48,
+        "line_height": 42,
         "cards": [
           {
             "fields": [
