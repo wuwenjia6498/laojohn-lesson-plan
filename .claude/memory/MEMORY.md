@@ -113,6 +113,7 @@
 - [阅读指南拓展栏点名具体书/影片](reading-guide-extension-concrete-titles.md) — 仅此栏放宽红线,吃不准就不写
 - ⚠[拓展阅读·课表书处理(1014)](extension-reading-exclude-own-catalog-1014.md) — 课表=pipeline/references/reading-club-catalog.md+书籍档案书名;低年级书只能写「你可能在X年级读过,再读一遍」,同级及以上不推;课表外须适龄
 ## 未决事项与交付风险（做完即删）
+- ⚠[野性的呼唤/萨哈拉的原图推迟到做PPT时处理(1020)](images-deferred-to-ppt-1020.md) — 档案写「无插图」但图目录已有未整理的图；做PPT先补图单，且要在AI生图之前，再改档案第十节
 - **备课视频首批两支已出片(0921)**:五上四17.8分钟为准片;三上一素材薄;六上四等PPT定稿;⚠闸门A记的是「用户指示直接出片(未逐页通读)」 — [详情](lesson-video-line-0921.md)
 - 仓库瘦身0920已完成(→303MiB);⚠新克隆必跑两条装机命令(见docs\协作同步说明.md);余salvage tag待确认无用再删 — [详情](repo-slimming-plan-0920.md)
 - 写作课批改标准包未做：三上五／四上五／四上六；四上五、四上六 PPT 链未做；**四上六**教材页未核（unit-texts 待补条目）＋资料卡「＿＿」数据待老师填 — [三上五](binfen-shijie-3a-lesson-state.md)｜[四上五](shenghuo-wanhuatong-4a-lesson-state.md)｜[四上六](wenhua-yichan-4a-lesson-state.md)
