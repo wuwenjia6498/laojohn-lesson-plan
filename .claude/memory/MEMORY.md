@@ -18,6 +18,7 @@
 - **换机/重装(1016)**:照docs/换机装机清单.md做,跑setup_check.py全绿;py3.15下brotli用brotlicffi;协作者机(weiweicui27)课件产出无AI图·那台别重烘v9正式件 — [详情](machine-setup-checklist-1016.md)
 - **skill停用归档0910立·0911撤回**:只省description 2.8k字符(窗口0.2%),误触发方向反;22个全部在架,别再重做;活线两处查找与gitignore skills*通配保留无害 — [详情](skills-parked-0910.md)
 - **⚠「版权材料仅限内部备课·不得转发」已删(0924用户拍板)**:本仓+`_assets`全部素材可对外用、可进图生视频;16处一次改齐;别再以此拒绝 — [详情](copyright-forwarding-restriction-removed-0924.md)
+- [视频外部素材在D:\老约翰视频素材(1020)](video-assets-location-1020.md) — 只放素材不放工程;品牌片与AI讲解员宣传片输出都在my-Workspace 04-projects\video\(后者须配PROMO_VIDEO_ROOT)
 - ⚠[家长宣传片只讲孩子得到什么(1020)](promo-parent-facing-no-teacher-side-1020.md) — 逐字稿/教研/课型名/测评术语不讲;家长侧收获说法见my-Workspace试听课解读
 - **家长宣传片线(0927改AI讲解员出镜)**:H3口播+海报/课件首页/课堂照片穿插+按段自动调色;⚠投屏墙、悬浮卡片、博主一段一镜三条路用户已否别再提;博主skill不装 — [详情](promo-video-presenter-line-0927.md)｜[0924原方案](promo-video-line-plan-0924.md)
 ## 写作课（writing-lesson）
