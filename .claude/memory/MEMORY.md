@@ -1,5 +1,5 @@
 # Project Memory: laojohn-lesson-plan
-> **索引维护规则(0818立·0901补)**:①新增课次/单本书状态→进[归档索引](memory-index-archived-deliveries.md),不占索引行;②横向通则→各线「跨课次通则」块,不埋进课次条目;③未决/交付风险→「未决事项」块,做完即删;④优先级集中在各区头行;⑤行数≤150、单条钩子≤200字符、细节下沉主题文件,超限先归档,机检挂SessionStart hook自动跑;⑥CLAUDE.md只写现行规则,来历/日期/旧口径进记忆;压缩前快照=[1015](memory-index-archive-20261015.md)
+> **索引维护规则(0818立·0901补)**:①新增课次/单本书状态→进[归档索引](memory-index-archived-deliveries.md),不占索引行;②横向通则→各线「跨课次通则」块,不埋进课次条目;③未决/交付风险→「未决事项」块,做完即删;④优先级集中在各区头行;⑤行数≤150、单条钩子≤200字符、细节下沉主题文件,超限先归档,机检挂SessionStart hook自动跑;⑥CLAUDE.md只写现行规则,来历/日期/旧口径进记忆;压缩前快照=[1020](memory-index-archive-20261020.md)
 ## 用户偏好
 - 中文回复;简洁直接不堆客套;重要决策先列选项让用户拍板;视觉迭代常用截图反馈
 - **问「有没有做到X」时是要判断、不是指出问题**——先自己核查给结论,别把判断权反问回去
@@ -36,7 +36,7 @@
 - [⚠动笔前按最新版教材核单元课文(0914)](textbook-latest-edition-verify-first-0914.md) — 六上2026秋换版;篇目/题目先查仓内textbook-2026梳理PDF,要素与题面靠用户实物页;⚠标「已逐字核对」的旧实拍记录同样会过期(五上四0915照出四处错·已进师话);四上六/七/八·五上七·六上七/八习作换题course-map待拍板
 - [③引本单元课文佐证技法·匹配则引(0821)](writing-lesson-cite-unit-text-0821.md) — 不配就不引不许硬上;判据=有一篇「最突出的写法」正是本课这一招;判不引≠欠账;事实源unit-texts.md先联网核实后落笔;口径=禁指向动作不禁指代进度
 - [教学指令一律正向表述(0824)](writing-lesson-positive-framing-not-prohibition.md) — 写法偏好类不判对错走三步对比,题目要求类可判;五落点(提纲表技法行/③④⑥/⑦最易漏);最大复发路径=档案自己写「避免笼统地说…」;反向刹车见源条
-- **承接学生发言要复述他说的具体内容再往下讲(0918)**:只写「是的/对」＝空承接;判据＝遮住`参考：`行师话还读得通就是没接住;四形态(单一答案直接确认/分散答案复述再归类/有分歧点出两边/多人各说一例压成短语或结论前置);⚠复述别照抄学生口语(「念」在方向指标口语词表)、别写成预演式 — [源](prose-exemplars-echo-student-answer-0918.md)
+- [承接学生发言须复述具体内容(0918)](prose-exemplars-echo-student-answer-0918.md) — 只写「是的/对」＝空承接;判据＝遮住`参考：`行师话还读得通就是没接住;四形态与禁照抄口语见源条
 - [电报体/生造词红线第7条·十形态(0731→0921)](writing-lesson-telegraphese-and-coinage-redline.md) — 六～十形态已进规则文件四处+tone_gate候选清单;判据「单独读给没上过这课的人,知道说的是什么、落在哪吗」;打磨完必复跑tone_gate
 - [学段口气全线没分级(0817)](writing-lesson-grade-tone-not-differentiated.md) — 判断分三层(用词/技法深度/思维层级);判据=降两级反问;0828复发:并列短语重难点只落实一半,拆开逐个问落点
 - [技法N件套须练全N件](technique-set-practice-all-parts.md) — 定稿前做「每件×是否产出过」对账;机检与checklist都抓不到｜⚠**同族第二病:自拟材料要按「步」拆开核要素是否齐全**(四上五正例中间一步无听觉、师话却把落在第一步的嗡嗡声算进去,通读查不到——整体读起来三样都有,漏的是「都在同一步里」) — [源](shenghuo-wanhuatong-4a-lesson-state.md)
@@ -53,7 +53,6 @@
 ## 看图写话（picture-writing）
 整区（跨课次通则＋规则体例）已外移 → **[看图写话线记忆](memory-index-picture-writing.md)**，排新课次或出图前打开；该线当前无未决项。
 ## 读书会详案（lesson-plan）
-- [读书会v9 PPT体积大·已根治(1011)](reading-ppt-v9-media-size-1011.md) — 病因=1536×2048无损PNG抠图;helpers._embed_source嵌图前缩1600+量化,九份回归结构全同;不必再事后shrink;大头儿子/神笔马良已事后瘦身(重烘会连版式一起变,别为瘦身重烘)
 - ⚠[读书会PPT缺图默认自动生图·不问(1014)](reading-ppt-auto-ai-images-1014.md) — 缺原书插图的页直接跑reading_deck全链，验收由出图人目视；插图进页后版式跟着调，不许挤角落
 - ⚠[读书会PPT通用问题四条(1008)](reading-ppt-general-feedback-1008.md) — 参考答案只上答案不带「就算数/都算对」;上屏原文带页码(只搬详案);填写表白底灰格线;`列宽：`按预估填写量;build_ppt末尾「中间稿机检」非零须改
 - ⚠[读书会PPT新样式v9·学人工优化版(1006)](reading-ppt-v9-human-optimized-1006.md) — 写`主题色：`才走新样式；每页大图+底带+问答拆框+卡片版式；写全名完整句；配图链路reading_deck.py；AI图不入库；答案改主题色(推翻红字)
@@ -72,7 +71,6 @@
 - [⚠一轮冷审后的多轮局部改稿必须二次冷审(0918)](local-edits-need-second-cold-review-0918.md) — 6/10项A块伤是改稿自己引入的(含真实性与机构课两条红线);固定查三类＝可数断言重测/回指逐处验/术语表对全文;一轮绿灯不继承;两轮意见相反时找第三条路不选边
 - [详案复盘冷启动化](detail-review-cold-start.md) / [复盘三文件去冗余](review-rubric-single-source-dedup.md) — 派fresh子agent冷审;review-rubric是五维/协议唯一源｜[冷审报告可删·台账分层0915](cold-review-report-retention-0915.md) — 三件齐即删报告;判读表≤250字符/行,明细进detail档;阈值8按31点定案维持(外部生成稿不适用)
 - [PPT链产出后详案页标回注必做](ppt-draft-pageback-mandatory.md) / [ppt-draft参考答案上屏从宽](ppt-draft-reference-answer-generous.md) — 〖PPT第N页〗必做并重渲docx(docx常被WPS锁须先关)
-- [旧版阅读单空框补提示·全部完成(1019)](worksheet-blank-box-fix-1019.md) — D:\00000读书会课案 二～六年级77页已修；产出在各书「阅读单优化后文件」同名；工具在 AppData\Local\laojohn-wsfix；3处待对原书核实
 ## 建档（book-profile）
 **给任何书建档前必读**：[全文通读红线](book-profile-full-read-redline.md) · [插图前置到建档阶段](book-profile-read-images-during-profiling.md)
 - [建档必须全文通读(红线)](book-profile-full-read-redline.md) — 严禁框架/选读代替;骑鹅框架式建档实测出三硬伤

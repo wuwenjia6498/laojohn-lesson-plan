@@ -41,3 +41,7 @@ metadata:
 
 ### 引擎 · 2026-10-15 外移
 - [claude.ai 旧 skill 快照已删净(0920)](skill-snapshots-cloud-cleared-0920.md) — 三份 06 月快照连同 daily-post/picture-book-recommend 用户手动删除(有意);重名冲突根除,CLAUDE.md §5 警告块已压缩;⚠误用自查点(产物落 写作课输出\ 或文件名缺-第N单元-)日后再传 skill 仍管用
+
+### 读书会 · 2026-10-20 外移（已完成/已根治）
+- [旧版阅读单空框补提示·全部完成(1019)](worksheet-blank-box-fix-1019.md) — D:\00000读书会课案 二～六年级77页已修；产出在各书「阅读单优化后文件」同名；工具在 AppData\Local\laojohn-wsfix；3处待对原书核实
+- [读书会v9 PPT体积大·已根治(1011)](reading-ppt-v9-media-size-1011.md) — 病因=1536×2048无损PNG抠图;helpers._embed_source嵌图前缩1600+量化,九份回归结构全同;不必再事后shrink;大头儿子/神笔马良已事后瘦身(重烘会连版式一起变,别为瘦身重烘)
