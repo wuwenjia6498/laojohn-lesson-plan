@@ -75,12 +75,19 @@ function render(){
       card.appendChild(box);
     }
     const fields = document.createElement('div'); fields.className = 'fields';
+    // 可选 field_columns：卡内字段左右并排（如「左边抄原句·右边写画面」）；不给=上下排，存量不变
+    const fcols = c.field_columns || d.field_columns || 1;
+    if (fcols > 1) {
+      fields.style.display = 'grid';
+      fields.style.gridTemplateColumns = 'repeat(' + fcols + ', minmax(0, 1fr))';
+      fields.style.columnGap = '24px';
+    }
     (c.fields || []).forEach(f => {
       const row = document.createElement('div'); row.className = 'frow';
       const lab = document.createElement('div'); lab.className = 'flab'; lab.textContent = f.label || ''; row.appendChild(lab);
       if (cc) lab.style.color = cc;
       const pre = Array.isArray(f.value) ? f.value : (f.value ? [f.value] : []);
-      const n = f.lines || 1;
+      const n = Math.max(f.lines || 1, pre.length);   // 多行预填每项占一行（同 PPTX 引擎），不再截掉第 2 行起
       for (let i = 0; i < n; i++) {
         const ln = document.createElement('div'); ln.className = 'fline';
         if (d.line_height) ln.style.height = d.line_height + 'px';   // 书写行距（可选；缺省 38px）

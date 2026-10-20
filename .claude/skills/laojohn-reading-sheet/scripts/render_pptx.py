@@ -908,14 +908,21 @@ def render_profile(slide, d):
     cards = d.get("cards", [])
     LH = int(d.get("line_height") or 38)   # 书写行距（可选；缺省 38 = 存量不变）
 
+    def field_h(f):
+        if _has_val(f.get("value")):
+            arr = f["value"] if isinstance(f["value"], list) else [f["value"]]
+            return 22 + LH * len(arr) + 12
+        return 22 + LH * f.get("lines", 1) + 12
+
+    def fcols_of(c):   # 可选 field_columns：卡内字段左右并排（同 HTML）；不给=上下排
+        return max(1, int(c.get("field_columns") or d.get("field_columns") or 1))
+
+    def field_rows(c):
+        fs, k = c.get("fields", []), fcols_of(c)
+        return [fs[i:i + k] for i in range(0, len(fs), k)]
+
     def card_h_of(c):
-        fh = 0
-        for f in c.get("fields", []):
-            if _has_val(f.get("value")):
-                arr = f["value"] if isinstance(f["value"], list) else [f["value"]]
-                fh += 22 + LH * len(arr) + 12
-            else:
-                fh += 22 + LH * f.get("lines", 1) + 12
+        fh = sum(max(field_h(f) for f in r) for r in field_rows(c))
         box_h = (c["box"].get("h", 150) if c.get("box") else 0)
         return max(fh, box_h) + 40
 
@@ -951,26 +958,32 @@ def render_profile(slide, d):
             add_text(slide, cx0 + 22, y + 20, bw, bh, box.get("label", "画像 / 贴图"),
                      size=13, color="A9A18C", align="center", anchor="middle", tf=tf)
             fx = cx0 + 22 + bw + 22
-        fw = cx0 + cw - 22 - fx
-        fy = y + 20
-        for f in c.get("fields", []):
-            add_text(slide, fx, fy, fw, 22, f.get("label", ""), size=14, bold=True,
-                     color=c_lab, tf=tf)
-            fy += 24
-            if _has_val(f.get("value")):
-                arr = f["value"] if isinstance(f["value"], list) else [f["value"]]
-                for item in arr:
-                    add_text(slide, fx + 2, fy + LH - 30, fw - 4, 26, item, size=14,
-                             color="3A4A45", tf=tf)
-                    add_line(slide, fx, fy + LH - 4, fx + fw, fy + LH - 4, c_ln, 1.3,
-                             dash="sysDot", tf=tf)
-                    fy += LH
-            else:
-                for _ in range(f.get("lines", 1)):
-                    add_line(slide, fx, fy + LH - 8, fx + fw, fy + LH - 8, c_ln, 1.3,
-                             dash="sysDot", tf=tf)
-                    fy += LH
-            fy += 12
+        FGAP = 24
+        fk = fcols_of(c)
+        fw_all = cx0 + cw - 22 - fx
+        fw = (fw_all - (fk - 1) * FGAP) / fk
+        fx_base, ry = fx, y + 20
+        for frow in field_rows(c):
+            for fj, f in enumerate(frow):
+                fx = fx_base + fj * (fw + FGAP)
+                fy = ry
+                add_text(slide, fx, fy, fw, 22, f.get("label", ""), size=14, bold=True,
+                         color=c_lab, tf=tf)
+                fy += 24
+                if _has_val(f.get("value")):
+                    arr = f["value"] if isinstance(f["value"], list) else [f["value"]]
+                    for item in arr:
+                        add_text(slide, fx + 2, fy + LH - 30, fw - 4, 26, item, size=14,
+                                 color="3A4A45", tf=tf)
+                        add_line(slide, fx, fy + LH - 4, fx + fw, fy + LH - 4, c_ln, 1.3,
+                                 dash="sysDot", tf=tf)
+                        fy += LH
+                else:
+                    for _ in range(f.get("lines", 1)):
+                        add_line(slide, fx, fy + LH - 8, fx + fw, fy + LH - 8, c_ln, 1.3,
+                                 dash="sysDot", tf=tf)
+                        fy += LH
+            ry += max(field_h(f) for f in frow) + 2   # 实际画法标签占 24（card_h_of 按 22 计），保持存量逐像素不变
     y = y0 + natural
     footer(slide, d, key="note", y=min(y, 1075))
 
@@ -1421,7 +1434,25 @@ def _fit_tf(start_y, natural_h, bottom=1075):
     则仅压缩纵向（sx=1 保持字号/横向不变）。返回 TF。"""
     avail = bottom - start_y
     vk = min(1.0, avail / natural_h) if natural_h > 0 else 1.0
+    if vk < 0.999:
+        _SQUASHED.append(vk)       # 供 main() 的尺寸检查报出「被压扁」
     return TF(sx=1.0, sy=vk, tx=0.0, ty=start_y * (1 - vk))
+
+
+_SQUASHED = []   # 当前这页 _fit_tf 的纵向压缩系数（每页渲染前清空）
+
+
+def _overflow_shapes(slide, tol_px=2):
+    """画到纸外的元素：任一边越出 A4 页面超过 tol_px。"""
+    tol = A4_W_EMU / PAGE_W_PX * tol_px
+    W, H = A4_W_EMU, A4_H_EMU
+    out = []
+    for sh in slide.shapes:
+        if sh.left is None or sh.width is None:
+            continue
+        if sh.left < -tol or sh.top < -tol or sh.left + sh.width > W + tol or sh.top + sh.height > H + tol:
+            out.append(sh)
+    return out
 
 
 def render_radial(slide, d):
@@ -1586,6 +1617,7 @@ def main():
     blank = prs.slide_layouts[6]
 
     unknown = []
+    size_warn = []
     count = 0
     for s in sheets:
         if _is_demo(s["file"]):                     # 示范版已停产，自动跳过
@@ -1602,9 +1634,17 @@ def main():
                      size=18, color="B00020", align="center", anchor="middle")
             continue
         data = normalize_quotes(dict(s["data"]))
+        _SQUASHED.clear()
         renderer(slide, data)
         count += 1
         print("OK:", s["file"])
+        # 尺寸检查：纸面恒为 A4，真正要查的是内容「被纵向压扁」或「画到纸外」
+        if _SQUASHED:
+            size_warn.append(f"{s['file']}：内容放不下，已纵向压扁到 {min(_SQUASHED):.0%}（字号不变、间距变小）")
+        over = _overflow_shapes(slide)
+        if over:
+            lowest = max(sh.top + sh.height for sh in over) / A4_H_EMU * 297
+            size_warn.append(f"{s['file']}：{len(over)} 个元素画到纸外（最低到 {lowest:.0f}mm，A4 高 297mm）")
 
     out_path = out_dir / f"{book}-阅读单.pptx"
     try:
@@ -1614,6 +1654,12 @@ def main():
         prs.save(str(out_path))
         sys.stderr.write(f"[warn] 目标被占用，已改写 {out_path.name}\n")
     print(f"\n完成 {count} 页 → {out_path}")
+    if size_warn:   # 只报不拦，提醒去调排法（同 render.py 尺寸检查）
+        print(f"\n⚠ 尺寸检查：{len(size_warn)} 页内容装不进 A4，需调排法：")
+        for w in size_warn:
+            print("   -", w)
+    else:
+        print("尺寸检查：全部装得进 A4 ✓")
     if unknown:
         sys.stderr.write("[warn] 以下模板无 PPTX renderer（已占位提示，需补）：\n")
         for f, k in unknown:

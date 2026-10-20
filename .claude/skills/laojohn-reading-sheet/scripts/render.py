@@ -47,6 +47,7 @@ os.environ.setdefault(
 )
 
 A4_W, A4_H = 794, 1123          # 竖版 A4（默认）
+FIT_MIN_BOTTOM = 24             # 自动收回 A4 时，内容底边距纸底至少留这么多（≈6mm，过打印机边距）
 VIEW_W = 1280                   # 渲染视口宽（容得下横版模板，竖版固定宽不受影响）
 
 # 直角引号 → 规范弯引号：「」→“”（双）、『』→‘’（嵌套单）。
@@ -199,6 +200,7 @@ def main():
     sheets = manifest.get("sheets", [])
     logo = load_logo()
     rendered_pdf = {}            # file 名 → 实际写出的 PDF 路径（供合册）
+    size_warn = []               # 不是标准 A4 的单子（渲完统一报出）
 
     from playwright.sync_api import sync_playwright
     with sync_playwright() as p:
@@ -228,11 +230,34 @@ def main():
                 "() => {const p=document.getElementById('page');"
                 "return {w: Math.ceil(p.getBoundingClientRect().width),"
                 " h: Math.ceil(p.scrollHeight)};}")
+            if box["w"] <= A4_W + 1 and box["h"] > A4_H:
+                # 超出的只是 #page 底部 padding（留白）时自动收回 A4：量最下面一个可见元素的底边，
+                # 离 A4 底 ≥ FIT_MIN_BOTTOM 就把 #page 定高 A4_H 并裁掉多出的留白（不缩放、不动内容）
+                content_bottom = page.evaluate(
+                    "() => {const p=document.getElementById('page');"
+                    "const top=p.getBoundingClientRect().top; let b=0;"
+                    "p.querySelectorAll('*').forEach(e=>{const r=e.getBoundingClientRect();"
+                    "if(r.width>0&&r.height>0){const cs=getComputedStyle(e);"
+                    "if(cs.display!=='none'&&cs.visibility!=='hidden') b=Math.max(b,r.bottom-top);}});"
+                    "return Math.ceil(b);}")
+                if content_bottom <= A4_H - FIT_MIN_BOTTOM:
+                    page.evaluate(
+                        f"() => {{const p=document.getElementById('page');"
+                        f"p.style.minHeight='{A4_H}px';p.style.height='{A4_H}px';p.style.overflow='hidden';}}")
+                    print(f"   收掉底部留白 {box['h'] - A4_H}px → 标准 A4：{s['file']}")
+                    box["h"] = A4_H
             if box["w"] <= A4_W + 1:                 # 竖版 A4
                 # 装得下一页就出标准 A4；#page 自带 min-height=A4_H，旧写法恒 +16 会让每张都变成 1140px
                 pw, ph = A4_W, (A4_H if box["h"] <= A4_H else box["h"] + 16)
+                if box["h"] > A4_H:
+                    size_warn.append(
+                        f"{s['file']}：内容高 {box['h']}px，超出竖版 A4（{A4_H}px）"
+                        f"{box['h'] - A4_H}px → PDF 被撑成 210×{ph * 25.4 / 96:.0f}mm")
             else:                                     # 横版（模板自带更宽 #page）
                 pw, ph = box["w"], box["h"]
+                if abs(pw - A4_H) > 1 or abs(ph - A4_W) > 1:
+                    size_warn.append(
+                        f"{s['file']}：横版页面 {pw}×{ph}px，不是横向 A4（{A4_H}×{A4_W}px）")
             written = safe_pdf(page, out_dir / (s["file"] + ".pdf"), pw, ph)
             rendered_pdf[s["file"]] = out_dir / written
             if want_png:
@@ -242,6 +267,12 @@ def main():
             print("OK:", s["file"])
         browser.close()
     print(f"\n完成 {len(rendered_pdf)} 张 → {out_dir}")
+    if size_warn:   # 尺寸闸门：只报不拦，提醒去调排法（减行高/改列数），别靠事后缩放兜底
+        print(f"\n⚠ 尺寸检查：{len(size_warn)} 张不是标准 A4，需调排法：")
+        for w in size_warn:
+            print("   -", w)
+    else:
+        print("尺寸检查：全部为标准 A4 ✓")
 
     if want_bundle:
         try:
