@@ -47,11 +47,23 @@ function mark(e){ e.setAttribute('data-answer','1'); e.setAttribute('data-order'
 // 长椭圆几何（竖版）：两枚等大竖向长椭圆左右交叠。
 // 左/右「独有区」在任一高度上的水平宽度恒为 CX2-CX1，所以书写线可随椭圆边缘平移、
 // 始终保持满宽——这是把书写空间做大的关键（旧版正圆 + 固定 x 只能取最窄处）。
-const CX1=266, CX2=528, CY=466, RX=244, RY=400;
-const GAP_LINE = 48;      // 同一维度内两条书写线的行距
-const GAP_ROW  = 94;      // 维度与维度之间的留白
-const L_SIDE   = 3;       // 左/右独有区每个维度给几条书写线
-const L_CENTER = 2;       // 交叠区每个维度给几条书写线
+// 下列几何可由 manifest 可选字段覆盖（缺省=历史值，存量逐字不变；render_pptx.render_venn 同口径）：
+//   cx_gap 两椭圆圆心距(262，越小交叠区越宽、独有区越窄) / rx 椭圆横半径(244，上限按页宽收) /
+//   gap_line 书写线行距(48) / gap_row 维度间留白(94) / side_lines 独有区每维度线数(3) / center_lines 交叠区每维度线数(2)
+let CX1=266, CX2=528, RX=244;
+const CY=466, RY=400;
+let GAP_LINE = 48;      // 同一维度内两条书写线的行距
+let GAP_ROW  = 94;      // 维度与维度之间的留白
+let L_SIDE   = 3;       // 左/右独有区每个维度给几条书写线
+let L_CENTER = 2;       // 交叠区每个维度给几条书写线
+function applyGeom(d){
+  const num = (v, dft) => (typeof v === 'number') ? v : dft;
+  const gap = num(d.cx_gap, 262);
+  CX1 = 397 - gap / 2; CX2 = 397 + gap / 2;
+  RX = Math.min(num(d.rx, 244), 397 - gap / 2 - 8);
+  GAP_LINE = num(d.gap_line, 48); GAP_ROW = num(d.gap_row, 94);
+  L_SIDE = num(d.side_lines, 3); L_CENTER = num(d.center_lines, 2);
+}
 const MARKS = ["①","②","③","④","⑤","⑥"];
 
 function kAt(y){ const t=(y-CY)/RY; const v=1-t*t; return v>0 ? Math.sqrt(v) : 0; }
@@ -132,6 +144,7 @@ function render(){
   const foot = document.getElementById('foot');
   if (d.footer) foot.textContent = d.footer; else foot.style.display='none';
 
+  applyGeom(d);
   const svg = document.getElementById('svg');
   svg.appendChild(el("ellipse",{cx:CX1,cy:CY,rx:RX,ry:RY,fill:"#7FA86A","fill-opacity":0.26,stroke:"#6E9457","stroke-width":2}));
   svg.appendChild(el("ellipse",{cx:CX2,cy:CY,rx:RX,ry:RY,fill:"#D8B24E","fill-opacity":0.24,stroke:"#C29A38","stroke-width":2}));

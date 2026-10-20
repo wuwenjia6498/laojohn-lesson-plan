@@ -59,7 +59,13 @@ let __AO = 0;
 function mark(e){ e.setAttribute('data-answer','1'); e.setAttribute('data-order', __AO++); return e; }
 const PALETTE = ["#A8504F","#D9883A","#C49B3E","#4E8C7D","#5B7FA6","#8268A0","#7A8C3A"];
 
-const X_L = 110, X_R = 1013, Y_BASE = 580, AMP = 360;
+const X_L = 110, X_R = 1013;
+// 可选几何参数（manifest 传入；缺省=历史值，存量逐字不变）：
+//   y_base 山脚 y(580) / amp 山高(缺省 360，给了 box_h 时自动压低到峰顶框不出画布) /
+//   box_h 框高(150，steps[i].box_h 单框覆盖) / box_w 框宽(176，不超过相邻间距-12) /
+//   lines 框内书写线条数(3，steps[i].lines 覆盖) / line_gap 书写线间距(34) /
+//   chapter_label 框底单独一行「标章」小标签(如 "章："，缺省不画)
+let Y_BASE = 580, AMP = 360;
 function render(){
   __AO = 0;
   const d = DATA;
@@ -73,7 +79,10 @@ function render(){
   const steps = d.steps || [];
   const n = steps.length;
   // 框宽随阶数自适应：阶多则收窄，杜绝峰顶相邻框贴连（6 阶常见）
-  const BOX_W = Math.min(176, Math.floor((X_R - X_L) / Math.max(1, n - 1)) - 12);
+  const BOX_W = Math.min(d.box_w || 176, Math.floor((X_R - X_L) / Math.max(1, n - 1)) - 12);
+  const BOX_H = d.box_h || 150;
+  const boxHOf = st => st.box_h || BOX_H;
+  const LINE_GAP = d.line_gap || 34;
 
   // 峰顶节点：优先认 header 含「高潮 / climax」，否则取偏后约 60% 处；可用 d.peak 指定索引
   let peakIdx = (typeof d.peak === 'number')
@@ -81,6 +90,12 @@ function render(){
     : steps.findIndex(s => /高潮|climax/i.test(s.header || ''));
   if(peakIdx < 0) peakIdx = Math.round((n - 1) * 0.6);
   peakIdx = Math.max(0, Math.min(n - 1, peakIdx));
+  Y_BASE = (typeof d.y_base === 'number') ? d.y_base : 580;
+  if (typeof d.amp === 'number') AMP = d.amp;
+  else {
+    const peakH = n ? boxHOf(steps[peakIdx]) : BOX_H;
+    AMP = Math.min(360, Y_BASE - 18 - peakH - 4);
+  }
 
   // 节点坐标：x 等距；y 让「峰顶」单独最高——上坡 0→1、下坡 1→0，单峰才像故事山
   const pos = [];
@@ -113,7 +128,7 @@ function render(){
     // 节点圆点
     svg.appendChild(el("circle",{cx:p.x, cy:p.y, r:6, fill:"#FFFFFF", stroke:color, "stroke-width":3}));
     // 框：位于节点上方，短连接线
-    const boxH = 150;
+    const boxH = boxHOf(st);
     const bx = Math.max(8, Math.min(1123-8-BOX_W, p.x - BOX_W/2));
     const by = p.y - 18 - boxH;
     svg.appendChild(el("line",{x1:p.x, y1:p.y-6, x2:p.x, y2:by+boxH, stroke:color, "stroke-width":1.6, "stroke-opacity":0.6}));
@@ -132,7 +147,14 @@ function render(){
       lines.forEach((ln,li)=>{ const t=el("text",{x:bx+8, y:by+48+li*22, class:"ftxt"}); t.textContent=ln; g.appendChild(t); });
       svg.appendChild(g);
     } else {
-      for(let k=0;k<3;k++){ const ly=by+52+k*34; svg.appendChild(el("line",{x1:bx+8, y1:ly, x2:bx+BOX_W-8, y2:ly, stroke:"#CFC8BA", "stroke-width":1.2})); }
+      const nl = (typeof st.lines === 'number') ? st.lines : ((typeof d.lines === 'number') ? d.lines : 3);
+      for(let k=0;k<nl;k++){ const ly=by+52+k*LINE_GAP; svg.appendChild(el("line",{x1:bx+8, y1:ly, x2:bx+BOX_W-8, y2:ly, stroke:"#CFC8BA", "stroke-width":1.2})); }
+      if(d.chapter_label){
+        const cy = by + boxH - 12;
+        const ct = el("text",{x:bx+8, y:cy-4, class:"ftxt", style:"fill:"+color+";font-weight:700"}); ct.textContent = d.chapter_label; svg.appendChild(ct);
+        const lw = 15 * String(d.chapter_label).length + 6;
+        svg.appendChild(el("line",{x1:bx+8+lw, y1:cy, x2:bx+BOX_W-8, y2:cy, stroke:color, "stroke-width":1.2, "stroke-opacity":0.7}));
+      }
     }
   });
   document.body.dataset.rendered = '1';

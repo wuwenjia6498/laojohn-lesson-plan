@@ -398,8 +398,13 @@ def render_venn(slide, d):
     # 几何与书写线布局须与 templates/template_venn.html 保持一致（改一处改两处）
     header(slide, d, title_px=66, title_size=26, sub_px=110, title_color="4A4A42")
     OFF = 186                                       # svg top:186
-    CX1, CX2, CY, RX, RY = 266, 528, 466, 244, 400
-    GAP_LINE, GAP_ROW, L_SIDE, L_CENTER = 48, 94, 3, 2
+    # 可选几何字段与 template_venn.html applyGeom() 同口径（缺省=历史值）
+    _n = lambda k, dft: d[k] if isinstance(d.get(k), (int, float)) else dft
+    gap = _n("cx_gap", 262)
+    CX1, CX2, CY, RY = 397 - gap / 2, 397 + gap / 2, 466, 400
+    RX = min(_n("rx", 244), 397 - gap / 2 - 8)
+    GAP_LINE, GAP_ROW = _n("gap_line", 48), _n("gap_row", 94)
+    L_SIDE, L_CENTER = int(_n("side_lines", 3)), int(_n("center_lines", 2))
     MARKS = ["①", "②", "③", "④", "⑤", "⑥"]
     add_oval(slide, CX1 - RX, CY - RY + OFF, 2 * RX, 2 * RY, fill="7FA86A", alpha=26,
              line="6E9457", line_w=1.5)
@@ -611,12 +616,14 @@ def render_story_mountain(slide, d):
     header(slide, d, title_px=74, title_size=23, sub_px=116)
     steps = d.get("steps", [])
     n = len(steps)
-    X_L, X_R, Y_BASE, AMP = 110, 1013, 580, 360
+    # 可选几何参数与 template_story_mountain.html 同口径（缺省=历史值，存量不变）
+    X_L, X_R = 110, 1013
     k = (PAGE_W_PX - 28) / 1123.0
-    # 峰顶框顶 native≈52(=Y_BASE-AMP-18-150)；让它落到标题下方 page y≈150
-    tf = TF(sx=k, sy=k, tx=14, ty=150 - k * 52)
     PALETTE = ["#A8504F", "#D9883A", "#C49B3E", "#4E8C7D", "#5B7FA6", "#8268A0", "#7A8C3A"]
-    BOX_W = min(176, (X_R - X_L) // max(1, n - 1) - 12)
+    BOX_W = min(d.get("box_w") or 176, (X_R - X_L) // max(1, n - 1) - 12)
+    BOX_H = d.get("box_h") or 150
+    LINE_GAP = d.get("line_gap") or 34
+    box_h_of = lambda st: st.get("box_h") or BOX_H
     peak = d.get("peak")
     if not isinstance(peak, int):
         peak = next((i for i, s in enumerate(steps)
@@ -624,6 +631,29 @@ def render_story_mountain(slide, d):
         if peak < 0:
             peak = round((n - 1) * 0.6)
     peak = max(0, min(n - 1, peak))
+    Y_BASE = d["y_base"] if isinstance(d.get("y_base"), (int, float)) else 580
+    if isinstance(d.get("amp"), (int, float)):
+        AMP = d["amp"]
+    else:
+        peak_h = box_h_of(steps[peak]) if n else BOX_H
+        AMP = min(360, Y_BASE - 18 - peak_h - 4)
+    # 最高框顶（缺省=峰顶框 native≈52）落到标题下方 page y≈150
+    top_native = 52
+    if n:
+        import math as _m
+        tops = []
+        for i, st in enumerate(steps):
+            t = i / (n - 1) if n > 1 else 0.5
+            if i <= peak:
+                fr = i / peak if peak > 0 else 1
+            else:
+                fr = (n - 1 - i) / (n - 1 - peak) if (n - 1 - peak) > 0 else 1
+            tops.append(round(Y_BASE - AMP * _m.sin(fr * _m.pi / 2)) - 18 - box_h_of(st))
+        top_native = min(tops)
+    # 内容超高时整体缩小以免出页（缺省几何不触发）
+    span = (Y_BASE + 4) - top_native
+    k = min(k, (1060 - 150) / span) if span > 0 else k
+    tf = TF(sx=k, sy=k, tx=(PAGE_W_PX - 1123 * k) / 2, ty=150 - k * top_native)
     import math
     pos = []
     for i in range(n):
@@ -643,7 +673,7 @@ def render_story_mountain(slide, d):
     for i, st in enumerate(steps):
         px, py = pos[i]
         color = PALETTE[i % len(PALETTE)]
-        boxH = 150
+        boxH = box_h_of(st)
         bx = max(8, min(1123 - 8 - BOX_W, px - BOX_W / 2))
         by = py - 18 - boxH
         add_oval(slide, px - 6, py - 6, 12, 12, fill="FFFFFF", line=color, line_w=3, tf=tf)
@@ -659,9 +689,18 @@ def render_story_mountain(slide, d):
             add_text(slide, bx + 8, by + 34, BOX_W - 16, boxH - 40, txt, size=13,
                      color="3A3A33", line_spacing=1.4, tf=tf)
         else:
-            for kk in range(3):
-                ly = by + 52 + kk * 34
+            nl = st["lines"] if isinstance(st.get("lines"), int) else (
+                d["lines"] if isinstance(d.get("lines"), int) else 3)
+            for kk in range(nl):
+                ly = by + 52 + kk * LINE_GAP
                 add_line(slide, bx + 8, ly, bx + BOX_W - 8, ly, "CFC8BA", 1.2, tf=tf)
+            if d.get("chapter_label"):
+                cy = by + boxH - 12
+                lab = str(d["chapter_label"])
+                lw = 15 * len(lab) + 6
+                add_text(slide, bx + 6, cy - 22, lw + 10, 22, lab, size=13, bold=True,
+                         color=color.lstrip("#"), tf=tf)
+                add_line(slide, bx + 8 + lw, cy, bx + BOX_W - 8, cy, color.lstrip("#"), 1.2, tf=tf)
     footer(slide, d, key="footer", y=1080)
 
 
