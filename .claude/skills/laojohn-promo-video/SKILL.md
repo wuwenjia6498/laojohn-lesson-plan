@@ -34,7 +34,7 @@ description: 把一个课次/一本书做成给家长看的 9:16 竖屏宣传短
 
 `<线>` 取 `写作课` / `读书会` / `看图写话`；`<课次>` 写作课沿用 `<年级册>-第N单元-<题目>`，读书会用书名（不带书名号），看图写话用课次目录名。
 
-**输出不在本仓**（2026-10-20 起）：写到姊妹仓 my-Workspace 的 `04-projects\video\`（下称视频根），按线分目录——读书会 `dushuhui-video\`、写作课 `writing-video\`、看图写话 `picturewriting-video\`，每课次一个 `ai-promo\<课次>\`。对照表在 `scripts\_shared.py` 的 `LINE_DIR`。
+**输出不在本仓**（2026-10-20 起）：写到姊妹仓 my-Workspace 的 `04-projects\video\`（下称视频根），按线分目录——读书会 `dushuhui-video\`、写作课 `writing-video\`、看图写话 `picturewriting-video\`（目前没有，出第一支时再建），每课次一个 `ai-promo\<课次>\`。对照表在 `scripts\_shared.py` 的 `LINE_DIR`。
 - 视频根不写死盘符：环境变量 `PROMO_VIDEO_ROOT`，或 `scripts\promo.config.json`（gitignored，每台机器各配）里写 `{"PROMO_VIDEO_ROOT": "…\\my-Workspace\\04-projects\\video"}`。没配就报错，不会悄悄写回本仓。
 - 脚本里引用输出目录里的文件（如 `_screen\` 截图）用 `video:<相对视频根的路径>`；`repo:` 仍指本仓（书籍档案、原书插图、海报插画、配乐）。
 - 生成仍由本 skill 驱动，台词情节只取本仓的书籍档案和详案。脚本、storyboard 等源文件在 my-Workspace 入库，提交也在那边。
