@@ -9,10 +9,14 @@ r"""宣传短视频线的公共层：路径、素材解析、共享件薄壳。
 素材引用写法（脚本 json 里 visual.src）：
     repo:<相对项目根的路径>        本仓文件，如 repo:写作课海报输出/…/…-插画.jpg
     assets:<相对素材库根的路径>    外部素材库，如 assets:专注书写/专注书写 (19).jpg
+    video:<相对视频根的路径>       输出目录里的文件，如 video:dushuhui-video/ai-promo/稻草人/_screen/x.png
     card:<卡片名>                  由 render_promo 按 visual.card 现渲的图文卡
 
-素材库根**不写死盘符**（项目与素材库都在移动硬盘，CLAUDE.md §1）：
-    环境变量 PROMO_ASSETS_ROOT  →  scripts\promo.config.json 的同名键（gitignored）
+输出不在本仓：2026-10-20 起写到姊妹仓 my-Workspace 的 04-projects\video\ 下，
+按线分目录（LINE_DIR），每课次一个 <线目录>\ai-promo\<课次>\。
+
+素材库根、视频根都**不写死盘符**（项目与素材库都在移动硬盘，CLAUDE.md §1）：
+    环境变量 PROMO_ASSETS_ROOT / PROMO_VIDEO_ROOT  →  scripts\promo.config.json 的同名键（gitignored）
 库里文件名是 Windows 去重式 `分类 (n).jpg`，重扫一次编号就会变——所以每张图在
 脚本里钉 md5，渲染前核对，对不上就报错，绝不静默换图。
 """
@@ -40,7 +44,7 @@ def project_root():
 
 ROOT = project_root()
 LV = os.path.join(ROOT, ".claude", "skills", "laojohn-lesson-video", "scripts")
-OUT_BASE = os.path.join(ROOT, "宣传短视频输出")
+LINE_DIR = {"读书会": "dushuhui-video", "写作课": "writing-video", "看图写话": "picturewriting-video"}
 PRESENTER_BASE = os.path.join(ROOT, "品牌资产", "宣传片讲解员")
 
 
@@ -83,16 +87,28 @@ def assets_root():
     return r
 
 
+def video_root():
+    r = os.environ.get("PROMO_VIDEO_ROOT") or _config().get("PROMO_VIDEO_ROOT")
+    if not r:
+        raise SystemExit("未设视频根：环境变量 PROMO_VIDEO_ROOT，或在 scripts\\promo.config.json 写 "
+                         "{\"PROMO_VIDEO_ROOT\": \"…\\my-Workspace\\04-projects\\video\"}")
+    if not os.path.isdir(r):
+        raise SystemExit("视频根不存在：%s（my-Workspace 换了位置或盘符？）" % r)
+    return r
+
+
 def resolve(src):
-    """repo:/assets: → 绝对路径；card: 返回 None（由渲染器现渲）。"""
+    """repo:/assets:/video: → 绝对路径；card: 返回 None（由渲染器现渲）。"""
     kind, _, rel = src.partition(":")
     if kind == "repo":
         return os.path.join(ROOT, rel)
     if kind == "assets":
         return os.path.join(assets_root(), rel)
+    if kind == "video":
+        return os.path.join(video_root(), rel)
     if kind == "card":
         return None
-    raise SystemExit("素材写法不认识：%s（只认 repo:/assets:/card:）" % src)
+    raise SystemExit("素材写法不认识：%s（只认 repo:/assets:/video:/card:）" % src)
 
 
 def md5_of(path):
@@ -104,7 +120,9 @@ def md5_of(path):
 
 
 def out_dir(line, unit):
-    return os.path.join(OUT_BASE, line, unit)
+    if line not in LINE_DIR:
+        raise SystemExit("线名不认识：%s（只认 %s）" % (line, " / ".join(LINE_DIR)))
+    return os.path.join(video_root(), LINE_DIR[line], "ai-promo", unit)
 
 
 def script_path(line, unit):

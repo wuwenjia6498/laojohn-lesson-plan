@@ -23,7 +23,7 @@ description: 把一个课次/一本书做成给家长看的 9:16 竖屏宣传短
 | 步 | 谁做 | 产出 |
 |---|---|---|
 | 0 定妆（一次） | `build_presenter.py init / voice / confirm` | `品牌资产\宣传片讲解员\<名>\`（人像、场景、音色参考、档案.json） |
-| 1 写脚本 | **AI（本会话）**按下方规则写台词、每段 `shots` 与穿插 | `宣传短视频输出\<线>\<课次>\<课次>-宣传片脚本.json` |
+| 1 写脚本 | **AI（本会话）**按下方规则写台词、每段 `shots` 与穿插 | `<视频根>\<线目录>\ai-promo\<课次>\<课次>-宣传片脚本.json` |
 | 2 机检＋钉图 | `check_script.py <线> <课次> --pin` | 穿插素材 md5 写回脚本 |
 | 闸门 A | 用户看过脚本 → `check_script.py … --by <人>` | `meta.audit` |
 | 3 提示词 | `h3_prompt.py <线> <课次>` | `storyboard.json`、`_prompts\sNN.txt`（Ref2VA 六段式） |
@@ -34,7 +34,11 @@ description: 把一个课次/一本书做成给家长看的 9:16 竖屏宣传短
 
 `<线>` 取 `写作课` / `读书会` / `看图写话`；`<课次>` 写作课沿用 `<年级册>-第N单元-<题目>`，读书会用书名（不带书名号），看图写话用课次目录名。
 
-输出留在本仓 `宣传短视频输出\`，跟着书籍档案和详案走，不搬去别处。手工做的品牌片、荐书片、节日片在姊妹仓 my-Workspace 的 `04-projects\video\`，那里的 `README.md` 是全部视频的总览。第 5 步出了成片后，在那份总览的「现有成片清单」里补一行。
+**输出不在本仓**（2026-10-20 起）：写到姊妹仓 my-Workspace 的 `04-projects\video\`（下称视频根），按线分目录——读书会 `dushuhui-video\`、写作课 `writing-video\`、看图写话 `picturewriting-video\`，每课次一个 `ai-promo\<课次>\`。对照表在 `scripts\_shared.py` 的 `LINE_DIR`。
+- 视频根不写死盘符：环境变量 `PROMO_VIDEO_ROOT`，或 `scripts\promo.config.json`（gitignored，每台机器各配）里写 `{"PROMO_VIDEO_ROOT": "…\\my-Workspace\\04-projects\\video"}`。没配就报错，不会悄悄写回本仓。
+- 脚本里引用输出目录里的文件（如 `_screen\` 截图）用 `video:<相对视频根的路径>`；`repo:` 仍指本仓（书籍档案、原书插图、海报插画、配乐）。
+- 生成仍由本 skill 驱动，台词情节只取本仓的书籍档案和详案。脚本、storyboard 等源文件在 my-Workspace 入库，提交也在那边。
+- 视频根下的 `README.md` 是全部视频的总览；第 5 步出了成片后，在它的「AI 讲解员宣传片」清单里补一行。
 
 ## 脚本规则（写 json 前必读）
 
