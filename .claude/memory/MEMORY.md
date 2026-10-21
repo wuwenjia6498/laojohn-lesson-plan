@@ -125,7 +125,7 @@
 - 写作线 0913 通读审计第四档（多处完整判据去重、technique-levels/SKILL/rubric 九来历下沉）未做，等两三篇新稿后再清 — [清单](writing-line-audit-0913-remaining.md)
 - 神笔马良详案【作者介绍】动画片/国际大奖/其他作品等生平档案无据（物料已避开），待用户定改不改；「马良一惊」段已降为复述 — [详情](shenbi-maliang-lesson-plan-state.md)
 - **⚠ 阅读单线 18 份 PDF 的 Type3 字体遗留未修** — [详情](pdf-type3-fonts-fixed.md)
-- 彼得·潘档案 line23/32 与机读块不一致待清理 — [详情](peterpan-book-profile-state.md)｜封面图缺(汉修先生/呼兰河传/骑鹅旅行记,骑鹅须补图重跑)·快乐王子下游未做·快乐读书吧6本已建2本余4本
+- 彼得·潘档案 line23/32 与机读块不一致待清理 — [详情](peterpan-book-profile-state.md)｜封面图缺(汉修先生/呼兰河传)·快乐王子下游未做·快乐读书吧6本已建2本余4本
 - **⚠三处「单元被搬空」待核实**:四下八、五下七、六下五(已标「待定」占位);两道全新题《我最喜爱的季节》《传承好家风》archive零命中待教材页;总地图docx仍是旧口径 — [详情](textbook-2026-five-retitles-0914.md)
 - 《推荐一个好地方》两处详案↔PPT微差未拍板 · writing 竞品借鉴 D3–D5/N1 待做 · ppt-profile Phase3 待办
 - 五上三故事新编批改标准包未开工(PPT/docx回贴0917已收官,见归档索引)｜我来编童话PPT六类页须外部重做+Vercel未重部署 — [详情](textbook-revision-same-title-new-page-0902.md)｜漫画老师0820对方改动未合入 — [详情](manhua-laoshi-5a-lesson-state.md)
