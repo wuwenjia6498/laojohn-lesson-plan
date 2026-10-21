@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<!-- 左右连线题：左列 N 个词卡（右侧带圆点）、右列 M 个词卡（左侧带圆点），中间留白给学生画线。
+     低年级「连一连」最常见的样子；不画表格线。左右两列各自等距铺满正文区，数量可以不等。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #page { width: 794px; height: 1123px; background: #FFFFFF; position: relative; overflow: hidden; }
+  .brand-logo { position: absolute; top: 32px; right: 42px; height: 48px; }
+  .variant-tag { position: absolute; top: 36px; left: 46px; font-size: 13px; color: #B3A98F; letter-spacing: 1px; }
+  .l-title { position: absolute; top: 110px; left: 0; width: 100%; text-align: center;
+    font-size: 23px; font-weight: 700; color: #333; padding: 0 56px; line-height: 1.4; }
+  .l-sub { position: absolute; top: 154px; left: 0; width: 100%; text-align: center; font-size: 15px; color: #8A8268; }
+  .l-foot { position: absolute; bottom: 28px; left: 0; width: 100%; text-align: left; font-size: 14px; color: #9A937F; padding: 0 40px; }
+  .col-head { position: absolute; top: 226px; width: 230px; height: 40px; line-height: 40px; text-align: center;
+    font-size: 17px; font-weight: 700; color: #FFFFFF; border-radius: 20px; }
+  .card { position: absolute; width: 230px; height: 72px; display: flex; align-items: center; justify-content: center;
+    border: 2px solid; border-radius: 14px; font-size: 21px; font-weight: 600; color: #3A3A33; text-align: center;
+    padding: 0 14px; line-height: 1.3; }
+  .dot { position: absolute; width: 18px; height: 18px; border-radius: 50%; }
+</style>
+</head>
+<body>
+<div id="page">
+  <img class="brand-logo" id="logo">
+  <div class="variant-tag" id="variantTag"></div>
+  <div class="l-title" id="title"></div>
+  <div class="l-sub" id="subtitle"></div>
+  <div class="l-foot" id="foot"></div>
+</div>
+<script>
+const DATA = /*__DATA__*/ null;
+// 版式常量（render_pptx.py 的 render_match 照抄同一组数）
+const LX = 80, RX = 484, CW = 230, CH = 72, TOP = 300, BOTTOM = 1040;
+function render(){
+  const d = DATA;
+  document.getElementById('logo').src = d.logo;
+  document.getElementById('title').textContent = d.title || '';
+  const sub = document.getElementById('subtitle'); if(d.subtitle) sub.textContent = d.subtitle; else sub.style.display='none';
+  const tag = document.getElementById('variantTag'); if(d.variant) tag.textContent = d.variant; else tag.style.display='none';
+  const foot = document.getElementById('foot'); if(d.footer) foot.textContent = d.footer; else foot.style.display='none';
+  const page = document.getElementById('page');
+  const lc = d.left_color || '#4E9A6E', rc = d.right_color || '#C18A3A';
+
+  function head(x, text, color){
+    if(!text) return;
+    const h = document.createElement('div'); h.className = 'col-head';
+    h.style.left = x + 'px'; h.style.background = color; h.textContent = text; page.appendChild(h);
+  }
+  head(LX, d.left_title, lc); head(RX, d.right_title, rc);
+
+  function column(items, x, color, dotSide){
+    const n = items.length; if(!n) return;
+    const step = (BOTTOM - TOP - CH) / Math.max(n - 1, 1);
+    items.forEach((t, i) => {
+      const y = n === 1 ? TOP + (BOTTOM - TOP - CH) / 2 : TOP + i * step;
+      const c = document.createElement('div'); c.className = 'card';
+      c.style.left = x + 'px'; c.style.top = Math.round(y) + 'px';
+      c.style.borderColor = color; c.style.background = color + '14';
+      c.textContent = t; page.appendChild(c);
+      const dot = document.createElement('div'); dot.className = 'dot'; dot.style.background = color;
+      dot.style.left = (dotSide === 'right' ? x + CW + 14 : x - 32) + 'px';
+      dot.style.top = Math.round(y + CH / 2 - 9) + 'px';
+      page.appendChild(dot);
+    });
+  }
+  column(d.left || [], LX, lc, 'right');
+  column(d.right || [], RX, rc, 'left');
+  document.body.dataset.rendered = '1';
+}
+render();
+</script>
+</body>
+</html>

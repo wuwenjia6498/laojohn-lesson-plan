@@ -388,7 +388,9 @@ def render_table(slide, d):
                 fill, fg, bold = "EAF1E2", "3C5232", True
             else:
                 fill, fg, bold = ("F6F4EF" if zebra else "FFFFFF"), "333333", False
-            _style_cell(table.cell(r + 1, c), txt, fill=fill, fg=fg, size=14, bold=bold)
+            ctr = c in (d.get("center_cols") or [])   # 可选：短词列居中
+            _style_cell(table.cell(r + 1, c), txt, fill=fill, fg=fg, size=14, bold=bold,
+                        align="center" if ctr else "left", anchor="middle" if ctr else "top")
 
     # note 放页底固定位（表格实际高度受 PowerPoint 自动撑行影响、难精确预估）
     footer(slide, d, key="note", color="8A8175", y=1085)
@@ -1100,6 +1102,9 @@ def render_facets(slide, d):
     cardW = (PAGE_W_PX - 2 * PAD - (cols - 1) * GAP) / cols
     HEAD_H, Q_H, LINE_H = 36, 39, 56
     max_lines = max([(f.get("lines", d.get("lines", 3))) for f in facets] or [3])
+    # question 可省（题干写进副标题）：全部省略时收回题干位高度
+    if not any(f.get("question") for f in facets):
+        Q_H = -8
     cardH = HEAD_H + 8 + Q_H + 8 + max_lines * LINE_H + 10
     for i, f in enumerate(facets):
         r, c = divmod(i, cols)
@@ -1117,8 +1122,9 @@ def render_facets(slide, d):
             add_text(slide, x + cardW - 64, y + 10, 52, 18,
                      f.get("required_label", "必写"), size=11, bold=True,
                      color=color, align="center")
-        add_text(slide, x + 12, y + HEAD_H + 6, cardW - 24, Q_H + 6,
-                 f.get("question", ""), size=13, color="6E6656", line_spacing=1.4)
+        if f.get("question"):
+            add_text(slide, x + 12, y + HEAD_H + 6, cardW - 24, Q_H + 6,
+                     f.get("question", ""), size=13, color="6E6656", line_spacing=1.4)
         val = f.get("value")
         vals = val if isinstance(val, list) else ([val] if val else [])
         body_y = y + HEAD_H + 8 + Q_H + 8
@@ -1608,8 +1614,39 @@ def render_tree(slide, d):
     footer(slide, d, key="footer", y=1064)
 
 
+def render_match(slide, d):
+    """左右连线题——照搬 template_match.html 的版式常量。"""
+    header(slide, d, title_px=74, title_size=23, sub_px=116)
+    LX, RX, CW, CH, TOP, BOTTOM = 80, 484, 230, 72, 300, 1040
+    lc = (d.get("left_color") or "#4E9A6E").lstrip("#")
+    rc = (d.get("right_color") or "#C18A3A").lstrip("#")
+    for x, t, c in ((LX, d.get("left_title"), lc), (RX, d.get("right_title"), rc)):
+        if t:
+            add_round_rect(slide, x, 226, CW, 40, radius=0.5, fill=c)
+            add_text(slide, x, 226, CW, 40, t, size=17, bold=True, color="FFFFFF",
+                     align="center", anchor="middle")
+
+    def column(items, x, c, dot_right):
+        n = len(items)
+        if not n:
+            return
+        step = (BOTTOM - TOP - CH) / max(n - 1, 1)
+        for i, t in enumerate(items):
+            y = TOP + (BOTTOM - TOP - CH) / 2 if n == 1 else TOP + i * step
+            add_round_rect(slide, x, y, CW, CH, radius=0.2, fill=_mix_white(c, 0.08),
+                           line=c, line_w=2)
+            add_text(slide, x + 14, y, CW - 28, CH, t, size=21, bold=True,
+                     color="3A3A33", align="center", anchor="middle", line_spacing=1.3)
+            dx = x + CW + 14 if dot_right else x - 32
+            add_oval(slide, dx, y + CH / 2 - 9, 18, 18, fill=c)
+
+    column(d.get("left", []), LX, lc, True)
+    column(d.get("right", []), RX, rc, False)
+    footer(slide, d, key="footer", y=1080)
+
+
 RENDERERS = {
-    "tree": render_tree,
+    "tree": render_tree, "match": render_match,
     "table": render_table, "venn": render_venn, "ladder": render_ladder,
     "logic": render_logic, "voyage": render_voyage,
     "story_mountain": render_story_mountain, "fishbone": render_fishbone,

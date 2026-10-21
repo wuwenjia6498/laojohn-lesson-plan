@@ -15,3 +15,5 @@ metadata:
 附带修了 profile 模板静默丢弃 `note` 的老问题——神笔马良心愿卡的 note 以前从没印出来，manifest 已把画框高 760→700 以便 note 放得下，但其存量 PDF 未重渲。相关：[[downstream-shared-layer-and-token-facts]]
 
 **1014 树形图新开 `tree` 模板（克雷洛夫寓言）**：先用 voyage（竖叠框）再用 radial（放射），用户都判「不像树形图」。树形图要的是**顶部根节点 → 横向总线 → N 支并排垂下**的样子，现已开 `template_tree.html` + `render_pptx.render_tree()`，登记表/决策树/schema 三处已补。以后详案点名「树形图」直接用 tree，别拿 voyage/radial 凑。
+
+**1021 连线题开 `match` 模板＋两个可选字段（和大人一起读（一））**：用户判「小猫咪问朋友」用表格加空列做连线「很奇怪」，要最常见的左右连线样子——已开 `template_match.html` + `render_pptx.render_match()`，以后「连一连」一律用 match。另两条同批反馈：① 7 天阅读计划每天问同样三问，**问题写进副标题、卡内不写**（facets 的 `question` 现可省，省出的高度多给一条书写线；副标题超一行会把 7 卡×4 线顶出 A4 11px，故副标题只放三问）；② 表格里只放短词的列要居中，用 table 可选 `center_cols`。两字段缺省行为不变，存量单子零影响（存量 facets 全部带 question）。

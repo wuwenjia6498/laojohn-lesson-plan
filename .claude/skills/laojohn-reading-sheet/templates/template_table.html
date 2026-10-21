@@ -177,6 +177,8 @@ function render() {
       const txt = (cell == null) ? '' : String(cell);
       td.textContent = txt;
       noWrapIfShort(td, txt);
+      // center_cols（可选）：这些列的格子水平、垂直都居中（短词列，如人物名/记号名）
+      if ((d.center_cols || []).indexOf(i) !== -1) { td.style.textAlign = 'center'; td.style.verticalAlign = 'middle'; }
       const isLabel = d.label_first_col && i === 0;
       if (isLabel) td.className = 'cell-label';
       else if (i === hiCol) td.className = 'cell-same';

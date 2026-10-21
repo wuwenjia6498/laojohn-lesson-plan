@@ -67,8 +67,9 @@ function render(){
     card.appendChild(head);
 
     const body = document.createElement('div'); body.className = 'c-body';
-    const q = document.createElement('div'); q.className = 'c-q';
-    q.textContent = f.question || ''; body.appendChild(q);
+    // question 可省：题干统一写进副标题时，卡内不留空题干位，多出的高度给书写线
+    if(f.question){ const q = document.createElement('div'); q.className = 'c-q';
+      q.textContent = f.question; body.appendChild(q); }
 
     const val = f.value;
     const vals = Array.isArray(val) ? val : (val ? [val] : []);
