@@ -1,5 +1,5 @@
 # Project Memory: laojohn-lesson-plan
-> **索引维护规则(0818立·0901补)**:①新增课次/单本书状态→进[归档索引](memory-index-archived-deliveries.md),不占索引行;②横向通则→各线「跨课次通则」块,不埋进课次条目;③未决/交付风险→「未决事项」块,做完即删;④优先级集中在各区头行;⑤行数≤150、单条钩子≤200字符、细节下沉主题文件,超限先归档,机检挂SessionStart hook自动跑;⑥CLAUDE.md只写现行规则,来历/日期/旧口径进记忆;压缩前快照=[1020](memory-index-archive-20261020.md)
+> **索引维护规则(0818立·0901补)**:①新增课次/单本书状态→进[归档索引](memory-index-archived-deliveries.md),不占索引行;②横向通则→各线「跨课次通则」块,不埋进课次条目;③未决/交付风险→「未决事项」块,做完即删;④优先级集中在各区头行;⑤行数≤150、单条钩子≤200字符、细节下沉主题文件,超限先归档,机检挂SessionStart hook自动跑;⑥CLAUDE.md只写现行规则,来历/日期/旧口径进记忆;压缩前快照=[1021](memory-index-archive-20261021.md)
 ## 用户偏好
 - 中文回复;简洁直接不堆客套;重要决策先列选项让用户拍板;视觉迭代常用截图反馈
 - **问「有没有做到X」时是要判断、不是指出问题**——先自己核查给结论,别把判断权反问回去
@@ -26,10 +26,7 @@
 ### 跨课次通则 → 已外移 [写作课跨课次通则子索引](memory-index-writing-lesson-rules.md)（0919，排新课次前整块打开；新通则加进那里、不回本文件）
 ### 规则与体例
 - ⚠[无Python时5.0润色静默缺席(1004)](no-python-skips-det-polish-1004.md) — 机械替换靠polish_writing，脚本跑不了成稿口语残留多；本机1004已装3.13
-- [⚠规则效力评估0915:素材层做到了·咬合三条零落地](model-essay-rules-effect-eval-0915.md) — 四篇同尺盲评;0912够得着需与0914叠加才判得出丙;C2旁批表双标准四篇全未达标;根因=checklist把三条压进同一个勾;要领数上限缺「补进核心技法行」出口;机检②③④全绿≠合格
-- [示范文规则0912补五条+机检E+瘦身](model-essay-rules-supplement-0912.md) — 够得着上限=优等学生;旁批表最见功夫两句必入表;不教第四招;起笔不与③反例同型;§六第7问;essay_audit.py每份必跑;⚠已拆条文+history,生成只读顶部一屏卡,别把来历写回条文
 - [⚠用张视角审详案的四口径+三条不采纳(0918)](zhang-perspective-audit-checks-0918.md) — 先取数(师话朗读时长/逐环节占比/伪问题逐条/材料套数);⚠他的处方默认「删」,正确动作＝保内容减讲法
-- [张祖庆视角接入写作课线(0912)](zhang-zuqing-on-writing-line-0912.md) — 三处落位:生成侧generation-brief§一.8减法三问/冷审rubric跨维九+维三三问/示范文链;体系审计8条已拍板采5不采3(讲评按需·审题依需·三档表);话语比不能当判据;三档优先级标记不推广
 - [⚠0911换靶:生成侧语体=规范教案·瘦身41%来历下沉·polish_writing机械层·PassB四个不执行机制](generation-retarget-0911.md) — 生成只读简报§一.7+prose-exemplars;避让卡替代整读pools/ledger;A/B待做
 - [⚠文风定盘0831·0901收敛一主三从](writing-style-two-directions-conflict-0831.md) — 方向=向规范书面靠;AI痕迹=破折号/导演腔/省主语/术语漂移;**PassC已撤别重开**;主判据唯一源style-criteria+执行位在PassB;改写工序跑完必看--baseline方向指标;批量修文件脚本每步立即写盘;⚠方言词表已实测否掉勿加回
 - [教师自拟例子四条硬判据(0817)](writing-lesson-example-must-be-unique-anchor.md) — 独一份/夸张≠计数/样板不低于例句/一篇内锚点不复用;管全篇例子不只示范文
@@ -89,10 +86,8 @@
 - [手绘风格库274条全改九项+按用途标签(0924)](handdraw-library-retune-0924.md) — style_tags.json封闭词表;读书会/绘本按书气质组合筛;特征只写画风不写内容;gpt-image照抄参考图服装改特征治不了
 - [课件配图工具接手绘风格库+缺省gpt-image(0924)](imgtool-handdraw-gptimage-0924.md) — 与海报共用handdraw_style.py;风格卡`手绘编号`走compose();通道钉project.通道、老项目按已有图目录认;⚠规则库在gpt-image上未重验
 - [宣传件渲染链+PDF反查源三指纹(0826)](promo-materials-render-chain.md) — 手改PDF前先三指纹反查源html;馆内海报scale须0.98;海报html已改入库
-- [配套PDF的Type3字体病已修两线(0817)](pdf-type3-fonts-fixed.md) — 装饰图标改纯CSS图形非换emoji;.mark .sym字体栈中间那档雅黑勿删;已装check_type3
 - [外部改稿docx回贴md(0902-0915)](external-docx-backfill-0902.md) — 骨架继承+文本整替;⚠判新旧看措辞不看哈希;⚠先互比外部历次版本;⚠清扫正则禁\s用[ 　];三方不同步以PPT+配套为基准;取舍权在用户
 - [下游六件抽共享层+token账实测](downstream-shared-layer-and-token-facts.md) — 合并skill省不了token;三条真源+薄壳;改真源照该条回归法(PDF比字节数不比md5)
-- [两个常驻文件的分层重构(0818)](memory-index-structure-over-size-0818.md) — MEMORY真病灶=通则被埋进课次条目;CLAUDE下沉判据=脚本docstring才是细则唯一源;机检脚本见L2
 - [读书会详案原书插图链路(0730)](lesson-plan-book-illustration-chain.md) — 详案写【图位:插-01｜图注】禁md图语法;⚠PROFILES字段CLI默认值一律None;PPT与阅读单吃图未做
 - [官方skill环境事实+禁令理由(0824)](office-skills-env-facts-0824.md) / [md里HTML标签会原样印进docx](md-html-tags-leak-into-docx.md) — 新建路径跑得通、禁令只靠纪律;转PDF/PNG只有Office COM用shot_assets.py;行内强调只用成对**
 - [fix_quotes会毁代码块里的命令(0807)](fix-quotes-breaks-code-blocks.md) — 不认代码围栏;含命令示例的md跑完须回扫还原半角

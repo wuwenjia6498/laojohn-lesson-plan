@@ -45,3 +45,10 @@ metadata:
 ### 读书会 · 2026-10-20 外移（已完成/已根治）
 - [旧版阅读单空框补提示·全部完成(1019)](worksheet-blank-box-fix-1019.md) — D:\00000读书会课案 二～六年级77页已修；产出在各书「阅读单优化后文件」同名；工具在 AppData\Local\laojohn-wsfix；3处待对原书核实
 - [读书会v9 PPT体积大·已根治(1011)](reading-ppt-v9-media-size-1011.md) — 病因=1536×2048无损PNG抠图;helpers._embed_source嵌图前缩1600+量化,九份回归结构全同;不必再事后shrink;大头儿子/神笔马良已事后瘦身(重烘会连版式一起变,别为瘦身重烘)
+
+### 综合 · 2026-10-21 外移（索引超 17500 字符 · 结论已进各规则文件/脚本 · 条目原样保留）
+- [⚠规则效力评估0915:素材层做到了·咬合三条零落地](model-essay-rules-effect-eval-0915.md) — 四篇同尺盲评;0912够得着需与0914叠加才判得出丙;C2旁批表双标准四篇全未达标;根因=checklist把三条压进同一个勾;要领数上限缺「补进核心技法行」出口;机检②③④全绿≠合格
+- [示范文规则0912补五条+机检E+瘦身](model-essay-rules-supplement-0912.md) — 够得着上限=优等学生;旁批表最见功夫两句必入表;不教第四招;起笔不与③反例同型;§六第7问;essay_audit.py每份必跑;⚠已拆条文+history,生成只读顶部一屏卡,别把来历写回条文
+- [张祖庆视角接入写作课线(0912)](zhang-zuqing-on-writing-line-0912.md) — 三处落位:生成侧generation-brief§一.8减法三问/冷审rubric跨维九+维三三问/示范文链;体系审计8条已拍板采5不采3(讲评按需·审题依需·三档表);话语比不能当判据;三档优先级标记不推广
+- [两个常驻文件的分层重构(0818)](memory-index-structure-over-size-0818.md) — MEMORY真病灶=通则被埋进课次条目;CLAUDE下沉判据=脚本docstring才是细则唯一源;机检脚本见L2
+- [配套PDF的Type3字体病已修两线(0817)](pdf-type3-fonts-fixed.md) — 装饰图标改纯CSS图形非换emoji;.mark .sym字体栈中间那档雅黑勿删;已装check_type3
