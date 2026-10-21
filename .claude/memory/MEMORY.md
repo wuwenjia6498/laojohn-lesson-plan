@@ -56,6 +56,7 @@
 整区（跨课次通则＋规则体例）已外移 → **[看图写话线记忆](memory-index-picture-writing.md)**，排新课次或出图前打开；该线当前无未决项。
 ## 读书会详案（lesson-plan）
 - ⚠[读书会PPT缺图默认自动生图·不问(1014)](reading-ppt-auto-ai-images-1014.md) — 缺原书插图的页直接跑reading_deck全链，验收由出图人目视；插图进页后版式跟着调，不许挤角落
+- ⚠[阅读计划表永远一页PPT·不拆(1021)](reading-plan-table-one-page-1021.md) — 表格超6行拆页规则的唯一例外;合并后中间稿P号/讲稿/详案页标三处同步前移
 - ⚠[读书会PPT通用问题四条(1008)](reading-ppt-general-feedback-1008.md) — 参考答案只上答案不带「就算数/都算对」;上屏原文带页码(只搬详案);填写表白底灰格线;`列宽：`按预估填写量;build_ppt末尾「中间稿机检」非零须改
 - ⚠[读书会PPT新样式v9·学人工优化版(1006)](reading-ppt-v9-human-optimized-1006.md) — 写`主题色：`才走新样式；每页大图+底带+问答拆框+卡片版式；写全名完整句；配图链路reading_deck.py；AI图不入库；答案改主题色(推翻红字)
 - ⚠[回归读书会·语体边界(1005)](reading-line-return-style-boundary-1005.md) — 延续散文化口语亲切(样本一至五原文锚定);写作线文风/润色/机检/MEMORY写作条目只有已进lesson-plan规则的才适用;Pass B按本线rubric;试写稻草人做基线
@@ -113,6 +114,7 @@
 - [阅读指南拓展栏点名具体书/影片](reading-guide-extension-concrete-titles.md) — 仅此栏放宽红线,吃不准就不写
 - ⚠[拓展阅读·课表书处理(1014)](extension-reading-exclude-own-catalog-1014.md) — 课表=pipeline/references/reading-club-catalog.md+书籍档案书名;低年级书只能写「你可能在X年级读过,再读一遍」,同级及以上不推;课表外须适龄
 ## 未决事项与交付风险（做完即删）
+- 和大人一起读（一）导读课P18:用户便签要求换成实书第8–9页整幅插图,协作者机无扫描件未做(便签留在PPT上);须在有扫描件的机器上补截入库(顺延编号)后换图、补图单
 - ⚠[野性的呼唤/萨哈拉的原图推迟到做PPT时处理(1020)](images-deferred-to-ppt-1020.md) — 档案写「无插图」但图目录已有未整理的图；做PPT先补图单，且要在AI生图之前，再改档案第十节
 - **备课视频首批两支已出片(0921)**:五上四17.8分钟为准片;三上一素材薄;六上四等PPT定稿;⚠闸门A记的是「用户指示直接出片(未逐页通读)」 — [详情](lesson-video-line-0921.md)
 - 仓库瘦身0920已完成(→303MiB);⚠新克隆必跑两条装机命令(见docs\协作同步说明.md);余salvage tag待确认无用再删 — [详情](repo-slimming-plan-0920.md)
