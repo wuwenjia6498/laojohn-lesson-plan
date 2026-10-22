@@ -1,9 +1,11 @@
 ---
 name: video-assets-location-1020
-description: 视频素材在 D:\老约翰视频素材（不在任何仓）；品牌片、AI 讲解员宣传片输出都在 my-Workspace 04-projects\video\（后者靠 PROMO_VIDEO_ROOT）
+description: 视频素材 2026-10-21 起在 my-Workspace _assets 总库（D:\老约翰视频素材 已并入）；品牌片、AI 讲解员宣传片输出都在 my-Workspace 04-projects\video\（后者靠 PROMO_VIDEO_ROOT）
 metadata:
   type: reference
 ---
+
+**2026-10-21 起素材以 my-Workspace `_assets\` 总库为准**：现场视频、阅读场景、宣传设计稿、产品讲解视频已并入，`D:\老约翰视频素材\` 不再往里放。总库只放常用素材，顶层按 01–07 分大类（存档在 `D:\老约翰素材归档\`）（课堂实拍照片在 `01-课堂实拍照片\` 下），宣传片脚本里的 `assets:` 路径要带这层前缀。权威版本：my-Workspace `_assets\素材总览.md`。
 
 原桌面 `临时\做宣传片\` 2026-10-20 拆分后删除：
 

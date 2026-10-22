@@ -8,7 +8,7 @@ r"""宣传短视频线的公共层：路径、素材解析、共享件薄壳。
 
 素材引用写法（脚本 json 里 visual.src）：
     repo:<相对项目根的路径>        本仓文件，如 repo:写作课海报输出/…/…-插画.jpg
-    assets:<相对素材库根的路径>    外部素材库，如 assets:专注书写/专注书写 (19).jpg
+    assets:<相对素材库根的路径>    外部素材库，如 assets:01-课堂实拍照片/专注书写/专注书写 (19).jpg
     video:<相对视频根的路径>       输出目录里的文件，如 video:dushuhui-video/ai-promo/稻草人/_screen/x.png
     card:<卡片名>                  由 render_promo 按 visual.card 现渲的图文卡
 
