@@ -6,13 +6,13 @@
       "template": "table",
       "data": {
         "title": "《和大人一起读（二）》阅读单 · “两样东西晒太阳”",
-        "subtitle": "第一行已经印好了。第二行写是谁晒的；第三行，奶奶知道的画“✓”，不知道的画“✗”",
+        "subtitle": "第二行写是谁晒的；第三行，奶奶知道的画“✓”，不知道的画“✗”",
         "variant": "空白版",
         "label_first_col": true,
         "row_min_h": 340,
         "columns": [
           {
-            "name": "晒的是什么",
+            "name": "/",
             "width": 30
           },
           {
