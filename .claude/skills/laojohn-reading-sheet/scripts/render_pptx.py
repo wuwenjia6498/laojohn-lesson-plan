@@ -273,7 +273,12 @@ def header(slide, d, *, title_align="center", title_px=72, title_size=23,
 def footer(slide, d, key="footer", color="9A937F", y=1075):
     # PDF 模板的 note/foot 一律左对齐（padding 40px）——PPTX 对齐之
     txt = d.get(key, "")
-    if txt:
+    if txt and d.get("note_big"):
+        # 可选 note_big：底部选项放大加深、按 \n 分行，整块往上挪到纸内（2026-10-22）
+        n = txt.count("\n") + 1
+        h = n * 36
+        add_text(slide, 40, min(y, 1123 - 30 - h), 714, h, txt, size=20, color="4A4038", align="left")
+    elif txt:
         add_text(slide, 40, y, 714, 30, txt, size=14, color=color, align="left")
 
 

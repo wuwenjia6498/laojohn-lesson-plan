@@ -78,6 +78,8 @@ function render(){
   const sub = document.getElementById('subtitle'); if(d.subtitle) sub.textContent = d.subtitle; else sub.style.display='none';
   const tag = document.getElementById('variantTag'); if(d.variant) tag.textContent = d.variant; else tag.style.display='none';
   const foot = document.getElementById('foot'); if(d.footer) foot.textContent = d.footer; else foot.style.display='none';
+  // 可选 note_big：同 table，底部选项放大加深、按 \n 换行
+  if(d.footer && d.note_big){ foot.style.fontSize='22px'; foot.style.color='#4A4038'; foot.style.whiteSpace='pre-line'; foot.style.lineHeight='1.8'; }
 
   const svg = document.getElementById('svg');
   const nodes = d.nodes || [];

@@ -192,6 +192,8 @@ function render() {
 
   const note = document.getElementById('note');
   if (d.note) { note.textContent = d.note; } else { note.style.display = 'none'; }
+  // 可选 note_big：底部是学生要照着填的选项时放大加深、按 \n 换行（2026-10-22 和大人一起读（三））
+  if (d.note && d.note_big) { note.style.fontSize = '22px'; note.style.color = '#4A4038'; note.style.whiteSpace = 'pre-line'; note.style.lineHeight = '1.8'; }
 
   document.body.dataset.rendered = '1';
 }
