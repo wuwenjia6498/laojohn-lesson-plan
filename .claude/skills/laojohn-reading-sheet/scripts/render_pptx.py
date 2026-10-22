@@ -791,9 +791,12 @@ def render_timeline(slide, d):
                 add_text(slide, bx, yy, cw, 22, f.get("label", ""), size=14, bold=True,
                          color=color.lstrip("#"), tf=tf)
                 yy += 22
-                for _ in range(f.get("lines", 1)):
+                for kk in range(f.get("lines", 1)):
                     yy += 44
                     add_line(slide, bx, yy, bx + cw, yy, "CFC8BA", 1.2, tf=tf)
+                    if kk == 0 and f.get("value"):  # 可选 fields[].value：该栏预填
+                        add_text(slide, bx, yy - 32, cw, 26, str(f["value"]), size=14,
+                                 color="3A3A33", align="center", tf=tf)
                 yy += 14
         else:
             rows = nd.get("lines", 7)
