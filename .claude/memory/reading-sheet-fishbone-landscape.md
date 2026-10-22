@@ -19,4 +19,6 @@ metadata:
 - **主干两端按标签宽度让位**：HTML 侧用 `getComputedTextLength()` 实测 `head_label`/`tail_label` 宽度反推 `X_TAIL`/`X_HEAD`（曾把「刚进老胡家」切掉半个字）；PPTX 侧没法实测，按 18px/字估算——**改 endlab 字号必须同步改这个估算常量**，否则 PPTX 两端错位。
 - 改 `template_fishbone.html` 的几何常量后，**必须同步 `scripts/render_pptx.py` 的 `render_fishbone`**（它是独立重绘、不读 HTML），否则 PDF 与 PPTX 视觉分叉。
 
+- ⚠ **timeline 也一律竖纸横排（1022 用户第二次指出后立规）**：交付 manifest 必写 `portrait_rotate: true`，引擎缺省 false 只为存量逐字不变；（二）（三）两本都是出了横向纸才被打回。规则已写进 reading-sheet `SKILL.md` 模板表与 `data-schema.md`。
+
 相关：[[reading-sheet-skill]]、[[reading-sheet-template-expansion-18]]、[[reading-sheet-editable-pptx]]
