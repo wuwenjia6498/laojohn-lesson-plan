@@ -54,6 +54,7 @@
 ## 读书会详案（lesson-plan）
 - ⚠[读书会PPT缺图默认自动生图·不问(1014)](reading-ppt-auto-ai-images-1014.md) — 缺原书插图的页直接跑reading_deck全链，验收由出图人目视；插图进页后版式跟着调，不许挤角落
 - ⚠[阅读计划表永远一页PPT·不拆(1021)](reading-plan-table-one-page-1021.md) — 表格超6行拆页规则的唯一例外;合并后中间稿P号/讲稿/详案页标三处同步前移
+- ⚠[读书会PPT一问一答对得上(1023)](reading-ppt-one-question-one-answer-1023.md) — 多问拆编号各配答案;标题不放无答案问句;动画问→答→问→答逐击;页码精确到页;用户手改(四)导读课1–33定
 - ⚠[读书会PPT通用问题四条(1008)](reading-ppt-general-feedback-1008.md) — 参考答案只上答案不带「就算数/都算对」;上屏原文带页码(只搬详案);填写表白底灰格线;`列宽：`按预估填写量;build_ppt末尾「中间稿机检」非零须改
 - ⚠[读书会PPT新样式v9·学人工优化版(1006)](reading-ppt-v9-human-optimized-1006.md) — 写`主题色：`才走新样式；每页大图+底带+问答拆框+卡片版式；写全名完整句；配图链路reading_deck.py；AI图不入库；答案改主题色(推翻红字)
 - ⚠[回归读书会·语体边界(1005)](reading-line-return-style-boundary-1005.md) — 延续散文化口语亲切(样本一至五原文锚定);写作线文风/润色/机检/MEMORY写作条目只有已进lesson-plan规则的才适用;Pass B按本线rubric;试写稻草人做基线
