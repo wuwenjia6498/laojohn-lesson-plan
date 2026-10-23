@@ -79,6 +79,7 @@
 - [插图前置到建档阶段(0806)](book-profile-read-images-during-profiling.md) — 通读时逐张目视+档案加插图指针节;角色归属须锚定原文句锁不住写「未定」;三坑见源条
 - [图单判读四类失败模式(0807)](illustration-judgement-failure-modes.md) — 人工核对结论不写回图单=没核;⚠页码压画面交人工别用脚本
 - [可引用原文栏取成段](book-profile-quote-full-passage.md) / [类型字段禁空泛「儿童小说」](book-type-no-generic-children-fiction.md) — 下游需成段并保留原书弯引号;类型须具体文学类型
+- [非虚构建档=同skill加NONFICTION模板(1023)](book-profile-nonfiction-mode-1023.md) — 传记仍走叙事版;节号不变(四=关键片段);照书不纠错;下游lesson-plan/测评已补字段对应
 - [低段/合集建档差异](low-grade-collection-profile-formalized.md) — 区分变量是「低段」非「快乐读书吧」
 - ⚠[低段建档以实书为准(1016)](low-grade-profile-from-physical-book.md) — docx丢页码/注音/配图/署名;最低要目录页＋精读篇页照片;和大人一～四已对全书扫描件订正(1019)
 ## 引擎与下游物料
