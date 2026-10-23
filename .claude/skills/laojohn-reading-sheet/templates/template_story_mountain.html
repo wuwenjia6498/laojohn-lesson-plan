@@ -17,6 +17,8 @@
     font-size: 23px; font-weight: 700; color: #333; padding: 0 56px; line-height: 1.4; }
   .l-sub { position: absolute; top: 116px; left: 0; width: 100%; text-align: center; font-size: 15px; color: #8A8268; }
   .l-foot { position: absolute; bottom: 28px; left: 0; width: 100%; text-align: left; font-size: 14px; color: #9A937F; padding: 0 40px; }
+  .l-foot { white-space: pre-line; }
+  .l-foot.big { font-size: 19px; line-height: 1.55; color: #5E574A; }
   .hd { font-size: 14px; font-weight: 700; }
   .ftxt { font-size: 13px; fill: #3A3A33; }
 </style>
@@ -73,7 +75,7 @@ function render(){
   document.getElementById('title').textContent = d.title || '';
   const sub = document.getElementById('subtitle'); if(d.subtitle) sub.textContent = d.subtitle; else sub.style.display='none';
   const tag = document.getElementById('variantTag'); if(d.variant) tag.textContent = d.variant; else tag.style.display='none';
-  const foot = document.getElementById('foot'); if(d.footer) foot.textContent = d.footer; else foot.style.display='none';
+  const foot = document.getElementById('foot'); if(d.footer){ foot.textContent = d.footer; if(d.note_big) foot.classList.add('big'); } else foot.style.display='none';
 
   const svg = document.getElementById('svg');
   const steps = d.steps || [];
