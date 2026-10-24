@@ -8,7 +8,9 @@ r"""换机装机自检：逐项核对本机能不能像旧机器一样跑全仓�
 清单与每一步的来由见 docs\换机装机清单.md——本脚本是那份清单的机检面，两处要一起改。
 """
 import importlib.util
+import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -168,6 +170,26 @@ if os.environ.get("AIHUBMIX_API_KEY") or cfgs:
 else:
     bad("没有 AiHubMix 密钥（生图、海报插画、宣传片、读书会配图全断）",
         "从旧机器拷 .claude\\skills\\laojohn-picture-writing\\scripts\\imggen.config.json，或设环境变量 AIHUBMIX_API_KEY")
+# 出图尺寸缺省（2026-10-24 统一长边 1280＋medium）在代码里；本地配置写死了尺寸会盖住缺省，悄悄按大图出、多花钱
+stale = []
+envf = ROOT / "课件配图工具/.env"
+if envf.exists():
+    for ln in envf.read_text(encoding="utf-8").splitlines():
+        if re.match(r"\s*(GEMINI_IMAGE_SIZE|IMAGE_LONG_SIDE|OPENAI_IMAGE_QUALITY)\s*=", ln):
+            stale.append(f"课件配图工具/.env：{ln.strip()}")
+for p in cfgs:
+    try:
+        d = json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        continue
+    for k in ("image_size", "size"):
+        if k in d:
+            stale.append(f"{p.relative_to(ROOT)}：\"{k}\": \"{d[k]}\"")
+if stale:
+    warn("本地配置里写死了出图尺寸/质量，会盖住全仓缺省（长边 1280＋medium）：" + "；".join(stale),
+         "删掉这几行（临时要大图才写，用完删）")
+else:
+    ok("出图尺寸走代码缺省（长边 1280＋medium，Gemini 1K）")
 grader = ROOT / "作文批改工具/web/server/config.json"
 ok("作文批改工具 config.json") if grader.exists() else \
     warn("作文批改工具 config.json 不在（只本地起批改服务才要）", "从旧机器拷 作文批改工具\\web\\server\\config.json")

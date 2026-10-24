@@ -12,6 +12,12 @@ T1–T5 五项、以及整课跑批查出的 A/B 两条，全部是在豆包上�
 选通道：环境变量 `IMAGE_PROVIDER=gpt-image|gemini|doubao`（缺省 gpt-image，2026-09-24 由 gemini 改），或调用方显式传参。
 课件配图工具的项目另有 project.通道 钉住通道（见 run_lesson.resolve_provider），老项目不随缺省值漂移。
 
+出图规格缺省（2026-10-24 用户定，全仓所有生图一律）：长边 1280 像素＋gpt-image 用 medium 档。
+野性的呼唤三页对比实测：投屏上课件图最宽只显示约 800 像素，2048 high 与 1280 medium 看不出差别，
+单张约 $0.29 → $0.05–0.08（账单实测，含参考图输入）。各通道对应：gpt-image／豆包按下面 RATIO 出 1280 档，Gemini 用 `1K`。
+确需大图（印刷海报等）时用环境变量临时覆盖：`IMAGE_LONG_SIDE=2048`、`OPENAI_IMAGE_QUALITY=high`、
+`GEMINI_IMAGE_SIZE=2K`——不改这里的缺省值。
+
 密钥纪律：只从环境变量 / `.env` 读，任何脚本不得写死。
   · 豆包：`ARK_API_KEY`
   · Gemini／gpt-image：`AIHUBMIX_API_KEY`；本仓早有此约定（见 CLAUDE.md §1「密钥承载约定」），
@@ -63,6 +69,14 @@ def _aihubmix_key(verbose=True):
                 print(f"  [密钥] AIHUBMIX_API_KEY 未设，回退取自 {PW_CONFIG.name}（同账号）")
             return k
     raise SystemExit("缺少 AIHUBMIX_API_KEY（放进 课件配图工具/.env 或环境变量），拒绝启动。")
+
+
+def _ratio_px(long_side=None):
+    """画幅→像素串，按长边算（缺省 1280，见模块头「出图规格缺省」）；边长取 16 的倍数。"""
+    n = int(long_side or os.environ.get("IMAGE_LONG_SIDE") or 1280)
+    s = lambda v: max(16, round(v / 16) * 16)
+    return {"1:1": f"{n}x{n}", "3:4": f"{s(n * 3 / 4)}x{n}",
+            "4:3": f"{n}x{s(n * 3 / 4)}", "16:9": f"{n}x{s(n * 9 / 16)}"}
 
 
 class _Base:
@@ -225,12 +239,13 @@ class DoubaoClient(_Base):
     """火山方舟 Seedream。文生图/参考生图/图像编辑同一入口，带 image 即为参考或编辑。"""
 
     name = "doubao"
-    # 画幅→像素。方舟要具体像素；不给会自作主张挑一个比例
-    RATIO = {"1:1": "2048x2048", "3:4": "1728x2304", "4:3": "2304x1728", "16:9": "2304x1296"}
+    # 画幅→像素。方舟要具体像素；不给会自作主张挑一个比例。实例化时按 IMAGE_LONG_SIDE（缺省 1280）重算
+    RATIO = _ratio_px(1280)
 
     def __init__(self):
         super().__init__()
         load_dotenv()
+        self.RATIO = _ratio_px()
         self.key = os.environ.get("ARK_API_KEY", "").strip()
         if not self.key:
             raise SystemExit("缺少 ARK_API_KEY，拒绝启动。")
@@ -304,7 +319,7 @@ class GeminiClient(_Base):
         self.vision_model = os.environ.get("AIHUBMIX_VISION_MODEL", "gpt-4o")
         # 拆解是长文理解任务，与判图分开配：判图看的是一张图，拆解要通读详案
         self.text_model = os.environ.get("AIHUBMIX_TEXT_MODEL", "gpt-4o")
-        self.image_size = os.environ.get("GEMINI_IMAGE_SIZE", "2K")
+        self.image_size = os.environ.get("GEMINI_IMAGE_SIZE", "1K")
         self.vision_extra = {}          # AiHubMix 是 OpenAI 兼容，别把方舟的 thinking 传过来
         self._client = None
 
@@ -386,21 +401,22 @@ class GptImageClient(_Base):
     该工具的规则库是在豆包／Gemini 上验证的，在这条通道上尚未重验，出图须人工逐张看。
     ⚠ 接口走 Azure 审核：提示词带在世画家名会被 moderation_blocked（手绘编号只用中文特征，不带作者名）。
     无参考图走 images/generations，有参考图走 images/edits（multipart）。
-    实测 gpt-image-2 接受任意像素尺寸（2048x1536 直出），回包只有 b64_json。
+    实测 gpt-image-2 接受任意像素尺寸（2048x1536、1280x960 都直出），回包只有 b64_json。
     """
 
     name = "gpt-image"
-    RATIO = {"1:1": "2048x2048", "3:4": "1536x2048", "4:3": "2048x1536", "16:9": "2048x1152"}
+    RATIO = _ratio_px(1280)
     _seed_warned = False
 
     def __init__(self):
         super().__init__()
         load_dotenv()
+        self.RATIO = _ratio_px()
         self.key = _aihubmix_key()
         self.base = os.environ.get("AIHUBMIX_BASE_URL", "https://aihubmix.com/v1").rstrip("/")
         self.chat_base, self.chat_key = self.base, self.key
         self.model = os.environ.get("OPENAI_IMAGE_MODEL", "gpt-image-2")
-        self.quality = os.environ.get("OPENAI_IMAGE_QUALITY", "high")
+        self.quality = os.environ.get("OPENAI_IMAGE_QUALITY", "medium")
         self.vision_model = os.environ.get("AIHUBMIX_VISION_MODEL", "gpt-4o")
         self.text_model = os.environ.get("AIHUBMIX_TEXT_MODEL", "gpt-4o")
         self.vision_extra = {}

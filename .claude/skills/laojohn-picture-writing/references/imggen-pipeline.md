@@ -25,6 +25,7 @@
 - **Gemini Nano Banana 系**（如 `gemini-3-pro-image-preview` = Nano Banana Pro，默认）：走**原生 google-genai 客户端**、`gemini_base_url=https://aihubmix.com/gemini`，尺寸用 `aspect_ratio`(4:3 等)+`image_size`(1K/2K/4K)，**无 images.generate 端点**；
 - **FLUX.1-Kontext-pro 等**：走 OpenAI 兼容 `images.generate`(/v1)，用 `size`。
 - **验收 `vision_model`** 始终走 `/v1` chat（`gpt-4o` 即可）。
+- **出图规格缺省（2026-10-24 用户定，全仓统一）**：Gemini `image_size=1K`、openai-images `size=1280x864`（长边 1280）；确需大图时在 config 里临时调高。网页端手工出的 2K 定妆图照常当 `style_ref` 用，参考图不需要和输出同尺寸。
 
 依赖（缺包自动装）：openai SDK（验收/flux）；选 gemini 时另需 google-genai。
 

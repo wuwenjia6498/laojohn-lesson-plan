@@ -39,8 +39,8 @@ DEFAULTS = {
     'image_model': 'gemini-3-pro-image-preview',       # 默认走 gemini 通道
     'vision_model': 'gpt-4o',                          # 多模态验收，/v1 兼容
     'aspect_ratio': '4:3',                             # gemini/flux 横版
-    'image_size': '2K',                                # gemini 专用：1K/2K/4K
-    'size': '1536x1024',                               # 仅 openai-images 通道(flux 忽略)
+    'image_size': '1K',                                # gemini 专用：1K/2K/4K（2026-10-24 全仓降为 1K，见 imgclient 头注释）
+    'size': '1280x864',                                # 仅 openai-images 通道(flux 忽略)；长边 1280 同上
     'max_retries': 2,                                  # 主图缺项最多重生次数
     'width_cm': 12.0,                                  # 回插用，generate 阶段仅透传记录
 }
