@@ -17,6 +17,7 @@
     font-size: 14px; color: #9A937F; padding: 0 40px; }
   .hd { font-size: 16px; font-weight: 700; }
   .ftxt { font-size: 14px; fill: #3A3A33; }
+  .ctxt { font-size: 15px; font-weight: 700; fill: #6B6352; }
 </style>
 </head>
 <body>
@@ -122,6 +123,17 @@ function render(){
       }
     });
   });
+
+  // 可选 corner：楼梯左上方空白区的书写框（详案要学生「写在阶梯图旁边/下面空白处」时用）；不给=不画，存量零影响
+  if(d.corner){
+    const c=d.corner, cx=c.x??40, cy=c.y??60, cw=c.w??260, gap=c.gap??52, nl=c.lines??4;
+    const lab=wrap(String(c.label||''), Math.max(6, Math.floor((cw-28)/15)));
+    const ch=c.h ?? (18 + lab.length*21 + 14 + nl*gap);
+    svg.appendChild(el("rect",{x:cx,y:cy,width:cw,height:ch,rx:10,fill:"#FBF8F1",stroke:"#CBC4B6","stroke-width":1.4,"stroke-dasharray":"6 4"}));
+    lab.forEach((ln,li)=>{ const t=el("text",{x:cx+14,y:cy+28+li*21,class:"ctxt"}); t.textContent=ln; svg.appendChild(t); });
+    let y=cy+18+lab.length*21+14+gap-12;
+    for(let k=0;k<nl;k++){ svg.appendChild(el("line",{x1:cx+14,y1:y,x2:cx+cw-14,y2:y,stroke:"#CFC8BA","stroke-width":1.2})); y+=gap; }
+  }
   document.body.dataset.rendered='1';
 }
 render();

@@ -516,6 +516,23 @@ def render_ladder(slide, d):
                 add_line(slide, lx + 2, rowY + OFF, lx + 2 + LINE_LEN, rowY + OFF,
                          s["color"], 1.4)
                 rowY += LINE_GAP
+    # 可选 corner：楼梯左上方空白区书写框（与 template_ladder.html 同步；不给=不画）
+    c = d.get("corner")
+    if c:
+        cx, cy, cw = c.get("x", 40), c.get("y", 60), c.get("w", 260)
+        gap, nl = c.get("gap", 52), c.get("lines", 4)
+        label = str(c.get("label", ""))
+        nlab = _wrap_lines(label, cw - 28, 15) if label else 0
+        ch = c.get("h", 18 + nlab * 21 + 14 + nl * gap)
+        add_round_rect(slide, cx, cy + OFF, cw, ch, radius=0.05, fill="FBF8F1",
+                       line="CBC4B6", line_w=1.4, dash="dash")
+        if label:
+            add_text(slide, cx + 14, cy + 12 + OFF, cw - 24, nlab * 24 + 4, label,
+                     size=15, bold=True, color="6B6352", line_spacing=1.1)
+        y = cy + 18 + nlab * 21 + 14 + gap - 12
+        for _ in range(nl):
+            add_line(slide, cx + 14, y + OFF, cx + cw - 14, y + OFF, "CFC8BA", 1.2)
+            y += gap
     footer(slide, d, key="footer", y=1080)
 
 
@@ -729,10 +746,12 @@ def render_fishbone(slide, d):
     add_line(slide, X_TAIL, SPINE_Y, X_HEAD, SPINE_Y, "C9A24A", 6, tf=tf)
     add_triangle(slide, X_HEAD, SPINE_Y - 50, 92, 100, "E7C46A", rotation=90, tf=tf)
     add_triangle(slide, X_TAIL - 64, SPINE_Y - 46, 44, 92, "E7C46A", rotation=270, tf=tf)
-    add_text(slide, X_HEAD + 104, SPINE_Y - 14, 180, 32, d.get("head_label", ""),
+    add_text(slide, X_HEAD + 104, SPINE_Y - 14, min(180, 1123 - 6 - (X_HEAD + 104)), 32,
+             d.get("head_label", ""),
              size=18, bold=True, color="5A5048", tf=tf)
-    add_text(slide, X_TAIL - 256, SPINE_Y - 14, 180, 32, d.get("tail_label", ""),
-             size=18, bold=True, color="5A5048", align="right", tf=tf)
+    if d.get("tail_label"):                      # 空鱼尾不画文本框（否则落到纸外）
+        add_text(slide, X_TAIL - 256, SPINE_Y - 14, 180, 32, d.get("tail_label", ""),
+                 size=18, bold=True, color="5A5048", align="right", tf=tf)
     segL, segR = X_TAIL + 40, X_HEAD - 30
     step = (segR - segL) / (n - 1) if n > 1 else 0
     BOX_W = max(120, min(300, round(2 * step - 24))) if n > 1 else 300
