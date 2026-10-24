@@ -1,5 +1,5 @@
 # Project Memory: laojohn-lesson-plan
-> **索引维护规则(0818立·0901补)**:①新增课次/单本书状态→进[归档索引](memory-index-archived-deliveries.md),不占索引行;②横向通则→各线「跨课次通则」块,不埋进课次条目;③未决/交付风险→「未决事项」块,做完即删;④优先级集中在各区头行;⑤行数≤150、单条钩子≤200字符、细节下沉主题文件,超限先归档,机检挂SessionStart hook自动跑;⑥CLAUDE.md只写现行规则,来历/日期/旧口径进记忆;压缩前快照=[1021](memory-index-archive-20261021.md)
+> **索引维护规则(0818立·0901补)**:①新增课次/单本书状态→进[归档索引](memory-index-archived-deliveries.md),不占索引行;②横向通则→各线「跨课次通则」块,不埋进课次条目;③未决/交付风险→「未决事项」块,做完即删;④优先级集中在各区头行;⑤行数≤150、单条钩子≤200字符、细节下沉主题文件,超限先归档,机检挂SessionStart hook自动跑;⑥CLAUDE.md只写现行规则,来历/日期/旧口径进记忆;压缩前快照=[1024](memory-index-archive-20261024.md)
 ## 用户偏好
 - 中文回复;简洁直接不堆客套;重要决策先列选项让用户拍板;视觉迭代常用截图反馈
 - **问「有没有做到X」时是要判断、不是指出问题**——先自己核查给结论,别把判断权反问回去
@@ -24,8 +24,8 @@
 ## 写作课（writing-lesson）
 **写任何一篇前必读**：[写作课子索引](memory-index-writing-lesson-rules.md)头部七篇（0911换靶／文风定盘／例子四判据／比喻反刻板／电报体红线／示范文「我」同龄）＋其下通则整块
 ### 跨课次通则 → 已外移 [写作课跨课次通则子索引](memory-index-writing-lesson-rules.md)（0919，排新课次前整块打开；新通则加进那里、不回本文件）
+- **批改工具/Vercel、配套json富文本与手改回写、无Python缺润色、三档学生可见**六条1024移入同一子索引末节「工具与配套侧」
 ### 规则与体例
-- ⚠[无Python时5.0润色静默缺席(1004)](no-python-skips-det-polish-1004.md) — 机械替换靠polish_writing，脚本跑不了成稿口语残留多；本机1004已装3.13
 - [⚠用张视角审详案的四口径+三条不采纳(0918)](zhang-perspective-audit-checks-0918.md) — 先取数(师话朗读时长/逐环节占比/伪问题逐条/材料套数);⚠他的处方默认「删」,正确动作＝保内容减讲法
 - [⚠0911换靶:生成侧语体=规范教案·瘦身41%来历下沉·polish_writing机械层·PassB四个不执行机制](generation-retarget-0911.md) — 生成只读简报§一.7+prose-exemplars;避让卡替代整读pools/ledger;A/B待做
 - [⚠文风定盘0831·0901收敛一主三从](writing-style-two-directions-conflict-0831.md) — 方向=向规范书面靠;AI痕迹=破折号/导演腔/省主语/术语漂移;**PassC已撤别重开**;主判据唯一源style-criteria+执行位在PassB;改写工序跑完必看--baseline方向指标;批量修文件脚本每步立即写盘;⚠方言词表已实测否掉勿加回
@@ -40,14 +40,9 @@
 - [学段口气全线没分级(0817)](writing-lesson-grade-tone-not-differentiated.md) — 判断分三层(用词/技法深度/思维层级);判据=降两级反问;0828复发:并列短语重难点只落实一半,拆开逐个问落点
 - [技法N件套须练全N件](technique-set-practice-all-parts.md) — 定稿前做「每件×是否产出过」对账;机检与checklist都抓不到｜⚠**同族第二病:自拟材料要按「步」拆开核要素是否齐全**(四上五正例中间一步无听觉、师话却把落在第一步的嗡嗡声算进去,通读查不到——整体读起来三样都有,漏的是「都在同一步里」) — [源](shenghuo-wanhuatong-4a-lesson-state.md)
 - [首页无区头单表6行+两行文案体例(现行)](writing-lesson-front-page-single-table.md) — 0831两行体例推翻0828:目标行一句话说清学会写哪类文章;技法行首句固定「使用+构思工具名」且与正文一字一致;写详案或改style_front_page前必读
-- [三档标准改学生可见(0921)](three-tier-standard-student-visible-0921.md) — 〔…教师掌握（不必读给学生）〕括注以后都不写;lesson-structure+checklist已改;tone_gate无需改;存量45份不回溯
-- [作文批改工具(0818立项)](writing-correction-tool-0818.md) — 给加盟商不做skill;判据从详案抽标准包JSON;主模型doubao-2-1-pro(必带thinking=disabled);闸门verified_by_human;0921经真稿实测已改到第七版栏目与判据(⚠「立得住」不禁·成语误用排第一·修辞改法禁另造喻体·起手式靠程序轮换角度治不住提示词);⚠改提示词必跑run_regression
-- [批改工具已部署Vercel(0824)](writing-correction-tool-vercel-deploy-0824.md) — 入口=部署根index.py不能放api/;.vercelignore挡config.json;正式地址grader.skyline666.top;⚠validate全绿≠包对
 - [⚠配套三侧文风0915与详案线同步换靶](writing-materials-retarget-0915.md) — 生成读三侧定稿样本不读对照表;polish_materials.py机检D每份必跑(同一张polish_rules,禁副本);存量42份已过一轮;样本卡=现行json快照,--check-exemplars防漂移(抄样本抄现行文件别抄git diff);⚠配套--all --dry-run是共享规则表第二回归面,首跑照出4条排除漏洞
 - ⚠**改配套共享模板只加可选字段、不动默认值(0916–0922)**:45份共用`template_student.html`,改它必跑零影响回归(重渲存量逐字相等);⚠0928有意破例改过一次默认值(构思表格线--plan-rule调深);PPT稿纸页是截图,配套一改即过期 — [详情](materials-template-optional-fields-0922.md)·[源](manhua-laoshi-5a-lesson-state.md)
 - [⚠写作课单元海报工具(0920立项)](writing-poster-tool-0920.md) — 独立skill;⚠0928文案三硬线(卡①现象→问题→解法·禁告别XX·禁半截指代);**出图前先立意推敲**:AI给2-3方向(带立意·画风·元素数·风险)→用户拍板→才写subject,留痕_brief;⚠比喻题禁画喻体实体;⚠立意过关≠方向过关(多场景天然碎);**排新海报前整份打开**
-- [配套json富文本标记只有部分字段解析(0907)](writing-materials-richtext-field-scope.md) — 教师materials/家长oneline走textContent,写{b}会印成(b);⚠溢出/页数/Type3三道机检全绿也抓不到,渲完正则扫一遍PDF文本
-- [手改只改HTML必被重渲冲掉(0821)](writing-materials-handedits-lost-on-rerender.md) — 文字改动一律回写_data.json;⚠仓内9课json仍不含那批手改
 - **PPT链**→[链索引](ppt-chain-index.md):⚠外部件止于动画注入、嵌图终稿不回仓,直出件是终稿入库｜⚠先读详案再审查再动画｜⚠[表头重影层先清(0915)](ppt-header-ghost-image-0915.md)｜⚠[动画禁由下向上(0915)](ppt-anim-no-upward-jump-0915.md)
 ## 看图写话（picture-writing）
 整区（跨课次通则＋规则体例）已外移 → **[看图写话线记忆](memory-index-picture-writing.md)**，排新课次或出图前打开；该线当前无未决项。
@@ -87,6 +82,7 @@
 - **写作课PPT仓内直出(0926)**:重写详案的课次走直出(direct_build.py＋每课构建脚本),外部件添图收尾用finalize_external.py;讲评环节不进课件;六上五各版本存放位置与页标待定见详情 — [详情](writing-ppt-direct-build-pilot-0926.md)
 **碰引擎/共享件前必读**：[下游六件抽共享层](downstream-shared-layer-and-token-facts.md)（改真源照该条回归法）· [0727上下文瘦身收官](context-engineering-slimdown-0727.md)（细节已下沉references别抄回）
 - [手绘风格库274条全改九项+按用途标签(0924)](handdraw-library-retune-0924.md) — style_tags.json封闭词表;读书会/绘本按书气质组合筛;特征只写画风不写内容;gpt-image照抄参考图服装改特征治不了
+- ⚠[全仓生图缺省长边1280+medium(1024)](image-gen-default-1280-medium-1024.md) — 投屏只显示约800px,2048 high看不出差别贵6倍;Gemini 1K;大图用IMAGE_LONG_SIDE临时覆盖;本地配置不写尺寸,setup_check会报
 - [课件配图工具接手绘风格库+缺省gpt-image(0924)](imgtool-handdraw-gptimage-0924.md) — 与海报共用handdraw_style.py;风格卡`手绘编号`走compose();通道钉project.通道、老项目按已有图目录认;⚠规则库在gpt-image上未重验
 - [宣传件渲染链+PDF反查源三指纹(0826)](promo-materials-render-chain.md) — 手改PDF前先三指纹反查源html;馆内海报scale须0.98;海报html已改入库
 - [外部改稿docx回贴md(0902-0915)](external-docx-backfill-0902.md) — 骨架继承+文本整替;⚠判新旧看措辞不看哈希;⚠先互比外部历次版本;⚠清扫正则禁\s用[ 　];三方不同步以PPT+配套为基准;取舍权在用户
@@ -114,7 +110,7 @@
 - ⚠[拓展阅读·课表书处理(1014)](extension-reading-exclude-own-catalog-1014.md) — 课表=pipeline/references/reading-club-catalog.md+书籍档案书名;低年级书只能写「你可能在X年级读过,再读一遍」,同级及以上不推;课表外须适龄
 ## 未决事项与交付风险（做完即删）
 - 和大人一起读（一）导读课P18:用户便签要求换成实书第8–9页整幅插图,协作者机无扫描件未做(便签留在PPT上);须在有扫描件的机器上补截入库(顺延编号)后换图、补图单
-- ⚠[野性的呼唤/萨哈拉的原图推迟到做PPT时处理(1020)](images-deferred-to-ppt-1020.md) — 档案写「无插图」但图目录已有未整理的图；做PPT先补图单，且要在AI生图之前，再改档案第十节
+- ⚠[萨哈拉原图推迟到做PPT时处理(1020)](images-deferred-to-ppt-1020.md) — 图目录未整理,做PPT先补图单(须在AI生图前)再改档案第十节;野性的呼唤1024已结案:网图不用,AI图按实体书封面风格(137+封面肌理参考图)
 - **备课视频首批两支已出片(0921)**:五上四17.8分钟为准片;三上一素材薄;六上四等PPT定稿;⚠闸门A记的是「用户指示直接出片(未逐页通读)」 — [详情](lesson-video-line-0921.md)
 - 仓库瘦身0920已完成(→303MiB);⚠新克隆必跑两条装机命令(见docs\协作同步说明.md);余salvage tag待确认无用再删 — [详情](repo-slimming-plan-0920.md)
 - 写作课批改标准包未做：三上五／四上五／四上六；四上五、四上六 PPT 链未做；**四上六**教材页未核（unit-texts 待补条目）＋资料卡「＿＿」数据待老师填 — [三上五](binfen-shijie-3a-lesson-state.md)｜[四上五](shenghuo-wanhuatong-4a-lesson-state.md)｜[四上六](wenhua-yichan-4a-lesson-state.md)

@@ -59,3 +59,11 @@ metadata:
 - **「说明方法说全名」这类换说法的整改，必须全篇 grep 同族变体再收工(0921)**:五上五按用户意见②改完「补上一个数」后，隔一轮仍被点出第41行「后面三句给了一个数」——实测同族残留 5 处（41/92/182/253/293），上一轮只改净被点到的那一处。查法＝改完搜半截搭配串（“一个数”“一个比较”“比了一下”）逐处看。⚠ 改法本身会带来第二个坑：把同一句式铺满全篇（这次「它到底是多少」一下 6 处撞池8 配额），**成句化改写完必看 tone_gate 口令高密度项**；但说明方法专名的必要搭配（「用列数字」）属术语不属口令，不强改 — [源](jieshao-shiwu-5a-lesson-state.md)
 - **AI 腔已换形态:①–⑤「话没说全」→⑥–⑩「话说全了但不是人话」(0921 三篇合并归纳)**:第十形态＝**隐喻化动词**(立起/长成/挂到中心上/出一次力/写得最厚/方面齐了/数字进去了/比出)与**术语半截化**(说明方法说成「给了一个数」「加一个比较」;判断的办法→判法;那一句→那半句);第五形态同时扩一层——**动词的宾语与落点同样会丢**(「第二段为什么能让人说得出来」)。判据换了:老判据「读出声像不像真老师顺嘴讲」对这几类失效(它们读着就是顺的),改问**把这句单独读给没上过这节课的人,他知道说的是什么、落在哪吗**。⚠ 十形态已落 lesson-structure §三第7条/checklist E/generation-brief/review-rubric 四处＋tone_gate [INFO]「自造搭配与半截术语候选」;⚠ **补形态只写进记忆＝没立规则**(六～九形态 0914/0918 只进记忆,三篇连着复发) — [源](writing-lesson-telegraphese-and-coinage-redline.md)
 - **对学生下的格式性规定别说死,先拿课文·示范文·三档三处各验一遍(0921)**:「每段段首一句点明方面」被《鲸》头两段证伪(须读到第二句)、「数字要说准」写「大约」也算列数字——改法＝放宽口径(开头一两句/有把握就写准、拿不准写大约/多用几种)并**全篇同步**(五上五归纳句·旁批表·指纹块三处漏改,隔轮才清)。同族第二问:**别把学生的正常写法设成判断题的错项**——「很大」「很快」这类总说句本身不错,该判的是「后面有没有跟上说明方法」(已补进红线第8条第三亚型与 checklist C 组) — [源](jieshao-shiwu-5a-lesson-state.md)
+
+### 工具与配套侧（1024 自 MEMORY.md 移入）
+- ⚠[无Python时5.0润色静默缺席(1004)](no-python-skips-det-polish-1004.md) — 机械替换靠polish_writing，脚本跑不了成稿口语残留多；本机1004已装3.13
+- [三档标准改学生可见(0921)](three-tier-standard-student-visible-0921.md) — 〔…教师掌握（不必读给学生）〕括注以后都不写;lesson-structure+checklist已改;tone_gate无需改;存量45份不回溯
+- [作文批改工具(0818立项)](writing-correction-tool-0818.md) — 给加盟商不做skill;判据从详案抽标准包JSON;主模型doubao-2-1-pro(必带thinking=disabled);闸门verified_by_human;0921经真稿实测已改到第七版栏目与判据(⚠「立得住」不禁·成语误用排第一·修辞改法禁另造喻体·起手式靠程序轮换角度治不住提示词);⚠改提示词必跑run_regression
+- [批改工具已部署Vercel(0824)](writing-correction-tool-vercel-deploy-0824.md) — 入口=部署根index.py不能放api/;.vercelignore挡config.json;正式地址grader.skyline666.top;⚠validate全绿≠包对
+- [配套json富文本标记只有部分字段解析(0907)](writing-materials-richtext-field-scope.md) — 教师materials/家长oneline走textContent,写{b}会印成(b);⚠溢出/页数/Type3三道机检全绿也抓不到,渲完正则扫一遍PDF文本
+- [手改只改HTML必被重渲冲掉(0821)](writing-materials-handedits-lost-on-rerender.md) — 文字改动一律回写_data.json;⚠仓内9课json仍不含那批手改
