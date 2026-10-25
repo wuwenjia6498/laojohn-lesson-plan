@@ -1,0 +1,36 @@
+{
+  "name": "老师01",
+  "pronoun": "she",
+  "portrait": "角色.jpg",
+  "scene": "场景.jpg",
+  "voice": "音色参考.wav",
+  "appearance_en": "a Chinese woman in her mid-thirties with long straight black hair parted in the middle falling past her shoulders, thin round gold metal-framed glasses, wearing a cream knit V-neck sweater with wide navy horizontal stripes; calm, sincere and approachable, a natural unretouched face with a kind, attentive gaze",
+  "scene_en": "a warm children's picture-book reading room: light wood wall shelves lit from within showing picture books face-out, a low wooden display table with open books in the middle, soft warm light, cream and light wood palette",
+  "voice_en": "a calm, clear mid-pitched female Mandarin voice",
+  "delivery_en": "engaging, thoughtful, steady",
+  "actions": {
+    "nod": "gives a small, understanding nod",
+    "lean_in": "leans slightly toward the camera as if sharing something important",
+    "open_palm": "raises one hand at chest height with an open palm in a gentle explaining gesture",
+    "count": "counts off on the fingers of one hand at chest height",
+    "smile": "breaks into a warm, reassuring smile",
+    "tilt_head": "tilts the head slightly with a thoughtful, questioning look",
+    "points_to_a_book": "points to a book on the central display table",
+    "picks_up_a_book": "picks up a book from the central display table and holds it toward the camera",
+    "gestures_toward_shelves": "gestures toward the bookshelves behind her"
+  },
+  "md5": {
+    "portrait": "980db7f7dad04d7d0a24e0a9fe0c13ea",
+    "scene": "773803d90d8331bcea3b84c3ba7d0e1a",
+    "voice": "1d222448ea950b927d3fe5ef69df0b3b"
+  },
+  "confirmed_by": "wuwenjia6498",
+  "stations": {
+    "bookshelf": {
+      "en": "standing close in front of the warmly lit wooden picture-book shelves, book covers softly blurred behind her shoulders",
+      "pose": "standing"
+    }
+  },
+  "voice_source": "音色参考.wav",
+  "confirmed_at": "2026-10-23 06:12"
+}

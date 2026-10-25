@@ -82,10 +82,12 @@ description: 把一个课次/一本书做成给家长看的 9:16 竖屏宣传短
 
 ## 生成后端
 
-- 缺省 AiHubMix `minimax-h3`，走 **`/ai/v1/videos` 新异步协议**（旧 `/v1/videos` 对 H3 报 legacy protocol；账号须在控制台开通「异步任务」）。`VIDEO_PROVIDER=minimax` 切 MiniMax 官方 v2（需 `MINIMAX_API_KEY`）。
-- 768P、9:16，约 $0.08/秒；一支片 6 段 ≈ $5，加样片与返工 ≈ $8。
+- **2026-10-25 起缺省 MiniMax 官方国内站 `MiniMax-H3-Lite`**（`api.minimaxi.com` `/v2/video_generation`，key 读用户环境变量 `MINIMAX_API_KEY`）。依据：读书会 system3min 拿 s1/s7/s16 三段同提示词同参考实测，Lite 与 H3 的 ASR、人像无明显差别；对照片在工作台 `04-projects\video\dushuhui-video\ai-promo\system3min\_lite_test\`。
+- 768P、9:16 单价（元/秒）：Lite 0.26｜Highspeed 0.40｜H3 0.50｜AiHubMix H3 实付 ≈ 0.55。一支 3 分钟（计费约 213 秒）Lite ≈ ¥55，原 AiHubMix ≈ ¥117。`videoclient.PRICE` 是估价唯一源，调价改那里。
+- 某段 Lite 口形或音色不过关：只对那段 `PROMO_VIDEO_MODEL=MiniMax-H3-Highspeed`（或 `MiniMax-H3`）重生。片段文件名哈希不含模型，换模型前先把那段旧片段挪走，否则会当「已有」跳过。
+- 退路 `VIDEO_PROVIDER=aihubmix`：`minimax-h3`，走 **`/ai/v1/videos` 新异步协议**（旧 `/v1/videos` 对 H3 报 legacy protocol；账号须在控制台开通「异步任务」）。AiHubMix 上没有 Lite / Highspeed。
 - 参考素材顺序固定：人像 `<Picture 1>`、场景 `<Picture 2>`、音色参考 `<Audio 1>`——`h3_prompt.refs_of` 与提示词标签一一对应，改一边必改另一边。
-- 备用通道：博主用的是 RunningHub 工作流（只收 2 张图、无音色参考、不能指定竖屏），未接；AiHubMix 出问题时再考虑加进 `videoclient.PROVIDERS`。
+- 备用通道：博主用的是 RunningHub 工作流（只收 2 张图、无音色参考、不能指定竖屏），未接；官方与 AiHubMix 都出问题时再考虑加进 `videoclient.PROVIDERS`。
 - 提示词格式唯一源＝MiniMax 官方 h3-prompt-writing 的 `references/ref-en.txt`；本仓只在 `h3_prompt.RULES` 与 `CAMERAS` 里加了近景、无字幕、正面明亮补光三类约束。
 
 ## 硬约束

@@ -142,7 +142,7 @@ def main():
     S.save_json(fresh, sb_path)
     bad = [r["id"] for r in rows if r.get("status") == "misread"]
     unk = [r["id"] for r in rows if r.get("status") == "unknown"]
-    print("\n本次生成约 %d 秒（≈ $%.1f）。" % (spent, spent * 0.08))
+    print("\n本次生成约 %d 秒（%s ≈ ¥%.1f）。" % ((spent,) + videoclient.cost(spent)))
     if bad:
         print("  ✗ 仍念错：%s——改台词（换掉难念的词）或 --only 再生" % "、".join(bad))
     if unk:

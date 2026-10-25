@@ -4,14 +4,18 @@ r"""视频生成 + 转写客户端（宣传片线讲解员口播用）。
     make_video(provider=None)   →  .generate(prompt, refs, seconds, ratio, resolution) → mp4 bytes
     transcribe(wav_path)        →  {"text", "segments":[{start,end,text}]} 或 {"_error": …}
 
-通道（`VIDEO_PROVIDER` 一个环境变量切，缺省 aihubmix）：
-  aihubmix  AiHubMix 新异步协议 `/ai/v1/videos`（2026-09-27 实测）。
+通道（`VIDEO_PROVIDER` 一个环境变量切，缺省 minimax）：
+  minimax   MiniMax 官方国内站 `/v2/video_generation`（2026-10-25 起缺省；需 MINIMAX_API_KEY）。
+            缺省模型 MiniMax-H3-Lite（¥0.26/秒，同提示词同参考实测 ASR、人像与 H3 无明显差别）；
+            要更稳换 `PROMO_VIDEO_MODEL=MiniMax-H3-Highspeed`（¥0.40）或 `MiniMax-H3`（¥0.50）。
+            Lite 的参考生视频不认 ratio=adaptive，须显式传 9:16（本链一直显式传）。
+            实测产物同 AiHubMix：768×1344、24fps；Lite 一段约 1.5～2 分钟，Highspeed 不到 1 分钟。
+  aihubmix  AiHubMix 新异步协议 `/ai/v1/videos`（2026-09-27 实测；只有 minimax-h3 / h3-max，
+            无 Lite/Highspeed，H3 768P 实付 ≈ ¥0.55/秒——比官方贵，现作退路）。
             ⚠ 旧的 `/v1/videos` 对 minimax-h3 直接 400「legacy protocol」；
             ⚠ 账号须先在控制台开通「异步任务」，否则 403 async_not_enabled；
             ⚠ 不认 `generate_audio` 字段（schema_violation）——H3 本就自带声音，不传。
             实测产物：768×1344、24fps、AAC 32kHz 双声道，4 秒片约 2 分钟出。
-  minimax   MiniMax 官方 `/v2/video_generation`（退路；需 MINIMAX_API_KEY）。
-
 参考素材一律 base64 data URL 内联（两家都认；单请求上限 64MB，人像+场景+10 秒 wav 远够）。
 
 密钥：AIHUBMIX_API_KEY 走 imgclient 的同一套三级回退（环境变量 → 课件配图工具\.env →
@@ -45,6 +49,17 @@ def aihubmix_key():
     m = _imgclient()
     m.load_dotenv()
     return m._aihubmix_key()
+
+
+# 768P 输出单价（元/秒）：官方国内站定价页 2026-10-25；AiHubMix 按账单实付 $0.07744 折算
+PRICE = {"MiniMax-H3-Lite": 0.26, "MiniMax-H3-Highspeed": 0.40, "MiniMax-H3": 0.50, "minimax-h3": 0.55}
+
+
+def cost(seconds):
+    """按当前通道与模型估生成费用（元）；不认识的模型按 H3 官方价。"""
+    name = (os.environ.get("VIDEO_PROVIDER") or "minimax").lower()
+    model = os.environ.get("PROMO_VIDEO_MODEL") or ("MiniMax-H3-Lite" if name == "minimax" else "minimax-h3")
+    return model, seconds * PRICE.get(model, 0.50)
 
 
 def data_url(path):
@@ -119,15 +134,16 @@ class AihubmixVideo(object):
 
 
 class MinimaxVideo(AihubmixVideo):
-    """MiniMax 官方 v2（退路）。content 数组带 role，参考生成走 reference_*。"""
+    """MiniMax 官方 v2（缺省通道）。content 数组带 role，参考生成走 reference_*。
+    国内站 key 只能打 api.minimaxi.com；国际站 key 设 MINIMAX_BASE=https://api.minimax.io。"""
     name = "minimax"
 
     def __init__(self):
         self.key = os.environ.get("MINIMAX_API_KEY")
         if not self.key:
-            raise SystemExit("minimax 通道需要 MINIMAX_API_KEY")
-        self.base = os.environ.get("MINIMAX_BASE", "https://api.minimax.io")
-        self.model = os.environ.get("PROMO_VIDEO_MODEL", "MiniMax-H3")
+            raise SystemExit("minimax 通道需要 MINIMAX_API_KEY（用户环境变量；改用 AiHubMix 设 VIDEO_PROVIDER=aihubmix）")
+        self.base = os.environ.get("MINIMAX_BASE", "https://api.minimaxi.com")
+        self.model = os.environ.get("PROMO_VIDEO_MODEL", "MiniMax-H3-Lite")
         self.h = {"Authorization": "Bearer " + self.key}
 
     def submit(self, prompt, refs=(), seconds=10, ratio="9:16", resolution="768P"):
@@ -169,7 +185,7 @@ PROVIDERS = {"aihubmix": AihubmixVideo, "minimax": MinimaxVideo}
 
 
 def make_video(provider=None):
-    name = (provider or os.environ.get("VIDEO_PROVIDER") or "aihubmix").lower()
+    name = (provider or os.environ.get("VIDEO_PROVIDER") or "minimax").lower()
     if name not in PROVIDERS:
         raise SystemExit("未知视频通道 %s，可选：%s" % (name, "/".join(PROVIDERS)))
     return PROVIDERS[name]()

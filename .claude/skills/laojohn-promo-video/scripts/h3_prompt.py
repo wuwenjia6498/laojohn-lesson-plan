@@ -164,7 +164,8 @@ def storyboard(sc, profile, out):
         rows.append({"id": seg["id"], "seconds": dur, "lines": seg["lines"],
                      "prompt": "_prompts/%s.txt" % seg["id"], "hash": h,
                      "clip": "_clips/%s_%s.mp4" % (seg["id"], h)})
-    sb = {"presenter": profile["name"], "model": os.environ.get("PROMO_VIDEO_MODEL", "minimax-h3"),
+    import videoclient
+    sb = {"presenter": profile["name"], "model": videoclient.cost(0)[0],
           "segments": rows, "total_seconds": sum(r["seconds"] for r in rows)}
     S.save_json(sb, os.path.join(out, "storyboard.json"))
     return sb
@@ -194,8 +195,9 @@ def main():
         print("闸门 P 已记账：%s（%d 段）" % (a.by, len(sb["segments"])))
     for r in sb["segments"]:
         print("  %s  %2ds  %s" % (r["id"], r["seconds"], "".join(r["lines"])))
-    print("合计 %d 秒口播，%d 段（约 $%.1f）→ storyboard.json、_prompts\\"
-          % (sb["total_seconds"], len(sb["segments"]), sb["total_seconds"] * 0.08))
+    import videoclient
+    print("合计 %d 秒口播，%d 段（%s 约 ¥%.1f）→ storyboard.json、_prompts\\"
+          % ((sb["total_seconds"], len(sb["segments"])) + videoclient.cost(sb["total_seconds"])))
 
 
 if __name__ == "__main__":
