@@ -54,12 +54,13 @@
 - ⚠[读书会PPT新样式v9·学人工优化版(1006)](reading-ppt-v9-human-optimized-1006.md) — 写`主题色：`才走新样式；每页大图+底带+问答拆框+卡片版式；写全名完整句；配图链路reading_deck.py；AI图不入库；答案改主题色(推翻红字)
 - ⚠[回归读书会·语体边界(1005)](reading-line-return-style-boundary-1005.md) — 延续散文化口语亲切(样本一至五原文锚定);写作线文风/润色/机检/MEMORY写作条目只有已进lesson-plan规则的才适用;Pass B按本线rubric;试写稻草人做基线
 - [张祖庆视角·读书会线暂不接入(1005)](zhang-perspective-reading-line-declined-1005.md) — 一手材料缺+处方与规格冲突;两张清点表收益小(稻草人三轮冷审已抓到);重启条件=连续几本同类问题漏网
-- ⚠[原文朗读篇幅立数字口径(1022)](lesson-plan-quote-length-cap-1022.md) — 10月批引文是7月批2–3倍;单次L5–L6≤180+每课时≤500为主闸(二轮收紧),机检quote_length.py;分批看git大改日期别看mtime;六本+记忆传授人已压完;稻草人·克雷洛夫暂不改;⚠一年级不压(1023用户定·老师给读本身是训练)
+- ⚠[原文朗读篇幅:先判断后算数(1022立·1025改)](lesson-plan-quote-length-cap-1022.md) — 只设上限后新稿压过头(萨哈拉交流课1仅93字);现行=正向判据「每节有没有值得全班听完的原文、读来做什么」+数字只当刹车;不设下限数字(用户定·防AI凑数);一年级不压
+- ⚠[L4–L6文学类交流课2必做文学赏析(1024)](lesson-plan-literary-appreciation-1024.md) — 引→品→比→说,先问效果后给名称;赏析≠写作技法不受解锁口管;档案新增「写法与语言特色」节;野性的呼唤等存量不回改
 **写详案前必读**：[逐环节装载量双向核查](lesson-plan-per-step-load-audit.md) · [创意环节正向标准三件套](lesson-plan-positive-standard-over-negative.md) · [环节标题三段式](lesson-plan-step-title-format.md)
 - [环节标题=功能·内容三段式(0807)](lesson-plan-step-title-format.md) — 功能名≤10字、同课时内不重复;规则在style-and-format+checklist
 - [一节讲不完的根因](lesson-plan-lesson-total-load-fit.md) / [创意环节防平庸=正向标准三件套](lesson-plan-positive-standard-over-negative.md) — 课堂动作量必须按标称配时倒算;只堆负向约束→模型取平庸下限
 - [逐环节装载量双向核查](lesson-plan-per-step-load-audit.md) / [三类文本差异化](lesson-plan-three-text-type-focus.md) — 过挤过松都查,≥5分钟环节须有学生动作;名著优先·三选一互斥
-- [详案偏薄根因=师话密度低](lesson-plan-shihua-density.md) — 三杠杆补厚(师话写长/参考填实/原文精读用对·1022改,不靠加长引文)
+- [详案偏薄根因=师话密度低](lesson-plan-shihua-density.md) — 三杠杆补厚(师话写长/参考填实/原文精读选得准·1025改:该听完的段完整读,不越少越好)
 - [导读钩子要切题](lesson-plan-hook-must-fit-theme.md) / [预测锚点须是已读内容](lesson-plan-prediction-anchor-must-be-read.md) / [导入钩子须先声夺人](lesson-plan-intro-hook-must-grip.md) — 禁次要情节线做钩子;钩子埋了要兑现
 - [导读课开场话术反同质化](lesson-plan-opening-antihomogenization.md) / [跨书查重防工具套路化](lesson-plan-cross-book-dedup.md) — 示范句禁逐字照抄、避「先不急着/先不忙」前缀家族;同一工具连用两本即换型
 - [学生课前已人手一本书](students-already-have-book.md) / [教室无黑板白板](classroom-no-blackboard.md) / [详案禁ASCII图用表格](lesson-plan-no-ascii-diagram-use-table.md) — 禁假悬念;检索黑板/板书/白板应零;工具一律MD表格
