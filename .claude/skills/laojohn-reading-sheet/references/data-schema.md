@@ -411,6 +411,33 @@
 - 书写线 56px 间距、虚线随分支色；4 支约 10 条/列，每条写一个篇名/词条。
 - **`template_tree.html` 与 `scripts/render_pptx.py` 的 `render_tree()` 各画一遍同一张图，几何常量必须同步改。**
 
+## htree —— 横向两级树形图（根 → 大类 → 末级横条卡）
+
+```json
+"data": {
+  "title": "《书名》阅读单4 · 树形图 · 谁会抚养后代",
+  "subtitle": "（可选）",
+  "variant": "空白版",
+  "root": "谁会抚养后代",                 // 左侧根节点，竖排（照抄详案）
+  "color": "#6B5442",                     // 可选，根节点底色
+  "col_heads": {"group": "第一层", "leaf": "第二层 · 书中的例子"},  // 可选，顶部列名（root/group/leaf）
+  "fields": [                             // 末级卡右侧各栏；栏名只在顶部印一次
+    {"label": "抚养后代吗？书中怎么写的", "width": 57},
+    {"label": "书中给的原因", "width": 43}           // width 为相对比例；可加 "lines" 固定线数，缺省按卡高铺满
+  ],
+  "groups": [                             // 第一层大类，2–3 个
+    {"header": "无脊椎动物", "color": "#C18A3A", "leaves": [
+      {"header": "大多数昆虫", "example": "（书中泛指）"},     // header 支持 \n；example=预填例子(可省)
+      {"header": "会抚养后代\n的少数", "example": "蝎子、蠼螋、水狼蛛、日本红螯蛛"}
+    ]}
+  ],
+  "footer": "（可选）"
+}
+```
+- 末级卡高按总数平分（6 张约 133px、每栏 3 条线，线距 43px）；末级 ≤7 较佳，再多书写线不够。
+- 名签宽 124px：第二层名每行约 7 字，长名用 `\n` 断在词边界。
+- **`template_htree.html` 与 `scripts/render_pptx.py` 的 `render_htree()` 各画一遍，几何常量必须同步改。**
+
 ## writing —— 写作 / 写诗页（装饰框 + 书写线）
 
 ```json

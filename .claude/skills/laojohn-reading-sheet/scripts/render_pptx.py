@@ -1672,7 +1672,102 @@ def render_match(slide, d):
     footer(slide, d, key="footer", y=1080)
 
 
+def render_htree(slide, d):
+    """横向两级树形图：根 → 第一层大类 → 第二层横条卡（名签 + 各栏书写线）。
+    搬 template_htree.html 的几何常量（两边须同步）。竖排文字用逐字换行近似。"""
+    header(slide, d, title_px=74, title_size=23, sub_px=116)
+    PALETTE = ["#C18A3A", "#5B7FA6", "#5B8C7B", "#8268A0"]
+    COLH_Y, TOP, BOTTOM = 204, 222, 1080
+    GROUP_GAP, LEAF_GAP = 16, 8
+    ROOT_X, ROOT_W, TRUNK_X, GRP_X, GRP_W, BR_X = 30, 56, 98, 110, 58, 180
+    LEAF_X, LEAF_R, TAB_W = 192, 762, 124
+    LINE_FIRST, LINE_GAP, STROKE = 42, 43, "A8957A"
+    groups = d.get("groups", [])
+    G = len(groups) or 1
+    N = sum(len(g.get("leaves", [])) for g in groups) or 1
+    fields = d.get("fields", [])
+    leafH = (BOTTOM - TOP - (G - 1) * GROUP_GAP - (N - G) * LEAF_GAP) / N
+    fx0 = LEAF_X + TAB_W
+    fW = LEAF_R - fx0
+    tot = sum(f.get("width", 1) for f in fields) or 1
+    fxs, acc = [], fx0
+    for f in fields:
+        w = fW * f.get("width", 1) / tot
+        fxs.append((acc, w))
+        acc += w
+    ch = d.get("col_heads", {}) or {}
+    for cx, t in ((ROOT_X + ROOT_W / 2, ch.get("root", "")), (GRP_X + GRP_W / 2, ch.get("group", "")),
+                  (LEAF_X + TAB_W / 2, ch.get("leaf", ""))):
+        if t:
+            add_text(slide, cx - 80, COLH_Y - 18, 160, 22, t, size=13.5, bold=True,
+                     color="6E6656", align="center", anchor="middle")
+    for (fx, fw), f in zip(fxs, fields):
+        add_text(slide, fx, COLH_Y - 18, fw, 22, f.get("label", ""), size=13.5, bold=True,
+                 color="6E6656", align="center", anchor="middle")
+    y, gmids = TOP, []
+    for gi, g in enumerate(groups):
+        color = (g.get("color") or PALETTE[gi % len(PALETTE)]).lstrip("#")
+        leaves = g.get("leaves", [])
+        gtop, mids = y, []
+        for lf in leaves:
+            ly = y
+            mids.append(ly + leafH / 2)
+            add_round_rect(slide, LEAF_X, ly, LEAF_R - LEAF_X, leafH, radius=0.08,
+                           fill=_mix_white(color, 0.06), line=color, line_w=1.4)
+            add_rect(slide, LEAF_X, ly, TAB_W, leafH, fill=color)
+            txt = lf.get("header", "")
+            if lf.get("example"):
+                mid = ly + leafH * 0.52
+                add_text(slide, LEAF_X + 6, ly + 6, TAB_W - 12, mid - ly - 8, txt, size=15, bold=True,
+                         color="FFFFFF", align="center", anchor="bottom", line_spacing=1.15)
+                add_text(slide, LEAF_X + 8, mid + 4, TAB_W - 16, ly + leafH - mid - 10, lf["example"],
+                         size=12.5, color="FFFFFF", align="center", anchor="top", line_spacing=1.2)
+            else:
+                add_text(slide, LEAF_X + 6, ly, TAB_W - 12, leafH, txt, size=15, bold=True,
+                         color="FFFFFF", align="center", anchor="middle", line_spacing=1.15)
+            for fi, (fx, fw) in enumerate(fxs):
+                if fi:
+                    add_line(slide, fx, ly + 8, fx, ly + leafH - 8, _mix_white(color, 0.35), 1.0, dash="sysDash")
+                n = fields[fi].get("lines")
+                if n is None:
+                    n = max(1, int((leafH - LINE_FIRST - 6) // LINE_GAP) + 1)
+                for k in range(n):
+                    yy = ly + LINE_FIRST + k * LINE_GAP
+                    if yy > ly + leafH - 5:
+                        break
+                    add_line(slide, fx + 12, yy, fx + fw - 12, yy, _mix_white(color, 0.5), 1.2, dash="dash")
+            add_line(slide, BR_X, ly + leafH / 2, LEAF_X, ly + leafH / 2, STROKE, 2)
+            y += leafH + LEAF_GAP
+        y -= LEAF_GAP
+        gmid = (gtop + y) / 2
+        gmids.append(gmid)
+        if len(mids) > 1:
+            add_line(slide, BR_X, mids[0], BR_X, mids[-1], STROKE, 2)
+        gtxt = g.get("header", "")
+        gh = min(y - gtop, len(gtxt) * 22 + 34)
+        add_round_rect(slide, GRP_X, gmid - gh / 2, GRP_W, gh, radius=0.18, fill=color)
+        add_text(slide, GRP_X, gmid - gh / 2, GRP_W, gh, "\n".join(gtxt), size=17, bold=True,
+                 color="FFFFFF", align="center", anchor="middle", line_spacing=1.0)
+        add_line(slide, GRP_X + GRP_W, gmid, BR_X, gmid, STROKE, 2)
+        add_line(slide, TRUNK_X, gmid, GRP_X, gmid, STROKE, 2)
+        add_oval(slide, BR_X - 4, gmid - 4, 8, 8, fill=STROKE)
+        y += GROUP_GAP
+    rmid = (gmids[0] + gmids[-1]) / 2 if gmids else (TOP + BOTTOM) / 2
+    if len(gmids) > 1:
+        add_line(slide, TRUNK_X, gmids[0], TRUNK_X, gmids[-1], STROKE, 2)
+    rtxt = d.get("root", "")
+    rh = len(rtxt) * 25 + 40
+    add_round_rect(slide, ROOT_X, rmid - rh / 2, ROOT_W, rh, radius=0.2,
+                   fill=(d.get("color") or "#6B5442").lstrip("#"))
+    add_text(slide, ROOT_X, rmid - rh / 2, ROOT_W, rh, "\n".join(rtxt), size=19, bold=True,
+             color="FFFFFF", align="center", anchor="middle", line_spacing=1.0)
+    add_line(slide, ROOT_X + ROOT_W, rmid, TRUNK_X, rmid, STROKE, 2)
+    add_oval(slide, TRUNK_X - 4.5, rmid - 4.5, 9, 9, fill=STROKE)
+    footer(slide, d, key="footer", y=1090)
+
+
 RENDERERS = {
+    "htree": render_htree,
     "tree": render_tree, "match": render_match,
     "table": render_table, "venn": render_venn, "ladder": render_ladder,
     "logic": render_logic, "voyage": render_voyage,

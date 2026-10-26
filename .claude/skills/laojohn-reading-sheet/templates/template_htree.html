@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<!-- 横向两级树形图：左侧根节点 → 第一层大类 → 第二层小类（每类一张横条卡），
+     卡左为彩色名签（第二层名 + 预填的书中例子），卡右按「栏」留书写线；栏名只在顶部印一次。
+     用于「两层分类、每个末级还要写几样东西」——竖排 tree 的列太窄写不下时用它。
+     render_pptx.py 的 render_htree() 搬同一组几何常量，两边须同步改。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #page { width: 794px; height: 1123px; background: #FFFFFF; position: relative; overflow: hidden; }
+  .brand-logo { position: absolute; top: 32px; right: 42px; height: 48px; }
+  .variant-tag { position: absolute; top: 36px; left: 46px; font-size: 13px; color: #B3A98F; letter-spacing: 1px; }
+  .l-title { position: absolute; top: 110px; left: 0; width: 100%; text-align: center;
+    font-size: 23px; font-weight: 700; color: #333; padding: 0 56px; line-height: 1.4; }
+  .l-sub { position: absolute; top: 152px; left: 0; width: 100%; text-align: center; font-size: 14px;
+    color: #8A8268; padding: 0 50px; line-height: 1.5; }
+  .l-foot { position: absolute; bottom: 18px; left: 0; width: 100%; text-align: left; font-size: 13.5px;
+    color: #9A937F; padding: 0 40px; line-height: 1.6; }
+  .root { font-size: 19px; font-weight: 700; fill: #FFFFFF; }
+  .grp { font-size: 17px; font-weight: 700; fill: #FFFFFF; }
+  .colh { font-size: 13.5px; font-weight: 700; fill: #6E6656; }
+  .lname { font-size: 15px; font-weight: 700; fill: #FFFFFF; }
+  .lex { font-size: 12.5px; fill: #FFFFFF; }
+</style>
+</head>
+<body>
+<div id="page">
+  <img class="brand-logo" id="logo">
+  <div class="variant-tag" id="variantTag"></div>
+  <div class="l-title" id="title"></div>
+  <div class="l-sub" id="subtitle"></div>
+  <svg id="svg" width="794" height="1123" style="position:absolute; top:0; left:0;"></svg>
+  <div class="l-foot" id="foot"></div>
+</div>
+<script>
+const DATA = /*__DATA__*/ null;
+const SVGNS = "http://www.w3.org/2000/svg";
+function el(t,a){const e=document.createElementNS(SVGNS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+function wrap(s,max){
+  s = String(s);
+  const NO_HEAD = "，。、；：？！）】」』”’》%…—-";
+  const NO_TAIL = "（【「『“‘《";
+  const toks = s.match(/[A-Za-z0-9]+(?:[.\-–][A-Za-z0-9]+)*|[\s\S]/g) || [];
+  const lines = []; let cur = "";
+  for (const tk of toks){
+    if (tk === "\n"){ lines.push(cur); cur = ""; continue; }
+    if (cur !== "" && cur.length + tk.length > max && NO_HEAD.indexOf(tk) === -1){
+      let carry = "";
+      while (cur && NO_TAIL.indexOf(cur[cur.length - 1]) !== -1){ carry = cur[cur.length - 1] + carry; cur = cur.slice(0, -1); }
+      lines.push(cur); cur = carry + tk;
+    } else { cur += tk; }
+  }
+  if (cur !== "") lines.push(cur);
+  return lines;
+}
+function mixWhite(hex, a){
+  const h = hex.replace('#','');
+  const c = [0,2,4].map(i=>parseInt(h.substr(i,2),16));
+  return '#' + c.map(v=>Math.round(255 - (255 - v) * a).toString(16).padStart(2,'0')).join('');
+}
+const PALETTE = ["#C18A3A","#5B7FA6","#5B8C7B","#8268A0"];
+
+// 几何常量（页面坐标）。render_pptx.py 的 render_htree() 须同步。
+const COLH_Y = 204, TOP = 222, BOTTOM = 1080;
+const GROUP_GAP = 16, LEAF_GAP = 8;
+const ROOT_X = 30, ROOT_W = 56;
+const TRUNK_X = 98;
+const GRP_X = 110, GRP_W = 58;
+const BR_X = 180;
+const LEAF_X = 192, LEAF_R = 762, TAB_W = 124;
+const LINE_FIRST = 42, LINE_GAP = 43, STROKE = "#A8957A";
+
+function vtext(svg, cx, cy, s, cls, step){
+  const chars = Array.from(String(s));
+  let y = cy - (chars.length*step)/2 + step*0.78;
+  chars.forEach(ch=>{ const t=el("text",{x:cx, y:Math.round(y), class:cls, "text-anchor":"middle"}); t.textContent=ch; svg.appendChild(t); y += step; });
+}
+
+function render(){
+  const d = DATA;
+  document.getElementById('logo').src = d.logo;
+  document.getElementById('title').textContent = d.title || '';
+  const sub = document.getElementById('subtitle'); if(d.subtitle) sub.textContent = d.subtitle; else sub.style.display='none';
+  const tag = document.getElementById('variantTag'); if(d.variant) tag.textContent = d.variant; else tag.style.display='none';
+  const foot = document.getElementById('foot'); if(d.footer) foot.textContent = d.footer; else foot.style.display='none';
+
+  const svg = document.getElementById('svg');
+  const groups = d.groups || [];
+  const G = groups.length || 1;
+  const N = groups.reduce((s,g)=>s + (g.leaves||[]).length, 0) || 1;
+  const fields = d.fields || [];
+  const leafH = (BOTTOM - TOP - (G-1)*GROUP_GAP - (N-G)*LEAF_GAP) / N;
+
+  // 栏宽（百分比 → 像素）
+  const fx0 = LEAF_X + TAB_W, fW = LEAF_R - fx0;
+  const tot = fields.reduce((s,f)=>s + (f.width || 1), 0) || 1;
+  let acc = fx0; const fxs = fields.map(f=>{ const w = fW * (f.width || 1) / tot; const r = [acc, w]; acc += w; return r; });
+
+  // 顶部栏名（只印一次）
+  const ch = d.col_heads || {};
+  const heads = [
+    [ROOT_X + ROOT_W/2, ch.root || ''],
+    [GRP_X + GRP_W/2, ch.group || ''],
+    [LEAF_X + TAB_W/2, ch.leaf || ''],
+  ];
+  heads.forEach(([x,t])=>{ if(!t) return; const e=el("text",{x:x, y:COLH_Y, class:"colh", "text-anchor":"middle"}); e.textContent=t; svg.appendChild(e); });
+  fields.forEach((f,i)=>{ const [x,w]=fxs[i]; const e=el("text",{x:x+w/2, y:COLH_Y, class:"colh", "text-anchor":"middle"}); e.textContent=f.label||''; svg.appendChild(e); });
+
+  // 叶卡与分组
+  let y = TOP; const gMids = [];
+  groups.forEach((g,gi)=>{
+    const color = g.color || PALETTE[gi % PALETTE.length];
+    const leaves = g.leaves || [];
+    const gTop = y; const mids = [];
+    leaves.forEach((lf,li)=>{
+      const ly = y;
+      mids.push(ly + leafH/2);
+      // 卡底 + 名签
+      svg.appendChild(el("rect",{x:LEAF_X, y:ly, width:LEAF_R-LEAF_X, height:leafH, rx:10, fill:mixWhite(color,0.06), stroke:color, "stroke-width":1.4}));
+      svg.appendChild(el("rect",{x:LEAF_X, y:ly, width:TAB_W, height:leafH, rx:10, fill:color}));
+      svg.appendChild(el("rect",{x:LEAF_X+TAB_W-12, y:ly, width:12, height:leafH, fill:color}));
+      const nl = wrap(lf.header || '', 7).slice(0,3);
+      const el2 = lf.example ? wrap(lf.example, 8).slice(0,4) : [];
+      const blk = nl.length*20 + (el2.length ? 6 + el2.length*17 : 0);
+      let ty = ly + (leafH - blk)/2 + 15;
+      nl.forEach(t=>{ const e=el("text",{x:LEAF_X+TAB_W/2, y:Math.round(ty), class:"lname", "text-anchor":"middle"}); e.textContent=t; svg.appendChild(e); ty += 20; });
+      ty += 6 - 3;
+      el2.forEach(t=>{ const e=el("text",{x:LEAF_X+TAB_W/2, y:Math.round(ty), class:"lex", "text-anchor":"middle"}); e.textContent=t; svg.appendChild(e); ty += 17; });
+      // 栏间竖虚线 + 书写线
+      fxs.forEach(([fx,fw],fi)=>{
+        if(fi) svg.appendChild(el("line",{x1:fx, y1:ly+8, x2:fx, y2:ly+leafH-8, stroke:mixWhite(color,0.35), "stroke-width":1, "stroke-dasharray":"3 3"}));
+        const nLines = (fields[fi].lines != null) ? fields[fi].lines : Math.max(1, Math.floor((leafH - LINE_FIRST - 6) / LINE_GAP) + 1);
+        for(let k=0;k<nLines;k++){
+          const yy = ly + LINE_FIRST + k*LINE_GAP;
+          if(yy > ly + leafH - 5) break;
+          svg.appendChild(el("line",{x1:fx+12, y1:Math.round(yy), x2:fx+fw-12, y2:Math.round(yy), stroke:mixWhite(color,0.5), "stroke-width":1.2, "stroke-dasharray":"4 3"}));
+        }
+      });
+      // 分支线：分组竖线 → 卡
+      svg.appendChild(el("line",{x1:BR_X, y1:ly+leafH/2, x2:LEAF_X, y2:ly+leafH/2, stroke:STROKE, "stroke-width":2}));
+      y += leafH + LEAF_GAP;
+    });
+    y = y - LEAF_GAP;
+    const gBot = y; const gMid = (gTop + gBot)/2; gMids.push(gMid);
+    // 分组竖线
+    if(mids.length > 1) svg.appendChild(el("line",{x1:BR_X, y1:mids[0], x2:BR_X, y2:mids[mids.length-1], stroke:STROKE, "stroke-width":2}));
+    // 分组节点
+    const gChars = Array.from(String(g.header || '')).length;
+    const gh = Math.min(gBot - gTop, gChars*22 + 34);
+    svg.appendChild(el("rect",{x:GRP_X, y:gMid-gh/2, width:GRP_W, height:gh, rx:10, fill:color}));
+    vtext(svg, GRP_X+GRP_W/2, gMid, g.header || '', "grp", 22);
+    svg.appendChild(el("line",{x1:GRP_X+GRP_W, y1:gMid, x2:BR_X, y2:gMid, stroke:STROKE, "stroke-width":2}));
+    svg.appendChild(el("circle",{cx:BR_X, cy:gMid, r:4, fill:STROKE}));
+    svg.appendChild(el("line",{x1:TRUNK_X, y1:gMid, x2:GRP_X, y2:gMid, stroke:STROKE, "stroke-width":2}));
+    y += GROUP_GAP;
+  });
+  // 根节点 + 主干
+  const rMid = gMids.length ? (gMids[0] + gMids[gMids.length-1])/2 : (TOP+BOTTOM)/2;
+  if(gMids.length > 1) svg.appendChild(el("line",{x1:TRUNK_X, y1:gMids[0], x2:TRUNK_X, y2:gMids[gMids.length-1], stroke:STROKE, "stroke-width":2}));
+  const rChars = Array.from(String(d.root || '')).length;
+  const rh = rChars*25 + 40;
+  svg.appendChild(el("rect",{x:ROOT_X, y:rMid-rh/2, width:ROOT_W, height:rh, rx:12, fill:d.color || "#6B5442"}));
+  vtext(svg, ROOT_X+ROOT_W/2, rMid, d.root || '', "root", 25);
+  svg.appendChild(el("line",{x1:ROOT_X+ROOT_W, y1:rMid, x2:TRUNK_X, y2:rMid, stroke:STROKE, "stroke-width":2}));
+  svg.appendChild(el("circle",{cx:TRUNK_X, cy:rMid, r:4.5, fill:STROKE}));
+
+  document.body.dataset.rendered = '1';
+}
+render();
+</script>
+</body>
+</html>
