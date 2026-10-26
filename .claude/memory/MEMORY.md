@@ -55,7 +55,7 @@
 - ⚠[回归读书会·语体边界(1005)](reading-line-return-style-boundary-1005.md) — 延续散文化口语亲切(样本一至五原文锚定);写作线文风/润色/机检/MEMORY写作条目只有已进lesson-plan规则的才适用;Pass B按本线rubric;试写稻草人做基线
 - [张祖庆视角·读书会线暂不接入(1005)](zhang-perspective-reading-line-declined-1005.md) — 一手材料缺+处方与规格冲突;两张清点表收益小(稻草人三轮冷审已抓到);重启条件=连续几本同类问题漏网
 - ⚠[原文朗读篇幅:先判断后算数(1022立·1025改)](lesson-plan-quote-length-cap-1022.md) — 只设上限后新稿压过头(萨哈拉交流课1仅93字);现行=正向判据「每节有没有值得全班听完的原文、读来做什么」+数字只当刹车;不设下限数字(用户定·防AI凑数);一年级不压
-- ⚠[L4–L6文学类交流课2必做文学赏析(1024)](lesson-plan-literary-appreciation-1024.md) — 引→品→比→说,先问效果后给名称;赏析≠写作技法不受解锁口管;档案新增「写法与语言特色」节;野性的呼唤等存量不回改
+- ⚠[文学赏析仅L4–L6·按书判定启用·启用即主体·体量守恒(1026改)](lesson-plan-literary-appreciation-1024.md) — 取代1024「必做」;L1–L3不设;判定可联网(只作判据不作事实源);压浅层重复识记,不砍主题/策略;可接小练笔
 **写详案前必读**：[逐环节装载量双向核查](lesson-plan-per-step-load-audit.md) · [创意环节正向标准三件套](lesson-plan-positive-standard-over-negative.md) · [环节标题三段式](lesson-plan-step-title-format.md)
 - [环节标题=功能·内容三段式(0807)](lesson-plan-step-title-format.md) — 功能名≤10字、同课时内不重复;规则在style-and-format+checklist
 - [一节讲不完的根因](lesson-plan-lesson-total-load-fit.md) / [创意环节防平庸=正向标准三件套](lesson-plan-positive-standard-over-negative.md) — 课堂动作量必须按标称配时倒算;只堆负向约束→模型取平庸下限
