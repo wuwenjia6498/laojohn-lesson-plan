@@ -69,10 +69,14 @@ const PALETTE = ["#5B8C7B","#C18A3A","#5B7FA6","#8268A0"];
 const NOS = ["①","②","③","④","⑤"];
 const STEP_COL_W = 168;
 
-function fillCell(host, st){
+function fillCell(host, st, ci){
   if(st.verdict){
     const v = document.createElement('div'); v.className = 'mx-verdict';
-    v.textContent = (st.options || ['真','假']).map(o=>'□ '+o).join('　　');
+    // 可选 options_by_card：matrix 版每张卡各用一组选项（如打乱顺序防止答案排成一条线，2026-10-27）
+    const opts = (Array.isArray(st.options_by_card) && st.options_by_card[ci]) || st.options || ['真','假'];
+    // 可选 stack：选项一行一个（选项长、三个以上时用，2026-10-27）
+    if(st.stack){ v.style.whiteSpace = 'pre-line'; v.style.lineHeight = '1.9'; }
+    v.textContent = opts.map(o=>'□ '+o).join(st.stack ? '\n' : '　　');
     host.appendChild(v); return;
   }
   const vals = Array.isArray(st.value) ? st.value : (st.value ? [st.value] : []);
@@ -110,7 +114,7 @@ function renderMatrix(d, cards, steps, host){
     for(let i=0;i<n;i++){
       const cell = document.createElement('div');
       cell.className = 'mx-cell' + (si === 0 ? ' first' : '');
-      fillCell(cell, st); mx.appendChild(cell);
+      fillCell(cell, st, i); mx.appendChild(cell);
     }
   });
   host.appendChild(mx);
@@ -134,7 +138,8 @@ function renderCards(d, cards, host){
       lb.appendChild(no); lb.appendChild(tx); bd.appendChild(lb);
       if(st.verdict){
         const v = document.createElement('div'); v.className = 'v-opts';
-        v.textContent = (st.options || ['真','假']).map(o=>'□ '+o).join('　'); bd.appendChild(v);
+        if(st.stack){ v.style.whiteSpace = 'pre-line'; v.style.lineHeight = '1.9'; }
+        v.textContent = (st.options || ['真','假']).map(o=>'□ '+o).join(st.stack ? '\n' : '　'); bd.appendChild(v);
       } else {
         const vals = Array.isArray(st.value) ? st.value : (st.value ? [st.value] : []);
         if(vals.length){ const v = document.createElement('div'); v.className = 'step-val';
@@ -156,6 +161,8 @@ function render(){
   const sub = document.getElementById('subtitle'); if(d.subtitle) sub.textContent = d.subtitle; else sub.style.display='none';
   const tag = document.getElementById('variantTag'); if(d.variant) tag.textContent = d.variant; else tag.style.display='none';
   const foot = document.getElementById('foot'); if(d.footer) foot.textContent = d.footer; else foot.style.display='none';
+  // 可选 note_big：同 table/timeline，底部放大加深、按换行符分行（2026-10-27 万物成长的故事·观点支架卡）
+  if(d.footer && d.note_big){ foot.style.fontSize='18px'; foot.style.color='#4A4038'; foot.style.whiteSpace='pre-line'; foot.style.lineHeight='1.8'; }
 
   const cards = d.cards || [];
   const shared = d.steps || [];

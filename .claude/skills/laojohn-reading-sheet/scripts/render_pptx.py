@@ -818,8 +818,10 @@ def render_timeline(slide, d):
                 for kk in range(f.get("lines", 1)):
                     yy += 44
                     add_line(slide, bx, yy, bx + cw, yy, "CFC8BA", 1.2, tf=tf)
-                    if kk == 0 and f.get("value"):  # 可选 fields[].value：该栏预填
-                        add_text(slide, bx, yy - 32, cw, 26, str(f["value"]), size=14,
+                    fv = f.get("value")
+                    fv = (fv[kk] if kk < len(fv) else None) if isinstance(fv, list) else (fv if kk == 0 else None)
+                    if fv:  # 可选 fields[].value：该栏预填（字符串印第一条线；数组逐条印各条线）
+                        add_text(slide, bx, yy - 32, cw, 26, str(fv), size=14,
                                  color="3A3A33", align="center", tf=tf)
                 yy += 14
         else:
@@ -1389,12 +1391,19 @@ def render_deduce(slide, d):
     top = 210
 
     def step_h(st):
-        return (8 + 22 + 10) if st.get("verdict") else (8 + st.get("lines", 2) * 56 + 10)
-
-    def fill(x, y, w, st):
         if st.get("verdict"):
-            add_text(slide, x + 10, y + 8, w - 20, 22,
-                     "　　".join("□ " + o for o in st.get("options", ["真", "假"])),
+            # 可选 stack：选项一行一个
+            return (8 + 26 * len(st.get("options", ["真", "假"])) + 10) if st.get("stack") else (8 + 22 + 10)
+        return 8 + st.get("lines", 2) * 56 + 10
+
+    def fill(x, y, w, st, ci=None):
+        if st.get("verdict"):
+            # 可选 options_by_card：matrix 版每张卡各用一组选项
+            obc = st.get("options_by_card")
+            src = obc[ci] if (isinstance(obc, list) and ci is not None and ci < len(obc)) else st.get("options", ["真", "假"])
+            opts = ["□ " + o for o in src]
+            add_text(slide, x + 10, y + 8, w - 20, 26 * len(opts) if st.get("stack") else 22,
+                     ("\n" if st.get("stack") else "　　").join(opts),
                      size=13, color="4A4238")
             return
         n = st.get("lines", 2)
@@ -1437,7 +1446,7 @@ def render_deduce(slide, d):
             for i in range(len(cards)):
                 add_round_rect(slide, colX(i), y, colW, h, radius=0.04, fill="FCFBF8",
                                line="D8D1C2", line_w=1.4)
-                fill(colX(i), y, colW, st)
+                fill(colX(i), y, colW, st, i)
             y += h
         board_bottom = y
     else:
@@ -1475,7 +1484,7 @@ def render_deduce(slide, d):
                          size=12.5, bold=True, color="6E6656", line_spacing=1.4)
                 fy += 18
                 fill(x, fy - 8, cardW, st)
-                fy += (26 if st.get("verdict") else st.get("lines", 2) * 56)
+                fy += ((26 * len(st.get("options", ["真", "假"])) if st.get("stack") else 26) if st.get("verdict") else st.get("lines", 2) * 56)
                 fy += ARROW_H if si < len(sts) - 1 else 0
         board_bottom = top + cardH
 
