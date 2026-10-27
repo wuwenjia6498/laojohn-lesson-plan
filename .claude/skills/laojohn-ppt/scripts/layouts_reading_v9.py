@@ -251,7 +251,11 @@ def _qa_blocks(slide, items, x, y, w, size, th, numbered=True):
                                   align="left", anchor="top", line_spacing=1.3)
             groups.append([qb.shape_id])
             cy += qh + Pt(14)
-            continue
+            if not a:
+                continue
+            # 收束句下挂 `参考：`（小标题 + 内容）：内容按「无问题项」画——不标号方块 + 答案，方块与首段同一击
+            cy -= Pt(6)
+            q = ""
         if numbered:
             sq = add_rect(slide, x, cy + Pt(3), side, side, th.main)
             _disable_shape_effects(sq)
