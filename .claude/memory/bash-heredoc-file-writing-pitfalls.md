@@ -34,3 +34,5 @@ metadata:
 `，改完 `file <路径>` 复核一次行尾。**
 
 - **补丁脚本写盘放末尾＝中途 assert 一断全白打（0901 连踩两次）**：逐项打印 OK 但 io.write 在最后，异常中止后什么都没落盘；二跑只补报错点之后的项，之前的静默丢失且无任何报错指向。**每步 sub 后立即写盘**，或先跑通全部 assert 再统一写。
+
+**补（2026-10-28 · 提交侧）**：仓内 md 的行尾**并不统一**——`MEMORY.md` 仓库里存的是 CRLF（对方机器提交的），`memory-index-archived-rules.md` 等存的是 LF；而本机 `core.autocrlf=true`。两条后果：① 用 python `open(...,"w",newline="\n")` 写回 MEMORY.md，提交后 `--stat` 显示整篇 270 行改动（实际只改 4 行），全程只有一条 LF/CRLF warning、不报错；MEMORY.md 是双人高频冲突点，整篇改写＝对方下次 pull 整篇冲突。② 发现后光把工作区转回 CRLF 没用——autocrlf 提交时又转成 LF；须 `git -c core.autocrlf=false add <文件>` 再 commit 才能存回 CRLF（1028 补交 8b5d43d 即此法）。**动手前先看原 blob 行尾**（`git show HEAD:<路径>` 数 `\r\n`），照原样写回；**提交后核 `--stat` 行数是否与实际改动相符**，`git diff --ignore-cr-at-eol --stat` 可分清真改动与行尾噪音。
