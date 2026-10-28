@@ -1,5 +1,5 @@
 # Project Memory: laojohn-lesson-plan
-> **索引维护规则(0818立·0901补)**:①新增课次/单本书状态→进[归档索引](memory-index-archived-deliveries.md),不占索引行;②横向通则→各线「跨课次通则」块,不埋进课次条目;③未决/交付风险→「未决事项」块,做完即删;④优先级集中在各区头行;⑤行数≤150、单条钩子≤200字符、细节下沉主题文件,超限先归档,机检挂SessionStart hook自动跑;⑥CLAUDE.md只写现行规则,来历/日期/旧口径进记忆;压缩前快照=[1024](memory-index-archive-20261024.md)
+> **索引维护规则(0818立·0901补)**:①新增课次/单本书状态→进[归档索引](memory-index-archived-deliveries.md),不占索引行;②横向通则→各线「跨课次通则」块,不埋进课次条目;③未决/交付风险→「未决事项」块,做完即删;④优先级集中在各区头行;⑤行数≤150、单条钩子≤200字符、细节下沉主题文件,超限先归档,机检挂SessionStart hook自动跑;⑥CLAUDE.md只写现行规则,来历/日期/旧口径进记忆;压缩前快照=[1028](memory-index-archive-20261028.md)
 ## 用户偏好
 - 中文回复;简洁直接不堆客套;重要决策先列选项让用户拍板;视觉迭代常用截图反馈
 - **问「有没有做到X」时是要判断、不是指出问题**——先自己核查给结论,别把判断权反问回去
@@ -97,9 +97,7 @@
 - [Bash heredoc写文件六坑(0820/0821)](bash-heredoc-file-writing-pitfalls.md) — 定界符漏引号反引号被执行成空;超长静默截断;替换失败先grep数次数;报错都指错方向,细节见源条
 - [Write吞弯引号→必跑fix_quotes](write-tool-normalizes-curly-quotes.md) / [下游JSON引号统一弯引号禁「」](json-materials-curly-quotes.md) / [雅黑弯引号显示半角](curly-quotes-render-halfwidth-yahei.md) — 含引号段落Edit改用无引号锚点;字符层U+201C已对别改JSON,靠模板unicode-range落宋体
 - [配图工具：多页道具须定妆件+示范文的「我」是大人(0903)](imgtool-prop-consistency-and-owner-0903.md) — 帆布包三错同根因;道具定妆必开去人物条目;款式写到托特/书包这一级
-- **PPT引擎**:[第三profile宣讲(0824)](ppt-promo-profile-0824.md) / [按profile分层·原语不fork](ppt-profile-seam-architecture.md) / [中文变Calibri:latin须在ea前](ppt-font-ea-latin-order.md) / [表格](ppt-table-autofit.md)·[原文齐读](ppt-quote-autofit.md)自适应(存量须重烘) / [阅读单页型已下线](ppt-reading-sheet-page.md)
 - ⚠[课件添图风格样板(0925)](ppt-illustration-style-reference-0925.md) — 用户否了「找空地塞小图」;要外部人工添图那套:吉祥物立页题条右端+主图9–20%常出血+正文压左60%;画内容不画活动;配图版以-配图版.pptx并排入库
-- **PPT 视觉**：[副标题克制电报体](ppt-subtitle-no-telegraphese.md) / [参考答案红字上屏](ppt-reference-answer-on-slide.md) / [逐条点击动画](ppt-click-reveal-animation.md) / [四图网格](ppt-four-image-grid.md) / [逐页讲稿新增docx](lecture-notes-docx.md) — 末条:打包只收docx
 - **工程坑**:题目带全角＿＿则place_pptx必认领失败须手工归位;配图空占位机检查不出须肉眼看 — [源](woheguoyitian-4a-ppt-chain-state.md)
 - ⚠[改外部pptx三个静默坑(0916)](pptx-text-edit-three-silent-traps-0916.md) — 重复shape id/timing空容器/endParaRPr不在段末,PowerPoint拒开不说原因;工具`laojohn-ppt/tools/pptx_text_edit.py`;normalize_paragraphs只在append过run时调
 - **备课视频线lesson-video(0921立)**:给加盟商老师自学;旁白＝备课解说不照念师话,增量在教师用json三色旁注;逐句合成防字幕漂移;⚠AiHubMix TTS够跑管线不够交付 — [详情](lesson-video-line-0921.md)

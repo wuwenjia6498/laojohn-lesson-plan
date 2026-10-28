@@ -52,3 +52,7 @@ metadata:
 - [张祖庆视角接入写作课线(0912)](zhang-zuqing-on-writing-line-0912.md) — 三处落位:生成侧generation-brief§一.8减法三问/冷审rubric跨维九+维三三问/示范文链;体系审计8条已拍板采5不采3(讲评按需·审题依需·三档表);话语比不能当判据;三档优先级标记不推广
 - [两个常驻文件的分层重构(0818)](memory-index-structure-over-size-0818.md) — MEMORY真病灶=通则被埋进课次条目;CLAUDE下沉判据=脚本docstring才是细则唯一源;机检脚本见L2
 - [配套PDF的Type3字体病已修两线(0817)](pdf-type3-fonts-fixed.md) — 装饰图标改纯CSS图形非换emoji;.mark .sym字体栈中间那档雅黑勿删;已装check_type3
+
+### 引擎 · 2026-10-28 外移（索引超 17500 字符 · 结论已进 laojohn-ppt 脚本与 architecture.md · 条目原样保留；其中「参考答案红字上屏」已被 v9 主题色答案推翻，见 reading-ppt-v9-human-optimized-1006）
+- **PPT引擎**:[第三profile宣讲(0824)](ppt-promo-profile-0824.md) / [按profile分层·原语不fork](ppt-profile-seam-architecture.md) / [中文变Calibri:latin须在ea前](ppt-font-ea-latin-order.md) / [表格](ppt-table-autofit.md)·[原文齐读](ppt-quote-autofit.md)自适应(存量须重烘) / [阅读单页型已下线](ppt-reading-sheet-page.md)
+- **PPT 视觉**：[副标题克制电报体](ppt-subtitle-no-telegraphese.md) / [参考答案红字上屏](ppt-reference-answer-on-slide.md) / [逐条点击动画](ppt-click-reveal-animation.md) / [四图网格](ppt-four-image-grid.md) / [逐页讲稿新增docx](lecture-notes-docx.md) — 末条:打包只收docx
