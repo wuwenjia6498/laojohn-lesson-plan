@@ -51,7 +51,12 @@ function mark(e){ e.setAttribute('data-answer','1'); e.setAttribute('data-order'
 //   cx_gap 两椭圆圆心距(262，越小交叠区越宽、独有区越窄) / rx 椭圆横半径(244，上限按页宽收) /
 //   gap_line 书写线行距(48) / gap_row 维度间留白(94) / side_lines 独有区每维度线数(3) / center_lines 交叠区每维度线数(2)
 let CX1=266, CX2=528, RX=244;
-const CY=466, RY=400;
+let CY=466; const RY=400;
+// 可选 shape:"rect"（2026-10-28 加）：两枚圆角矩形左右交叠，三区每行都满宽、不随边缘收窄，
+// 书写空间比椭圆大得多。rect_w 每枚矩形宽(缺省 489 → 左右独有区各 225、交叠区 264)；
+// 矩形上下沿固定 RT/RB，维度间画浅色虚线分隔。缺省（不写 shape）仍是长椭圆，存量逐字不变。
+let SHAPE = "ellipse", RW = 489;
+const RL = 40, RR = 754, RT = 56, RB = 836, RRAD = 28;
 let GAP_LINE = 48;      // 同一维度内两条书写线的行距
 let GAP_ROW  = 94;      // 维度与维度之间的留白
 let L_SIDE   = 3;       // 左/右独有区每个维度给几条书写线
@@ -63,12 +68,18 @@ function applyGeom(d){
   RX = Math.min(num(d.rx, 244), 397 - gap / 2 - 8);
   GAP_LINE = num(d.gap_line, 48); GAP_ROW = num(d.gap_row, 94);
   L_SIDE = num(d.side_lines, 3); L_CENTER = num(d.center_lines, 2);
+  if (d.shape === "rect"){ SHAPE = "rect"; RW = num(d.rect_w, 489); CY = (RT + RB) / 2; }
 }
 const MARKS = ["①","②","③","④","⑤","⑥"];
 
 function kAt(y){ const t=(y-CY)/RY; const v=1-t*t; return v>0 ? Math.sqrt(v) : 0; }
 // 各区在高度 y 上的可写水平区间
 function spanAt(slot, y){
+  if (SHAPE === "rect"){
+    if (slot === "left")  return [RL, RR - RW];
+    if (slot === "right") return [RL + RW, RR];
+    return [RR - RW, RL + RW];
+  }
   const w = RX * kAt(y);
   if (slot === "left")   return [CX1 - w, CX2 - w];
   if (slot === "right")  return [CX1 + w, CX2 + w];
@@ -145,19 +156,35 @@ function render(){
   if (d.footer) foot.textContent = d.footer; else foot.style.display='none';
 
   applyGeom(d);
+  if (typeof d.foot_inset === 'number') foot.style.padding = '0 ' + d.foot_inset + 'px';
   const svg = document.getElementById('svg');
-  svg.appendChild(el("ellipse",{cx:CX1,cy:CY,rx:RX,ry:RY,fill:"#7FA86A","fill-opacity":0.26,stroke:"#6E9457","stroke-width":2}));
-  svg.appendChild(el("ellipse",{cx:CX2,cy:CY,rx:RX,ry:RY,fill:"#D8B24E","fill-opacity":0.24,stroke:"#C29A38","stroke-width":2}));
-
-  const labY = CY - RY - 22;
-  const L = el("text",{x:(CX1+CX2)/2 - RX,y:labY,"text-anchor":"middle",class:"lbl",fill:"#5C7A47"}); L.textContent=d.left_label||""; svg.appendChild(L);
-  const C = el("text",{x:(CX1+CX2)/2,y:labY,"text-anchor":"middle",class:"lbl",fill:"#7A6B3A"}); C.textContent=d.center_label||"共同"; svg.appendChild(C);
-  const R2 = el("text",{x:(CX1+CX2)/2 + RX,y:labY,"text-anchor":"middle",class:"lbl",fill:"#A07E2A"}); R2.textContent=d.right_label||""; svg.appendChild(R2);
+  let labY, lx;
+  if (SHAPE === "rect"){
+    svg.appendChild(el("rect",{x:RL,y:RT,width:RW,height:RB-RT,rx:RRAD,fill:"#7FA86A","fill-opacity":0.26,stroke:"#6E9457","stroke-width":2}));
+    svg.appendChild(el("rect",{x:RR-RW,y:RT,width:RW,height:RB-RT,rx:RRAD,fill:"#D8B24E","fill-opacity":0.24,stroke:"#C29A38","stroke-width":2}));
+    labY = RT - 18;
+    lx = [(RL + RR - RW) / 2, 397, (RL + RW + RR) / 2];
+  } else {
+    svg.appendChild(el("ellipse",{cx:CX1,cy:CY,rx:RX,ry:RY,fill:"#7FA86A","fill-opacity":0.26,stroke:"#6E9457","stroke-width":2}));
+    svg.appendChild(el("ellipse",{cx:CX2,cy:CY,rx:RX,ry:RY,fill:"#D8B24E","fill-opacity":0.24,stroke:"#C29A38","stroke-width":2}));
+    labY = CY - RY - 22;
+    lx = [(CX1+CX2)/2 - RX, (CX1+CX2)/2, (CX1+CX2)/2 + RX];
+  }
+  const L = el("text",{x:lx[0],y:labY,"text-anchor":"middle",class:"lbl",fill:"#5C7A47"}); L.textContent=d.left_label||""; svg.appendChild(L);
+  const C = el("text",{x:lx[1],y:labY,"text-anchor":"middle",class:"lbl",fill:"#7A6B3A"}); C.textContent=d.center_label||"共同"; svg.appendChild(C);
+  const R2 = el("text",{x:lx[2],y:labY,"text-anchor":"middle",class:"lbl",fill:"#A07E2A"}); R2.textContent=d.right_label||""; svg.appendChild(R2);
 
   const left = d.left || [], center = d.center || [], right = d.right || [];
   const nRows = Math.max(left.length, center.length, right.length, 1);
   const rowsY = rowCenters(nRows);
   const showMarks = !!d.row_marks && nRows > 1;
+  if (SHAPE === "rect"){
+    // 维度块之间画一条贯通三区的浅色虚线，让「第几块」一眼分得清
+    for (let i = 0; i + 1 < rowsY.length; i++){
+      const y = (rowsY[i] + rowsY[i + 1]) / 2;
+      svg.appendChild(el("line",{x1:RL+14,y1:y,x2:RR-14,y2:y,stroke:"#B8AE92","stroke-width":1.2,"stroke-dasharray":"6 6"}));
+    }
+  }
   drawRegion(svg, "left",   left,   "#6E9457", "#5C7A47", rowsY, showMarks);
   drawRegion(svg, "center", center, "#9A8A4A", "#7A6B3A", rowsY, showMarks);
   drawRegion(svg, "right",  right,  "#C29A38", "#A07E2A", rowsY, showMarks);

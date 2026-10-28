@@ -413,19 +413,39 @@ def render_venn(slide, d):
     GAP_LINE, GAP_ROW = _n("gap_line", 48), _n("gap_row", 94)
     L_SIDE, L_CENTER = int(_n("side_lines", 3)), int(_n("center_lines", 2))
     MARKS = ["①", "②", "③", "④", "⑤", "⑥"]
-    add_oval(slide, CX1 - RX, CY - RY + OFF, 2 * RX, 2 * RY, fill="7FA86A", alpha=26,
-             line="6E9457", line_w=1.5)
-    add_oval(slide, CX2 - RX, CY - RY + OFF, 2 * RX, 2 * RY, fill="D8B24E", alpha=24,
-             line="C29A38", line_w=1.5)
-    labY = CY - RY - 22 + OFF
-    mid = (CX1 + CX2) / 2
-    for lx, key, dflt, col in ((mid - RX, "left_label", "", "5C7A47"),
-                               (mid, "center_label", "共同", "7A6B3A"),
-                               (mid + RX, "right_label", "", "A07E2A")):
+    # 可选 shape:"rect"：两枚圆角矩形交叠、三区满宽（与 template_venn.html 同口径）
+    rect = d.get("shape") == "rect"
+    RL, RR, RT, RB, RRAD = 40, 754, 56, 836, 28
+    RW = _n("rect_w", 489)
+    if rect:
+        CY = (RT + RB) / 2
+        add_round_rect(slide, RL, RT + OFF, RW, RB - RT, radius=RRAD / RW, fill="7FA86A",
+                       alpha=26, line="6E9457", line_w=1.5)
+        add_round_rect(slide, RR - RW, RT + OFF, RW, RB - RT, radius=RRAD / RW,
+                       fill="D8B24E", alpha=24, line="C29A38", line_w=1.5)
+        labY = RT - 18 + OFF
+        lxs = ((RL + RR - RW) / 2, 397, (RL + RW + RR) / 2)
+    else:
+        add_oval(slide, CX1 - RX, CY - RY + OFF, 2 * RX, 2 * RY, fill="7FA86A", alpha=26,
+                 line="6E9457", line_w=1.5)
+        add_oval(slide, CX2 - RX, CY - RY + OFF, 2 * RX, 2 * RY, fill="D8B24E", alpha=24,
+                 line="C29A38", line_w=1.5)
+        labY = CY - RY - 22 + OFF
+        mid = (CX1 + CX2) / 2
+        lxs = (mid - RX, mid, mid + RX)
+    for lx, key, dflt, col in ((lxs[0], "left_label", "", "5C7A47"),
+                               (lxs[1], "center_label", "共同", "7A6B3A"),
+                               (lxs[2], "right_label", "", "A07E2A")):
         add_text(slide, lx - 90, labY - 20, 180, 30, d.get(key, dflt),
                  size=22, bold=True, color=col, align="center")
 
     def span_at(slot, y):
+        if rect:
+            if slot == "left":
+                return RL, RR - RW
+            if slot == "right":
+                return RL + RW, RR
+            return RR - RW, RL + RW
         t = (y - CY) / RY
         v = 1 - t * t
         w = RX * (math.sqrt(v) if v > 0 else 0.0)
@@ -440,6 +460,10 @@ def render_venn(slide, d):
     step = (max(L_SIDE, L_CENTER) - 1) * GAP_LINE + GAP_ROW
     rows_y = [CY + (i - (n_rows - 1) / 2) * step for i in range(n_rows)]
     show_marks = bool(d.get("row_marks")) and n_rows > 1
+    if rect:
+        for a, b in zip(rows_y, rows_y[1:]):
+            yy = (a + b) / 2 + OFF
+            add_line(slide, RL + 14, yy, RR - 14, yy, "B8AE92", 1.2, dash="dash")
 
     for slot, items, color, mcol in (("left", left, "6E9457", "5C7A47"),
                                      ("center", center, "9A8A4A", "7A6B3A"),
@@ -472,7 +496,12 @@ def render_venn(slide, d):
             else:
                 for yy, sx0, sx1 in segs:
                     add_line(slide, sx0, yy + OFF, sx1, yy + OFF, color, 1.4)
-    footer(slide, d, key="footer")
+    if isinstance(d.get("foot_inset"), (int, float)) and d.get("footer"):
+        fi = d["foot_inset"]
+        add_text(slide, fi, 1075 - 22, 794 - 2 * fi, 52, d["footer"], size=14,
+                 color="9A937F", align="left")
+    else:
+        footer(slide, d, key="footer")
 
 
 def render_ladder(slide, d):
