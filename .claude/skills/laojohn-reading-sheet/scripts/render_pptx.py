@@ -1269,11 +1269,11 @@ def render_lanes(slide, d):
 
 def render_stance(slide, d):
     """立场表：claim 横幅 + 左右两栏对峙 + 底部落立场。坐标按 template_stance.html 的流式版面复刻。"""
-    header(slide, d, title_px=106, title_size=23, sub_px=146)
+    hy = header(slide, d, title_px=106, title_size=23, sub_px=146)
     PAL = ["#A8634F", "#5B7FA6"]
     PAD, GAP_MID = 40, 52
     sideW = (PAGE_W_PX - 2 * PAD - GAP_MID) / 2
-    y = 184
+    y = max(184, hy - 1)                  # 副标题折两行时整体下推一行（单行时仍是 184，存量不变），防被 claim 横幅压住
     if d.get("claim"):
         ch = 80 if d.get("claim_question") else 54
         add_round_rect(slide, PAD, y, PAGE_W_PX - 2 * PAD, ch, radius=0.1,
@@ -1291,6 +1291,62 @@ def render_stance(slide, d):
     fields_of = lambda sd: sd.get("fields") or shared
     layout = d.get("layout") or ("matrix" if (shared and len(sides) == 2
                  and all(not sd.get("fields") for sd in sides)) else "columns")
+    if layout == "bands":
+        # 与 template_stance.html 的 bands 版同口径：字段名横跨两栏，左右两格各占近一半页宽
+        LH = d["line_h"] if isinstance(d.get("line_h"), (int, float)) else 56
+        GAP = 20
+        cw = (PAGE_W_PX - 2 * PAD - GAP) / 2
+        lx = [PAD, PAD + cw + GAP]
+        for i, sd in enumerate(sides):
+            color = (sd.get("color") or PAL[i % len(PAL)]).lstrip("#")
+            add_round_rect(slide, lx[i], arena_y, cw, HEAD_H, radius=0.1, fill=color)
+            add_text(slide, lx[i] + 30, arena_y + 9, cw - 60, 24, sd.get("label", ""),
+                     size=15, bold=True, color="FFFFFF", align="center")
+        add_oval(slide, 397 - 20, arena_y, 40, 40, fill="FFFFFF", line="C2BBA9", line_w=2)
+        add_text(slide, 397 - 20, arena_y, 40, 40, d.get("vs_label", "VS"), size=13,
+                 bold=True, color="8A8268", align="center", anchor="middle")
+        ry = arena_y + HEAD_H
+        for f in shared:
+            ry += 12
+            add_text(slide, PAD, ry - 2, PAGE_W_PX - 2 * PAD, 22, f.get("label", ""), size=14,
+                     bold=True, color="6E6656", align="center")
+            ry += 22 + 6
+            n = f.get("lines", 3)
+            rh = 2 + n * LH + 8
+            for i in range(2):
+                add_round_rect(slide, lx[i], ry, cw, rh, radius=0.04, fill="FCFBF8",
+                               line="D8D1C2", line_w=1.4)
+                val = f.get("value")
+                vals = val if isinstance(val, list) else ([val] if val else [])
+                if vals:
+                    add_text(slide, lx[i] + 12, ry + 4, cw - 24, n * LH, "\n".join(vals),
+                             size=13, color="3A3A33", line_spacing=1.6)
+                else:
+                    for k in range(n):
+                        yy = ry + 2 + (k + 1) * LH
+                        add_line(slide, lx[i] + 12, yy, lx[i] + cw - 12, yy, "CFC8BA", 1.2)
+            ry += rh
+        vy = ry + 18
+        v = d.get("verdict")
+        if v:
+            vlines = v.get("lines", 3)
+            vh = 12 + 20 + 6 + vlines * LH + 14
+            add_round_rect(slide, PAD, vy, PAGE_W_PX - 2 * PAD, vh, radius=0.06,
+                           fill="FFFFFF", line="C9A24A", line_w=1.8)
+            opts = v.get("options")
+            if opts is None:
+                opts = [sd.get("label", "") for sd in sides]
+            lab = v.get("label", "听完两边，我站……")
+            if opts:
+                lab += "　　" + "　　".join("□ " + o for o in opts)
+            add_text(slide, PAD + 16, vy + 12, PAGE_W_PX - 2 * PAD - 32, 22, lab,
+                     size=14, bold=True, color="5A5048")
+            for k in range(vlines):
+                add_line(slide, PAD + 16, vy + 38 + (k + 1) * LH,
+                         PAGE_W_PX - PAD - 16, vy + 38 + (k + 1) * LH, "CFC8BA", 1.2)
+            vy += vh
+        footer(slide, d, key="footer", y=vy + 14)
+        return
     if layout == "matrix":
         LBL, GAP = 150, 12
         cw = (PAGE_W_PX - 2 * PAD - LBL - 2 * GAP) / 2

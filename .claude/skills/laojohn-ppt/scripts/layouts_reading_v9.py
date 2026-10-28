@@ -231,8 +231,9 @@ def _fit_size(items, width_emu, avail_emu, ladder=Q_LADDER):
 
 
 # ---------- 问答块：主题色方块编号 + 问题框 + 答案框（各自独立）----------
-def _qa_blocks(slide, items, x, y, w, size, th, numbered=True):
-    """items：[(问题, 答案)]。返回点击分组：问题一组（方块+数字+问题），答案一组。"""
+def _qa_blocks(slide, items, x, y, w, size, th, numbered=True, show_no=True):
+    """items：[(问题, 答案)]。返回点击分组：问题一组（方块+数字+问题），答案一组。
+    show_no=False（`要点样式：不编号`）：方块照画、不写数字——只有一问时不必标「1」。"""
     side = Pt(size + 8)
     gap = Pt(12)
     tx = x + side + gap if numbered else x
@@ -260,7 +261,7 @@ def _qa_blocks(slide, items, x, y, w, size, th, numbered=True):
             sq = add_rect(slide, x, cy + Pt(3), side, side, th.main)
             _disable_shape_effects(sq)
             grp.append(sq.shape_id)
-            if q:                       # 只有答案、没有问题的项：方块不标号
+            if q and show_no:           # 只有答案、没有问题的项：方块不标号
                 no += 1
                 num = add_textbox(slide, x, cy + Pt(3), side, side, str(no),
                                   font=FONT_TITLE, size=size - 4, color="FFFFFF",
@@ -448,7 +449,8 @@ def _render_points(slide, page, ctx, th):
     answers = getattr(page, "bullet_answers", None) or []
     items = [(b, answers[i] if i < len(answers) else "") for i, b in enumerate(page.bullets)]
     has_ans = any(a for _q, a in items)
-    style = "" if has_ans else (page.bullet_style or "")
+    plain_no = (page.bullet_style == "不编号")
+    style = "" if (has_ans or plain_no) else (page.bullet_style or "")
     if style == "对比" and not (page.left_body or page.right_body):
         style = ""
     if style == "时间轴":
@@ -519,7 +521,7 @@ def _render_points(slide, page, ctx, th):
     elif style == "对比":
         groups = _compare(slide, page, x, y, col_w, area_h, th)
     elif page.bullets:
-        groups = _qa_blocks(slide, items, x, y, col_w, size, th)
+        groups = _qa_blocks(slide, items, x, y, col_w, size, th, show_no=not plain_no)
 
     if pic is not None and page.image_click and 1 <= page.image_click <= len(groups):
         groups[page.image_click - 1].append(pic.shape_id)

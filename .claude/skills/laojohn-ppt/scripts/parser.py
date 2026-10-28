@@ -313,7 +313,7 @@ def parse_md(md_text: str) -> Deck:
                     if v == "卡片强调":
                         current.bullet_style = "卡片"
                         current.bullets_highlight_last = True
-                    elif v in {"竖排", "卡片", "步骤", "图文", "节点", "药丸", "流程", "时间轴", "对比"}:
+                    elif v in {"竖排", "卡片", "步骤", "图文", "节点", "药丸", "流程", "时间轴", "对比", "不编号"}:
                         current.bullet_style = v
                 elif key == "场景":
                     # `场景：图=<路径>｜名=<场景名>｜问=<问题>｜答=<答案>`（后三段可缺）
