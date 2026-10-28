@@ -3,7 +3,7 @@
 ## 用户偏好
 - 中文回复;简洁直接不堆客套;重要决策先列选项让用户拍板;视觉迭代常用截图反馈
 - **问「有没有做到X」时是要判断、不是指出问题**——先自己核查给结论,别把判断权反问回去
-- ⚠[编辑器未保存的手改会被我冲掉(1015)](editor-unsaved-edits-lost-1015.md) — 我只见磁盘;Cursor已开自动保存;用户开着的文件动手前提醒先保存;docx被锁先比对再重渲
+- ⚠[编辑器未保存的手改会被我冲掉(1015)](editor-unsaved-edits-lost-1015.md) — 我只见磁盘;⚠反向:旧缓冲区自动保存会把新提交盖回旧版(1028);改用户开着的文件先请其关掉/重载;docx被锁先比对再重渲
 - ⚠[360清理Pro定时删%TEMP%旧文件(1019)](temp-cleaner-wipes-scratchpad-1019.md) — scratchpad超1–2小时的文件会被删、目录留着;跨小时要复用的脚本/备份放%LOCALAPPDATA%等持久目录
 ## 跨技能硬约束（三条详案线通用）
 **动笔写任何详案前必读**：[约束分层](constraint-layering-generation-vs-coldreview-0804.md) · [机构课场景](venue-is-institution-not-school.md) · [真实情境官方锚点](real-situation-official-anchor-first.md)
