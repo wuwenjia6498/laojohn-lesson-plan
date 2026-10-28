@@ -460,10 +460,6 @@ def render_venn(slide, d):
     step = (max(L_SIDE, L_CENTER) - 1) * GAP_LINE + GAP_ROW
     rows_y = [CY + (i - (n_rows - 1) / 2) * step for i in range(n_rows)]
     show_marks = bool(d.get("row_marks")) and n_rows > 1
-    if rect:
-        for a, b in zip(rows_y, rows_y[1:]):
-            yy = (a + b) / 2 + OFF
-            add_line(slide, RL + 14, yy, RR - 14, yy, "B8AE92", 1.2, dash="dash")
 
     for slot, items, color, mcol in (("left", left, "6E9457", "5C7A47"),
                                      ("center", center, "9A8A4A", "7A6B3A"),
