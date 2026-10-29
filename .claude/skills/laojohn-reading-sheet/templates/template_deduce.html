@@ -10,14 +10,14 @@
   body { font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
     -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   #page { width: 794px; min-height: 1123px; background: #FFFFFF; position: relative;
-    padding: 84px 34px 34px 34px; }
+    padding: 84px 42px 34px 34px; }   /* 右 42＝与 logo 右缘对齐（generation-rules A4） */
   .brand-logo { position: absolute; top: 32px; right: 42px; height: 48px; }
   .variant-tag { position: absolute; top: 36px; left: 46px; font-size: 13px; color: #B3A98F; letter-spacing: 1px; }
   .l-title { margin-top: 22px; text-align: center; font-size: 23px; font-weight: 700; color: #333; line-height: 1.4; }
-  .l-sub { margin-top: 10px; text-align: center; font-size: 13.5px; color: #8A8268; line-height: 1.6; padding: 0 10px; }
+  .l-sub { margin-top: 10px; text-align: left; font-size: 13.5px; color: #8A8268; line-height: 1.6; padding: 0 10px; }
 
   /* ── matrix 版式 ── */
-  .mx { display: grid; margin-top: 20px; column-gap: 10px; }
+  .mx { display: grid; margin-top: 24px; column-gap: 10px; }
   .mx-corner { }
   .mx-head { border-radius: 10px 10px 0 0; padding: 9px 8px; color: #FFFFFF; text-align: center;
     font-size: 14.5px; font-weight: 700; line-height: 1.35; white-space: pre-line; }
@@ -30,10 +30,13 @@
   .mx-lines div { height: 56px; border-bottom: 1.2px solid #CFC8BA; }
   .mx-val { font-size: 12.5px; color: #3A3A33; line-height: 1.6; white-space: pre-line; }
   .mx-verdict { font-size: 13px; color: #4A4238; padding: 4px 0 2px; letter-spacing: 0.5px; }
+  .mx-band { grid-column: 1 / -1; display: flex; gap: 6px; padding: 14px 4px 6px; font-size: 13.5px;
+    font-weight: 700; color: #6E6656; line-height: 1.5; }
+  .mx-band.first { padding-top: 12px; }
   .mx-arrow { text-align: right; padding-right: 12px; font-size: 17px; color: #C2BBA9; line-height: 1; }
 
   /* ── cards 版式 ── */
-  .chain { display: grid; gap: 12px; margin-top: 20px; }
+  .chain { display: grid; gap: 12px; margin-top: 24px; }
   .card { border: 1.6px solid #D8D1C2; border-radius: 12px; overflow: hidden; background: #FCFBF8; }
   .c-head { padding: 8px 10px; color: #FFFFFF; text-align: center; }
   .c-h1 { font-size: 14.5px; font-weight: 700; line-height: 1.35; white-space: pre-line; }
@@ -92,16 +95,27 @@ function fillCell(host, st, ci){
 
 function renderMatrix(d, cards, steps, host){
   const n = cards.length;
+  // 可选 step_band：步骤说明改成横跨各列的标题条，不占左侧一整列（2026-10-29，左列吃掉书写宽度）
+  const band = !!d.step_band;
   const mx = document.createElement('div'); mx.className = 'mx';
-  mx.style.gridTemplateColumns = STEP_COL_W + 'px repeat(' + n + ', 1fr)';
+  mx.style.gridTemplateColumns = band ? ('repeat(' + n + ', 1fr)') : (STEP_COL_W + 'px repeat(' + n + ', 1fr)');
   // 表头行：左上角空 + 每列线索名
-  const corner = document.createElement('div'); corner.className = 'mx-corner'; mx.appendChild(corner);
+  if(!band){ const corner = document.createElement('div'); corner.className = 'mx-corner'; mx.appendChild(corner); }
   cards.forEach((cd,i)=>{
     const h = document.createElement('div'); h.className = 'mx-head';
     h.style.background = cd.color || PALETTE[i % PALETTE.length];
     h.textContent = cd.header || ('线索'+(i+1)); mx.appendChild(h);
   });
   steps.forEach((st,si)=>{
+    if(band){
+      const lb = document.createElement('div'); lb.className = 'mx-band' + (si === 0 ? ' first' : '');
+      const no = document.createElement('span'); no.className = 'mx-no'; no.textContent = NOS[si] || (si+1);
+      const tx = document.createElement('span'); tx.textContent = st.label || '';
+      lb.appendChild(no); lb.appendChild(tx); mx.appendChild(lb);
+      for(let i=0;i<n;i++){ const cell = document.createElement('div'); cell.className = 'mx-cell';
+        fillCell(cell, st, i); mx.appendChild(cell); }
+      return;
+    }
     if(si){  // 箭头行：只在左侧步骤列显示 ↓
       const a = document.createElement('div'); a.className = 'mx-arrow'; a.textContent = '↓'; mx.appendChild(a);
       for(let i=0;i<n;i++){ const pad = document.createElement('div'); pad.className = 'mx-pad';

@@ -171,12 +171,15 @@ function render() {
   // 表体
   const tbody = document.getElementById('tbody');
   const minH = d.row_min_h || 64;
-  (d.rows || []).forEach(row => {
+  // 可选 row_heights：逐行定高（如示范行内容少、书写行要大时），缺的行回落 row_min_h（2026-10-29）
+  const rowHs = Array.isArray(d.row_heights) ? d.row_heights : [];
+  (d.rows || []).forEach((row, ri) => {
     const tr = document.createElement('tr');
+    const rh = rowHs[ri] || minH;
     row.forEach((cell, i) => {
       const td = document.createElement('td');
-      td.style.minHeight = minH + 'px';
-      td.style.height = minH + 'px';
+      td.style.minHeight = rh + 'px';
+      td.style.height = rh + 'px';
       const txt = (cell == null) ? '' : String(cell);
       td.textContent = txt;
       noWrapIfShort(td, txt);

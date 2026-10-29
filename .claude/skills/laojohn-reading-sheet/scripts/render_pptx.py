@@ -260,7 +260,7 @@ def header(slide, d, *, title_align="center", title_px=72, title_size=23,
     y = title_px + 40
     sub = d.get("subtitle", "")
     if sub:
-        sa = "left" if title_align == "left" else "center"
+        sa = "left"   # 说明小字一律左对齐（2026-10-29 用户定，见 generation-rules A3）
         sx, sw = (64, 640) if title_align == "left" else (48, 698)
         add_text(slide, sx, sub_px, sw, 50, sub, size=15, color=sub_color,
                  align=sa, line_spacing=1.5)
@@ -277,9 +277,9 @@ def footer(slide, d, key="footer", color="9A937F", y=1075):
         # 可选 note_big：底部选项放大加深、按 \n 分行，整块往上挪到纸内（2026-10-22）
         n = txt.count("\n") + 1
         h = n * 36
-        add_text(slide, 40, min(y, 1123 - 30 - h), 714, h, txt, size=20, color="4A4038", align="left")
+        add_text(slide, 40, min(y, 1123 - 30 - h), 706, h, txt, size=20, color="4A4038", align="left")
     elif txt:
-        add_text(slide, 40, y, 714, 30, txt, size=14, color=color, align="left")
+        add_text(slide, 40, y, 706, 30, txt, size=14, color=color, align="left")   # 右缘 746＝logo 右缘
 
 
 # ─────────────────────────── 表格内边框 ───────────────────────────
@@ -356,8 +356,11 @@ def render_table(slide, d):
     else:
         row_h = row_min_h
 
+    # 可选 row_heights：逐行定高（同 template_table.html），缺的行回落 row_h
+    rhs = d.get("row_heights") or []
+    row_hs = [rhs[r] if r < len(rhs) and rhs[r] else row_h for r in range(len(rows))]
     shape = slide.shapes.add_table(len(rows) + 1, ncol, E(CONTENT_X), E(y0),
-                                   E(CONTENT_W), E(head_h + row_h * len(rows)))
+                                   E(CONTENT_W), E(head_h + sum(row_hs)))
     table = shape.table
     table.first_row = False
     table.horz_banding = False
@@ -371,7 +374,7 @@ def render_table(slide, d):
         acc += w
     table.rows[0].height = E(head_h)
     for r in range(len(rows)):
-        table.rows[r + 1].height = E(row_h)
+        table.rows[r + 1].height = E(row_hs[r])
 
     # 表头
     for c in range(ncol):
@@ -808,14 +811,15 @@ def render_fishbone(slide, d):
 
 def render_timeline(slide, d):
     # 横版内容：缩放横铺进竖版页（近似）。标题/页脚竖版正常排。
-    header(slide, d, title_px=64, title_size=24, sub_px=98)
+    hy = header(slide, d, title_px=100, title_size=24, sub_px=140)   # 标题让开右上 logo
     nodes = d.get("nodes", [])
     n = len(nodes)
     X0, X1 = 64, 1059
     # 可选 fields（每站多栏书写）：给了才把轴上移；不给则轴位与变换逐字不变
     AX_Y = d.get("axis_y") or (96 if any(isinstance(nd.get("fields"), list) for nd in nodes) else 200)
-    k = (PAGE_W_PX - 24) / 1123.0
-    tf = TF(sx=k, sy=k, tx=12, ty=210 - k * (AX_Y - 58))
+    # 左 34、右到 logo 右缘 746（generation-rules A4）
+    k = (746 - 34) / 1123.0
+    tf = TF(sx=k, sy=k, tx=34, ty=max(210, hy + 30) - k * (AX_Y - 58))
     PALETTE = ["#4F86C6", "#D9883A", "#C49B3E", "#6FA85A", "#4E8C7D", "#5B7FA6", "#A8504F"]
     add_line(slide, X0, AX_Y, X1, AX_Y, "9A937F", 2.5, tf=tf)
     add_triangle(slide, X1, AX_Y - 9, 18, 18, "9A937F", rotation=90, tf=tf)
@@ -1462,14 +1466,15 @@ def render_stance(slide, d):
 def render_deduce(slide, d):
     """推断卡链。matrix（默认，共用步骤时）：步骤文字只在左列排一次，右侧每列一条线索只留格子；
     cards：每卡自带步骤文字。底部可挂收口条。"""
-    header(slide, d, title_px=106, title_size=23, sub_px=146)
+    hy = header(slide, d, title_px=106, title_size=23, sub_px=146)
     PAL = ["#5B8C7B", "#C18A3A", "#5B7FA6", "#8268A0"]
     NOS = ["①", "②", "③", "④", "⑤"]
-    PAD, GAP = 34, 10
+    PAD, PADR, GAP = 34, 48, 10          # 右缘 746＝PPTX logo 右缘（add_logo：628+118）
+    INNER_W = PAGE_W_PX - PAD - PADR
     cards = d.get("cards", [])
     shared = d.get("steps", [])
     layout = d.get("layout") or ("matrix" if shared and all(not c.get("steps") for c in cards) else "cards")
-    top = 210
+    top = max(210, hy + 8)               # 说明小字多行时下推，与正文隔开一行
 
     def step_h(st):
         if st.get("verdict"):
@@ -1499,10 +1504,15 @@ def render_deduce(slide, d):
                          y + 8 + (k + 1) * 56, "CFC8BA", 1.2)
 
     if layout == "matrix":
-        STEPW, ARROW_H = 168, 16
+        band = bool(d.get("step_band"))  # 可选：步骤说明横跨各列成标题条，不占左列
+        STEPW, ARROW_H = (0, 0) if band else (168, 16)
         n = len(cards) or 1
-        colW = (PAGE_W_PX - 2 * PAD - STEPW - n * GAP) / n
-        colX = lambda i: PAD + STEPW + GAP + i * (colW + GAP)
+        if band:
+            colW = (INNER_W - (n - 1) * GAP) / n
+            colX = lambda i: PAD + i * (colW + GAP)
+        else:
+            colW = (INNER_W - STEPW - n * GAP) / n
+            colX = lambda i: PAD + STEPW + GAP + i * (colW + GAP)
         # 卡头按最多行数撑高：雅黑实际行高≈字号×1.33×行距，两行卡头写死 46px 会被下方格子盖住第二行
         head_lines = max([_wrap_lines(str(cd.get("header", "")), colW - 12, 14.5)
                           for cd in cards] or [1])
@@ -1516,11 +1526,23 @@ def render_deduce(slide, d):
                      line_spacing=1.3)
         y = top + HEAD_H
         for si, st in enumerate(shared):
+            h = step_h(st)
+            if band:
+                y += 12 if si == 0 else 14
+                add_text(slide, PAD + 4, y, INNER_W - 8, 22,
+                         f"{NOS[si] if si < len(NOS) else si+1} {st.get('label','')}",
+                         size=13.5, bold=True, color="6E6656")
+                y += 28
+                for i in range(len(cards)):
+                    add_round_rect(slide, colX(i), y, colW, h, radius=0.04, fill="FCFBF8",
+                                   line="D8D1C2", line_w=1.4)
+                    fill(colX(i), y, colW, st, i)
+                y += h
+                continue
             if si:
                 add_text(slide, PAD, y, STEPW - 12, 20, "↓", size=17, color="C2BBA9",
                          align="right")
                 y += ARROW_H
-            h = step_h(st)
             add_text(slide, PAD + 2, y + 10, STEPW - 12, h - 12,
                      f"{NOS[si] if si < len(NOS) else si+1} {st.get('label','')}",
                      size=12.5, bold=True, color="6E6656", line_spacing=1.5)
@@ -1532,7 +1554,7 @@ def render_deduce(slide, d):
         board_bottom = y
     else:
         cols = d.get("columns") or len(cards) or 1
-        cardW = (PAGE_W_PX - 2 * PAD - (cols - 1) * 12) / cols
+        cardW = (INNER_W - (cols - 1) * 12) / cols
         ARROW_H = 30
         # 卡头同 matrix 按最多行数撑高，两行卡头写死 46px 会压进正文
         head_lines = max([_wrap_lines(str(cd.get("header", "")), cardW - 16, 14.5)
@@ -1574,13 +1596,13 @@ def render_deduce(slide, d):
     if t:
         tl = t.get("lines", 2)
         th = 12 + 40 + 6 + tl * 56 + 14
-        add_round_rect(slide, PAD, ty, PAGE_W_PX - 2 * PAD, th, radius=0.05,
+        add_round_rect(slide, PAD, ty, INNER_W, th, radius=0.05,
                        fill="FFFFFF", line="C9A24A", line_w=1.8)
-        add_text(slide, PAD + 16, ty + 12, PAGE_W_PX - 2 * PAD - 32, 42,
+        add_text(slide, PAD + 16, ty + 12, INNER_W - 32, 42,
                  t.get("label", ""), size=14, bold=True, color="5A5048", line_spacing=1.45)
         for k in range(tl):
             add_line(slide, PAD + 16, ty + 58 + (k + 1) * 56,
-                     PAGE_W_PX - PAD - 16, ty + 58 + (k + 1) * 56, "CFC8BA", 1.2)
+                     PAD + INNER_W - 16, ty + 58 + (k + 1) * 56, "CFC8BA", 1.2)
         ty += th
     footer(slide, d, key="footer", y=ty + 14)
 
@@ -1765,12 +1787,15 @@ def render_match(slide, d):
 def render_htree(slide, d):
     """横向两级树形图：根 → 第一层大类 → 第二层横条卡（名签 + 各栏书写线）。
     搬 template_htree.html 的几何常量（两边须同步）。竖排文字用逐字换行近似。"""
-    header(slide, d, title_px=74, title_size=23, sub_px=116)
+    hy = header(slide, d, title_px=74, title_size=23, sub_px=116)
     PALETTE = ["#C18A3A", "#5B7FA6", "#5B8C7B", "#8268A0"]
-    COLH_Y, TOP, BOTTOM = 204, 222, 1080
+    COLH_Y, BOTTOM = 204, 1080
+    if d.get("subtitle"):
+        COLH_Y = max(COLH_Y, hy + 24)     # 说明小字与栏名隔一行（同 template_htree.html）
+    TOP = COLH_Y + 18
     GROUP_GAP, LEAF_GAP = 16, 8
     ROOT_X, ROOT_W, TRUNK_X, GRP_X, GRP_W, BR_X = 30, 56, 98, 110, 58, 180
-    LEAF_X, LEAF_R, TAB_W = 192, 762, 124
+    LEAF_X, LEAF_R, TAB_W = 192, 746, 124      # 右缘 746＝PPTX logo 右缘（add_logo：628+118）
     LINE_FIRST, LINE_GAP, STROKE = 42, 43, "A8957A"
     groups = d.get("groups", [])
     G = len(groups) or 1

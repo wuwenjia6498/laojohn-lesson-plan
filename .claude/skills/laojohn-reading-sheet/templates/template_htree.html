@@ -15,8 +15,8 @@
   .variant-tag { position: absolute; top: 36px; left: 46px; font-size: 13px; color: #B3A98F; letter-spacing: 1px; }
   .l-title { position: absolute; top: 110px; left: 0; width: 100%; text-align: center;
     font-size: 23px; font-weight: 700; color: #333; padding: 0 56px; line-height: 1.4; }
-  .l-sub { position: absolute; top: 152px; left: 0; width: 100%; text-align: center; font-size: 14px;
-    color: #8A8268; padding: 0 50px; line-height: 1.5; }
+  .l-sub { position: absolute; top: 152px; left: 0; width: 100%; text-align: left; font-size: 14px;
+    color: #8A8268; padding: 0 42px 0 34px; line-height: 1.5; }
   .l-foot { position: absolute; bottom: 18px; left: 0; width: 100%; text-align: left; font-size: 13.5px;
     color: #9A937F; padding: 0 40px; line-height: 1.6; }
   .root { font-size: 19px; font-weight: 700; fill: #FFFFFF; }
@@ -64,13 +64,14 @@ function mixWhite(hex, a){
 const PALETTE = ["#C18A3A","#5B7FA6","#5B8C7B","#8268A0"];
 
 // 几何常量（页面坐标）。render_pptx.py 的 render_htree() 须同步。
-const COLH_Y = 204, TOP = 222, BOTTOM = 1080;
+let COLH_Y = 204, TOP = 222;
+const BOTTOM = 1080;
 const GROUP_GAP = 16, LEAF_GAP = 8;
 const ROOT_X = 30, ROOT_W = 56;
 const TRUNK_X = 98;
 const GRP_X = 110, GRP_W = 58;
 const BR_X = 180;
-const LEAF_X = 192, LEAF_R = 762, TAB_W = 124;
+const LEAF_X = 192, LEAF_R = 752, TAB_W = 124;   // 右缘＝logo 右缘（generation-rules A4）
 const LINE_FIRST = 42, LINE_GAP = 43, STROKE = "#A8957A";
 
 function vtext(svg, cx, cy, s, cls, step){
@@ -84,6 +85,9 @@ function render(){
   document.getElementById('logo').src = d.logo;
   document.getElementById('title').textContent = d.title || '';
   const sub = document.getElementById('subtitle'); if(d.subtitle) sub.textContent = d.subtitle; else sub.style.display='none';
+  // 说明小字与栏名之间空出一行：小字折行越多，栏名与卡片整体下移（卡片随之等比压矮）
+  if(d.subtitle){ const sb = sub.getBoundingClientRect().bottom - document.getElementById('page').getBoundingClientRect().top;
+    COLH_Y = Math.max(COLH_Y, Math.ceil(sb) + 34); TOP = COLH_Y + 18; }
   const tag = document.getElementById('variantTag'); if(d.variant) tag.textContent = d.variant; else tag.style.display='none';
   const foot = document.getElementById('foot'); if(d.footer) foot.textContent = d.footer; else foot.style.display='none';
 
