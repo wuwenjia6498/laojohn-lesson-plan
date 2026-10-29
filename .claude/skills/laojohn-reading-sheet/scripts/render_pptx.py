@@ -845,7 +845,7 @@ def render_timeline(slide, d):
                          color=color.lstrip("#"), tf=tf)
                 yy += 22
                 for kk in range(f.get("lines", 1)):
-                    yy += 44
+                    yy += f.get("gap") or 44      # 可选 fields[].gap：行距（同 template_timeline.html）
                     add_line(slide, bx, yy, bx + cw, yy, "CFC8BA", 1.2, tf=tf)
                     fv = f.get("value")
                     fv = (fv[kk] if kk < len(fv) else None) if isinstance(fv, list) else (fv if kk == 0 else None)
