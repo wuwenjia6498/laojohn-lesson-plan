@@ -126,8 +126,7 @@ function render(){
       nd.fields.forEach(f=>{
         const lt = el("text",{x:bx, y:yy + 14, class:"flab", fill:color}); lt.textContent = f.label || ''; svg.appendChild(lt);
         yy += 22;
-        for(let k=0;k<(f.lines || 1);k++){ yy += (f.gap || 44);   // 可选 fields[].gap：该栏书写线行距（缺省 44）
-          svg.appendChild(el("line",{x1:bx, y1:yy, x2:bx+cw, y2:yy, stroke:"#CFC8BA", "stroke-width":1.2}));
+        for(let k=0;k<(f.lines || 1);k++){ yy += 44; svg.appendChild(el("line",{x1:bx, y1:yy, x2:bx+cw, y2:yy, stroke:"#CFC8BA", "stroke-width":1.2}));
           const fv = Array.isArray(f.value) ? f.value[k] : (k===0 ? f.value : null);
           if(fv){ const ft=el("text",{x:cx, y:yy-10, class:"ftxt", "text-anchor":"middle"}); ft.textContent=String(fv); svg.appendChild(ft); } }  // 可选 fields[].value：该栏预填（字符串印在第一条线上；数组逐条印在各条线上）
         yy += 14;
